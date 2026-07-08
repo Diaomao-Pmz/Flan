@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d119a8b425dd0945976490205fc2ed4, type: 3}
+  m_Name: PlayerSkillDataBase
+  m_EditorClassIdentifier: Assembly-CSharp::SkillDataBase
+  data:
+  - SkillType: 1
+    ManaCost: 1
+    RequiredSkillToUnlock: 0
+  - SkillType: 2
+    ManaCost: 2
+    RequiredSkillToUnlock: 1
+  - SkillType: 3
+    ManaCost: 1
+    RequiredSkillToUnlock: 0
+  - SkillType: 4
+    ManaCost: 2
+    RequiredSkillToUnlock: 3

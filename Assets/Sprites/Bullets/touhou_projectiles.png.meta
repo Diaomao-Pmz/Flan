@@ -1,0 +1,5798 @@
+fileFormatVersion: 2
+guid: 5634f870aec298a449125680922513c8
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5653806206287591474
+    second: touhou_projectiles_0
+  - first:
+      213: 7074728631859274293
+    second: touhou_projectiles_1
+  - first:
+      213: -2030056049066368667
+    second: touhou_projectiles_2
+  - first:
+      213: 3128528252950859169
+    second: touhou_projectiles_3
+  - first:
+      213: -6304143252497467666
+    second: touhou_projectiles_4
+  - first:
+      213: -5064879495553373420
+    second: touhou_projectiles_5
+  - first:
+      213: -3371893980478322070
+    second: touhou_projectiles_6
+  - first:
+      213: 2178673144316986245
+    second: touhou_projectiles_7
+  - first:
+      213: 7264696726888528320
+    second: touhou_projectiles_8
+  - first:
+      213: 8378456327798557463
+    second: touhou_projectiles_9
+  - first:
+      213: 746112381661633774
+    second: touhou_projectiles_10
+  - first:
+      213: 3365232527550020427
+    second: touhou_projectiles_11
+  - first:
+      213: -5261705310641567126
+    second: touhou_projectiles_12
+  - first:
+      213: 7074282315618335947
+    second: touhou_projectiles_13
+  - first:
+      213: -6120424432441840514
+    second: touhou_projectiles_14
+  - first:
+      213: 7870648968451999400
+    second: touhou_projectiles_15
+  - first:
+      213: 8396302988788414613
+    second: touhou_projectiles_16
+  - first:
+      213: 4151663814781791458
+    second: touhou_projectiles_17
+  - first:
+      213: 2000207630660780939
+    second: touhou_projectiles_18
+  - first:
+      213: 1502921057407861242
+    second: touhou_projectiles_19
+  - first:
+      213: 2488213226729078787
+    second: touhou_projectiles_20
+  - first:
+      213: 7535002332552361360
+    second: touhou_projectiles_21
+  - first:
+      213: 6187473876564286234
+    second: touhou_projectiles_22
+  - first:
+      213: 7295589905028461413
+    second: touhou_projectiles_23
+  - first:
+      213: -1550352345347957970
+    second: touhou_projectiles_24
+  - first:
+      213: -9000376652138241865
+    second: touhou_projectiles_25
+  - first:
+      213: -5342150833336494307
+    second: touhou_projectiles_26
+  - first:
+      213: -6193541016935386370
+    second: touhou_projectiles_27
+  - first:
+      213: 9035455211371337819
+    second: touhou_projectiles_28
+  - first:
+      213: -813912702292985269
+    second: touhou_projectiles_29
+  - first:
+      213: -4389465304221940432
+    second: touhou_projectiles_30
+  - first:
+      213: -1854923044540169261
+    second: touhou_projectiles_31
+  - first:
+      213: 7967998641465069808
+    second: touhou_projectiles_32
+  - first:
+      213: -7065080800343584354
+    second: touhou_projectiles_33
+  - first:
+      213: 4713179977754807890
+    second: touhou_projectiles_34
+  - first:
+      213: -8417178149052204030
+    second: touhou_projectiles_35
+  - first:
+      213: -1813855560102685880
+    second: touhou_projectiles_36
+  - first:
+      213: 2526347761814229354
+    second: touhou_projectiles_37
+  - first:
+      213: -4950244177727137715
+    second: touhou_projectiles_38
+  - first:
+      213: 7208728216893894259
+    second: touhou_projectiles_39
+  - first:
+      213: 6195113756330774224
+    second: touhou_projectiles_40
+  - first:
+      213: 201569313259348676
+    second: touhou_projectiles_41
+  - first:
+      213: 3260490224969175655
+    second: touhou_projectiles_42
+  - first:
+      213: 5209667999346060350
+    second: touhou_projectiles_43
+  - first:
+      213: 3157593303114518117
+    second: touhou_projectiles_44
+  - first:
+      213: -5860369442541458267
+    second: touhou_projectiles_45
+  - first:
+      213: 2502697052675594672
+    second: touhou_projectiles_46
+  - first:
+      213: 6746081396261653974
+    second: touhou_projectiles_47
+  - first:
+      213: -1623713035806326022
+    second: touhou_projectiles_48
+  - first:
+      213: -1167135084498726976
+    second: touhou_projectiles_49
+  - first:
+      213: -8243877355560977982
+    second: touhou_projectiles_50
+  - first:
+      213: 6311467157562304977
+    second: touhou_projectiles_51
+  - first:
+      213: 5304205956829790499
+    second: touhou_projectiles_52
+  - first:
+      213: -7229234975299364549
+    second: touhou_projectiles_53
+  - first:
+      213: -2733086774354956962
+    second: touhou_projectiles_54
+  - first:
+      213: -1746840011168392971
+    second: touhou_projectiles_55
+  - first:
+      213: 280009411533113425
+    second: touhou_projectiles_56
+  - first:
+      213: -1229717205903303220
+    second: touhou_projectiles_57
+  - first:
+      213: -5596426001046857690
+    second: touhou_projectiles_58
+  - first:
+      213: 8498346007284754082
+    second: touhou_projectiles_59
+  - first:
+      213: -2239856459558848789
+    second: touhou_projectiles_60
+  - first:
+      213: -1839239488489298968
+    second: touhou_projectiles_61
+  - first:
+      213: 6994815424194936440
+    second: touhou_projectiles_62
+  - first:
+      213: -1232407439584019625
+    second: touhou_projectiles_63
+  - first:
+      213: 8180725897644981143
+    second: touhou_projectiles_64
+  - first:
+      213: -1112598106331343774
+    second: touhou_projectiles_65
+  - first:
+      213: -6476636815152317191
+    second: touhou_projectiles_66
+  - first:
+      213: -3134555896658651499
+    second: touhou_projectiles_67
+  - first:
+      213: 6170844897537777104
+    second: touhou_projectiles_68
+  - first:
+      213: 5958035111622937505
+    second: touhou_projectiles_69
+  - first:
+      213: -9184579810764288637
+    second: touhou_projectiles_70
+  - first:
+      213: -571118303323924348
+    second: touhou_projectiles_71
+  - first:
+      213: 2295282448911136463
+    second: touhou_projectiles_72
+  - first:
+      213: -4222974145839970751
+    second: touhou_projectiles_73
+  - first:
+      213: 4105334354601848815
+    second: touhou_projectiles_74
+  - first:
+      213: 1762183772579780541
+    second: touhou_projectiles_75
+  - first:
+      213: 8562631255167942334
+    second: touhou_projectiles_76
+  - first:
+      213: -4643355834892318872
+    second: touhou_projectiles_77
+  - first:
+      213: 690779982017209688
+    second: touhou_projectiles_78
+  - first:
+      213: -5281193225461643468
+    second: touhou_projectiles_79
+  - first:
+      213: -1572129258621265203
+    second: touhou_projectiles_80
+  - first:
+      213: 7107271472816520030
+    second: touhou_projectiles_81
+  - first:
+      213: 7500369528881489001
+    second: touhou_projectiles_82
+  - first:
+      213: 5284144554620022428
+    second: touhou_projectiles_83
+  - first:
+      213: -2026047303493953454
+    second: touhou_projectiles_84
+  - first:
+      213: 4891286875835583093
+    second: touhou_projectiles_85
+  - first:
+      213: 377457115456877396
+    second: touhou_projectiles_86
+  - first:
+      213: 2579840648303379595
+    second: touhou_projectiles_87
+  - first:
+      213: -2988892122171352727
+    second: touhou_projectiles_88
+  - first:
+      213: -4818886924403777097
+    second: touhou_projectiles_89
+  - first:
+      213: 5580781944675995269
+    second: touhou_projectiles_90
+  - first:
+      213: -810670061922315801
+    second: touhou_projectiles_91
+  - first:
+      213: -4374543690886393136
+    second: touhou_projectiles_92
+  - first:
+      213: -4289924079734048476
+    second: touhou_projectiles_93
+  - first:
+      213: -8211622502988076824
+    second: touhou_projectiles_94
+  - first:
+      213: -1590034324726564687
+    second: touhou_projectiles_95
+  - first:
+      213: 3096693248678767165
+    second: touhou_projectiles_96
+  - first:
+      213: 6942827705423685705
+    second: touhou_projectiles_97
+  - first:
+      213: -5819485928452659064
+    second: touhou_projectiles_98
+  - first:
+      213: 1414690527603436624
+    second: touhou_projectiles_99
+  - first:
+      213: -6256292488793438479
+    second: touhou_projectiles_100
+  - first:
+      213: 7388633256704439443
+    second: touhou_projectiles_101
+  - first:
+      213: 6677527648041309068
+    second: touhou_projectiles_102
+  - first:
+      213: -3858424635948622756
+    second: touhou_projectiles_103
+  - first:
+      213: -4992223738697933497
+    second: touhou_projectiles_104
+  - first:
+      213: -8011716505354877580
+    second: touhou_projectiles_105
+  - first:
+      213: 873320734707202785
+    second: touhou_projectiles_106
+  - first:
+      213: 2137169509065140211
+    second: touhou_projectiles_107
+  - first:
+      213: 8231655681601621351
+    second: touhou_projectiles_108
+  - first:
+      213: -1701218649810320797
+    second: touhou_projectiles_109
+  - first:
+      213: 5251768120248414692
+    second: touhou_projectiles_110
+  - first:
+      213: 5453036600222021336
+    second: touhou_projectiles_111
+  - first:
+      213: 553865954020211418
+    second: touhou_projectiles_112
+  - first:
+      213: 4377597190757897399
+    second: touhou_projectiles_113
+  - first:
+      213: -5626301477067648398
+    second: touhou_projectiles_114
+  - first:
+      213: 3580635294934638239
+    second: touhou_projectiles_115
+  - first:
+      213: -897623742601739770
+    second: touhou_projectiles_116
+  - first:
+      213: 2948303664699358630
+    second: touhou_projectiles_117
+  - first:
+      213: -7282348224155330878
+    second: touhou_projectiles_118
+  - first:
+      213: 2634242868200429726
+    second: touhou_projectiles_119
+  - first:
+      213: -4429225113985803767
+    second: touhou_projectiles_120
+  - first:
+      213: -1925753764261701708
+    second: touhou_projectiles_121
+  - first:
+      213: -2673144509207868416
+    second: touhou_projectiles_122
+  - first:
+      213: 1877608026764439477
+    second: touhou_projectiles_123
+  - first:
+      213: -2905344050131053891
+    second: touhou_projectiles_124
+  - first:
+      213: 5654016414838670951
+    second: touhou_projectiles_125
+  - first:
+      213: -4907633959186127438
+    second: touhou_projectiles_126
+  - first:
+      213: 5838912876860757917
+    second: touhou_projectiles_127
+  - first:
+      213: 1772503496148431310
+    second: touhou_projectiles_128
+  - first:
+      213: 6767561431732845939
+    second: touhou_projectiles_129
+  - first:
+      213: 2976276593546874635
+    second: touhou_projectiles_130
+  - first:
+      213: 424579321184094246
+    second: touhou_projectiles_131
+  - first:
+      213: 1765728374115808189
+    second: touhou_projectiles_132
+  - first:
+      213: -2660964842146982984
+    second: touhou_projectiles_133
+  - first:
+      213: -2939464239215860774
+    second: touhou_projectiles_134
+  - first:
+      213: 7411940450236361496
+    second: touhou_projectiles_135
+  - first:
+      213: -3276744778690390877
+    second: touhou_projectiles_136
+  - first:
+      213: -3607060737220894382
+    second: touhou_projectiles_137
+  - first:
+      213: -8238810619650201083
+    second: touhou_projectiles_138
+  - first:
+      213: 7959417993018543622
+    second: touhou_projectiles_139
+  - first:
+      213: -2831410536402095365
+    second: touhou_projectiles_140
+  - first:
+      213: 4878543600097529131
+    second: touhou_projectiles_141
+  - first:
+      213: 5470357629922591184
+    second: touhou_projectiles_142
+  - first:
+      213: -2130683727250918053
+    second: touhou_projectiles_143
+  - first:
+      213: 6923372130541640267
+    second: touhou_projectiles_144
+  - first:
+      213: 876782652986822422
+    second: touhou_projectiles_145
+  - first:
+      213: -1412085686016005156
+    second: touhou_projectiles_146
+  - first:
+      213: 1897973937424077240
+    second: touhou_projectiles_147
+  - first:
+      213: -8468267642814801075
+    second: touhou_projectiles_148
+  - first:
+      213: 1691555507039231505
+    second: touhou_projectiles_149
+  - first:
+      213: -6978732989456164107
+    second: touhou_projectiles_150
+  - first:
+      213: 8867522621567271962
+    second: touhou_projectiles_151
+  - first:
+      213: 4012275969963069522
+    second: touhou_projectiles_152
+  - first:
+      213: -5607643979852220254
+    second: touhou_projectiles_153
+  - first:
+      213: 3992758817477126084
+    second: touhou_projectiles_154
+  - first:
+      213: -5324333157006406232
+    second: touhou_projectiles_155
+  - first:
+      213: 8067055774387317554
+    second: touhou_projectiles_156
+  - first:
+      213: -2418332386984405024
+    second: touhou_projectiles_157
+  - first:
+      213: -6567768725736091897
+    second: touhou_projectiles_158
+  - first:
+      213: -1870957951663562826
+    second: touhou_projectiles_159
+  - first:
+      213: -7199469163540175525
+    second: touhou_projectiles_160
+  - first:
+      213: -6423591387308040281
+    second: touhou_projectiles_161
+  - first:
+      213: -6394700058114165750
+    second: touhou_projectiles_162
+  - first:
+      213: 3332914516443406959
+    second: touhou_projectiles_163
+  - first:
+      213: 377909269522002241
+    second: touhou_projectiles_164
+  - first:
+      213: -1398828563589416424
+    second: touhou_projectiles_165
+  - first:
+      213: 1350502303498428959
+    second: touhou_projectiles_166
+  - first:
+      213: 4160964708635545972
+    second: touhou_projectiles_167
+  - first:
+      213: -9200977711394702584
+    second: touhou_projectiles_168
+  - first:
+      213: 6630827044689623523
+    second: touhou_projectiles_169
+  - first:
+      213: -8718517436919493496
+    second: touhou_projectiles_170
+  - first:
+      213: -3061473850059192042
+    second: touhou_projectiles_171
+  - first:
+      213: 7919784748519949578
+    second: touhou_projectiles_172
+  - first:
+      213: 1931973936342814126
+    second: touhou_projectiles_173
+  - first:
+      213: 3480226001496181674
+    second: touhou_projectiles_174
+  - first:
+      213: -522041694423831174
+    second: touhou_projectiles_175
+  - first:
+      213: 4719780659910497933
+    second: touhou_projectiles_176
+  - first:
+      213: 2808695715548544426
+    second: touhou_projectiles_177
+  - first:
+      213: 6865513019441932586
+    second: touhou_projectiles_178
+  - first:
+      213: 2312614519570641349
+    second: touhou_projectiles_179
+  - first:
+      213: 8333300820289699248
+    second: touhou_projectiles_180
+  - first:
+      213: -5550302843840968152
+    second: touhou_projectiles_181
+  - first:
+      213: 4284347862010378668
+    second: touhou_projectiles_182
+  - first:
+      213: 7399467001605554406
+    second: touhou_projectiles_183
+  - first:
+      213: 7719603325075080412
+    second: touhou_projectiles_184
+  - first:
+      213: 8491489596530630257
+    second: touhou_projectiles_185
+  - first:
+      213: 1574401743277510549
+    second: touhou_projectiles_186
+  - first:
+      213: 2385905656661701020
+    second: touhou_projectiles_187
+  - first:
+      213: 993560656813486362
+    second: touhou_projectiles_188
+  - first:
+      213: 7580303211291281427
+    second: touhou_projectiles_189
+  - first:
+      213: 264880587144000082
+    second: touhou_projectiles_190
+  - first:
+      213: -103343052581811545
+    second: touhou_projectiles_191
+  - first:
+      213: 901701353824800987
+    second: touhou_projectiles_192
+  - first:
+      213: 6916964157625021898
+    second: touhou_projectiles_193
+  - first:
+      213: -5393044024924109068
+    second: touhou_projectiles_194
+  - first:
+      213: -3812806663356730092
+    second: touhou_projectiles_195
+  - first:
+      213: 2795692923966998251
+    second: touhou_projectiles_196
+  - first:
+      213: -8142791046003222604
+    second: touhou_projectiles_197
+  - first:
+      213: -6161355790158977346
+    second: touhou_projectiles_198
+  - first:
+      213: 5313101054020357050
+    second: touhou_projectiles_199
+  - first:
+      213: -4095766685659767612
+    second: touhou_projectiles_200
+  - first:
+      213: -6829764302204757904
+    second: touhou_projectiles_201
+  - first:
+      213: 1910053695825329161
+    second: touhou_projectiles_202
+  - first:
+      213: 1930347815427820638
+    second: touhou_projectiles_203
+  - first:
+      213: 3959524923475276970
+    second: touhou_projectiles_204
+  - first:
+      213: 413978824498043505
+    second: touhou_projectiles_205
+  - first:
+      213: -6971199691788512257
+    second: touhou_projectiles_206
+  - first:
+      213: 1475784179743926667
+    second: touhou_projectiles_207
+  - first:
+      213: 8593998321315330530
+    second: touhou_projectiles_208
+  - first:
+      213: 6190208993621277522
+    second: touhou_projectiles_209
+  - first:
+      213: 1330251403630429412
+    second: touhou_projectiles_210
+  - first:
+      213: -146556393172412080
+    second: touhou_projectiles_211
+  - first:
+      213: 2938968880225722972
+    second: touhou_projectiles_212
+  - first:
+      213: -2596026518551796004
+    second: touhou_projectiles_213
+  - first:
+      213: -5103722828829657928
+    second: touhou_projectiles_214
+  - first:
+      213: -3838706309071948622
+    second: touhou_projectiles_215
+  - first:
+      213: 9001365843973081751
+    second: touhou_projectiles_216
+  - first:
+      213: -344230354566376483
+    second: touhou_projectiles_217
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: touhou_projectiles_0
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 528
+        width: 258
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec74455e535a981b0800000000000000
+      internalID: -5653806206287591474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_1
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 479
+        width: 258
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 532e148053c7e2260800000000000000
+      internalID: 7074728631859274293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_2
+      rect:
+        serializedVersion: 2
+        x: 268
+        y: 527
+        width: 50
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 561244177cac3d3e0800000000000000
+      internalID: -2030056049066368667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_3
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1adc8e2ded3ca6b20800000000000000
+      internalID: 3128528252950859169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_4
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 463
+        width: 129
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee676b5dc1f2388a0800000000000000
+      internalID: -6304143252497467666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_5
+      rect:
+        serializedVersion: 2
+        x: 333
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41ba1650feee5b9b0800000000000000
+      internalID: -5064879495553373420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_6
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6acf413a40a431d0800000000000000
+      internalID: -3371893980478322070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_7
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58382b08ea33c3e10800000000000000
+      internalID: 2178673144316986245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_8
+      rect:
+        serializedVersion: 2
+        x: 381
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c9322fde2361d460800000000000000
+      internalID: 7264696726888528320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_9
+      rect:
+        serializedVersion: 2
+        x: 397
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71b8e80a3a1464470800000000000000
+      internalID: 8378456327798557463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_10
+      rect:
+        serializedVersion: 2
+        x: 413
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eec567f0249ba5a00800000000000000
+      internalID: 746112381661633774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_11
+      rect:
+        serializedVersion: 2
+        x: 429
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4b753f6725b3be20800000000000000
+      internalID: 3365232527550020427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_12
+      rect:
+        serializedVersion: 2
+        x: 445
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6a4c6ec5eaaaf6b0800000000000000
+      internalID: -5261705310641567126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_13
+      rect:
+        serializedVersion: 2
+        x: 461
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcc324fe846ec2260800000000000000
+      internalID: 7074282315618335947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_14
+      rect:
+        serializedVersion: 2
+        x: 461
+        y: 464
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7caea5f762ef0ba0800000000000000
+      internalID: -6120424432441840514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_15
+      rect:
+        serializedVersion: 2
+        x: 477
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a6406c49892a3d60800000000000000
+      internalID: 7870648968451999400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_16
+      rect:
+        serializedVersion: 2
+        x: 493
+        y: 528
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 598b8413519a58470800000000000000
+      internalID: 8396302988788414613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_17
+      rect:
+        serializedVersion: 2
+        x: 509
+        y: 528
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ec69ea3e3cad9930800000000000000
+      internalID: 4151663814781791458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_18
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 498
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b83cf861e3a22cb10800000000000000
+      internalID: 2000207630660780939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_19
+      rect:
+        serializedVersion: 2
+        x: 277
+        y: 464
+        width: 57
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af100482db27bd410800000000000000
+      internalID: 1502921057407861242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_20
+      rect:
+        serializedVersion: 2
+        x: 268
+        y: 484
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3008d902fb8e78220800000000000000
+      internalID: 2488213226729078787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_21
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 335
+        width: 258
+        height: 130
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 095f58503b4b19860800000000000000
+      internalID: 7535002332552361360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_22
+      rect:
+        serializedVersion: 2
+        x: 13
+        y: 464
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1b9f9545b25ed550800000000000000
+      internalID: 6187473876564286234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_23
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 464
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 563b52c6d542f3560800000000000000
+      internalID: 7295589905028461413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_24
+      rect:
+        serializedVersion: 2
+        x: 45
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2b57da81ca0c7ae0800000000000000
+      internalID: -1550352345347957970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_25
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b0a494fe1d381380800000000000000
+      internalID: -9000376652138241865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_26
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d17db6afe1edcd5b0800000000000000
+      internalID: -5342150833336494307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_27
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef231c7824f1c0aa0800000000000000
+      internalID: -6193541016935386370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_28
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 464
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b589db194a2646d70800000000000000
+      internalID: 9035455211371337819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_29
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4af5a5a5b664b4f0800000000000000
+      internalID: -813912702292985269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_30
+      rect:
+        serializedVersion: 2
+        x: 141
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03503fbef8c7513c0800000000000000
+      internalID: -4389465304221940432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_31
+      rect:
+        serializedVersion: 2
+        x: 157
+        y: 464
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d34f7c915df146e0800000000000000
+      internalID: -1854923044540169261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_32
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f012535c84049e60800000000000000
+      internalID: 7967998641465069808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_33
+      rect:
+        serializedVersion: 2
+        x: 189
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e91961ac17ac3fd90800000000000000
+      internalID: -7065080800343584354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_34
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25e0f80e734986140800000000000000
+      internalID: 4713179977754807890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_35
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20c309ec11d203b80800000000000000
+      internalID: -8417178149052204030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_36
+      rect:
+        serializedVersion: 2
+        x: 237
+        y: 464
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84356327af3e3d6e0800000000000000
+      internalID: -1813855560102685880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_37
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 464
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a615a0a77e36f0320800000000000000
+      internalID: 2526347761814229354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_38
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 400
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d48d02bd5233d4bb0800000000000000
+      internalID: -4950244177727137715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_39
+      rect:
+        serializedVersion: 2
+        x: 333
+        y: 400
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37eab4aae1c8a0460800000000000000
+      internalID: 7208728216893894259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_40
+      rect:
+        serializedVersion: 2
+        x: 395
+        y: 322
+        width: 131
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0de4b35632779f550800000000000000
+      internalID: 6195113756330774224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_41
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 367
+        width: 29
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c26172f83e1cc200800000000000000
+      internalID: 201569313259348676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_42
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 335
+        width: 29
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 762dbe4b5969f3d20800000000000000
+      internalID: 3260490224969175655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_43
+      rect:
+        serializedVersion: 2
+        x: 304
+        y: 367
+        width: 28
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3cedb281757c4840800000000000000
+      internalID: 5209667999346060350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_44
+      rect:
+        serializedVersion: 2
+        x: 333
+        y: 319
+        width: 63
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56e0b49216602db20800000000000000
+      internalID: 3157593303114518117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_45
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 367
+        width: 29
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ac23c4aa09cbaea0800000000000000
+      internalID: -5860369442541458267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_46
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 367
+        width: 29
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b95525a5bd5bb220800000000000000
+      internalID: 2502697052675594672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_47
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 304
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6dd0c02a945ee9d50800000000000000
+      internalID: 6746081396261653974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_48
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 304
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af2c793c8996779e0800000000000000
+      internalID: -1623713035806326022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_49
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 304
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cfce8b03d08dcfe0800000000000000
+      internalID: -1167135084498726976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_50
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 304
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c9b6e9193dd79d80800000000000000
+      internalID: -8243877355560977982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_51
+      rect:
+        serializedVersion: 2
+        x: 138
+        y: 304
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d9ab02b0f5d69750800000000000000
+      internalID: 6311467157562304977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_52
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 304
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 321c95007335c9940800000000000000
+      internalID: 5304205956829790499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_53
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 304
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b39937397199cab90800000000000000
+      internalID: -7229234975299364549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_54
+      rect:
+        serializedVersion: 2
+        x: 234
+        y: 304
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5d214a2f00221ad0800000000000000
+      internalID: -2733086774354956962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_55
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 320
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f85ed6d34af1c7e0800000000000000
+      internalID: -1746840011168392971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_56
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 289
+        width: 31
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1588234831bc2e300800000000000000
+      internalID: 280009411533113425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_57
+      rect:
+        serializedVersion: 2
+        x: 286
+        y: 320
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccd92ff67ba2feee0800000000000000
+      internalID: -1229717205903303220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_58
+      rect:
+        serializedVersion: 2
+        x: 299
+        y: 287
+        width: 66
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62897d304308552b0800000000000000
+      internalID: -5596426001046857690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_59
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 288
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a6219edaa030f570800000000000000
+      internalID: 8498346007284754082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_60
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 288
+        width: 49
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be67124da6e6ae0e0800000000000000
+      internalID: -2239856459558848789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_61
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 287
+        width: 66
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e369bf0e65b976e0800000000000000
+      internalID: -1839239488489298968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_62
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87eff847193921160800000000000000
+      internalID: 6994815424194936440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_63
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75bbb0996fb95eee0800000000000000
+      internalID: -1232407439584019625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_64
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79bb7fd4cd6c78170800000000000000
+      internalID: 8180725897644981143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_65
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2641956cae14f80f0800000000000000
+      internalID: -1112598106331343774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_66
+      rect:
+        serializedVersion: 2
+        x: 139
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fcf0ad912d5e16a0800000000000000
+      internalID: -6476636815152317191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_67
+      rect:
+        serializedVersion: 2
+        x: 155
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5961e030502df74d0800000000000000
+      internalID: -3134555896658651499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_68
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0dd55c16dbe33a550800000000000000
+      internalID: 6170844897537777104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_69
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ab0793fd513fa250800000000000000
+      internalID: 5958035111622937505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_70
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38d8b28f251d98080800000000000000
+      internalID: -9184579810764288637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_71
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 289
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48857a5ddeaf218f0800000000000000
+      internalID: -571118303323924348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_72
+      rect:
+        serializedVersion: 2
+        x: 467
+        y: 293
+        width: 20
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc67982f93b7adf10800000000000000
+      internalID: 2295282448911136463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_73
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 253
+        width: 258
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 146cc8d736bf465c0800000000000000
+      internalID: -4222974145839970751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_74
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 189
+        width: 258
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fef204238d319f830800000000000000
+      internalID: 4105334354601848815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_75
+      rect:
+        serializedVersion: 2
+        x: 268
+        y: 151
+        width: 69
+        height: 130
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db753910ec8847810800000000000000
+      internalID: 1762183772579780541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_76
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 151
+        width: 14
+        height: 130
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebe31f282c394d670800000000000000
+      internalID: 8562631255167942334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_77
+      rect:
+        serializedVersion: 2
+        x: 350
+        y: 151
+        width: 15
+        height: 130
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 867818f387c7f8fb0800000000000000
+      internalID: -4643355834892318872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_78
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 195
+        width: 12
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8552616dbb4269900800000000000000
+      internalID: 690779982017209688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_79
+      rect:
+        serializedVersion: 2
+        x: 398
+        y: 252
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 437c82e0ebe65b6b0800000000000000
+      internalID: -5281193225461643468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_80
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 248
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dca91eec4ccae2ae0800000000000000
+      internalID: -1572129258621265203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_81
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 252
+        width: 21
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5bfe73afb912a260800000000000000
+      internalID: 7107271472816520030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_82
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 252
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 964252d095aa61860800000000000000
+      internalID: 7500369528881489001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_83
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 252
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9ee0ffc97d055940800000000000000
+      internalID: 5284144554620022428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_84
+      rect:
+        serializedVersion: 2
+        x: 472
+        y: 252
+        width: 18
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 258da1146b802e3e0800000000000000
+      internalID: -2026047303493953454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_85
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 230
+        width: 10
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57ac5b89f7751e340800000000000000
+      internalID: 4891286875835583093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_86
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 230
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45330c42f3ffc3500800000000000000
+      internalID: 377457115456877396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_87
+      rect:
+        serializedVersion: 2
+        x: 414
+        y: 230
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b848c3ba66f6dc320800000000000000
+      internalID: 2579840648303379595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_88
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 230
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 969530263725586d0800000000000000
+      internalID: -2988892122171352727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_89
+      rect:
+        serializedVersion: 2
+        x: 431
+        y: 230
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b16322bfdfdf1db0800000000000000
+      internalID: -4818886924403777097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_90
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 230
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58e83554c9be27d40800000000000000
+      internalID: 5580781944675995269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_91
+      rect:
+        serializedVersion: 2
+        x: 398
+        y: 204
+        width: 7
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e19311bfdbefb4f0800000000000000
+      internalID: -810670061922315801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_92
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 208
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d25a42c0bf7a43c0800000000000000
+      internalID: -4374543690886393136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_93
+      rect:
+        serializedVersion: 2
+        x: 414
+        y: 208
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 429be0a47c02774c0800000000000000
+      internalID: -4289924079734048476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_94
+      rect:
+        serializedVersion: 2
+        x: 427
+        y: 208
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e8aacf27d47a0e80800000000000000
+      internalID: -8211622502988076824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_95
+      rect:
+        serializedVersion: 2
+        x: 443
+        y: 208
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b8befdb4301fe9e0800000000000000
+      internalID: -1590034324726564687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_96
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 208
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3a29d94a1aa9fa20800000000000000
+      internalID: 3096693248678767165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_97
+      rect:
+        serializedVersion: 2
+        x: 471
+        y: 208
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 948e48e6301e95060800000000000000
+      internalID: 6942827705423685705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_98
+      rect:
+        serializedVersion: 2
+        x: 11
+        y: 124
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 888e13b81680d3fa0800000000000000
+      internalID: -5819485928452659064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_99
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 124
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05ca9ec1a8df1a310800000000000000
+      internalID: 1414690527603436624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_100
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 124
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f6c582f02f2d29a0800000000000000
+      internalID: -6256292488793438479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_101
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 124
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3947181ecc2b98660800000000000000
+      internalID: 7388633256704439443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_102
+      rect:
+        serializedVersion: 2
+        x: 139
+        y: 124
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c831a5f44085bac50800000000000000
+      internalID: 6677527648041309068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_103
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 124
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5c9aa58c3f147ac0800000000000000
+      internalID: -3858424635948622756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_104
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 124
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74d13a7a5fe08bab0800000000000000
+      internalID: -4992223738697933497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_105
+      rect:
+        serializedVersion: 2
+        x: 235
+        y: 124
+        width: 26
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4754039494aa0d090800000000000000
+      internalID: -8011716505354877580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_106
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 167
+        width: 15
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1eab437c498ae1c00800000000000000
+      internalID: 873320734707202785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_107
+      rect:
+        serializedVersion: 2
+        x: 397
+        y: 186
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f7af946850c8ad10800000000000000
+      internalID: 2137169509065140211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_108
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 186
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76dc03faa37bc3270800000000000000
+      internalID: 8231655681601621351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_109
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 186
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36249c4c6ae0468e0800000000000000
+      internalID: -1701218649810320797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_110
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 186
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e1b022c74702e840800000000000000
+      internalID: 5251768120248414692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_111
+      rect:
+        serializedVersion: 2
+        x: 451
+        y: 186
+        width: 15
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d6ff6f75e31dab40800000000000000
+      internalID: 5453036600222021336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_112
+      rect:
+        serializedVersion: 2
+        x: 465
+        y: 186
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: adabe82962abfa700800000000000000
+      internalID: 553865954020211418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_113
+      rect:
+        serializedVersion: 2
+        x: 477
+        y: 186
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b45fd4937950cc30800000000000000
+      internalID: 4377597190757897399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_114
+      rect:
+        serializedVersion: 2
+        x: 485
+        y: 186
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2729024bd9c5be1b0800000000000000
+      internalID: -5626301477067648398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_115
+      rect:
+        serializedVersion: 2
+        x: 397
+        y: 164
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9e1ec864d8f0b130800000000000000
+      internalID: 3580635294934638239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_116
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 164
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 602444046fffa83f0800000000000000
+      internalID: -897623742601739770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_117
+      rect:
+        serializedVersion: 2
+        x: 423
+        y: 164
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ad3360ff8a7ae820800000000000000
+      internalID: 2948303664699358630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_118
+      rect:
+        serializedVersion: 2
+        x: 442
+        y: 164
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c65688afd6efea90800000000000000
+      internalID: -7282348224155330878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_119
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 164
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e98513b8ee5be8420800000000000000
+      internalID: 2634242868200429726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_120
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 164
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90a13a2d93b3882c0800000000000000
+      internalID: -4429225113985803767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_121
+      rect:
+        serializedVersion: 2
+        x: 471
+        y: 164
+        width: 19
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b75f4c87295645e0800000000000000
+      internalID: -1925753764261701708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_122
+      rect:
+        serializedVersion: 2
+        x: 489
+        y: 164
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00c01675b3517ead0800000000000000
+      internalID: -2673144509207868416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_123
+      rect:
+        serializedVersion: 2
+        x: 499
+        y: 160
+        width: 7
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bf67b66d8a9e0a10800000000000000
+      internalID: 1877608026764439477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_124
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 128
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db2d4a5caf42ea7d0800000000000000
+      internalID: -2905344050131053891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_125
+      rect:
+        serializedVersion: 2
+        x: 286
+        y: 128
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 766cfa819f9177e40800000000000000
+      internalID: 5654016414838670951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_126
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 124
+        width: 7
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b521177ae494ebb0800000000000000
+      internalID: -4907633959186127438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_127
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 128
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d975dbb535cf70150800000000000000
+      internalID: 5838912876860757917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_128
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 128
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec1b013e982399810800000000000000
+      internalID: 1772503496148431310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_129
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 128
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37df11e14453bed50800000000000000
+      internalID: 6767561431732845939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_130
+      rect:
+        serializedVersion: 2
+        x: 344
+        y: 128
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0fcba7facbdd4920800000000000000
+      internalID: 2976276593546874635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_131
+      rect:
+        serializedVersion: 2
+        x: 356
+        y: 128
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6288722a4a864e500800000000000000
+      internalID: 424579321184094246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_132
+      rect:
+        serializedVersion: 2
+        x: 366
+        y: 128
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db3300dd990218810800000000000000
+      internalID: 1765728374115808189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_133
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 124
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b39600139a521bd0800000000000000
+      internalID: -2660964842146982984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_134
+      rect:
+        serializedVersion: 2
+        x: 395
+        y: 128
+        width: 19
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad3239f29dce437d0800000000000000
+      internalID: -2939464239215860774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_135
+      rect:
+        serializedVersion: 2
+        x: 412
+        y: 124
+        width: 7
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81befa0c1908cd660800000000000000
+      internalID: 7411940450236361496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_136
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 128
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a41b861cf9a682d0800000000000000
+      internalID: -3276744778690390877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_137
+      rect:
+        serializedVersion: 2
+        x: 430
+        y: 128
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 251a0bade5521fdc0800000000000000
+      internalID: -3607060737220894382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_138
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 128
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50aa80c746dd9ad80800000000000000
+      internalID: -8238810619650201083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_139
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 128
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60e09bc6e78857e60800000000000000
+      internalID: 7959417993018543622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_140
+      rect:
+        serializedVersion: 2
+        x: 467
+        y: 128
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf2747c5e1fc4b8d0800000000000000
+      internalID: -2831410536402095365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_141
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 93
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2d81118e8114b340800000000000000
+      internalID: 4878543600097529131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_142
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 93
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d142edf74d9aeb40800000000000000
+      internalID: 5470357629922591184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_143
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 93
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b55f08c507a4e62e0800000000000000
+      internalID: -2130683727250918053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_144
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 93
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4a16c86542c41060800000000000000
+      internalID: 6923372130541640267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_145
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 93
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61f01807d25fa2c00800000000000000
+      internalID: 876782652986822422
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_146
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 93
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdb2a94dc83476ce0800000000000000
+      internalID: -1412085686016005156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_147
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 93
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b19c1d7d35f65a10800000000000000
+      internalID: 1897973937424077240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_148
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 93
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4bd617127baa7a80800000000000000
+      internalID: -8468267642814801075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_149
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 106
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11eddea75cc997710800000000000000
+      internalID: 1691555507039231505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_150
+      rect:
+        serializedVersion: 2
+        x: 278
+        y: 106
+        width: 19
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fa5a2d225f862f90800000000000000
+      internalID: -6978732989456164107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_151
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 106
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a14024897d4cf0b70800000000000000
+      internalID: 8867522621567271962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_152
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 106
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2501c7a9cb77ea730800000000000000
+      internalID: 4012275969963069522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_153
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 106
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a8fc0ac285ad22b0800000000000000
+      internalID: -5607643979852220254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_154
+      rect:
+        serializedVersion: 2
+        x: 342
+        y: 106
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c7688d6df0296730800000000000000
+      internalID: 3992758817477126084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_155
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 106
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ad8cc6043b2c16b0800000000000000
+      internalID: -5324333157006406232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_156
+      rect:
+        serializedVersion: 2
+        x: 363
+        y: 106
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23bae975c70f3ff60800000000000000
+      internalID: 8067055774387317554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_157
+      rect:
+        serializedVersion: 2
+        x: 375
+        y: 106
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e7d8f4c18b507ed0800000000000000
+      internalID: -2418332386984405024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_158
+      rect:
+        serializedVersion: 2
+        x: 393
+        y: 106
+        width: 10
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70f849734299ad4a0800000000000000
+      internalID: -6567768725736091897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_159
+      rect:
+        serializedVersion: 2
+        x: 403
+        y: 106
+        width: 24
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bf966dd7a50906e0800000000000000
+      internalID: -1870957951663562826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_160
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 29
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b552fcfa0f8561c90800000000000000
+      internalID: -7199469163540175525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_161
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 29
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7afde39baa1dad6a0800000000000000
+      internalID: -6423591387308040281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_162
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 29
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a047fee7d267147a0800000000000000
+      internalID: -6394700058114165750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_163
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 29
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f622a5b1814e04e20800000000000000
+      internalID: 3332914516443406959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_164
+      rect:
+        serializedVersion: 2
+        x: 273
+        y: 84
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 141bf277a7a9e3500800000000000000
+      internalID: 377909269522002241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_165
+      rect:
+        serializedVersion: 2
+        x: 286
+        y: 84
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81a359d25dc569ce0800000000000000
+      internalID: -1398828563589416424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_166
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 84
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f12ee5490b2fdb210800000000000000
+      internalID: 1350502303498428959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_167
+      rect:
+        serializedVersion: 2
+        x: 309
+        y: 84
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47198255b57beb930800000000000000
+      internalID: 4160964708635545972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_168
+      rect:
+        serializedVersion: 2
+        x: 319
+        y: 84
+        width: 23
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80b3806358f8f4080800000000000000
+      internalID: -9200977711394702584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_169
+      rect:
+        serializedVersion: 2
+        x: 343
+        y: 84
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e937c5c01e650c50800000000000000
+      internalID: 6630827044689623523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_170
+      rect:
+        serializedVersion: 2
+        x: 359
+        y: 84
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88c4d54759a910780800000000000000
+      internalID: -8718517436919493496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_171
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 84
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6190316f0c57385d0800000000000000
+      internalID: -3061473850059192042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_172
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 84
+        width: 18
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a058619944ab8ed60800000000000000
+      internalID: 7919784748519949578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_173
+      rect:
+        serializedVersion: 2
+        x: 403
+        y: 84
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eadc60f1f00cfca10800000000000000
+      internalID: 1931973936342814126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_174
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 84
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aab024dfb1f3c4030800000000000000
+      internalID: 3480226001496181674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_175
+      rect:
+        serializedVersion: 2
+        x: 426
+        y: 81
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7dace548d551c8f0800000000000000
+      internalID: -522041694423831174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_176
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 84
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8659b3f087008140800000000000000
+      internalID: 4719780659910497933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_177
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 80
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aadbe674fdd7af620800000000000000
+      internalID: 2808695715548544426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_178
+      rect:
+        serializedVersion: 2
+        x: 463
+        y: 80
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a29e7a457b3374f50800000000000000
+      internalID: 6865513019441932586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_179
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 84
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c13b6d17ae081020800000000000000
+      internalID: 2312614519570641349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_180
+      rect:
+        serializedVersion: 2
+        x: 484
+        y: 84
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bdb6dfb1f4d5a370800000000000000
+      internalID: 8333300820289699248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_181
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 62
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82ac40568fc59f2b0800000000000000
+      internalID: -5550302843840968152
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_182
+      rect:
+        serializedVersion: 2
+        x: 283
+        y: 58
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca935595eaf057b30800000000000000
+      internalID: 4284347862010378668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_183
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 62
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e08ceda80030b660800000000000000
+      internalID: 7399467001605554406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_184
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 62
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd4460ee25a812b60800000000000000
+      internalID: 7719603325075080412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_185
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 58
+        width: 15
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17e12275cc4d7d570800000000000000
+      internalID: 8491489596530630257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_186
+      rect:
+        serializedVersion: 2
+        x: 339
+        y: 58
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59fcfc14b0669d510800000000000000
+      internalID: 1574401743277510549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_187
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 62
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c917aecbd807c1120800000000000000
+      internalID: 2385905656661701020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_188
+      rect:
+        serializedVersion: 2
+        x: 361
+        y: 62
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a11fb2c3726d9cd00800000000000000
+      internalID: 993560656813486362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_189
+      rect:
+        serializedVersion: 2
+        x: 379
+        y: 62
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31805c6cb95a23960800000000000000
+      internalID: 7580303211291281427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_190
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 40
+        width: 18
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2527d989d7b0da300800000000000000
+      internalID: 264880587144000082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_191
+      rect:
+        serializedVersion: 2
+        x: 291
+        y: 40
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7aa4bdc8a0ad09ef0800000000000000
+      internalID: -103343052581811545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_192
+      rect:
+        serializedVersion: 2
+        x: 301
+        y: 40
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd057389a9c738c00800000000000000
+      internalID: 901701353824800987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_193
+      rect:
+        serializedVersion: 2
+        x: 318
+        y: 40
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac53953f04efdff50800000000000000
+      internalID: 6916964157625021898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_194
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 40
+        width: 19
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f60b5c680f0825b0800000000000000
+      internalID: -5393044024924109068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_195
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 40
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41531617a80361bc0800000000000000
+      internalID: -3812806663356730092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_196
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 40
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be64022f6eb4cc620800000000000000
+      internalID: 2795692923966998251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_197
+      rect:
+        serializedVersion: 2
+        x: 375
+        y: 40
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b71fbe9faefefe80800000000000000
+      internalID: -8142791046003222604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_198
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 40
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb627c89d877e7aa0800000000000000
+      internalID: -6161355790158977346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_199
+      rect:
+        serializedVersion: 2
+        x: 413
+        y: 40
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abb03a4324debb940800000000000000
+      internalID: 5313101054020357050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_200
+      rect:
+        serializedVersion: 2
+        x: 426
+        y: 40
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ccde5256e9e827c0800000000000000
+      internalID: -4095766685659767612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_201
+      rect:
+        serializedVersion: 2
+        x: 443
+        y: 40
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07811738d8dc731a0800000000000000
+      internalID: -6829764302204757904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_202
+      rect:
+        serializedVersion: 2
+        x: 455
+        y: 40
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90c379967bfd18a10800000000000000
+      internalID: 1910053695825329161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_203
+      rect:
+        serializedVersion: 2
+        x: 465
+        y: 40
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5cc6875c19f9ca10800000000000000
+      internalID: 1930347815427820638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_204
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 18
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa4bc0f70fe03f630800000000000000
+      internalID: 3959524923475276970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_205
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 18
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17a5dba2c8fbeb500800000000000000
+      internalID: 413978824498043505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_206
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 18
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff312a8b0d2514f90800000000000000
+      internalID: -6971199691788512257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_207
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 18
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8927c674e90b7410800000000000000
+      internalID: 1475784179743926667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_208
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 18
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e9bd46b0f3044770800000000000000
+      internalID: 8593998321315330530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_209
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 18
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25b7936584a08e550800000000000000
+      internalID: 6190208993621277522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_210
+      rect:
+        serializedVersion: 2
+        x: 350
+        y: 18
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e44b578a90067210800000000000000
+      internalID: 1330251403630429412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_211
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 18
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0595565acb357fdf0800000000000000
+      internalID: -146556393172412080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_212
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 14
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5228cf00a059c820800000000000000
+      internalID: 2938968880225722972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_213
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 18
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd6e93eb2af09fbd0800000000000000
+      internalID: -2596026518551796004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_214
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 18
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b47e8bb02feb29b0800000000000000
+      internalID: -5103722828829657928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_215
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 18
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b437b243fc2abac0800000000000000
+      internalID: -3838706309071948622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_216
+      rect:
+        serializedVersion: 2
+        x: 434
+        y: 18
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79a89573b864bec70800000000000000
+      internalID: 9001365843973081751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: touhou_projectiles_217
+      rect:
+        serializedVersion: 2
+        x: 447
+        y: 18
+        width: 17
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd31a2bf05c093bf0800000000000000
+      internalID: -344230354566376483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      touhou_projectiles_0: -5653806206287591474
+      touhou_projectiles_1: 7074728631859274293
+      touhou_projectiles_10: 746112381661633774
+      touhou_projectiles_100: -6256292488793438479
+      touhou_projectiles_101: 7388633256704439443
+      touhou_projectiles_102: 6677527648041309068
+      touhou_projectiles_103: -3858424635948622756
+      touhou_projectiles_104: -4992223738697933497
+      touhou_projectiles_105: -8011716505354877580
+      touhou_projectiles_106: 873320734707202785
+      touhou_projectiles_107: 2137169509065140211
+      touhou_projectiles_108: 8231655681601621351
+      touhou_projectiles_109: -1701218649810320797
+      touhou_projectiles_11: 3365232527550020427
+      touhou_projectiles_110: 5251768120248414692
+      touhou_projectiles_111: 5453036600222021336
+      touhou_projectiles_112: 553865954020211418
+      touhou_projectiles_113: 4377597190757897399
+      touhou_projectiles_114: -5626301477067648398
+      touhou_projectiles_115: 3580635294934638239
+      touhou_projectiles_116: -897623742601739770
+      touhou_projectiles_117: 2948303664699358630
+      touhou_projectiles_118: -7282348224155330878
+      touhou_projectiles_119: 2634242868200429726
+      touhou_projectiles_12: -5261705310641567126
+      touhou_projectiles_120: -4429225113985803767
+      touhou_projectiles_121: -1925753764261701708
+      touhou_projectiles_122: -2673144509207868416
+      touhou_projectiles_123: 1877608026764439477
+      touhou_projectiles_124: -2905344050131053891
+      touhou_projectiles_125: 5654016414838670951
+      touhou_projectiles_126: -4907633959186127438
+      touhou_projectiles_127: 5838912876860757917
+      touhou_projectiles_128: 1772503496148431310
+      touhou_projectiles_129: 6767561431732845939
+      touhou_projectiles_13: 7074282315618335947
+      touhou_projectiles_130: 2976276593546874635
+      touhou_projectiles_131: 424579321184094246
+      touhou_projectiles_132: 1765728374115808189
+      touhou_projectiles_133: -2660964842146982984
+      touhou_projectiles_134: -2939464239215860774
+      touhou_projectiles_135: 7411940450236361496
+      touhou_projectiles_136: -3276744778690390877
+      touhou_projectiles_137: -3607060737220894382
+      touhou_projectiles_138: -8238810619650201083
+      touhou_projectiles_139: 7959417993018543622
+      touhou_projectiles_14: -6120424432441840514
+      touhou_projectiles_140: -2831410536402095365
+      touhou_projectiles_141: 4878543600097529131
+      touhou_projectiles_142: 5470357629922591184
+      touhou_projectiles_143: -2130683727250918053
+      touhou_projectiles_144: 6923372130541640267
+      touhou_projectiles_145: 876782652986822422
+      touhou_projectiles_146: -1412085686016005156
+      touhou_projectiles_147: 1897973937424077240
+      touhou_projectiles_148: -8468267642814801075
+      touhou_projectiles_149: 1691555507039231505
+      touhou_projectiles_15: 7870648968451999400
+      touhou_projectiles_150: -6978732989456164107
+      touhou_projectiles_151: 8867522621567271962
+      touhou_projectiles_152: 4012275969963069522
+      touhou_projectiles_153: -5607643979852220254
+      touhou_projectiles_154: 3992758817477126084
+      touhou_projectiles_155: -5324333157006406232
+      touhou_projectiles_156: 8067055774387317554
+      touhou_projectiles_157: -2418332386984405024
+      touhou_projectiles_158: -6567768725736091897
+      touhou_projectiles_159: -1870957951663562826
+      touhou_projectiles_16: 8396302988788414613
+      touhou_projectiles_160: -7199469163540175525
+      touhou_projectiles_161: -6423591387308040281
+      touhou_projectiles_162: -6394700058114165750
+      touhou_projectiles_163: 3332914516443406959
+      touhou_projectiles_164: 377909269522002241
+      touhou_projectiles_165: -1398828563589416424
+      touhou_projectiles_166: 1350502303498428959
+      touhou_projectiles_167: 4160964708635545972
+      touhou_projectiles_168: -9200977711394702584
+      touhou_projectiles_169: 6630827044689623523
+      touhou_projectiles_17: 4151663814781791458
+      touhou_projectiles_170: -8718517436919493496
+      touhou_projectiles_171: -3061473850059192042
+      touhou_projectiles_172: 7919784748519949578
+      touhou_projectiles_173: 1931973936342814126
+      touhou_projectiles_174: 3480226001496181674
+      touhou_projectiles_175: -522041694423831174
+      touhou_projectiles_176: 4719780659910497933
+      touhou_projectiles_177: 2808695715548544426
+      touhou_projectiles_178: 6865513019441932586
+      touhou_projectiles_179: 2312614519570641349
+      touhou_projectiles_18: 2000207630660780939
+      touhou_projectiles_180: 8333300820289699248
+      touhou_projectiles_181: -5550302843840968152
+      touhou_projectiles_182: 4284347862010378668
+      touhou_projectiles_183: 7399467001605554406
+      touhou_projectiles_184: 7719603325075080412
+      touhou_projectiles_185: 8491489596530630257
+      touhou_projectiles_186: 1574401743277510549
+      touhou_projectiles_187: 2385905656661701020
+      touhou_projectiles_188: 993560656813486362
+      touhou_projectiles_189: 7580303211291281427
+      touhou_projectiles_19: 1502921057407861242
+      touhou_projectiles_190: 264880587144000082
+      touhou_projectiles_191: -103343052581811545
+      touhou_projectiles_192: 901701353824800987
+      touhou_projectiles_193: 6916964157625021898
+      touhou_projectiles_194: -5393044024924109068
+      touhou_projectiles_195: -3812806663356730092
+      touhou_projectiles_196: 2795692923966998251
+      touhou_projectiles_197: -8142791046003222604
+      touhou_projectiles_198: -6161355790158977346
+      touhou_projectiles_199: 5313101054020357050
+      touhou_projectiles_2: -2030056049066368667
+      touhou_projectiles_20: 2488213226729078787
+      touhou_projectiles_200: -4095766685659767612
+      touhou_projectiles_201: -6829764302204757904
+      touhou_projectiles_202: 1910053695825329161
+      touhou_projectiles_203: 1930347815427820638
+      touhou_projectiles_204: 3959524923475276970
+      touhou_projectiles_205: 413978824498043505
+      touhou_projectiles_206: -6971199691788512257
+      touhou_projectiles_207: 1475784179743926667
+      touhou_projectiles_208: 8593998321315330530
+      touhou_projectiles_209: 6190208993621277522
+      touhou_projectiles_21: 7535002332552361360
+      touhou_projectiles_210: 1330251403630429412
+      touhou_projectiles_211: -146556393172412080
+      touhou_projectiles_212: 2938968880225722972
+      touhou_projectiles_213: -2596026518551796004
+      touhou_projectiles_214: -5103722828829657928
+      touhou_projectiles_215: -3838706309071948622
+      touhou_projectiles_216: 9001365843973081751
+      touhou_projectiles_217: -344230354566376483
+      touhou_projectiles_22: 6187473876564286234
+      touhou_projectiles_23: 7295589905028461413
+      touhou_projectiles_24: -1550352345347957970
+      touhou_projectiles_25: -9000376652138241865
+      touhou_projectiles_26: -5342150833336494307
+      touhou_projectiles_27: -6193541016935386370
+      touhou_projectiles_28: 9035455211371337819
+      touhou_projectiles_29: -813912702292985269
+      touhou_projectiles_3: 3128528252950859169
+      touhou_projectiles_30: -4389465304221940432
+      touhou_projectiles_31: -1854923044540169261
+      touhou_projectiles_32: 7967998641465069808
+      touhou_projectiles_33: -7065080800343584354
+      touhou_projectiles_34: 4713179977754807890
+      touhou_projectiles_35: -8417178149052204030
+      touhou_projectiles_36: -1813855560102685880
+      touhou_projectiles_37: 2526347761814229354
+      touhou_projectiles_38: -4950244177727137715
+      touhou_projectiles_39: 7208728216893894259
+      touhou_projectiles_4: -6304143252497467666
+      touhou_projectiles_40: 6195113756330774224
+      touhou_projectiles_41: 201569313259348676
+      touhou_projectiles_42: 3260490224969175655
+      touhou_projectiles_43: 5209667999346060350
+      touhou_projectiles_44: 3157593303114518117
+      touhou_projectiles_45: -5860369442541458267
+      touhou_projectiles_46: 2502697052675594672
+      touhou_projectiles_47: 6746081396261653974
+      touhou_projectiles_48: -1623713035806326022
+      touhou_projectiles_49: -1167135084498726976
+      touhou_projectiles_5: -5064879495553373420
+      touhou_projectiles_50: -8243877355560977982
+      touhou_projectiles_51: 6311467157562304977
+      touhou_projectiles_52: 5304205956829790499
+      touhou_projectiles_53: -7229234975299364549
+      touhou_projectiles_54: -2733086774354956962
+      touhou_projectiles_55: -1746840011168392971
+      touhou_projectiles_56: 280009411533113425
+      touhou_projectiles_57: -1229717205903303220
+      touhou_projectiles_58: -5596426001046857690
+      touhou_projectiles_59: 8498346007284754082
+      touhou_projectiles_6: -3371893980478322070
+      touhou_projectiles_60: -2239856459558848789
+      touhou_projectiles_61: -1839239488489298968
+      touhou_projectiles_62: 6994815424194936440
+      touhou_projectiles_63: -1232407439584019625
+      touhou_projectiles_64: 8180725897644981143
+      touhou_projectiles_65: -1112598106331343774
+      touhou_projectiles_66: -6476636815152317191
+      touhou_projectiles_67: -3134555896658651499
+      touhou_projectiles_68: 6170844897537777104
+      touhou_projectiles_69: 5958035111622937505
+      touhou_projectiles_7: 2178673144316986245
+      touhou_projectiles_70: -9184579810764288637
+      touhou_projectiles_71: -571118303323924348
+      touhou_projectiles_72: 2295282448911136463
+      touhou_projectiles_73: -4222974145839970751
+      touhou_projectiles_74: 4105334354601848815
+      touhou_projectiles_75: 1762183772579780541
+      touhou_projectiles_76: 8562631255167942334
+      touhou_projectiles_77: -4643355834892318872
+      touhou_projectiles_78: 690779982017209688
+      touhou_projectiles_79: -5281193225461643468
+      touhou_projectiles_8: 7264696726888528320
+      touhou_projectiles_80: -1572129258621265203
+      touhou_projectiles_81: 7107271472816520030
+      touhou_projectiles_82: 7500369528881489001
+      touhou_projectiles_83: 5284144554620022428
+      touhou_projectiles_84: -2026047303493953454
+      touhou_projectiles_85: 4891286875835583093
+      touhou_projectiles_86: 377457115456877396
+      touhou_projectiles_87: 2579840648303379595
+      touhou_projectiles_88: -2988892122171352727
+      touhou_projectiles_89: -4818886924403777097
+      touhou_projectiles_9: 8378456327798557463
+      touhou_projectiles_90: 5580781944675995269
+      touhou_projectiles_91: -810670061922315801
+      touhou_projectiles_92: -4374543690886393136
+      touhou_projectiles_93: -4289924079734048476
+      touhou_projectiles_94: -8211622502988076824
+      touhou_projectiles_95: -1590034324726564687
+      touhou_projectiles_96: 3096693248678767165
+      touhou_projectiles_97: 6942827705423685705
+      touhou_projectiles_98: -5819485928452659064
+      touhou_projectiles_99: 1414690527603436624
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

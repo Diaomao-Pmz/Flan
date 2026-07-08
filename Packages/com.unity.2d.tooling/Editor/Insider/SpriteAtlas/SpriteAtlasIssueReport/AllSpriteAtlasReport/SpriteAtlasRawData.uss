@@ -1,0 +1,18 @@
+:root {
+    flex: 1 1 0;
+}
+
+.table {
+    flex: 1 1 0;
+    height: 100%;
+}
+
+.unity-multi-column-header__column--sortable {
+    flex-direction: row-reverse;
+}
+
+.no-data-label{
+    flex: 1 1 0;
+    -unity-text-align: middle-center;
+    overflow: hidden;
+}

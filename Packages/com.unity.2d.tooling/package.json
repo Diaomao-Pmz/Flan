@@ -1,0 +1,41 @@
+{
+  "name": "com.unity.2d.tooling",
+  "displayName": "2D Tooling",
+  "version": "1.0.0",
+  "unity": "6000.3",
+  "unityRelease": "0a2",
+  "description": "A Unity Editor tool to analyze Sprite Atlases usage.",
+  "dependencies": {
+    "com.unity.2d.common": "12.0.1",
+    "com.unity.modules.uielements": "1.0.0"
+  },
+  "relatedPackages": {
+    "com.unity.2d.common.tests": "12.0.1",
+    "com.unity.2d.tooling.tests": "1.0.0"
+  },
+  "samples": [
+    {
+      "displayName": "Sample Sprite Atlas Report",
+      "description": "Sample Sprite Atlas report that shows how to use the Sprite Atlas data source to create a report. Note that this sample uses the internal APIs from the package which are subject to change.",
+      "path": "Samples~/Sample Sprite Atlas Report"
+    },
+    {
+      "displayName": "Sample Sprite Data source And Report",
+      "description": "Sample custom data source and report implementation.",
+      "path": "Samples~/Sample Sprite Data source And Report"
+    }
+  ],
+  "_upm": {
+    "changelog": "### Fixed\n- Fixed All Sprite Atlas report not showing correct total memory size. (DANB-1066)\n- Fixed All Sprite Atlas reporting columns data not showing sensible data.\n- Fixed redundant revert button on report settings.\n- Fixed obsolete usage of API."
+  },
+  "upmCi": {
+    "footprint": "fb98158b81d49582df0dc1669dfd17da472adae3"
+  },
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.2d.tooling@1.0/manual/index.html",
+  "repository": {
+    "url": "https://github.cds.internal.unity3d.com/unity/2d.git",
+    "type": "git",
+    "revision": "0f527ad8312724fd801fb3b317d1f4be2f019652"
+  },
+  "_fingerprint": "55ff0338cdce2a73e936a6c2bad0fb9581330a6f"
+}
