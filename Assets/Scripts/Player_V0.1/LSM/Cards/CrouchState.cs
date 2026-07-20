@@ -53,8 +53,8 @@ public class CrouchState : IState
         sm.rb.linearVelocity = new Vector2(moveDir * crouchSpeed, sm.rb.linearVelocity.y);
 
         // 控制翻转
-        if (moveDir < 0) sm.GetComponent<SpriteRenderer>().flipX = true;
-        else if (moveDir > 0) sm.GetComponent<SpriteRenderer>().flipX = false;
+        if (moveDir < 0) sm.playerController.SetFacingDirection(-1);
+        else if (moveDir > 0) sm.playerController.SetFacingDirection(1);
 
         // 3. 悬崖防掉落 (蹲着走到悬崖边掉下去，也要切到 FallState)
         if (!sm.IsGrounded())

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using Flandre.CombatSystem;
 
 // 这是所有敌人的老祖宗类，包含最基础的生命周期和数值
 public abstract class EntityBase : MonoBehaviour
@@ -20,7 +21,7 @@ public abstract class EntityBase : MonoBehaviour
     }
 
     // 统一的受伤接口
-    public virtual void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage, DamageType type = DamageType.Melee)
     {
         if (isDead) return;
 

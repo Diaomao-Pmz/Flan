@@ -8,6 +8,11 @@ public class JumpState : IState
     private readonly int playerLayer = LayerMask.NameToLayer("Player");
     private readonly int invincibleLayer = LayerMask.NameToLayer("Invincible");
 
+    private float qHoldTimer = 0f;
+    private float originalGravity;
+    private bool isHovering = false;
+    private bool requireQRelease = false;
+
     public JumpState(PlayerStateMachine stateMachine)
     {
         sm = stateMachine;
@@ -16,17 +21,13 @@ public class JumpState : IState
     public void Enter()
     {
         sm.playerController.loadoutManager.ExecuteActionModifier(ActionType.Jump);
-
-        Debug.Log("进入了：跳跃状态，当前跳跃次数：" + sm.jumpCount);
-
-        // 1. 每次进入跳跃，计步器 +1
         sm.jumpCount++;
 
         if (sm.isJumpRelay)
         {
-            sm.jumpAnchorPos = sm.transform.position; // 记录锚点位置
-            sm.hasJumpAnchor = true;                  
-            sm.gameObject.layer = invincibleLayer;    // 开启第一段跳跃无敌！
+            sm.jumpAnchorPos = sm.transform.position;
+            sm.hasJumpAnchor = true;
+            sm.gameObject.layer = invincibleLayer;
 
             if (sm.anchorPrefab != null)
             {
@@ -34,58 +35,85 @@ public class JumpState : IState
             }
         }
 
-        // 2. 播放起跳动画
         sm.anim.Play("Flandre_Jump_Start");
 
-        // 3. 物理爆发：强制清零Y轴速度，确保二段跳也能跳得一样高
         sm.rb.linearVelocity = new Vector2(sm.rb.linearVelocity.x, 0f);
         sm.rb.AddForce(Vector2.up * sm.jumpForce, ForceMode2D.Impulse);
+
+        qHoldTimer = 0f;
+        isHovering = false;
+        originalGravity = sm.rb.gravityScale;
+
+        // 【修改】：向虚拟手柄读取 Fly(Q) 键状态
+        requireQRelease = sm.playerController.isFlyHeld;
     }
 
     public void Update()
     {
-        float vy = sm.rb.linearVelocity.y;
-
-        // ==========================================
-        // 【新增核心逻辑】：长短按跳跃高度控制 (Velocity Cut)
-        // 如果玩家没有按住跳跃键，且角色还在往上飞，且速度大于我们允许的最小值
-        if (!Input.GetKey(KeyCode.Space) && vy > sm.minJumpVelocity)
+        if (requireQRelease)
         {
-            // 强制截断Y轴向上的速度，实现“提前坠落”
-            sm.rb.linearVelocity = new Vector2(sm.rb.linearVelocity.x, sm.minJumpVelocity);
-            vy = sm.minJumpVelocity; // 同步更新局部变量，保证下方动画状态机能正确读取最新的速度
+            if (!sm.playerController.isFlyHeld) requireQRelease = false;
         }
 
-        // ==========================================
+        if (!requireQRelease && sm.playerController.isFlyHeld)
+        {
+            if (!isHovering)
+            {
+                isHovering = true;
+                sm.rb.gravityScale = 0f;
+                sm.rb.linearVelocity = Vector2.zero;
+            }
 
-        if (vy > 0.5f) sm.anim.Play("Flandre_Jump_Start"); // 向上飞
-        else if (vy >= -0.5f) sm.anim.Play("Flandre_Jump_Apex");  // 顶点滞空
-        else sm.anim.Play("Flandre_Jump_Fall");  // 下坠
+            qHoldTimer += Time.deltaTime;
 
-        // 空中左右移动逻辑
-        float moveDir = 0f;
-        if (Input.GetKey(KeyCode.A)) moveDir = -1f;
-        if (Input.GetKey(KeyCode.D)) moveDir = 1f;
+            if (qHoldTimer >= sm.hoverChargeTime)
+            {
+                sm.ChangeState(sm.flyState);
+                return;
+            }
+        }
+        else
+        {
+            if (isHovering)
+            {
+                isHovering = false;
+                sm.rb.gravityScale = originalGravity;
+                qHoldTimer = 0f;
+            }
+        }
 
+        if (isHovering) return;
+
+        float vy = sm.rb.linearVelocity.y;
+
+        // 【修改】：读取虚拟手柄的 isJumpHeld，实现按键长短决定跳跃高度
+        if (!sm.playerController.isJumpHeld && vy > sm.minJumpVelocity)
+        {
+            sm.rb.linearVelocity = new Vector2(sm.rb.linearVelocity.x, sm.minJumpVelocity);
+            vy = sm.minJumpVelocity;
+        }
+
+        if (vy > 0.5f) sm.anim.Play("Flandre_Jump_Start");
+        else if (vy >= -0.5f) sm.anim.Play("Flandre_Jump_Apex");
+        else sm.anim.Play("Flandre_Jump_Fall");
+
+        // 【修改】：读取虚拟手柄的 moveInput.x，替代 Input.GetKey(A/D)
+        float moveDir = sm.playerController.moveInput.x;
         sm.rb.linearVelocity = new Vector2(moveDir * sm.moveSpeed, sm.rb.linearVelocity.y);
 
-        // 翻转逻辑
-        if (moveDir < 0) sm.GetComponent<SpriteRenderer>().flipX = true;
-        else if (moveDir > 0) sm.GetComponent<SpriteRenderer>().flipX = false;
+        if (moveDir < 0) sm.playerController.SetFacingDirection(-1);
+        else if (moveDir > 0) sm.playerController.SetFacingDirection(1);
 
-        // 落地检测 (只有往下掉且踩地时才算落地)
         if (vy <= 0f && sm.IsGrounded())
         {
-            if (moveDir != 0) sm.ChangeState(sm.runState);
+            if (Mathf.Abs(moveDir) > 0.1f) sm.ChangeState(sm.runState);
             else sm.ChangeState(sm.idleState);
         }
     }
 
     public void Exit()
     {
-        //移除无敌
         if (sm.isJumpRelay) sm.gameObject.layer = playerLayer;
-
-        Debug.Log("离开了：跳跃状态");
+        sm.rb.gravityScale = originalGravity;
     }
 }

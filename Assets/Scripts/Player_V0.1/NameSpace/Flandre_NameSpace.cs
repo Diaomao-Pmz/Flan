@@ -5,8 +5,12 @@ namespace Flandre.CombatSystem
     // 玩家的所有抽象输入指令
     public enum InputCmd
     {
-        LightAttack,
-        HeavyAttack,
+        Up,
+        Down,
+        Left,
+        Right,
+        MainAttack,
+        SubAttack,
         Jump,
         Dash,
         Slide,
@@ -28,5 +32,11 @@ namespace Flandre.CombatSystem
         Relay,
         Shield,
         Pulse
+    }
+
+    public enum DamageType
+    {
+        Melee,  // 近战
+        Ranged  // 远程
     }
 }

@@ -54,7 +54,10 @@ public class DashState : IState
         if (isFirstHit && sm.isDashRelay)
         {
             sm.dashAnchorPos = sm.transform.position;
-            sm.gameObject.layer = invincibleLayer;
+
+            sm.playerState.health.SetUntargetable(true);//玩家无敌
+            sm.gameObject.layer = invincibleLayer;//玩家可穿过敌人
+
             if (sm.anchorPrefab != null)
                 sm.activeDashAnchor = GameObject.Instantiate(sm.anchorPrefab, sm.dashAnchorPos, Quaternion.identity);
         }
@@ -85,8 +88,12 @@ public class DashState : IState
     {
         if (isRejected) return;
 
-        // 如果开启了 Relay 无敌，退出时必须关闭
-        if (sm.isDashRelay) sm.gameObject.layer = playerLayer;
+        // 退出无敌
+        if (sm.isDashRelay)
+        {
+            sm.gameObject.layer = playerLayer;
+            sm.playerState.health.SetUntargetable(false);
+        }
 
         sm.dashSkill.StartCooldownIfFirstHit(isFirstHit);
 

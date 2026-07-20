@@ -36,7 +36,7 @@ public class HUDBars : MonoBehaviour
 
     // DEBUG 测试按钮调用的方法
     public void DBG_AddHP() { playerState.health.AddHP(10); }
-    public void DBG_SubHP() { playerState.health.TakeDamage(10); }
+    public void DBG_SubHP() { playerState.health.TakeDamage(10, Vector2.zero, playerState); }
     public void DBG_AddMP() { playerState.health.AddMP(10); }
     public void DBG_SubMP() { playerState.health.AddMP(-10); }
 }

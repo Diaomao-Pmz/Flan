@@ -81,18 +81,21 @@ public class PlayerHitDetection : MonoBehaviour
                 // 如果是敌人，而且【不在黑名单里】
                 if (hit.CompareTag("Enemy") && !alreadyHitEnemies.Contains(hit))
                 {
-                    alreadyHitEnemies.Add(hit); // 记入黑名单，这招再也打不到它第二次了
-                    Debug.Log($"砍中了 {hit.name}，造成了 {node.damage} 点伤害！");
+                    alreadyHitEnemies.Add(hit); // 记入黑名单
+                    Debug.Log($"砍中了碰撞体: {hit.name}</color>");
 
-                    // 【核心修改】：尝试获取敌人身上的 EntityBase 基类
-                    EntityBase enemy = hit.GetComponent<EntityBase>();
+                    // 【核心修复】：必须使用 GetComponentInParent，防止砍到子物体没伤害！
+                    EntityBase enemy = hit.GetComponentInParent<EntityBase>();
+
                     if (enemy != null)
                     {
+                        Debug.Log($"成功找到父级实体 {enemy.gameObject.name}，调用 TakeDamage！</color>");
                         // 触发基类的统一扣血接口
-                        enemy.TakeDamage(node.damage);
-
-                        // 如果你以后在 EntityBase 里加了削韧/击退参数，也可以传进去：
-                        // enemy.TakeDamage(node.damage, node.knockbackForce);
+                        enemy.TakeDamage(node.damage, DamageType.Melee);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"砍中了 {hit.name}，但在它或父节点上没找到 EntityBase！</color>");
                     }
                 }
             }

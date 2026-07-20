@@ -13,38 +13,45 @@ public class RunState : IState
     {
         Debug.Log("进入了：跑动状态");
         sm.anim.Play("Flandre_Run");
-        Debug.Log("执行跑动动画");
-        sm.jumpCount = 0;
+        sm.jumpCount = 0; // 踩地跑动，刷新跳跃次数
     }
 
     public void Update()
     {
+        // 1. 离地检测：跑着跑着踩空了（比如从平台边缘掉落），切入下落
         if (!sm.IsGrounded())
         {
             sm.ChangeState(sm.fallState);
             return;
         }
 
-        // 2. 获取极其丝滑的方向输入 (-1表示纯左，1表示纯右，0表示没按)
-        float moveDir = Input.GetAxisRaw("Horizontal");
+        // 2. 【核心新增】：上下文按键检测（情景：移动中）
+        // 跑步时如果按下了 Ctrl 键，并且滑铲技能 CD 好了，瞬间突进滑铲！
+        if (sm.playerController.isCrouchHeld && sm.slideSkill.CanExecute())
+        {
+            sm.ChangeState(sm.slideState);
+            return; // 成功拦截，跳过下方的常规跑步位移
+        }
 
-        // 3. 赋予物理速度
+        // 3. 从新输入系统安全读取极其丝滑的 X 轴方向输入 (-1左，1右，0没按)
+        float moveDir = sm.playerController.moveInput.x;
+
+        // 4. 赋予真实的物理速度
         sm.rb.linearVelocity = new Vector2(moveDir * sm.moveSpeed, sm.rb.linearVelocity.y);
 
-        // 4. 控制角色翻转（极其简洁的写法）
-        if (moveDir < 0) sm.GetComponent<SpriteRenderer>().flipX = true;
-        else if (moveDir > 0) sm.GetComponent<SpriteRenderer>().flipX = false;
+        // 5. 翻转角色朝向并同步给控制器 (通过 facingDirection 让战斗判定框知道往哪打)
+        if (moveDir < 0) sm.playerController.SetFacingDirection(-1);
+        else if (moveDir > 0) sm.playerController.SetFacingDirection(1);
 
-        // 5. 核心流转：如果玩家松开了方向键（摇杆回中）
+        // 6. 核心流转：如果玩家松开了方向键（按键归零/摇杆回中），切回待机
         if (Mathf.Abs(moveDir) < 0.1f)
         {
             sm.ChangeState(sm.idleState);
         }
     }
 
-public void Exit()
-{
-Debug.Log("离开了：跑动状态");
-}
-
+    public void Exit()
+    {
+        Debug.Log("离开了：跑动状态");
+    }
 }

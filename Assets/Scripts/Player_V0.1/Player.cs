@@ -16,7 +16,7 @@ public class Player : MonoBehaviour
     public void TakeDamage(int damage)
     {
         // 调用状态机的数据扣血
-        state.health.TakeDamage(damage);
+        state.health.TakeDamage(damage, Vector2.zero, state);
 
         // 检查生命周期逻辑（例如是否死亡）
         if (state.health.currentHP <= 0)
@@ -32,3 +32,4 @@ public class Player : MonoBehaviour
         // controller.anim.SetTrigger("Die");
     }
 }
+

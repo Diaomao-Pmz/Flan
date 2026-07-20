@@ -3,6 +3,10 @@ using UnityEngine;
 public class ComboState : IState
 {
     private PlayerStateMachine sm;
+    public bool isCancelable = false;
+
+    // 【新增】：用于暂存原始重力，并在收招时完美归还
+    private float originalGravity;
 
     public ComboState(PlayerStateMachine stateMachine)
     {
@@ -11,58 +15,65 @@ public class ComboState : IState
 
     public void Enter()
     {
-        // 核心结合点：直接去问 Buffer 要当前对出来的暗号节点
+        isCancelable = false;
+
+        // 1. 记录角色的原始重力
+        originalGravity = sm.rb.gravityScale;
+
+        // 2. 【工业级 ACT 核心增幅】：空中连段反重力悬停 (滞空控制)
+        if (!sm.IsGrounded())
+        {
+            sm.rb.gravityScale = 0f;
+            // 瞬间没收所有物理惯性，将角色牢牢“钉”在空中，防止开枪或挥剑时产生诡异下滑
+            sm.rb.linearVelocity = Vector2.zero;
+        }
+
         ComboNode activeNode = sm.GetComponent<ComboInputBuffer>().currentNode;
 
         if (activeNode != null)
         {
             Debug.Log($"[ComboState] 执行连招: {activeNode.nodeName}");
-
-            // 1. 播放数据资产中配置的动画
             sm.anim.Play(activeNode.animName, 0, 0f);
 
-            // 2. 如果这招自带突进，给它个初速度（朝向 * 突进值）
-            float dir = sm.playerController.facingDirection;
-            sm.rb.linearVelocity = new Vector2(dir * activeNode.forwardThrust.x, sm.rb.linearVelocity.y);
+            // 如果地面招式带有 forwardThrust，且人在地上，则赋予突进位移
+            if (sm.IsGrounded())
+            {
+                float dir = sm.playerController.facingDirection;
+                sm.rb.linearVelocity = new Vector2(dir * activeNode.forwardThrust.x, sm.rb.linearVelocity.y);
+            }
         }
     }
 
     public void Update()
     {
-        // 依然保留边跑边打的逻辑（类Tevi的灵魂手感）
-        float moveDir = sm.playerController.moveInput.x;
+        // 动画后摇取消检测
+        if (isCancelable)
+        {
+            bool advanced = sm.GetComponent<ComboInputBuffer>().TryAdvanceCombo();
+            if (advanced) return;
+        }
 
+        // 允许在攻击窗口内输入微弱的方向调整朝向（瞄准/修招式朝向）
+        float moveDir = sm.playerController.moveInput.x;
         if (Mathf.Abs(moveDir) > 0.1f)
         {
-            // 打 8 折速度移动
-            sm.rb.linearVelocity = new Vector2(moveDir * sm.moveSpeed * 0.8f, sm.rb.linearVelocity.y);
-
-            // 边走边打更新朝向
             int newDir = moveDir > 0 ? 1 : -1;
             sm.playerController.SetFacingDirection(newDir);
         }
-        else
-        {
-            // 如果没推摇杆，保留进入状态时的惯性或突进速度，但施加一点摩擦力
-            sm.rb.linearVelocity = new Vector2(sm.rb.linearVelocity.x * 0.9f, sm.rb.linearVelocity.y);
-        }
 
-        // 切出状态依然交由 OnAttackAnimationEnd（动画事件标记）处理
+        // 【新增维护】：只要还在空中连招期间，强行锁定物理速度，不接受下落重力叠加
+        if (!sm.IsGrounded())
+        {
+            sm.rb.linearVelocity = Vector2.zero;
+        }
     }
 
     public void Exit()
     {
         Debug.Log("[ComboState] 退出当前招式");
-
-        // 防止人冲刺走了，原地还留着空气判定框
         sm.GetComponent<PlayerHitDetection>()?.ForceStopHitbox();
 
-        // 连招重置逻辑
-        // 如果希望：跳跃/冲刺后，玩家再按攻击，必须从【平A第一段】重新起手，就取消注释下面这行。
-        sm.GetComponent<ComboInputBuffer>().ResetCombo();
-
-        /* 如果你把上面那行 ResetCombo() 注释掉（不重置），玩家就可以实现：
-         * 【平A第一段】 -> 【冲刺打断】 -> 【冲刺结束前按攻击】 -> 直接打出【平A第二段】
-         */
+        // 3. 完美归还重力，让角色继续受重力掌控正常下落或待机
+        sm.rb.gravityScale = originalGravity;
     }
 }

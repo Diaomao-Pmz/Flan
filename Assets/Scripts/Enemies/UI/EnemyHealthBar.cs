@@ -3,21 +3,25 @@ using UnityEngine.UI;
 
 public class EnemyHealthBar : MonoBehaviour
 {
-    // 将引用从 EnemyState 改为 EntityBase
-    public EntityBase targetEntity;
+    [Header("绑定目标 (二选一即可)")]
+    public EntityBase targetEntity; // 小怪拖给这个
+    public BossState bossState;     // Boss拖给这个 (你需要在Inspector里把Boss拖进来)
+
+    [Header("UI 组件")]
     public Image fillImage;
     public GameObject rootObject;
 
     private void OnEnable()
     {
-        if (targetEntity != null)
-            targetEntity.OnStatChanged += Refresh; // 继续监听事件
+        // 智能订阅：有 Boss 就听 Boss 的，否则听小怪的
+        if (bossState != null) bossState.health.OnStatChanged += Refresh;
+        else if (targetEntity != null) targetEntity.OnStatChanged += Refresh;
     }
 
     private void OnDisable()
     {
-        if (targetEntity != null)
-            targetEntity.OnStatChanged -= Refresh;
+        if (bossState != null) bossState.health.OnStatChanged -= Refresh;
+        else if (targetEntity != null) targetEntity.OnStatChanged -= Refresh;
     }
 
     private void Start()
@@ -27,11 +31,18 @@ public class EnemyHealthBar : MonoBehaviour
 
     public void Refresh()
     {
-        if (targetEntity == null || fillImage == null) return;
+        if (fillImage == null) return;
 
-        fillImage.fillAmount = (float)targetEntity.currentHP / targetEntity.maxHP;
-
-        if (rootObject != null)
-            rootObject.SetActive(targetEntity.currentHP < targetEntity.maxHP);
+        // 智能读取：读取真正发生变化的血量数据
+        if (bossState != null)
+        {
+            fillImage.fillAmount = (float)bossState.health.currentHP / bossState.health.maxHP;
+            if (rootObject != null) rootObject.SetActive(bossState.health.currentHP < bossState.health.maxHP);
+        }
+        else if (targetEntity != null)
+        {
+            fillImage.fillAmount = (float)targetEntity.currentHP / targetEntity.maxHP;
+            if (rootObject != null) rootObject.SetActive(targetEntity.currentHP < targetEntity.maxHP);
+        }
     }
 }

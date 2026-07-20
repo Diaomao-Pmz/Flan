@@ -13,13 +13,19 @@ public class PlayerStateMachine : MonoBehaviour
     public DashState dashState; 
     public CrouchState crouchState;
     public SlideState slideState;
+    public FlyState flyState;
+
     public ComboState comboState;
-    public RangeAttackState rangeAttackState;
+
+    public ChargeState chargeState;
+    public HitState hitState;
+
 
     public Animator anim;
     public Rigidbody2D rb;
     public TrailRenderer dashTrail;         // 尾迹
     public PlayerController playerController;
+    public PlayerState playerState;
 
     /*    
     //技能相关
@@ -62,10 +68,25 @@ public class PlayerStateMachine : MonoBehaviour
     public Transform hurtboxCore; // 把你的 Hurtbox_Core 拖到这里
     private Vector3 originalHurtboxPos; // 记录它站立时的初始本地坐标
 
-    //远程
-    [Header("Ranged Attack Settings")]
-    public GameObject projectilePrefab; // 魔法/子弹的预制体
+    //被击飞
+    [Header("Hit settings")]
+    public float hitStunDuration = 0.35f; // 玩家失去控制的硬直时间
+    public Vector2 hitKnockbackForce = new Vector2(8f, 5f); // 默认击飞力度 (X水平, Y垂直)
+    public float blinkInterval = 0.1f; // 闪烁频率（多少秒闪一次）
+
+    [Header("Shoot settings")]
+    [Tooltip("远程子弹预制体")]
+    public GameObject projectilePrefab;
+    [Tooltip("子弹发射的枪口位置")]
     public Transform firePoint;
+    [Tooltip("常规射击子弹的速度")]
+    public float projectileSpeed = 12f;
+
+    [Header("Fly Settings")]
+    public float hoverChargeTime = 1.0f;       // 长按多少秒后进入飞行
+    public float flyManaCostPerSecond = 10f;   // 每秒耗蓝 (n)
+    public float flyCancelJumpForce = 8f;      // 取消飞行时的向上冲力 (x)
+    public float flySpeed = 5f;                // 飞行时的平移速度
 
     //Objects
     [HideInInspector] public Vector2 dashAnchorPos;
@@ -87,6 +108,7 @@ public class PlayerStateMachine : MonoBehaviour
     void Awake()
     {
         playerController = GetComponent<PlayerController>();
+        playerState = GetComponent<PlayerState>();
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<BoxCollider2D>();
@@ -105,8 +127,12 @@ public class PlayerStateMachine : MonoBehaviour
         dashState = new DashState(this);
         crouchState = new CrouchState(this);
         slideState = new SlideState(this);
+        flyState = new FlyState(this);
+
         comboState = new ComboState(this);
-        rangeAttackState = new RangeAttackState(this);
+
+        chargeState = new ChargeState(this);
+        hitState = new HitState(this);
 
         if (dashTrail == null) dashTrail = GetComponentInChildren<TrailRenderer>(); // 尾迹
 
@@ -124,20 +150,27 @@ public class PlayerStateMachine : MonoBehaviour
         {
         // 游戏开始，强行进入待机状态
         ChangeState(idleState);
-        }
-
-    public void ChangeState(IState newState)
-    {
-        Debug.Log("切换中");
-        if (currentState != null)
+        if (playerState != null && playerState.health != null)
         {
-            currentState.Exit();
+            playerState.health.OnPlayerHit += HandlePlayerHit;
         }
 
-        currentState = newState;
-        currentState.Enter();
+        if (playerState == null)
+        {
+            Debug.LogError("【致命错误】playerState 是空的！请检查 Awake 里是否忘记写 playerState = GetComponent<PlayerState>();");
+        }
+        else if (playerState.health == null)
+        {
+            Debug.LogError("【致命错误】health 模块是空的！");
+        }
+        else
+        {
+            // 养成好习惯，先取消再订阅，防止重复绑定
+            playerState.health.OnPlayerHit -= HandlePlayerHit;
+            playerState.health.OnPlayerHit += HandlePlayerHit;
+            Debug.Log("【系统正常】状态机已接通受击广播，就等挨打了！");
+        }
     }
-
     void Update()
     {
         if (IsGrounded() && currentState != dashState && currentState != jumpState)
@@ -178,16 +211,84 @@ public class PlayerStateMachine : MonoBehaviour
         if (currentState != null)currentState.Update();
     }
 
+    public void ChangeState(IState newState)
+    {
+        Debug.Log("切换中");
+        if (currentState != null)
+        {
+            currentState.Exit();
+        }
+
+        currentState = newState;
+        currentState.Enter();
+    }
+
     // ==========================================
     //攻击
-    public void OnAttackAnimationEnd()
+    // 1. 由动画事件调用：在挥剑结束的瞬间触发，开启派生窗口
+    public void OpenComboWindow()
     {
-
-        // 只有当芙兰确实在攻击状态时，动画播完了才帮她恢复状态
         if (currentState == comboState)
         {
-            // 恢复状态的智能化细节：如果播完动画时玩家还按着跑动键，直接无缝切入跑步，否则进待机
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            comboState.isCancelable = true;
+
+            // 顺便做一次立刻结算：万一玩家在这个事件触发前0.1秒按了键，立刻生效！
+            GetComponent<ComboInputBuffer>().TryAdvanceCombo();
+        }
+    }
+
+    // 2. 由动画事件调用：在收招即将结束时触发，关闭强制打断
+    public void CloseComboWindow()
+    {
+        if (currentState == comboState)
+        {
+            comboState.isCancelable = false;
+        }
+    }
+
+    // 3. 由动画事件调用：动画彻底播完了
+    // 由动画事件调用：动画彻底播完了
+    public void OnAttackAnimationEnd()
+    {
+        if (currentState == comboState)
+        {
+            ComboInputBuffer buffer = GetComponent<ComboInputBuffer>();
+            buffer.StartGracePeriod();
+
+            ComboNode lastNode = buffer.currentNode;
+            bool isCurrentButtonHeld = false;
+
+            if (lastNode != null)
+            {
+                // ==========================================
+                // 侦探代码开始：监听所有核心数据
+                // ==========================================
+                Debug.Log($"[查案] 1. 当前刚放完的技能是: {lastNode.nodeName}");
+                Debug.Log($"[查案] 2. 该技能配置里是否包含主攻击(Main): {lastNode.inputSequence.Contains(InputCmd.MainAttack)}");
+                Debug.Log($"[查案] 3. 该技能配置里是否包含副攻击(Sub): {lastNode.inputSequence.Contains(InputCmd.SubAttack)}");
+                Debug.Log($"[查案] 4. 控制器里的左键状态(isMainHeld): {playerController.isMainAttackHeld}");
+                Debug.Log($"[查案] 5. 控制器里的右键状态(isSubHeld): {playerController.isSubAttackHeld}");
+                // ==========================================
+
+                // 根据刚放完的技能类型，去查对应的按键
+                if (lastNode.inputSequence.Contains(InputCmd.MainAttack))
+                {
+                    isCurrentButtonHeld = playerController.isMainAttackHeld;
+                }
+                else if (lastNode.inputSequence.Contains(InputCmd.SubAttack))
+                {
+                    isCurrentButtonHeld = playerController.isSubAttackHeld;
+                }
+            }
+
+            Debug.Log($"[查案] 6. 最终判定是否切入蓄力(isCurrentButtonHeld): {isCurrentButtonHeld}");
+
+            // 核心流转
+            if (isCurrentButtonHeld)
+            {
+                ChangeState(chargeState);
+            }
+            else if (Mathf.Abs(playerController.moveInput.x) > 0.1f)
             {
                 ChangeState(runState);
             }
@@ -198,36 +299,45 @@ public class PlayerStateMachine : MonoBehaviour
         }
     }
 
-    // ==========================================
-    //远程
-    public void TryEnterRangeAttack()
+    /*public void OnAttackAnimationEnd()
     {
-        // 把以前在 Update 里的判断条件，原封不动搬到这里
-        if ((currentState == idleState || currentState == runState) && IsGrounded())
+        if (currentState == comboState)
         {
-            ChangeState(rangeAttackState);
-        }
-        else
-        {
-            Debug.Log("当前状态或未落地，拒绝进入远程攻击");
-        }
-    }
+            ComboInputBuffer buffer = GetComponent<ComboInputBuffer>();
+            buffer.StartGracePeriod();
 
-/*    public void SpawnProjectileEightDirection()
-    {
-        if (projectilePrefab != null && firePoint != null)
-        {
-            float h = Input.GetAxisRaw("Horizontal");
-            float v = Input.GetAxisRaw("Vertical");
+            ComboNode lastNode = buffer.currentNode;
+            bool isCurrentButtonHeld = false;
 
-            GameObject bullet = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-            Projectile projScript = bullet.GetComponent<Projectile>();
-            if (projScript != null)
+            if (lastNode != null)
             {
-                projScript.Setup(new Vector2(h,v));
+                if (lastNode.inputSequence.Contains(InputCmd.MainAttack))
+                {
+                    isCurrentButtonHeld = playerController.isMainAttackHeld;
+                }
+                else if (lastNode.inputSequence.Contains(InputCmd.SubAttack)) 
+                {
+                    isCurrentButtonHeld = playerController.isSubAttackHeld;
+                }
+            }
+
+            if (isCurrentButtonHeld)
+            {
+                ChangeState(chargeState);
+            }
+            else if (Mathf.Abs(playerController.moveInput.x) > 0.1f)
+            {
+                ChangeState(runState);
+            }
+            else
+            {
+                ChangeState(idleState);
             }
         }
     }*/
+
+    // ==========================================
+    //远程
 
     public void SpawnProjectile()
     {
@@ -252,12 +362,15 @@ public class PlayerStateMachine : MonoBehaviour
                 firePoint.localPosition.z
             );
 
+
+
+
             // 5. 现在 FirePoint 已经在正确的枪口位置了，计算真正的射击方向
             Vector2 shootDirection = (mousePos - firePoint.position);
 
             // 6. 生成子弹并输送动力
             GameObject bullet = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-            Projectile projScript = bullet.GetComponent<Projectile>();
+            Player_Projectile projScript = bullet.GetComponent<Player_Projectile>();
             if (projScript != null)
             {
                 projScript.Setup(shootDirection);
@@ -265,13 +378,26 @@ public class PlayerStateMachine : MonoBehaviour
         }
     }
 
-    public void OnRangeAttackEnd()
+    // ==========================================
+    //击飞
+    private void HandlePlayerHit(Vector2 knockbackDirection)
     {
-        if (currentState == rangeAttackState)
+        hitState.SetKnockbackForce(knockbackDirection);
+        ChangeState(hitState);
+
+        // 2. 让 Controller 接管画面：开启闪烁（闪烁的时间与无敌时间严格一致）
+        playerController.StartBlink(playerState.health.invulnerableDuration, blinkInterval);
+    }
+
+    void OnDestroy()
+    {
+        if (playerState != null && playerState.health != null)
         {
-            ChangeState(idleState);
+            playerState.health.OnPlayerHit -= HandlePlayerHit;
         }
     }
+
+
 
     // ==========================================
     //检测

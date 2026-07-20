@@ -27,8 +27,10 @@ public class PlayerHealth
     public int maxMP = 100;
     public int currentMP = 100;
     public bool isUntargetable = false;
+    public float invulnerableDuration = 0.2f; // 无敌保护期总长
 
     public event System.Action OnStatChanged;
+    public event System.Action<Vector2> OnPlayerHit;
 
     public void Init()
     {
@@ -37,18 +39,44 @@ public class PlayerHealth
         OnStatChanged?.Invoke();
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, Vector2 knockbackForce, MonoBehaviour coroutineRunner)
     {
+        //如果正在无敌，直接无视后续所有伤害和击飞
         if (isUntargetable) return;
 
         currentHP -= damage;
         if (currentHP < 0) currentHP = 0;
+        OnStatChanged?.Invoke();
 
-        OnStatChanged?.Invoke(); // 通知 UI
+        //瞬间开启无敌，从被击中的这一帧立刻开始倒计时！
+        coroutineRunner.StartCoroutine(InvulnerableRoutine());
+
+        // 发送广播，通知状态机去击飞，通知 Controller 去闪烁
+        OnPlayerHit?.Invoke(knockbackForce);
 
         Debug.Log($"[健康总线] 芙兰受到了 {damage} 点伤害，当前血量: {currentHP}");
     }
 
+    private System.Collections.IEnumerator InvulnerableRoutine()
+    {
+        SetUntargetable(true);
+        yield return new WaitForSeconds(invulnerableDuration);
+        SetUntargetable(false);
+    }
+
+    //------------------------------------------------------------------------
+
+    public bool ConsumeMP(int amount)
+    {
+        if (currentMP >= amount)
+        {
+            SetMP(currentMP - amount); // 复用你的 SetMP 以便触发 OnStatChanged 广播
+            return true;
+        }
+        return false; // 蓝量不足，拒绝扣除
+    }
+
+    //------------------------------------------------------------------------
     public void SetHP(int value)
     {
         currentHP = Mathf.Clamp(value, 0, maxHP);
@@ -70,7 +98,7 @@ public class PlayerHealth
     {
         SetMP(currentMP + value);
     }
-
+    //-------------------------------------------------------------------------
     public void SetUntargetable(bool state)
     {
         isUntargetable = state;

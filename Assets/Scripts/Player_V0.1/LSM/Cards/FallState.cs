@@ -4,6 +4,11 @@ public class FallState : IState
 {
     private PlayerStateMachine sm;
 
+    private float qHoldTimer = 0f;
+    private float originalGravity;
+    private bool isHovering = false;
+    private bool requireQRelease = false;
+
     public FallState(PlayerStateMachine stateMachine)
     {
         sm = stateMachine;
@@ -12,57 +17,69 @@ public class FallState : IState
     public void Enter()
     {
         Debug.Log("进入了：下落状态");
-        // 直接播放下坠动画，没有任何向上的加力代码！
         sm.anim.Play("Flandre_Jump_Fall");
+
+        qHoldTimer = 0f;
+        isHovering = false;
+        originalGravity = sm.rb.gravityScale;
+
+        // 【修改】
+        requireQRelease = sm.playerController.isFlyHeld;
     }
 
     public void Update()
     {
-        // 1. 空中左右移动逻辑
-        float moveDir = 0f;
-        if (Input.GetKey(KeyCode.A)) moveDir = -1f;
-        if (Input.GetKey(KeyCode.D)) moveDir = 1f;
-
-        sm.rb.linearVelocity = new Vector2(moveDir * sm.moveSpeed, sm.rb.linearVelocity.y);
-
-        if (moveDir < 0) sm.GetComponent<SpriteRenderer>().flipX = true;
-        else if (moveDir > 0) sm.GetComponent<SpriteRenderer>().flipX = false;
-        //fallstate
-        /*if (Input.GetKeyDown(KeyCode.Space))
+        if (requireQRelease)
         {
-            if (sm.isJumpRelay && sm.hasJumpAnchor)
+            if (!sm.playerController.isFlyHeld) requireQRelease = false;
+        }
+
+        // 【修改】
+        if (!requireQRelease && sm.playerController.isFlyHeld)
+        {
+            if (!isHovering)
             {
-                sm.transform.position = sm.jumpAnchorPos;
+                isHovering = true;
+                sm.rb.gravityScale = 0f;
                 sm.rb.linearVelocity = Vector2.zero;
-                sm.hasJumpAnchor = false;            // 传送完毕，消耗掉锚点
-                sm.ChangeState(sm.fallState);
-                return;
             }
-            else if (sm.jumpCount < sm.maxJumps)
+
+            qHoldTimer += Time.deltaTime;
+
+            if (qHoldTimer >= sm.hoverChargeTime)
             {
-                sm.ChangeState(sm.jumpState);
+                sm.ChangeState(sm.flyState);
                 return;
             }
         }
-
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        else
         {
-            sm.ChangeState(sm.dashState);
-            return;
-        }*/
+            if (isHovering)
+            {
+                isHovering = false;
+                sm.rb.gravityScale = originalGravity;
+                qHoldTimer = 0f;
+            }
+        }
 
-        // 3. 落地检测
+        if (isHovering) return;
+
+        // 【修改】：读取虚拟手柄的移动信号
+        float moveDir = sm.playerController.moveInput.x;
+        sm.rb.linearVelocity = new Vector2(moveDir * sm.moveSpeed, sm.rb.linearVelocity.y);
+
+        if (moveDir < 0) sm.playerController.SetFacingDirection(-1);
+        else if (moveDir > 0) sm.playerController.SetFacingDirection(1);
+
         if (sm.IsGrounded())
-{
-    if (moveDir != 0) sm.ChangeState(sm.runState);
-    else sm.ChangeState(sm.idleState);
-}
+        {
+            if (Mathf.Abs(moveDir) > 0.1f) sm.ChangeState(sm.runState);
+            else sm.ChangeState(sm.idleState);
+        }
+    }
 
-
-
-}
-
-public void Exit()
-{
-}
+    public void Exit()
+    {
+        sm.rb.gravityScale = originalGravity;
+    }
 }

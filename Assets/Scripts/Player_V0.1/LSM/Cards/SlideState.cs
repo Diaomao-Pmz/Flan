@@ -64,7 +64,22 @@ public class SlideState : IState
         if (sm.dashTrail != null) sm.dashTrail.emitting = true;
 
         currentSlideSpeed = sm.moveSpeed * sm.slideStartSpeedMultiplier;
-        slideDirection = sm.GetComponent<SpriteRenderer>().flipX ? -1f : 1f;
+
+        // 读取玩家真实的按键输入 (使用 Input System 存下来的值，或者 GetAxisRaw)
+        float inputX = sm.playerController.moveInput.x;
+        if (inputX == 0) inputX = Input.GetAxisRaw("Horizontal"); // 双保险读取
+
+        if (Mathf.Abs(inputX) > 0.1f)
+        {
+            slideDirection = Mathf.Sign(inputX);
+
+            // 为了防止“倒着滑”的视觉 Bug，强制让身体翻转过去匹配滑铲方向
+            sm.playerController.SetFacingDirection(slideDirection > 0 ? 1 : -1);
+        }
+        else
+        {
+            slideDirection = sm.GetComponent<SpriteRenderer>().flipX ? -1f : 1f;
+        }
     }
 
     public void Update()
