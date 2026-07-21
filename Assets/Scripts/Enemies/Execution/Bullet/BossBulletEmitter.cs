@@ -28,6 +28,7 @@ public class BossBulletEmitter : MonoBehaviour
 
     [Header("--- 基础发射设置 ---")]
     [SerializeField] GameObject projectilePrefab;
+    [SerializeField] string projectileKey = "EnemyBullet";
     [SerializeField] Transform firePoint;
 
     [Header("--- 弹速加速设置 ---")]
@@ -195,7 +196,7 @@ public class BossBulletEmitter : MonoBehaviour
         // 枪口位置不进行任何偏移，在原点生成
         Vector3 spawnPos = firePoint.position;
 
-        GameObject bullet = SpawnProjectile(dir, spawnPos, projectilePrefab, lineBulletSpeed);
+        GameObject bullet = SpawnProjectile(dir, spawnPos, projectileKey, lineBulletSpeed);
         if (bullet != null)
         {
             bullet.transform.localScale = new Vector3(lineBulletScale, lineBulletScale, 1f);
@@ -205,14 +206,14 @@ public class BossBulletEmitter : MonoBehaviour
     private void RandomlySpawnProjectile()
     {
         Vector2 dir = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
-        SpawnProjectile(dir, firePoint.position, projectilePrefab, randomBulletSpeed);
+        SpawnProjectile(dir, firePoint.position, projectileKey, randomBulletSpeed);
     }
 
     private void RotatingSpawnProjectile()
     {
         Quaternion rotation = Quaternion.Euler(0, 0, angle);
         Vector2 dir = rotation * new Vector2(1, 0);
-        SpawnProjectile(dir, firePoint.position, projectilePrefab, rotationBulletSpeed);
+        SpawnProjectile(dir, firePoint.position, projectileKey, rotationBulletSpeed);
         angle += rotationAngleIncrement;
     }
 
@@ -225,7 +226,7 @@ public class BossBulletEmitter : MonoBehaviour
         {
             float currentAngle = i * angleStep;
             Vector2 dir = new Vector2(Mathf.Cos(currentAngle * Mathf.Deg2Rad), Mathf.Sin(currentAngle * Mathf.Deg2Rad));
-            SpawnProjectile(dir, spawnPos, projectilePrefab, circleBulletSpeed);
+            SpawnProjectile(dir, spawnPos, projectileKey, circleBulletSpeed);
         }
     }
 
@@ -302,9 +303,12 @@ public class BossBulletEmitter : MonoBehaviour
         }
     }
 
-    private GameObject SpawnProjectile(Vector2 dir, Vector3 spawnPos, GameObject prefab, float speedOverride)
+    private GameObject SpawnProjectile(Vector2 dir, Vector3 spawnPos, string objectPoolKey, float speedOverride)
     {
-        GameObject bullet = Instantiate(prefab, spawnPos, Quaternion.identity);
+        //对象池调用
+        GameObject bullet = ObjectPoolManager.Instance?.Get(objectPoolKey);
+        Debug.Log($"objpool: {ObjectPoolManager.Instance == null}");
+        bullet.transform.position = spawnPos;
         Enemy_Projectile projScript = bullet.GetComponent<Enemy_Projectile>();
         if (projScript != null)
         {
@@ -314,6 +318,12 @@ public class BossBulletEmitter : MonoBehaviour
             // 【修改】：使用新的位运算检查是否需要挂载加速器
             if (IsCurrentAttackAccelerated())
             {
+                BulletAcceleration a = bullet.GetComponent<BulletAcceleration>();
+                if (a != null)
+                {
+                    Destroy(a);
+                }
+
                 BulletAcceleration acc = bullet.AddComponent<BulletAcceleration>();
                 acc.accelerationRate = accelerationRate;
                 acc.coef = this.coef;
@@ -366,16 +376,13 @@ public class FormationBullet : MonoBehaviour
         if (!isEnemyProjectile && playerState != null) return;
         if (isEnemyProjectile && hitInfo.CompareTag("Enemy")) return;
 
-        if ((destroyLayer.value & (1 << hitInfo.gameObject.layer)) != 0)
+        if (isEnemyProjectile && playerState != null)
         {
-            if (isEnemyProjectile && playerState != null)
-            {
-                float relativeX = playerState.transform.position.x - transform.position.x;
-                Vector2 knockbackDir = new Vector2(Mathf.Sign(relativeX) * 8f, 5f);
-                playerState.health.TakeDamage(damage, knockbackDir, playerState);
-            }
-            Destroy(gameObject);
+            float relativeX = playerState.transform.position.x - transform.position.x;
+            Vector2 knockbackDir = new Vector2(Mathf.Sign(relativeX) * 8f, 5f);
+            playerState.health.TakeDamage(damage, knockbackDir, playerState);
         }
+        Destroy(gameObject);
     }
 }
 

@@ -174,5 +174,5 @@ MonoBehaviour:
   damage: 15
   destroyLayer:
     serializedVersion: 2
-    m_Bits: 2097152
+    m_Bits: 3145728
   isEnemyProjectile: 1

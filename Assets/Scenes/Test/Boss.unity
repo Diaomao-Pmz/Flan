@@ -1745,6 +1745,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 733517159}
   m_CullTransparentMesh: 1
+--- !u!1 &771204819
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 771204821}
+  - component: {fileID: 771204820}
+  m_Layer: 0
+  m_Name: ObjectPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &771204820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771204819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 173a2cfe31dafaa4d8f2c4f14fa92a00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectPoolManager
+  poolConfigs:
+  - key: EnemyBullet
+    prefab: {fileID: 2589707116977578368, guid: 09f4fcf80f38d9f4b927c96f89d6ddb8, type: 3}
+    prewarmCount: 30
+    maxSize: 200
+--- !u!4 &771204821
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771204819}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.33233, y: -3.62747, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &784030298
 GameObject:
   m_ObjectHideFlags: 0
@@ -1859,7 +1908,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!61 &786768184
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2022,6 +2071,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossBulletEmitter
   projectilePrefab: {fileID: 2589707116977578368, guid: 09f4fcf80f38d9f4b927c96f89d6ddb8, type: 3}
+  projectileKey: EnemyBullet
   firePoint: {fileID: 318592942}
   acceleratedAttacks: 16
   accelerationRate: 5
@@ -2060,6 +2110,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d1f6eb24f2b10254298eac1d12de4d87, type: 2}
   - {fileID: 11400000, guid: d485a8c5c66f61b44aaee9689391ed95, type: 2}
   - {fileID: 11400000, guid: 52fa0d58ed410084084fc64411e616ce, type: 2}
+  - {fileID: 11400000, guid: ead5623e896c9ff4ea1be273dfec6c1e, type: 2}
   phase2Action:
   - {fileID: 11400000, guid: 055ca54815ef2b240b27f449d54fce53, type: 2}
   - {fileID: 11400000, guid: ead5623e896c9ff4ea1be273dfec6c1e, type: 2}
@@ -4633,3 +4684,4 @@ SceneRoots:
   - {fileID: 1164344987}
   - {fileID: 1193546116}
   - {fileID: 65104230}
+  - {fileID: 771204821}

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Enemy_Projectile : MonoBehaviour
+public class Enemy_Projectile : MonoBehaviour, IPoolable
 {
     [Header("子弹属性")]
     public float speed = 5f;
@@ -49,6 +49,17 @@ public class Enemy_Projectile : MonoBehaviour
 
     void OnBecameInvisible()
     {
-        Destroy(gameObject);
+        //对象池回收
+        ObjectPoolManager.Instance?.Recycle("EnemyBullet", gameObject);
+    }
+
+    public void OnSpawn()
+    {
+        
+    }
+
+    public void OnDespawn()
+    {
+        
     }
 }
