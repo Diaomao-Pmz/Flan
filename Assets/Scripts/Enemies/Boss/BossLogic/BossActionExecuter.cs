@@ -77,12 +77,12 @@ public class BossActionExecuter : IState
         // 3. 盲盒是【弹幕卡】吗？
         if (actionNode is BulletNode bulletNode)
         {
-            if (boss.bossStatusText != null) boss.bossStatusText.SetText($"{bulletNode.AttackType}!");
+            if (boss.bossStatusText != null) boss.bossStatusText.SetText($"{bulletNode.AttackName}!");
 
             // 【极其重要的防呆】：检查你有没有在 Inspector 里忘填 AttackType！
-            if (!string.IsNullOrEmpty(bulletNode.AttackType))
+            if (!string.IsNullOrEmpty(bulletNode.AttackName))
             {
-                boss.BulletEmitter.StartAttack(bulletNode.AttackType, bulletNode.formationDuration);
+                boss.BulletEmitter.StartAttack(bulletNode.AttackName, bulletNode.formationDuration);
                 yield return new WaitForSeconds(3f);
                 boss.BulletEmitter.StopAttack();
             }

@@ -70,7 +70,7 @@ public class DashState : IState
         originalGravity = sm.rb.gravityScale;
         sm.rb.gravityScale = 0f;
 
-        float direction = sm.GetComponent<SpriteRenderer>().flipX ? -1f : 1f;
+        float direction = sm.playerController.facingDirection;
         sm.rb.linearVelocity = new Vector2(direction * sm.dashSpeed, 0f);
     }
 

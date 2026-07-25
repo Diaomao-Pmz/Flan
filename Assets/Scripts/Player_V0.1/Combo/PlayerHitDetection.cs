@@ -68,7 +68,7 @@ public class PlayerHitDetection : MonoBehaviour
         do
         {
             // 1. 实时更新判定框位置（这样可以支持边跑边打的持续判定）
-            float dirX = (player.sr != null && player.sr.flipX) ? -1f : 1f;
+            float dirX = player.facingDirection; 
             Vector2 finalOffset = new Vector2(node.hitboxOffset.x * dirX, node.hitboxOffset.y);
             Vector2 boxCenter = (Vector2)transform.position + finalOffset;
 
@@ -120,8 +120,8 @@ public class PlayerHitDetection : MonoBehaviour
         if (buffer == null || buffer.currentNode == null) return;
 
         ComboNode nodeToDraw = buffer.currentNode;
-        PlayerController pc = GetComponent<PlayerController>();
-        float dirX = (pc != null && pc.sr != null && pc.sr.flipX) ? -1f : 1f;
+        PlayerController pc = GetComponent<PlayerController>(); 
+        float dirX = (pc != null) ? pc.facingDirection : 1f;
 
         Vector2 finalOffset = new Vector2(buffer.currentNode.hitboxOffset.x * dirX, buffer.currentNode.hitboxOffset.y);
         Vector2 centerPos = (Vector2)transform.position + finalOffset;

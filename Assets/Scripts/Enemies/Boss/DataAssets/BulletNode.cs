@@ -8,7 +8,7 @@ public class BulletNode : ActionNode
 {
     [Header("--- 弹幕专属配置 ---")]
     //public bool isAirAttack; 暂时没用
-    public string AttackType;
+    public string AttackName;
     [Tooltip("0~1s")]
     public float formationDuration = 0f;
 }

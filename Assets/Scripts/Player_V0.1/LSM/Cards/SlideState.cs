@@ -78,7 +78,7 @@ public class SlideState : IState
         }
         else
         {
-            slideDirection = sm.GetComponent<SpriteRenderer>().flipX ? -1f : 1f;
+            slideDirection = sm.playerController.facingDirection;
         }
     }
 

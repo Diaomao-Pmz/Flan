@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class Enemy_Projectile : MonoBehaviour, IPoolable
@@ -14,6 +15,8 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
     private Vector2 moveDirection;
     private Rigidbody2D rb;
 
+    public bool isControlledByFormation = false;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -27,7 +30,10 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
     }
 
     void FixedUpdate()
-    {
+    {        
+        // 如果被阵型接管了，子弹自己不施加速度，跟随父物体移动即可
+        if (isControlledByFormation) return;
+
         rb.linearVelocity = moveDirection * speed;
     }
 
@@ -60,6 +66,9 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
 
     public void OnDespawn()
     {
-        
+        // 【关键】：回收进池子时，一定要把状态重置为标准子弹！
+        isControlledByFormation = false;
+        transform.SetParent(ObjectPoolManager.Instance.transform); // 脱离阵型父节点
+        rb.linearVelocity = Vector2.zero;
     }
 }

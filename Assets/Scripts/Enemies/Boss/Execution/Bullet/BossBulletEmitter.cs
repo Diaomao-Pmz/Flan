@@ -267,40 +267,29 @@ public class BossBulletEmitter : MonoBehaviour
                 float t = (float)i / squareBulletsPerSide;
                 Vector2 localPos = Vector2.Lerp(startPoint, endPoint, t);
 
-                GameObject bullet = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
-                bullet.transform.SetParent(squareParent.transform);
+                // 1. 从对象池获取子弹
+                GameObject bullet = ObjectPoolManager.Instance.Get(projectileKey);
 
+                // 2. 认贼作父，摆好阵型
+                bullet.transform.SetParent(squareParent.transform);
+                bullet.transform.localPosition = localPos;
+
+                // 3. 调整朝向
                 float rotAngle = Mathf.Atan2(localPos.y, localPos.x) * Mathf.Rad2Deg;
                 bullet.transform.rotation = Quaternion.Euler(0, 0, rotAngle);
 
+                // 4. 开启阵型接管模式
                 Enemy_Projectile p = bullet.GetComponent<Enemy_Projectile>();
                 if (p != null)
                 {
-                    LayerMask mask = p.destroyLayer;
-                    bool isEnemy = p.isEnemyProjectile;
-                    int originalDamage = p.damage;
-
-                    Destroy(p);
-                    if (bullet.GetComponent<Rigidbody2D>() != null) Destroy(bullet.GetComponent<Rigidbody2D>());
-
-                    FormationBullet fb = bullet.AddComponent<FormationBullet>();
-                    fb.destroyLayer = mask;
-                    fb.isEnemyProjectile = isEnemy;
-                    fb.damage = originalDamage;
+                    p.isControlledByFormation = true;
                 }
 
                 formationCtrl.AddBullet(bullet.transform, localPos);
             }
         }
-
-        if (currentFormationDuration > 0)
-        {
-            formationCtrl.StartFormation(currentFormationDuration, rot);
-        }
-        else
-        {
-            formationCtrl.StartFormation(0f, rot);
-        }
+        // 5. 注册到阵型控制器
+        formationCtrl.StartFormation(currentFormationDuration, rot);
     }
 
     private GameObject SpawnProjectile(Vector2 dir, Vector3 spawnPos, string objectPoolKey, float speedOverride)

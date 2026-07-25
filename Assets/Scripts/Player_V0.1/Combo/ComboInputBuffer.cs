@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Flandre.CombatSystem;
+using UnityEditor.Search;
 
 public class ComboInputBuffer : MonoBehaviour
 {
@@ -26,11 +27,13 @@ public class ComboInputBuffer : MonoBehaviour
 
     private PlayerStateMachine sm;
     private LoadoutManager loadout;
+    private PlayerController player;
 
     void Awake()
     {
         sm = GetComponent<PlayerStateMachine>();
         loadout = GetComponent<LoadoutManager>();
+        player = GetComponent<PlayerController>();
     }
 
     void Update()
@@ -55,6 +58,18 @@ public class ComboInputBuffer : MonoBehaviour
                 ResetCombo();
             }
         }
+
+        if (player != null) // 【安全锁】：如果当前物体没有 Controller (比如残缺的测试假人)，直接无视
+        {
+            if (player.isMainAttackHeld && !player.isMainChargeConsumed)
+            {
+                TryAutoExecuteCharge(InputCmd.MainAttack, player.mainAttackHoldTime);
+            }
+            if (player.isSubAttackHeld && !player.isSubChargeConsumed)
+            {
+                TryAutoExecuteCharge(InputCmd.SubAttack, player.subAttackHoldTime);
+            }
+        }
     }
 
     // ==================================================
@@ -62,9 +77,13 @@ public class ComboInputBuffer : MonoBehaviour
     // ==================================================
     public void OnReceiveInput(InputCmd cmd)
     {
-        // ==================================================
+        // 【新增拦截】：如果在飞行状态按了射击，不存入缓存，直接驳回！
+        if (sm.currentState == sm.flyState && (cmd == InputCmd.MainAttack || cmd == InputCmd.SubAttack))
+        {
+            return;
+        }
+
         // 受身打断 (Combo Breaker)
-        // ==================================================
         if (sm != null && sm.currentState == sm.hitState)
         {
             if (CheckIfHasShieldGem(cmd))
@@ -76,9 +95,7 @@ public class ComboInputBuffer : MonoBehaviour
             return;
         }
 
-        // ==================================================
         // 纯位移动作类指令 - 立刻放行
-        // ==================================================
         if (cmd == InputCmd.Jump || cmd == InputCmd.Dash)
         {
             if (cmd == InputCmd.Dash && sm.dashSkill.CanExecute()) sm.ChangeState(sm.dashState);
@@ -86,9 +103,7 @@ public class ComboInputBuffer : MonoBehaviour
             return;
         }
 
-        // ==================================================
         // 攻击类指令 (主/副攻击同等地位) - 存入预输入缓存！
-        // ==================================================
         if (cmd == InputCmd.MainAttack || cmd == InputCmd.SubAttack)
         {
             hasBufferedInput = true;
@@ -111,6 +126,29 @@ public class ComboInputBuffer : MonoBehaviour
         bufferTimer = bufferLifespan;
 
         if (sm.currentState != sm.comboState) TryAdvanceCombo();
+    }
+
+    private void TryAutoExecuteCharge(InputCmd cmd, float currentHoldTime)
+    {
+        // 拿当前的蓄力时间去问匹配引擎，看看时间够不够触发下一个技能
+        List<ComboNode> searchList = (currentNode == null) ? rootNodes : (currentNode.childNodes ?? new List<ComboNode>());
+        ComboNode match = FindBestMatch(searchList, cmd, currentHoldTime);
+
+        // 如果找到了匹配的技能，而且确实是一个蓄力技能
+        if (match != null && match.isChargeSkill)
+        {
+            Debug.Log($"[ComboBuffer] 蓄力达标！自动释放技能: {match.name}");
+
+            // 使用直接引用的 player
+            if (cmd == InputCmd.MainAttack) player.ConsumeMainCharge();
+            if (cmd == InputCmd.SubAttack) player.ConsumeSubCharge();
+
+            hasBufferedInput = false;
+            isGracePeriodActive = false;
+
+            currentNode = match;
+            sm.ChangeState(sm.comboState);
+        }
     }
 
     // ==================================================
@@ -142,9 +180,11 @@ public class ComboInputBuffer : MonoBehaviour
         return false;
     }
 
-    // 【新增】：工业级指令匹配器
+    // 指令匹配器
     private ComboNode FindBestMatch(List<ComboNode> nodes, InputCmd triggerCmd, float holdTime)
     {
+        if (nodes == null) return null;
+
         ComboNode bestMatch = null;
         int maxSequenceLength = -1; // 用于优先级判定：要求越多的连招，优先级越高
 
@@ -251,4 +291,6 @@ public class ComboInputBuffer : MonoBehaviour
         if (loadout == null) return false;
         return loadout.HasShieldGem(cmd);
     }
+
+
 }

@@ -21,18 +21,17 @@ public class PlayerController : MonoBehaviour
 
     // ==========================================
     // 持续按压与蓄力状态记录区
-    // ==========================================
     public bool isJumpHeld { get; private set; }
     public bool isCrouchHeld { get; private set; }
-    public bool isFlyHeld { get; private set; } // 【新增】：记录飞行键状态
+    public bool isFlyHeld { get; private set; } 
 
-    // 主攻击蓄力
     public bool isMainAttackHeld { get; private set; }
     public float mainAttackHoldTime { get; private set; }
+    public bool isMainChargeConsumed { get; private set; } 
 
-    // 副攻击蓄力
     public bool isSubAttackHeld { get; private set; }
     public float subAttackHoldTime { get; private set; }
+    public bool isSubChargeConsumed { get; private set; } 
 
     void Awake()
     {
@@ -110,13 +109,18 @@ public class PlayerController : MonoBehaviour
         if (ctx.started)
         {
             isMainAttackHeld = true;
+            isMainChargeConsumed = false; 
             mainAttackHoldTime = 0f;
-            inputBuffer.OnReceiveInput(InputCmd.MainAttack); // 这里仍使用枚举里的旧名，想改枚举也可以
+            inputBuffer.OnReceiveInput(InputCmd.MainAttack);
         }
         else if (ctx.canceled)
         {
             isMainAttackHeld = false;
-            inputBuffer.OnReceiveChargeRelease(InputCmd.MainAttack, mainAttackHoldTime);
+
+            if (!isMainChargeConsumed)
+            {
+                inputBuffer.OnReceiveChargeRelease(InputCmd.MainAttack, mainAttackHoldTime);
+            }
         }
     }
 
@@ -124,18 +128,24 @@ public class PlayerController : MonoBehaviour
     {
         if (ctx.started)
         {
-            Debug.Log($"[Input] 右键开始！帧率: {Time.frameCount}");
             isSubAttackHeld = true;
+            isSubChargeConsumed = false; 
             subAttackHoldTime = 0f;
-            inputBuffer.OnReceiveInput(InputCmd.SubAttack); // 对应原有的副攻击/重攻击
+            inputBuffer.OnReceiveInput(InputCmd.SubAttack);
         }
         else if (ctx.canceled)
         {
-            Debug.Log($"[Input] 右键中断！帧率: {Time.frameCount} | 当前蓄力时长: {subAttackHoldTime}");
             isSubAttackHeld = false;
-            inputBuffer.OnReceiveChargeRelease(InputCmd.SubAttack, subAttackHoldTime);
+
+            if (!isSubChargeConsumed)
+            {
+                inputBuffer.OnReceiveChargeRelease(InputCmd.SubAttack, subAttackHoldTime);
+            }
         }
     }
+
+    public void ConsumeMainCharge() { isMainChargeConsumed = true; }
+    public void ConsumeSubCharge() { isSubChargeConsumed = true; }
 
     // ==========================================
     // 杂项

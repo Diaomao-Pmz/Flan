@@ -343,38 +343,32 @@ public class PlayerStateMachine : MonoBehaviour
     {
         if (projectilePrefab != null && firePoint != null)
         {
-            // 1. 获取鼠标的真实世界坐标
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mousePos.z = 0f;
+            Vector2 shootDirection = Vector2.zero;
+            Vector2 inputDir = playerController.moveInput;
 
-            // 2. 判定朝向：鼠标在玩家中心点的左边还是右边？
-            bool isAimingLeft = mousePos.x < transform.position.x;
+            // 1. 如果有按键输入，进行【八向吸附】
+            if (inputDir.magnitude > 0.1f)
+            {
+                // 将输入向量转换为角度，然后吸附到 45 度的倍数
+                float angle = Mathf.Atan2(inputDir.y, inputDir.x) * Mathf.Rad2Deg;
+                angle = Mathf.Round(angle / 45f) * 45f;
 
-            // 3. 翻转贴图
-            GetComponent<SpriteRenderer>().flipX = isAimingLeft;
+                shootDirection = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
 
-            // 4. 【核心修复】：动态翻转 FirePoint 的位置！
-            // 取出当前 FirePoint X坐标的绝对值，然后根据朝向赋予正负号
-            float absoluteX = Mathf.Abs(firePoint.localPosition.x);
-            firePoint.localPosition = new Vector3(
-                isAimingLeft ? -absoluteX : absoluteX,
-                firePoint.localPosition.y,
-                firePoint.localPosition.z
-            );
+                // 顺便同步转身 (如果是往左后方打，身体要转过去)
+                if (shootDirection.x < -0.1f) playerController.SetFacingDirection(-1);
+                else if (shootDirection.x > 0.1f) playerController.SetFacingDirection(1);
+            }
+            else
+            {
+                // 2. 如果没按方向键，默认朝正前方射击
+                shootDirection = new Vector2(playerController.facingDirection, 0f);
+            }
 
-
-
-
-            // 5. 现在 FirePoint 已经在正确的枪口位置了，计算真正的射击方向
-            Vector2 shootDirection = (mousePos - firePoint.position);
-
-            // 6. 生成子弹并输送动力
+            // 生成子弹
             GameObject bullet = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
             Player_Projectile projScript = bullet.GetComponent<Player_Projectile>();
-            if (projScript != null)
-            {
-                projScript.Setup(shootDirection);
-            }
+            if (projScript != null) projScript.Setup(shootDirection);
         }
     }
 

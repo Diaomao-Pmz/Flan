@@ -1243,7 +1243,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 9
-        y: 335
+        y: 351
         width: 258
         height: 130
       alignment: 0
@@ -3970,10 +3970,10 @@ TextureImporter:
       name: touhou_projectiles_145
       rect:
         serializedVersion: 2
-        x: 136
-        y: 93
-        width: 33
-        height: 32
+        x: 467
+        y: 293
+        width: 20
+        height: 22
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
