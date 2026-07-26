@@ -343,6 +343,7 @@ public class RotatingFormation : MonoBehaviour
 
     void Update()
     {
+        Debug.Log($"Rotation Direction: {direction}");
         if (enableAcceleration)
         {
             timer += Time.deltaTime;

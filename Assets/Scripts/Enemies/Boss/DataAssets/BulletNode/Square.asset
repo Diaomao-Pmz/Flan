@@ -20,5 +20,5 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
-  AttackType: Square
-  formationDuration: 0
+  AttackName: Square
+  formationDuration: 0.5

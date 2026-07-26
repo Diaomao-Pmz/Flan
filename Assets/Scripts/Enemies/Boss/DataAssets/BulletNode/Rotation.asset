@@ -20,5 +20,5 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
-  AttackType: Rotation
+  AttackName: Rotation
   formationDuration: 0

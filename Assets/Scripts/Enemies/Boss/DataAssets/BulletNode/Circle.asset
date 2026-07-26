@@ -20,5 +20,5 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
-  AttackType: Circle
+  AttackName: Circle
   formationDuration: 0
