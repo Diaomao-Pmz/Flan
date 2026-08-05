@@ -324,12 +324,11 @@ public class BossBulletEmitter : MonoBehaviour
 
 // ==========================================
 // 辅助类保持不变
-public class RotatingFormation : MonoBehaviour
+public class RotatingFormation : FormationBase
 {
     public Vector2 direction;
     public float speed;
     public float rotationSpeed;
-    public float lifeTime = 10f;
     public bool enableAcceleration = false;
     public float accelerationRate = 0f;
     private float timer = 0f;
@@ -337,13 +336,13 @@ public class RotatingFormation : MonoBehaviour
 
     void Start()
     {
-        Destroy(gameObject, lifeTime);
         baseSpeed = speed;
     }
 
-    void Update()
+    protected override void Update()
     {
-        Debug.Log($"Rotation Direction: {direction}");
+        base.Update();
+
         if (enableAcceleration)
         {
             timer += Time.deltaTime;
@@ -351,6 +350,18 @@ public class RotatingFormation : MonoBehaviour
         }
         transform.Translate(direction * speed * Time.deltaTime, Space.World);
         transform.Rotate(0, 0, rotationSpeed * Time.deltaTime);
+    }
+}
+
+//rotating formation等formation 类的基类
+public class FormationBase : MonoBehaviour
+{
+    protected virtual void Update()
+    {
+        if(transform.childCount == 0)
+        {
+            Destroy(gameObject);
+        }
     }
 }
 

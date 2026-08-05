@@ -7,6 +7,8 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
     public float speed = 5f;
     public float lifeTime = 3f;
     public int damage = 15;
+    //超出屏幕此距离回收
+    public float margin = 0.5f;
 
     [Header("碰撞检测设置")]
     [Tooltip("勾选子弹碰到哪些图层才会销毁（比如地面、敌人）")]
@@ -37,6 +39,18 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
         rb.linearVelocity = moveDirection * speed;
     }
 
+    private void Update()
+    {
+        Vector3 vp = Camera.main.WorldToViewportPoint(transform.position);
+
+        if (vp.x < -margin || vp.x > 1f + margin ||
+            vp.y < -margin || vp.y > 1f + margin)
+        {
+            //对象池回收
+            ObjectPoolManager.Instance?.Recycle("EnemyBullet", gameObject);
+        }
+    }
+
     public bool isEnemyProjectile = false; // 在怪物的预制体面板里把这个勾上
 
     void OnTriggerEnter2D(Collider2D hitInfo)
@@ -53,12 +67,6 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
         }
     }
 
-    void OnBecameInvisible()
-    {
-        //对象池回收
-        ObjectPoolManager.Instance?.Recycle("EnemyBullet", gameObject);
-    }
-
     public void OnSpawn()
     {
         
@@ -70,5 +78,7 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
         isControlledByFormation = false;
         transform.SetParent(ObjectPoolManager.Instance.transform); // 脱离阵型父节点
         rb.linearVelocity = Vector2.zero;
+        //重置大小
+        transform.localScale = new Vector3(0.5f, 0.5f, 1);
     }
 }
