@@ -101,6 +101,8 @@ public class SlideState : IState
 
         sm.slideSkill.StartCooldownIfFirstHit(isFirstHit);
         if (sm.dashTrail != null) sm.dashTrail.emitting = false;
+
+        sm.SetColliderHeight(false);
     }
 
     private void HandleFallback()
