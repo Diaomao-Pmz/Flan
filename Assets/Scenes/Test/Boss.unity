@@ -2090,6 +2090,18 @@ MonoBehaviour:
   squareBulletsPerSide: 4
   squareSize: 4
   squareOffsetY: 0
+  triangleBulletCount: 6
+  triangleShootInterval: 1
+  triangleBulletSpeed: 5
+  tri_rmin: 1
+  tri_rmax: 2
+  triangleOffsetY: 0
+  starBulletCount: 25
+  starShootInterval: 3
+  starBulletSpeed: 3
+  star_rmin: 1
+  star_rmax: 4
+  starOffsetY: 2
   circleShootInterval: 1.5
   circleBulletSpeed: 8
   circleBulletCount: 36
@@ -2107,10 +2119,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAIDecider
   phase1Action:
-  - {fileID: 11400000, guid: d1f6eb24f2b10254298eac1d12de4d87, type: 2}
-  - {fileID: 11400000, guid: d485a8c5c66f61b44aaee9689391ed95, type: 2}
-  - {fileID: 11400000, guid: ead5623e896c9ff4ea1be273dfec6c1e, type: 2}
-  - {fileID: 11400000, guid: ead5623e896c9ff4ea1be273dfec6c1e, type: 2}
+  - {fileID: 11400000, guid: 53f91ee9b7595ef4aa93e06d2605e599, type: 2}
+  - {fileID: 11400000, guid: 53f91ee9b7595ef4aa93e06d2605e599, type: 2}
+  - {fileID: 11400000, guid: b08c3a96c83b9a94e84ef3b17b5b26e4, type: 2}
+  - {fileID: 11400000, guid: b08c3a96c83b9a94e84ef3b17b5b26e4, type: 2}
   phase2Action:
   - {fileID: 11400000, guid: 055ca54815ef2b240b27f449d54fce53, type: 2}
   - {fileID: 11400000, guid: ead5623e896c9ff4ea1be273dfec6c1e, type: 2}

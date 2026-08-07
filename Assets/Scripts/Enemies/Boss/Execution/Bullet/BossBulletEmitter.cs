@@ -6,7 +6,9 @@ public enum BossAttackType
     Random,
     Circle,
     Square,
-    Rotation
+    Rotation,
+    Triangle,
+    Star
 }
 
 // 【新增】：为了让 Inspector 面板支持多选下拉框，必须定义一个位掩码枚举
@@ -19,6 +21,8 @@ public enum BossAttackFlags
     Circle = 1 << 2,    // 对应 BossAttackType.Circle
     Square = 1 << 3,    // 对应 BossAttackType.Square
     Rotation = 1 << 4,  // 对应 BossAttackType.Rotation
+    Triangle = 1 << 5,
+    Star = 1 << 6,
     All = ~0            // 全选
 }
 
@@ -63,6 +67,22 @@ public class BossBulletEmitter : MonoBehaviour
     public int squareBulletsPerSide = 5;
     public float squareSize = 3f;
     public float squareOffsetY = 0f; // 方阵作为整体，依然保留出生点偏移
+
+    [Header("--- Triangle ---")]
+    public int triangleBulletCount = 10;
+    public float triangleShootInterval = 1f;
+    public float triangleBulletSpeed = 5f;
+    public float tri_rmin = 2;
+    public float tri_rmax = 4;
+    public float triangleOffsetY = 0f;
+
+    [Header("--- Star ---")]
+    public int starBulletCount = 10;
+    public float starShootInterval = 1f;
+    public float starBulletSpeed = 5f;
+    public float star_rmin = 2;
+    public float star_rmax = 4;
+    public float starOffsetY = 0f;
 
     [Header("--- Circle ---")]
     public float circleShootInterval = 1.5f;
@@ -128,6 +148,8 @@ public class BossBulletEmitter : MonoBehaviour
             case BossAttackType.Circle: return circleShootInterval;
             case BossAttackType.Rotation: return rotationShootInterval;
             case BossAttackType.Square: return squareShootInterval;
+            case BossAttackType.Triangle: return triangleShootInterval;
+            case BossAttackType.Star: return starShootInterval;
             default: return 1f;
         }
     }
@@ -141,6 +163,8 @@ public class BossBulletEmitter : MonoBehaviour
             case BossAttackType.Circle: SpawnCircleBurst(); break;
             case BossAttackType.Rotation: RotatingSpawnProjectile(); break;
             case BossAttackType.Square: SpawnSquareBurst(); break;
+            case BossAttackType.Triangle: SpawnTriangleBurst(); break;
+            case BossAttackType.Star: SpawnStarBurst(); break;
         }
     }
 
@@ -290,6 +314,109 @@ public class BossBulletEmitter : MonoBehaviour
         }
         // 5. 注册到阵型控制器
         formationCtrl.StartFormation(currentFormationDuration, rot);
+    }
+
+    private void SpawnTriangleBurst()
+    {
+        Vector2[] spawnPositions = new Vector2[triangleBulletCount];
+
+        //根据公式得出特定角度下的xy坐标
+        for(int i = 0; i  < triangleBulletCount; i++)
+        {
+            float angle = (i / (float)triangleBulletCount) * 2 * Mathf.PI;
+
+            Vector2 xycood = MathHelper.N_PolygonAngleEquation(3, angle, tri_rmin, tri_rmax);
+
+            spawnPositions[i] = xycood;
+        }
+
+        Vector3 parentSpawnPos = firePoint.position + new Vector3(0, triangleOffsetY, 0);
+
+        ShapeFormationController formationCtrl = CreateFormationParent(spawnPositions, "BossTriangleFormation", parentSpawnPos);
+
+        RotatingFormation rot = formationCtrl.gameObject.AddComponent<RotatingFormation>();
+        float directionX = (playerTransform != null && playerTransform.position.x - transform.position.x >= 0) ? 1f : -1f;
+        rot.direction = new Vector2(directionX, 0);
+        rot.speed = triangleBulletSpeed;
+        rot.rotationSpeed = Random.Range(0, 2) == 0 ? Random.Range(45f, 120f) : Random.Range(-120f, -45f);
+
+        // 【修改】：使用新的位运算检查方阵是否需要加速
+        rot.enableAcceleration = IsCurrentAttackAccelerated();
+        rot.accelerationRate = accelerationRate;
+
+        formationCtrl.StartFormation(currentFormationDuration, rot);
+    }
+
+    private void SpawnStarBurst()
+    {
+        Vector2[] spawnPositions = new Vector2[starBulletCount];
+
+        //根据公式得出特定角度下的xy坐标
+        for(int i = 0; i  < starBulletCount; i++)
+        {
+            float angle = (i / (float)starBulletCount) * 2 * Mathf.PI;
+
+            Vector2 xycood = MathHelper.N_PolygonAngleEquation(5, angle, star_rmin, star_rmax);
+
+            spawnPositions[i] = xycood;
+        }
+
+        Vector3 parentSpawnPos = firePoint.position + new Vector3(0, starOffsetY, 0);
+
+        ShapeFormationController formationCtrl = CreateFormationParent(spawnPositions, "BossStarFormation", parentSpawnPos);
+
+        RotatingFormation rot = formationCtrl.gameObject.AddComponent<RotatingFormation>();
+        float directionX = (playerTransform != null && playerTransform.position.x - transform.position.x >= 0) ? 1f : -1f;
+        rot.direction = new Vector2(directionX, 0);
+        rot.speed = starBulletSpeed;
+        rot.rotationSpeed = Random.Range(0, 2) == 0 ? Random.Range(45f, 120f) : Random.Range(-120f, -45f);
+
+        // 【修改】：使用新的位运算检查方阵是否需要加速
+        rot.enableAcceleration = IsCurrentAttackAccelerated();
+        rot.accelerationRate = accelerationRate;
+
+        formationCtrl.StartFormation(currentFormationDuration, rot);
+    }
+
+    /// <summary>
+    /// 创建一个搭载shape formation controller的父对象，返回其shape formation controller组件
+    /// </summary>
+    /// <param name="bulletPositions">子弹位置</param>
+    /// <param name="parentName">父对象名字</param>
+    /// <returns></returns>
+    private ShapeFormationController CreateFormationParent(Vector2[] bulletPositions, string parentName, Vector3 spawnPos)
+    {
+        //创建父物体
+        GameObject Parent = new GameObject(parentName);
+        Parent.transform.position = spawnPos;
+
+        ShapeFormationController formationCtrl = Parent.AddComponent<ShapeFormationController>();
+
+        for(int i = 0; i < bulletPositions.Length; i++)
+        {
+            Vector2 localPos = bulletPositions[i];
+
+            // 1. 从对象池获取子弹
+            GameObject bullet = ObjectPoolManager.Instance.Get(projectileKey);
+
+            // 2. 认贼作父，摆好阵型
+            bullet.transform.SetParent(Parent.transform);
+
+            // 3. 调整朝向
+            float rotAngle = Mathf.Atan2(localPos.y, localPos.x) * Mathf.Rad2Deg;
+            bullet.transform.rotation = Quaternion.Euler(0, 0, rotAngle);
+
+            // 4. 开启阵型接管模式
+            Enemy_Projectile p = bullet.GetComponent<Enemy_Projectile>();
+            if (p != null)
+            {
+                p.isControlledByFormation = true;
+            }
+
+            formationCtrl.AddBullet(bullet.transform, localPos);
+        }
+
+        return formationCtrl;
     }
 
     private GameObject SpawnProjectile(Vector2 dir, Vector3 spawnPos, string objectPoolKey, float speedOverride)

@@ -80,5 +80,10 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
         rb.linearVelocity = Vector2.zero;
         //重置大小
         transform.localScale = new Vector3(0.5f, 0.5f, 1);
+        //扔掉不要的组件
+        if(TryGetComponent<BulletAcceleration>(out BulletAcceleration ba))
+        {
+            Destroy(ba);
+        }
     }
 }
