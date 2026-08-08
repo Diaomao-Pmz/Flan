@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7427861770358651114}
   - component: {fileID: 7245800898948883673}
   - component: {fileID: 507349021135495906}
+  - component: {fileID: -6793872223365607027}
   m_Layer: 19
   m_Name: E_Bullet
   m_TagString: Untagged
@@ -172,8 +173,21 @@ MonoBehaviour:
   speed: 5
   lifeTime: 3
   damage: 15
+  margin: 0.5
   destroyLayer:
     serializedVersion: 2
     m_Bits: 3145728
   isControlledByFormation: 0
   isEnemyProjectile: 1
+--- !u!114 &-6793872223365607027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2589707116977578368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92dd525ae2fcdea47851f60a1e39b032, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BulletAcceleration

@@ -46,7 +46,7 @@ public class Player_Projectile : MonoBehaviour
         if (enemy != null)
         {
             //调用统一的扣血接口，并传入【远程伤害】类型！
-            enemy.TakeDamage(damage, DamageType.Ranged);
+            enemy.TakeDamage(new DamageInfo(damage, DamageType.Ranged, transform.position, gameObject));
 
             // 命中敌人后销毁子弹
             Destroy(gameObject);

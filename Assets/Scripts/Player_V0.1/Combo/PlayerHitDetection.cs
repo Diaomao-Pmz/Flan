@@ -91,7 +91,7 @@ public class PlayerHitDetection : MonoBehaviour
                     {
                         Debug.Log($"成功找到父级实体 {enemy.gameObject.name}，调用 TakeDamage！</color>");
                         // 触发基类的统一扣血接口
-                        enemy.TakeDamage(node.damage, DamageType.Melee);
+                        enemy.TakeDamage(new DamageInfo(node.damage, DamageType.Melee, transform.position, gameObject));
                     }
                     else
                     {

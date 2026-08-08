@@ -1,4 +1,5 @@
 using UnityEngine;
+using Flandre.CombatSystem;
 
 [RequireComponent(typeof(PlayerState), typeof(PlayerController))]
 public class Player : MonoBehaviour
@@ -16,7 +17,7 @@ public class Player : MonoBehaviour
     public void TakeDamage(int damage)
     {
         // 调用状态机的数据扣血
-        state.health.TakeDamage(damage, Vector2.zero, state);
+        ((IDamageable)state).TakeDamage(new DamageInfo(damage, DamageType.Melee, transform.position, null));
 
         // 检查生命周期逻辑（例如是否死亡）
         if (state.health.currentHP <= 0)

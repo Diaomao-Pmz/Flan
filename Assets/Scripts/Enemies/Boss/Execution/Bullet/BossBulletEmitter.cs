@@ -261,6 +261,8 @@ public class BossBulletEmitter : MonoBehaviour
         GameObject squareParent = new GameObject("BossSquareFormation");
         squareParent.transform.position = spawnPos;
 
+        FormationCore core = squareParent.AddComponent<FormationCore>();
+
         RotatingFormation rot = squareParent.AddComponent<RotatingFormation>();
         float directionX = (playerTransform != null && playerTransform.position.x - transform.position.x >= 0) ? 1f : -1f;
         rot.direction = new Vector2(directionX, 0);
@@ -293,10 +295,12 @@ public class BossBulletEmitter : MonoBehaviour
 
                 // 1. 从对象池获取子弹
                 GameObject bullet = ObjectPoolManager.Instance.Get(projectileKey);
+                if (bullet == null) continue;
 
                 // 2. 认贼作父，摆好阵型
                 bullet.transform.SetParent(squareParent.transform);
                 bullet.transform.localPosition = localPos;
+                core.Register(bullet.transform);
 
                 // 3. 调整朝向
                 float rotAngle = Mathf.Atan2(localPos.y, localPos.x) * Mathf.Rad2Deg;
@@ -390,6 +394,7 @@ public class BossBulletEmitter : MonoBehaviour
         GameObject Parent = new GameObject(parentName);
         Parent.transform.position = spawnPos;
 
+        FormationCore core = Parent.AddComponent<FormationCore>();
         ShapeFormationController formationCtrl = Parent.AddComponent<ShapeFormationController>();
 
         for(int i = 0; i < bulletPositions.Length; i++)
@@ -398,9 +403,11 @@ public class BossBulletEmitter : MonoBehaviour
 
             // 1. 从对象池获取子弹
             GameObject bullet = ObjectPoolManager.Instance.Get(projectileKey);
+            if (bullet == null) continue;
 
             // 2. 认贼作父，摆好阵型
             bullet.transform.SetParent(Parent.transform);
+            core.Register(bullet.transform);
 
             // 3. 调整朝向
             float rotAngle = Mathf.Atan2(localPos.y, localPos.x) * Mathf.Rad2Deg;
@@ -423,7 +430,7 @@ public class BossBulletEmitter : MonoBehaviour
     {
         //对象池调用
         GameObject bullet = ObjectPoolManager.Instance?.Get(objectPoolKey);
-        Debug.Log($"objpool: {ObjectPoolManager.Instance == null}");
+        if (bullet == null) return null;
         bullet.transform.position = spawnPos;
         Enemy_Projectile projScript = bullet.GetComponent<Enemy_Projectile>();
         if (projScript != null)
@@ -434,15 +441,15 @@ public class BossBulletEmitter : MonoBehaviour
             // 【修改】：使用新的位运算检查是否需要挂载加速器
             if (IsCurrentAttackAccelerated())
             {
-                BulletAcceleration a = bullet.GetComponent<BulletAcceleration>();
-                if (a != null)
+                BulletAcceleration acc = bullet.GetComponent<BulletAcceleration>();
+                if (acc != null)
                 {
-                    Destroy(a);
+                    acc.Configure(accelerationRate, coef);
                 }
-
-                BulletAcceleration acc = bullet.AddComponent<BulletAcceleration>();
-                acc.accelerationRate = accelerationRate;
-                acc.coef = this.coef;
+                else
+                {
+                    Debug.LogWarning($"[Emitter] {bullet.name} 缺少 BulletAcceleration 组件，加速未生效。", bullet);
+                }
             }
         }
         return bullet;
@@ -485,58 +492,6 @@ public class FormationBase : MonoBehaviour
 {
     protected virtual void Update()
     {
-        if(transform.childCount == 0)
-        {
-            Destroy(gameObject);
-        }
-    }
-}
-
-public class FormationBullet : MonoBehaviour
-{
-    public LayerMask destroyLayer;
-    public bool isEnemyProjectile = true;
-    public int damage = 10;
-
-    void OnTriggerEnter2D(Collider2D hitInfo)
-    {
-        PlayerState playerState = hitInfo.GetComponentInParent<PlayerState>();
-        if (!isEnemyProjectile && playerState != null) return;
-        if (isEnemyProjectile && hitInfo.CompareTag("Enemy")) return;
-
-        if (isEnemyProjectile && playerState != null)
-        {
-            float relativeX = playerState.transform.position.x - transform.position.x;
-            Vector2 knockbackDir = new Vector2(Mathf.Sign(relativeX) * 8f, 5f);
-            playerState.health.TakeDamage(damage, knockbackDir, playerState);
-        }
-        Destroy(gameObject);
-    }
-}
-
-public class BulletAcceleration : MonoBehaviour
-{
-    public float accelerationRate;
-    public float coef;
-    private Enemy_Projectile proj;
-    private float timer = 0f;
-    private float baseSpeed;
-
-    void Start()
-    {
-        proj = GetComponent<Enemy_Projectile>();
-        if (proj != null)
-        {
-            baseSpeed = proj.speed;
-        }
-    }
-
-    void Update()
-    {
-        if (proj != null)
-        {
-            timer += Time.deltaTime;
-            proj.speed = coef * baseSpeed + (accelerationRate * timer * timer);
-        }
+        
     }
 }

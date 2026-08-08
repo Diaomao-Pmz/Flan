@@ -1,6 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using Flandre.CombatSystem;
 
-// ´¿Êı¾İÀà±£³Ö²»±ä£¬ÓÉ PlayerState Í³Ò»¹ÜÀí
+// çº¯æ•°æ®ç±»ä¿æŒä¸å˜ï¼Œç”± PlayerState ç»Ÿä¸€ç®¡ç†
 [System.Serializable]
 public class PlayerStats
 {
@@ -14,7 +15,7 @@ public class PlayerCombat
 
     public void SetSlideCooldown(float time)
     {
-        Debug.Log($"[Çû¸É×ÜÏß] »¬ĞĞ½øÈëÀäÈ´: {time}Ãë");
+        Debug.Log($"[èº¯å¹²æ€»çº¿] æ»‘è¡Œè¿›å…¥å†·å´: {time}ç§’");
     }
 }
 
@@ -27,7 +28,7 @@ public class PlayerHealth
     public int maxMP = 100;
     public int currentMP = 100;
     public bool isUntargetable = false;
-    public float invulnerableDuration = 0.2f; // ÎŞµĞ±£»¤ÆÚ×Ü³¤
+    public float invulnerableDuration = 0.2f; // æ— æ•Œä¿æŠ¤æœŸæ€»é•¿
 
     public event System.Action OnStatChanged;
     public event System.Action<Vector2> OnPlayerHit;
@@ -41,20 +42,20 @@ public class PlayerHealth
 
     public void TakeDamage(int damage, Vector2 knockbackForce, MonoBehaviour coroutineRunner)
     {
-        //Èç¹ûÕıÔÚÎŞµĞ£¬Ö±½ÓÎŞÊÓºóĞøËùÓĞÉËº¦ºÍ»÷·É
+        //å¦‚æœæ­£åœ¨æ— æ•Œï¼Œç›´æ¥æ— è§†åç»­æ‰€æœ‰ä¼¤å®³å’Œå‡»é£
         if (isUntargetable) return;
 
         currentHP -= damage;
         if (currentHP < 0) currentHP = 0;
         OnStatChanged?.Invoke();
 
-        //Ë²¼ä¿ªÆôÎŞµĞ£¬´Ó±»»÷ÖĞµÄÕâÒ»Ö¡Á¢¿Ì¿ªÊ¼µ¹¼ÆÊ±£¡
+        //ç¬é—´å¼€å¯æ— æ•Œï¼Œä»è¢«å‡»ä¸­çš„è¿™ä¸€å¸§ç«‹åˆ»å¼€å§‹å€’è®¡æ—¶ï¼
         coroutineRunner.StartCoroutine(InvulnerableRoutine());
 
-        // ·¢ËÍ¹ã²¥£¬Í¨Öª×´Ì¬»úÈ¥»÷·É£¬Í¨Öª Controller È¥ÉÁË¸
+        // å‘é€å¹¿æ’­ï¼Œé€šçŸ¥çŠ¶æ€æœºå»å‡»é£ï¼Œé€šçŸ¥ Controller å»é—ªçƒ
         OnPlayerHit?.Invoke(knockbackForce);
 
-        Debug.Log($"[½¡¿µ×ÜÏß] Ü½À¼ÊÜµ½ÁË {damage} µãÉËº¦£¬µ±Ç°ÑªÁ¿: {currentHP}");
+        Debug.Log($"[å¥åº·æ€»çº¿] èŠ™å…°å—åˆ°äº† {damage} ç‚¹ä¼¤å®³ï¼Œå½“å‰è¡€é‡: {currentHP}");
     }
 
     private System.Collections.IEnumerator InvulnerableRoutine()
@@ -70,10 +71,10 @@ public class PlayerHealth
     {
         if (currentMP >= amount)
         {
-            SetMP(currentMP - amount); // ¸´ÓÃÄãµÄ SetMP ÒÔ±ã´¥·¢ OnStatChanged ¹ã²¥
+            SetMP(currentMP - amount); // å¤ç”¨ä½ çš„ SetMP ä»¥ä¾¿è§¦å‘ OnStatChanged å¹¿æ’­
             return true;
         }
-        return false; // À¶Á¿²»×ã£¬¾Ü¾ø¿Û³ı
+        return false; // è“é‡ä¸è¶³ï¼Œæ‹’ç»æ‰£é™¤
     }
 
     //------------------------------------------------------------------------
@@ -102,21 +103,41 @@ public class PlayerHealth
     public void SetUntargetable(bool state)
     {
         isUntargetable = state;
-        Debug.Log($"[Çû¸É×ÜÏß] Ü½À¼µÄÎŞµĞ×´Ì¬¸Ä±äÎª: {state}");
+        Debug.Log($"[èº¯å¹²æ€»çº¿] èŠ™å…°çš„æ— æ•ŒçŠ¶æ€æ”¹å˜ä¸º: {state}");
     }
 }
 
-// ¡¾ÕâÊÇÄãĞèÒª¹ÒÔØµ½Íæ¼ÒÉíÉÏµÄ×é¼ş¡¿
-public class PlayerState : MonoBehaviour
+// ã€è¿™æ˜¯ä½ éœ€è¦æŒ‚è½½åˆ°ç©å®¶èº«ä¸Šçš„ç»„ä»¶ã€‘
+public class PlayerState : MonoBehaviour, IDamageable
 {
-    [Header("ºËĞÄÊı¾İ×ÜÏß")]
+    [Header("æ ¸å¿ƒæ•°æ®æ€»çº¿")]
     public PlayerStats stats = new PlayerStats();
     public PlayerHealth health = new PlayerHealth();
     public PlayerCombat combat = new PlayerCombat();
 
     void Awake()
     {
-        // Í³Ò»ÔÚ´Ë³õÊ¼»¯ÔËĞĞÊ±Êı¾İ
+        // ç»Ÿä¸€åœ¨æ­¤åˆå§‹åŒ–è¿è¡Œæ—¶æ•°æ®
         health.Init();
+    }
+
+    /// <summary>
+    /// ã€ç»Ÿä¸€å—ä¼¤å…¥å£ã€‘ä¸æ•Œäººä¾§çš„ EntityBase ä½¿ç”¨åŒä¸€ä»½å¥‘çº¦ã€‚
+    ///
+    /// å‡»é€€åŠ›åº¦**ä¸ç”±æ”»å‡»æ–¹å†³å®š** â€”â€” è¿™é‡ŒåªæŠŠã€Œæ¥æºåœ¨æˆ‘å·¦è¾¹è¿˜æ˜¯å³è¾¹ã€ç¿»è¯‘æˆæ–¹å‘ï¼Œ
+    /// çœŸæ­£çš„åŠ›åº¦ç”± PlayerStateMachine.hitKnockbackForce é…ç½®ã€HitState è¯»å–ã€‚
+    /// å› æ­¤ä»¥åè¦åŠ éœ¸ä½“ã€å‡»é€€æŠ—æ€§ã€å—å‡»æ–¹å‘ä¿®æ­£ï¼Œåªéœ€æ”¹è¿™ä¸€å¤„ã€‚
+    /// </summary>
+    public void TakeDamage(in DamageInfo info)
+    {
+        float dx = transform.position.x - info.sourcePosition.x;
+
+        // ä¸ HitState çš„æ—¢æœ‰åˆ¤å®šä¿æŒä¸€è‡´ï¼š
+        // å·®å€¼è¿‡å°æ—¶ä¼  zeroï¼Œè®© HitState å›é€€åˆ°ã€ŒæŒ‰ç©å®¶æœå‘å‘åå‡»é£ã€ã€‚
+        Vector2 hitDirection = Mathf.Abs(dx) > 0.01f
+            ? new Vector2(Mathf.Sign(dx), 0f)
+            : Vector2.zero;
+
+        health.TakeDamage(info.amount, hitDirection, this);
     }
 }

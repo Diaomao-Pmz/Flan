@@ -1,38 +1,53 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 using Flandre.CombatSystem;
 
-// ÕâÊÇËùÓĞµĞÈËµÄÀÏ×æ×ÚÀà£¬°üº¬×î»ù´¡µÄÉúÃüÖÜÆÚºÍÊıÖµ
-public abstract class EntityBase : MonoBehaviour
+// è¿™æ˜¯æ‰€æœ‰æ•Œäººçš„è€ç¥–å®—ç±»ï¼ŒåŒ…å«æœ€åŸºç¡€çš„ç”Ÿå‘½å‘¨æœŸå’Œæ•°å€¼
+public abstract class EntityBase : MonoBehaviour, IDamageable
 {
     [Header("Base Stats")]
     public int maxHP = 100;
-    public int currentHP { get; protected set; } // ±£»¤Ğ´È¨ÏŞ£¬Ö»ÄÜÍ¨¹ı·½·¨ĞŞ¸Ä
+    public int currentHP { get; protected set; } // ä¿æŠ¤å†™æƒé™ï¼Œåªèƒ½é€šè¿‡æ–¹æ³•ä¿®æ”¹
     public bool isDead { get; protected set; }
 
-    // UI ¼àÌıµÄÊÂ¼ş£¨±£ÁôÁËÄã×éÔ±µÄÓÅĞãÉè¼Æ£©
+    // UI ç›‘å¬çš„äº‹ä»¶ï¼ˆä¿ç•™äº†ä½ ç»„å‘˜çš„ä¼˜ç§€è®¾è®¡ï¼‰
     public event Action OnStatChanged;
 
-    // Áô¸ø×ÓÀàÔÚ Awake Ê±µ÷ÓÃµÄ»ù´¡³õÊ¼»¯Âß¼­
+    // ç•™ç»™å­ç±»åœ¨ Awake æ—¶è°ƒç”¨çš„åŸºç¡€åˆå§‹åŒ–é€»è¾‘
     protected virtual void Awake()
     {
         currentHP = maxHP;
         isDead = false;
     }
 
-    // Í³Ò»µÄÊÜÉË½Ó¿Ú
-    public virtual void TakeDamage(int damage, DamageType type = DamageType.Melee)
+    /// <summary>
+    /// ã€ç»Ÿä¸€å—ä¼¤æ¥å£ã€‘æ•Œæˆ‘åŒæ–¹å…±ç”¨çš„å”¯ä¸€æ ¸å¿ƒï¼Œå­ç±»é‡å†™è¿™ä¸€ä¸ªå³å¯ã€‚
+    /// åŸå…ˆçš„ TakeDamage(int, DamageType) å·²é™çº§ä¸ºè½¬å‘ç”¨çš„éè™šæ–¹æ³•ã€‚
+    /// </summary>
+    public virtual void TakeDamage(in DamageInfo info)
     {
         if (isDead) return;
 
-        currentHP = Mathf.Clamp(currentHP - damage, 0, maxHP);
-        OnStatChanged?.Invoke(); // Í¨ÖªÑªÌõ UI ¸üĞÂ
+        currentHP = Mathf.Clamp(currentHP - info.amount, 0, maxHP);
+        OnStatChanged?.Invoke(); // é€šçŸ¥è¡€æ¡ UI æ›´æ–°
 
         if (currentHP <= 0)
         {
             isDead = true;
             Die();
         }
+    }
+
+    /// <summary>
+    /// ã€è¿‡æ¸¡ç”¨ã€‘æ—§ç­¾åã€‚ç¼ºå°‘æ¥æºåæ ‡ï¼Œåªèƒ½ç”¨è‡ªèº«ä½ç½®é¡¶æ›¿ï¼Œ
+    /// å› æ­¤æ‹¿ä¸åˆ°æ­£ç¡®çš„å‡»é€€æ–¹å‘ã€‚è¯·æ”¹ç”¨ DamageInfo ç‰ˆæœ¬ã€‚
+    /// æ³¨æ„ï¼šè¿™é‡Œæ˜¯éè™šæ–¹æ³• â€”â€” å­ç±»è‹¥è¿˜å†™ç€ override ä¼šç¼–è¯‘æŠ¥é”™ï¼ˆCS0506ï¼‰ï¼Œ
+    /// è¿™æ˜¯åˆ»æ„çš„ï¼Œé¿å…é‡å†™äº†æ—§ç­¾åå´åœ¨æ–°è°ƒç”¨è·¯å¾„ä¸‹é™é»˜å¤±æ•ˆã€‚
+    /// </summary>
+    [Obsolete("è¯·æ”¹ç”¨ TakeDamage(in DamageInfo)ï¼Œä»¥ä¾¿æºå¸¦ä¼¤å®³æ¥æºåæ ‡ã€‚")]
+    public void TakeDamage(int damage, DamageType type = DamageType.Melee)
+    {
+        TakeDamage(new DamageInfo(damage, type, transform.position, null));
     }
 
     public virtual void Heal(int amount)
@@ -42,10 +57,10 @@ public abstract class EntityBase : MonoBehaviour
         OnStatChanged?.Invoke();
     }
 
-    // ³éÏó/Ğé·½·¨£º¾ßÌåµÄËÀÍö±íÏÖ½»¸ø×ÓÀà×Ô¼º¾ö¶¨
+    // æŠ½è±¡/è™šæ–¹æ³•ï¼šå…·ä½“çš„æ­»äº¡è¡¨ç°äº¤ç»™å­ç±»è‡ªå·±å†³å®š
     protected virtual void Die()
     {
-        // Ä¬ÈÏĞĞÎª£ºÏú»ÙÎïÌå
+        // é»˜è®¤è¡Œä¸ºï¼šé”€æ¯ç‰©ä½“
         Destroy(gameObject);
     }
 }

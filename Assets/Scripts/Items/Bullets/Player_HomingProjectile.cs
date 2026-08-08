@@ -86,7 +86,7 @@ public class Player_HomingProjectile : MonoBehaviour
 
         if (enemy != null)
         {
-            enemy.TakeDamage(damage, DamageType.Ranged);
+            enemy.TakeDamage(new DamageInfo(damage, DamageType.Ranged, transform.position, gameObject));
             Destroy(gameObject);
             return;
         }

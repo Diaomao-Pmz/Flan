@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using Flandre.CombatSystem;
+using static UnityEngine.AdaptivePerformance.Provider.AdaptivePerformanceSubsystemDescriptor;
 
 [RequireComponent(typeof(BossState))]
 [RequireComponent(typeof(BossTeleporter))] // 【新增】强制要求挂载传送器组件
@@ -135,12 +136,12 @@ public class BossController : EntityBase
         }
     }
 
-    public override void TakeDamage(int damage, DamageType type)
+    public override void TakeDamage(in DamageInfo info)
     {
         if (bossState != null)
         {
             // 将伤害请求转发给黑板 (BossState) 处理
-            bossState.bossMechanic.TakeDamage(damage, type);
+            bossState.bossMechanic.TakeDamage(info.amount, info.type);
         }
     }
 }

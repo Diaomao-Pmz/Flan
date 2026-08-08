@@ -2073,7 +2073,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 2589707116977578368, guid: 09f4fcf80f38d9f4b927c96f89d6ddb8, type: 3}
   projectileKey: EnemyBullet
   firePoint: {fileID: 318592942}
-  acceleratedAttacks: 16
+  acceleratedAttacks: 0
   accelerationRate: 5
   coef: 0.3
   lineShootInterval: 1
