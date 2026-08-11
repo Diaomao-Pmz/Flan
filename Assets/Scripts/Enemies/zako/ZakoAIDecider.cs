@@ -3,13 +3,13 @@ using UnityEngine;
 public class CommonEnemy : EntityBase
 {
     // 如果小怪需要射击，依然可以直接挂载你的 BossBulletEmitter（记得改名为 ProjectileEmitter）
-    private BossBulletEmitter emitter;
+    private BAE_BulletEmitter emitter;
     private Transform player;
 
     protected override void Awake()
     {
         base.Awake();
-        emitter = GetComponent<BossBulletEmitter>();
+        emitter = GetComponent<BAE_BulletEmitter>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
         if (emitter != null) emitter.Init(player);
@@ -24,7 +24,7 @@ public class CommonEnemy : EntityBase
         // 假设你在 Emitter 里公开了 IsShooting 属性
         if (dist < 5f && emitter != null) // && !emitter.IsShooting) 
         {
-            emitter.StartAttack(BossAttackType.Random);
+            //emitter.StartAttack(BossAttackType.Random);
         }
         else if (dist >= 5f && emitter != null)
         {

@@ -8,7 +8,7 @@ public class ZakoController : EntityBase
 
     // 组件引用
     // 注意：如果你的 BossBulletEmitter 还没有改名，就先用 BossBulletEmitter
-    private BossBulletEmitter emitter;
+    private BAE_BulletEmitter emitter;
     private Transform player;
 
     private bool isAttacking = false; // 记录当前是否正在攻击
@@ -19,7 +19,7 @@ public class ZakoController : EntityBase
         base.Awake();
 
         // 3. 获取身上的发射器组件
-        emitter = GetComponent<BossBulletEmitter>();
+        emitter = GetComponent<BAE_BulletEmitter>();
 
         // 4. 自动寻找场景里的玩家 (确保你的玩家物体上打上了 "Player" 的 Tag)
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -46,7 +46,7 @@ public class ZakoController : EntityBase
             if (dist <= attackRange && !isAttacking)
             {
                 // 玩家进入射程，开始使用指定的弹幕攻击（比如普通小怪只会发射直线弹）
-                emitter.StartAttack(BossAttackType.Line, 0f);
+                //emitter.StartAttack(BossAttackType.Line, 0f);
                 isAttacking = true;
             }
             else if (dist > attackRange && isAttacking)

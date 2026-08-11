@@ -1,55 +1,48 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
-public enum BossAttackType
-{
-    Line,
-    Random,
-    Circle,
-    Square,
-    Rotation,
-    Triangle,
-    Star
-}
 
-// ¡¾ĞÂÔö¡¿£ºÎªÁËÈÃ Inspector Ãæ°åÖ§³Ö¶àÑ¡ÏÂÀ­¿ò£¬±ØĞë¶¨ÒåÒ»¸öÎ»ÑÚÂëÃ¶¾Ù
+// ä½æ©ç æšä¸¾å®ç° Inspector é¢æ¿æ”¯æŒå¤šé€‰ä¸‹æ‹‰æ¡†
 [System.Flags]
 public enum BossAttackFlags
 {
     None = 0,
-    Line = 1 << 0,      // ¶ÔÓ¦ BossAttackType.Line
-    Random = 1 << 1,    // ¶ÔÓ¦ BossAttackType.Random
-    Circle = 1 << 2,    // ¶ÔÓ¦ BossAttackType.Circle
-    Square = 1 << 3,    // ¶ÔÓ¦ BossAttackType.Square
-    Rotation = 1 << 4,  // ¶ÔÓ¦ BossAttackType.Rotation
+    Line = 1 << 0,      // å¯¹åº” BossAttackType.Line
+    Random = 1 << 1,    // å¯¹åº” BossAttackType.Random
+    Circle = 1 << 2,    // å¯¹åº” BossAttackType.Circle
+    Square = 1 << 3,    // å¯¹åº” BossAttackType.Square
+    Rotation = 1 << 4,  // å¯¹åº” BossAttackType.Rotation
     Triangle = 1 << 5,
     Star = 1 << 6,
-    All = ~0            // È«Ñ¡
+    All = ~0            // å…¨é€‰
 }
 
-public class BossBulletEmitter : MonoBehaviour
+
+public class BAE_BulletEmitter : MonoBehaviour, IBossActionExecutor
 {
     private Transform playerTransform;
 
-    [Header("--- »ù´¡·¢ÉäÉèÖÃ ---")]
+    [Header("--- åŸºç¡€å‘å°„è®¾ç½® ---")]
     [SerializeField] GameObject projectilePrefab;
     [SerializeField] string projectileKey = "EnemyBullet";
     [SerializeField] Transform firePoint;
 
-    [Header("--- µ¯ËÙ¼ÓËÙÉèÖÃ ---")]
-    [Tooltip("ÔÚÏÂÀ­ÁĞ±íÖĞ¹´Ñ¡ĞèÒªÓ¦ÓÃ¼ÓËÙÂß¼­µÄÕĞÊ½")]
+    [Header("--- å¼¹é€ŸåŠ é€Ÿè®¾ç½® ---")]
+    [Tooltip("åœ¨ä¸‹æ‹‰åˆ—è¡¨ä¸­å‹¾é€‰éœ€è¦åº”ç”¨åŠ é€Ÿé€»è¾‘çš„æ‹›å¼")]
     public BossAttackFlags acceleratedAttacks = BossAttackFlags.None;
-    [Tooltip("µ¯ËÙ¼ÓËÙÏµÊı")]
+    [Tooltip("å¼¹é€ŸåŠ é€Ÿç³»æ•°")]
     public float accelerationRate = 5f;
     public float coef = 0.3f;
 
     // ==========================================
-    // ¸÷ĞÎÌ¬¿Éµ÷½Ú²ÎÊı (LineĞÎÌ¬ÒÑ¸ÄÎªÂäµãÆ«ÒÆ)
+    // å„å½¢æ€å¯è°ƒèŠ‚å‚æ•° (Lineå½¢æ€å·²æ”¹ä¸ºè½ç‚¹åç§»)
     // ==========================================
     [Header("--- Line ---")]
     public float lineShootInterval = 1f;
     public float lineBulletSpeed = 15f;
     public float lineBulletScale = 1.5f;
-    [Tooltip("ÂäµãYÖáÆ«ÒÆ£ºÃé×¼Íæ¼ÒÈõµãÉÏ·½(+)»òÏÂ·½(-)")]
+    [Tooltip("è½ç‚¹Yè½´åç§»ï¼šç„å‡†ç©å®¶å¼±ç‚¹ä¸Šæ–¹(+)æˆ–ä¸‹æ–¹(-)")]
     public float lineOffsetY = 0f;
 
     [Header("--- Random ---")]
@@ -66,7 +59,7 @@ public class BossBulletEmitter : MonoBehaviour
     public float squareBulletSpeed = 5f;
     public int squareBulletsPerSide = 5;
     public float squareSize = 3f;
-    public float squareOffsetY = 0f; // ·½Õó×÷ÎªÕûÌå£¬ÒÀÈ»±£Áô³öÉúµãÆ«ÒÆ
+    public float squareOffsetY = 0f; // æ–¹é˜µä½œä¸ºæ•´ä½“ï¼Œä¾ç„¶ä¿ç•™å‡ºç”Ÿç‚¹åç§»
 
     [Header("--- Triangle ---")]
     public int triangleBulletCount = 10;
@@ -88,14 +81,42 @@ public class BossBulletEmitter : MonoBehaviour
     public float circleShootInterval = 1.5f;
     public float circleBulletSpeed = 8f;
     public int circleBulletCount = 18;
-    public float circleOffsetY = 0f; // Ô²»·×÷ÎªÕûÌå£¬ÒÀÈ»±£Áô³öÉúµãÆ«ÒÆ
+    public float circleOffsetY = 0f; // åœ†ç¯ä½œä¸ºæ•´ä½“ï¼Œä¾ç„¶ä¿ç•™å‡ºç”Ÿç‚¹åç§»
 
-    private BossAttackType currentAttackType = BossAttackType.Random;
-    private float angle = 0;
-    private float timer = 0;
-    private bool isShooting = false;
-    private float currentFormationDuration = 0f;
+    // ==========================================
+    // ã€å¤šè½¨åŒ–ã€‘è¿è¡Œæ—¶çŠ¶æ€
+    // åŸå…ˆè¿™é‡Œæ˜¯ currentAttackType / angle / timer / isShooting / currentFormationDuration
+    // äº”ä¸ªå•ä»½å­—æ®µï¼Œåªèƒ½è·‘ä¸€ç§å¼¹å¹•ã€‚ç°åœ¨æ”¹ä¸ºä¸€ç»„è½¨é“ï¼Œå„è‡ªç‹¬ç«‹æ¨è¿›ã€‚
+    // ==========================================
+    private readonly List<EmitterTrack> tracks = new List<EmitterTrack>(8);
 
+    /// <summary>
+    /// å½“å‰æ­£åœ¨æ‰§è¡Œçš„è½¨é“ã€‚ä»…åœ¨ ExecutePattern è°ƒç”¨æœŸé—´æœ‰æ•ˆã€‚
+    /// å„ Spawn æ–¹æ³•é€šè¿‡å®ƒè¯»å– formationDuration / angle / æ˜¯å¦åŠ é€Ÿï¼Œ
+    /// é¿å…ç»™åå‡ ä¸ªæ–¹æ³•é€ä¸ªåŠ å‚æ•°ã€‚ExecutePattern æ˜¯åŒæ­¥çš„ï¼Œä¸å­˜åœ¨è½¨é“äº¤é”™ã€‚
+    /// </summary>
+    private EmitterTrack activeTrack;
+
+    //å®ç°IBOOSACTIONEXECUTOR
+    public System.Type NodeType => typeof(BulletNode);
+
+    public IEnumerator Execute(ActionNode node, BossContext ctx)
+    {
+        BulletNode bulletNode = node as BulletNode;
+        if (bulletNode == null) yield break;
+
+        if (!StartCombo(bulletNode))
+        {
+            yield return new WaitForSeconds(1f); // é…ç½®æœ‰è¯¯ï¼Œåœé¡¿ä¸€ä¸‹é˜²æ­¢ç©ºè½¬åˆ·å±
+            yield break;
+        }
+
+        yield return new WaitForSeconds(bulletNode.TotalDuration);
+        StopAttack();
+    }
+
+    public void Cancel() => StopAttack();
+    //---------------------------------------------------
     public void Init(Transform playerT)
     {
         playerTransform = playerT;
@@ -103,45 +124,107 @@ public class BossBulletEmitter : MonoBehaviour
 
     void Update()
     {
-        if (isShooting)
+        for (int i = 0; i < tracks.Count; i++)
         {
-            timer += Time.deltaTime;
-            if (timer >= GetCurrentInterval())
+            EmitterTrack track = tracks[i];
+            if (track.IsFinished) continue;
+
+            if (track.Tick(Time.deltaTime))
             {
-                timer = 0;
-                ExecutePattern(currentAttackType);
+                activeTrack = track;
+                ExecutePattern(track.type);
+                activeTrack = null;
             }
         }
     }
 
-    public void StartAttack(BossAttackType attackType, float formationTime = 0f)
+    // ==========================================
+    // ç»„åˆå¯åŠ¨
+    // ==========================================
+
+    /// <summary>
+    /// æŒ‰å¡ç‰‡é…ç½®é“ºå¼€æ‰€æœ‰è½¨é“ã€‚è¿”å›æ˜¯å¦æˆåŠŸå¯åŠ¨ã€‚
+    /// </summary>
+    public bool StartCombo(BulletNode node)
     {
-        isShooting = true;
-        currentAttackType = attackType;
-        currentFormationDuration = formationTime;
-        timer = GetCurrentInterval();
+        ClearTracks();
+
+        if (node.HasPhases)
+        {
+            int added = 0;
+            for (int i = 0; i < node.phases.Count; i++)
+            {
+                BulletPhase phase = node.phases[i];
+                if (phase == null) continue;
+
+                float interval = phase.intervalOverride > 0f
+                    ? phase.intervalOverride
+                    : GetDefaultInterval(phase.type);
+
+                AddTrack(phase.type, phase.startDelay, phase.duration, interval, phase.formationDuration);
+                added++;
+            }
+
+            if (added == 0)
+            {
+                Debug.LogError($"[Emitter] å¡ç‰‡ {node.name} çš„ phases é‡Œå…¨æ˜¯ç©ºæ§½ä½ï¼", this);
+                return false;
+            }
+            return true;
+        }
+
+        // ---- æ—§ç‰ˆå•å½¢æ€å…¼å®¹è·¯å¾„ ----
+        // phases ç•™ç©ºæ—¶ï¼ŒæŠŠ AttackName + attackDuration å½“æˆä¸€æ¡è½¨é“è·‘ï¼Œ
+        // ç°æœ‰èµ„äº§ä¸éœ€è¦é‡æ–°é…ç½®ã€‚
+        if (string.IsNullOrEmpty(node.AttackName))
+        {
+            Debug.LogError($"[Emitter] å¡ç‰‡ {node.name} æ—¢æ²¡æœ‰é…ç½® phasesï¼ŒAttackName ä¹Ÿæ˜¯ç©ºçš„ï¼", this);
+            return false;
+        }
+
+        if (!System.Enum.TryParse(node.AttackName, out BossAttackType parsedType))
+        {
+            Debug.LogError($"[Emitter] æ— æ³•è¯†åˆ«çš„å¼¹å¹•å­—ç¬¦ä¸²: {node.AttackName}ï¼ˆå¡ç‰‡ {node.name}ï¼‰", this);
+            return false;
+        }
+
+        AddTrack(parsedType, 0f, node.attackDuration, GetDefaultInterval(parsedType), node.formationDuration);
+        return true;
     }
 
-    public void StartAttack(string attackTypeStr, float formationTime = 0f)
+    /// <summary>å–ä¸€æ¡ç©ºé—²è½¨é“å¤ç”¨ï¼Œæ²¡æœ‰å°±æ–°å»ºã€‚é¿å…æ¯æ¬¡ç»„åˆéƒ½äº§ç”Ÿ GCã€‚</summary>
+    private void AddTrack(BossAttackType type, float startDelay, float duration,
+                          float interval, float formationDuration)
     {
-        if (System.Enum.TryParse(attackTypeStr, out BossAttackType parsedType))
+        for (int i = 0; i < tracks.Count; i++)
         {
-            StartAttack(parsedType, formationTime);
+            if (tracks[i].IsFinished)
+            {
+                tracks[i].Setup(type, startDelay, duration, interval, formationDuration);
+                return;
+            }
         }
-        else
-        {
-            Debug.LogError($"[Emitter] ÎŞ·¨Ê¶±ğµÄµ¯Ä»×Ö·û´®: {attackTypeStr}");
-        }
+
+        EmitterTrack track = new EmitterTrack();
+        track.Setup(type, startDelay, duration, interval, formationDuration);
+        tracks.Add(track);
+    }
+
+    private void ClearTracks()
+    {
+        for (int i = 0; i < tracks.Count; i++) tracks[i].Finish();
     }
 
     public void StopAttack()
     {
-        isShooting = false;
+        ClearTracks();
+        activeTrack = null;
     }
 
-    private float GetCurrentInterval()
+    /// <summary>æŸå½¢æ€åœ¨ Inspector ä¸Šé…ç½®çš„é»˜è®¤å‘å°„é—´éš”ã€‚</summary>
+    private float GetDefaultInterval(BossAttackType type)
     {
-        switch (currentAttackType)
+        switch (type)
         {
             case BossAttackType.Line: return lineShootInterval;
             case BossAttackType.Random: return randomShootInterval;
@@ -168,38 +251,42 @@ public class BossBulletEmitter : MonoBehaviour
         }
     }
 
-    // ¡¾ĞÂÔö¡¿£ºÖÇÄÜ»ñÈ¡Íæ¼ÒÉíÉÏµÄ Hurtbox ×ø±ê
+    /// <summary>å½“å‰è½¨é“çš„é˜µå‹æ‰˜ç®¡æ—¶é•¿ã€‚</summary>
+    private float CurrentFormationDuration => activeTrack != null ? activeTrack.formationDuration : 0f;
+
+    // ã€æ–°å¢ã€‘ï¼šæ™ºèƒ½è·å–ç©å®¶èº«ä¸Šçš„ Hurtbox åæ ‡
     private Vector3 GetPlayerTargetPosition()
     {
         if (playerTransform == null) return firePoint.position;
 
-        // ³¢ÊÔÑ°ÕÒÖ®Ç°ÄãÔÚ PlayerStateMachine Àï¶¨ÒåµÄ "Hurtbox_Core"
+        // å°è¯•å¯»æ‰¾ä¹‹å‰ä½ åœ¨ PlayerStateMachine é‡Œå®šä¹‰çš„ "Hurtbox_Core"
         Transform hurtbox = playerTransform.Find("Hurtbox_Core");
         if (hurtbox != null)
         {
             return hurtbox.position;
         }
 
-        // Èç¹ûÃû×ÖÃ»¶ÔÉÏ£¬×÷Îª·À´ôÉè¼Æ£¬»ñÈ¡Åö×²ÌåÖĞĞÄµã¶ø²»ÊÇ½Åµ×
+        // å¦‚æœåå­—æ²¡å¯¹ä¸Šï¼Œä½œä¸ºé˜²å‘†è®¾è®¡ï¼Œè·å–ç¢°æ’ä½“ä¸­å¿ƒç‚¹è€Œä¸æ˜¯è„šåº•
         Collider2D col = playerTransform.GetComponent<Collider2D>();
         if (col != null)
         {
             return col.bounds.center;
         }
 
-        // ×î²îÇé¿ö£¬·µ»Ø½Åµ×
+        // æœ€å·®æƒ…å†µï¼Œè¿”å›è„šåº•
         return playerTransform.position;
     }
 
-    // ¡¾ĞÂÔö¡¿£º¼ì²éµ±Ç°ÕĞÊ½ÊÇ·ñÔÚ¼ÓËÙ×Öµä£¨¶àÑ¡¿ò£©ÖĞ±»¹´Ñ¡
+    // ã€æ–°å¢ã€‘ï¼šæ£€æŸ¥å½“å‰æ‹›å¼æ˜¯å¦åœ¨åŠ é€Ÿå­—å…¸ï¼ˆå¤šé€‰æ¡†ï¼‰ä¸­è¢«å‹¾é€‰
     private bool IsCurrentAttackAccelerated()
     {
-        int flagValue = 1 << (int)currentAttackType;
+        if (activeTrack == null) return false;
+        int flagValue = 1 << (int)activeTrack.type;
         return ((int)acceleratedAttacks & flagValue) != 0;
     }
 
     // ==========================================
-    // ¾ßÌåµ¯Ä»ÊµÏÖ
+    // å…·ä½“å¼¹å¹•å®ç°
 
     private void SpawnLineProjectile()
     {
@@ -207,17 +294,17 @@ public class BossBulletEmitter : MonoBehaviour
 
         if (playerTransform != null)
         {
-            // 1. »ñÈ¡×î¾«È·µÄÍæ¼ÒÈõµã×ø±ê
+            // 1. è·å–æœ€ç²¾ç¡®çš„ç©å®¶å¼±ç‚¹åæ ‡
             Vector3 targetPos = GetPlayerTargetPosition();
 
-            // 2. ½«ÂäµãÆ«ÒÆ¼ÓÔÚ¡°×¼ĞÇ¡±ÉÏ£¡
+            // 2. å°†è½ç‚¹åç§»åŠ åœ¨"å‡†æ˜Ÿ"ä¸Šï¼
             targetPos.y += lineOffsetY;
 
-            // 3. Ç¹¿ÚÒÀÈ»ÔÚÀÏµØ·½£¬µ«Ãé×¼µÄÊÇÆ«ÒÆºóµÄÈõµã
+            // 3. æªå£ä¾ç„¶åœ¨è€åœ°æ–¹ï¼Œä½†ç„å‡†çš„æ˜¯åç§»åçš„å¼±ç‚¹
             dir = (targetPos - firePoint.position).normalized;
         }
 
-        // Ç¹¿ÚÎ»ÖÃ²»½øĞĞÈÎºÎÆ«ÒÆ£¬ÔÚÔ­µãÉú³É
+        // æªå£ä½ç½®ä¸è¿›è¡Œä»»ä½•åç§»ï¼Œåœ¨åŸç‚¹ç”Ÿæˆ
         Vector3 spawnPos = firePoint.position;
 
         GameObject bullet = SpawnProjectile(dir, spawnPos, projectileKey, lineBulletSpeed);
@@ -235,10 +322,15 @@ public class BossBulletEmitter : MonoBehaviour
 
     private void RotatingSpawnProjectile()
     {
-        Quaternion rotation = Quaternion.Euler(0, 0, angle);
+        // ã€å¤šè½¨åŒ–å…³é”®ã€‘æ—‹è½¬ç´¯åŠ å™¨æ”¹ä»è½¨é“ä¸Šå–ã€‚
+        // åŸå…ˆæ˜¯ Emitter çš„å…±äº«å­—æ®µï¼Œä¸¤æ¡ Rotation è½¨é“å¹¶å‘æ—¶ä¼šäº’ç›¸æŠ¢ï¼Œè§’åº¦ä¼šä¹±è·³ã€‚
+        float currentAngle = activeTrack != null ? activeTrack.angle : 0f;
+
+        Quaternion rotation = Quaternion.Euler(0, 0, currentAngle);
         Vector2 dir = rotation * new Vector2(1, 0);
         SpawnProjectile(dir, firePoint.position, projectileKey, rotationBulletSpeed);
-        angle += rotationAngleIncrement;
+
+        if (activeTrack != null) activeTrack.angle += rotationAngleIncrement;
     }
 
     private void SpawnCircleBurst()
@@ -269,7 +361,7 @@ public class BossBulletEmitter : MonoBehaviour
         rot.speed = squareBulletSpeed;
         rot.rotationSpeed = Random.Range(0, 2) == 0 ? Random.Range(45f, 120f) : Random.Range(-120f, -45f);
 
-        // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃĞÂµÄÎ»ÔËËã¼ì²é·½ÕóÊÇ·ñĞèÒª¼ÓËÙ
+        // ã€ä¿®æ”¹ã€‘ï¼šä½¿ç”¨æ–°çš„ä½è¿ç®—æ£€æŸ¥æ–¹é˜µæ˜¯å¦éœ€è¦åŠ é€Ÿ
         rot.enableAcceleration = IsCurrentAttackAccelerated();
         rot.accelerationRate = accelerationRate;
 
@@ -293,20 +385,20 @@ public class BossBulletEmitter : MonoBehaviour
                 float t = (float)i / squareBulletsPerSide;
                 Vector2 localPos = Vector2.Lerp(startPoint, endPoint, t);
 
-                // 1. ´Ó¶ÔÏó³Ø»ñÈ¡×Óµ¯
+                // 1. ä»å¯¹è±¡æ± è·å–å­å¼¹
                 GameObject bullet = ObjectPoolManager.Instance.Get(projectileKey);
                 if (bullet == null) continue;
 
-                // 2. ÈÏÔô×÷¸¸£¬°ÚºÃÕóĞÍ
+                // 2. è®¤è´¼ä½œçˆ¶ï¼Œæ‘†å¥½é˜µå‹
                 bullet.transform.SetParent(squareParent.transform);
                 bullet.transform.localPosition = localPos;
                 core.Register(bullet.transform);
 
-                // 3. µ÷Õû³¯Ïò
+                // 3. è°ƒæ•´æœå‘
                 float rotAngle = Mathf.Atan2(localPos.y, localPos.x) * Mathf.Rad2Deg;
                 bullet.transform.rotation = Quaternion.Euler(0, 0, rotAngle);
 
-                // 4. ¿ªÆôÕóĞÍ½Ó¹ÜÄ£Ê½
+                // 4. å¼€å¯é˜µå‹æ¥ç®¡æ¨¡å¼
                 Enemy_Projectile p = bullet.GetComponent<Enemy_Projectile>();
                 if (p != null)
                 {
@@ -316,16 +408,16 @@ public class BossBulletEmitter : MonoBehaviour
                 formationCtrl.AddBullet(bullet.transform, localPos);
             }
         }
-        // 5. ×¢²áµ½ÕóĞÍ¿ØÖÆÆ÷
-        formationCtrl.StartFormation(currentFormationDuration, rot);
+        // 5. æ³¨å†Œåˆ°é˜µå‹æ§åˆ¶å™¨
+        formationCtrl.StartFormation(CurrentFormationDuration, rot);
     }
 
     private void SpawnTriangleBurst()
     {
         Vector2[] spawnPositions = new Vector2[triangleBulletCount];
 
-        //¸ù¾İ¹«Ê½µÃ³öÌØ¶¨½Ç¶ÈÏÂµÄxy×ø±ê
-        for(int i = 0; i  < triangleBulletCount; i++)
+        //æ ¹æ®å…¬å¼å¾—å‡ºç‰¹å®šè§’åº¦ä¸‹çš„xyåæ ‡
+        for (int i = 0; i < triangleBulletCount; i++)
         {
             float angle = (i / (float)triangleBulletCount) * 2 * Mathf.PI;
 
@@ -344,19 +436,19 @@ public class BossBulletEmitter : MonoBehaviour
         rot.speed = triangleBulletSpeed;
         rot.rotationSpeed = Random.Range(0, 2) == 0 ? Random.Range(45f, 120f) : Random.Range(-120f, -45f);
 
-        // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃĞÂµÄÎ»ÔËËã¼ì²é·½ÕóÊÇ·ñĞèÒª¼ÓËÙ
+        // ã€ä¿®æ”¹ã€‘ï¼šä½¿ç”¨æ–°çš„ä½è¿ç®—æ£€æŸ¥æ–¹é˜µæ˜¯å¦éœ€è¦åŠ é€Ÿ
         rot.enableAcceleration = IsCurrentAttackAccelerated();
         rot.accelerationRate = accelerationRate;
 
-        formationCtrl.StartFormation(currentFormationDuration, rot);
+        formationCtrl.StartFormation(CurrentFormationDuration, rot);
     }
 
     private void SpawnStarBurst()
     {
         Vector2[] spawnPositions = new Vector2[starBulletCount];
 
-        //¸ù¾İ¹«Ê½µÃ³öÌØ¶¨½Ç¶ÈÏÂµÄxy×ø±ê
-        for(int i = 0; i  < starBulletCount; i++)
+        //æ ¹æ®å…¬å¼å¾—å‡ºç‰¹å®šè§’åº¦ä¸‹çš„xyåæ ‡
+        for (int i = 0; i < starBulletCount; i++)
         {
             float angle = (i / (float)starBulletCount) * 2 * Mathf.PI;
 
@@ -375,45 +467,45 @@ public class BossBulletEmitter : MonoBehaviour
         rot.speed = starBulletSpeed;
         rot.rotationSpeed = Random.Range(0, 2) == 0 ? Random.Range(45f, 120f) : Random.Range(-120f, -45f);
 
-        // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃĞÂµÄÎ»ÔËËã¼ì²é·½ÕóÊÇ·ñĞèÒª¼ÓËÙ
+        // ã€ä¿®æ”¹ã€‘ï¼šä½¿ç”¨æ–°çš„ä½è¿ç®—æ£€æŸ¥æ–¹é˜µæ˜¯å¦éœ€è¦åŠ é€Ÿ
         rot.enableAcceleration = IsCurrentAttackAccelerated();
         rot.accelerationRate = accelerationRate;
 
-        formationCtrl.StartFormation(currentFormationDuration, rot);
+        formationCtrl.StartFormation(CurrentFormationDuration, rot);
     }
 
     /// <summary>
-    /// ´´½¨Ò»¸ö´îÔØshape formation controllerµÄ¸¸¶ÔÏó£¬·µ»ØÆäshape formation controller×é¼ş
+    /// åˆ›å»ºä¸€ä¸ªæ­è½½shape formation controllerçš„çˆ¶å¯¹è±¡ï¼Œè¿”å›å…¶shape formation controllerç»„ä»¶
     /// </summary>
-    /// <param name="bulletPositions">×Óµ¯Î»ÖÃ</param>
-    /// <param name="parentName">¸¸¶ÔÏóÃû×Ö</param>
+    /// <param name="bulletPositions">å­å¼¹ä½ç½®</param>
+    /// <param name="parentName">çˆ¶å¯¹è±¡åå­—</param>
     /// <returns></returns>
     private ShapeFormationController CreateFormationParent(Vector2[] bulletPositions, string parentName, Vector3 spawnPos)
     {
-        //´´½¨¸¸ÎïÌå
+        //åˆ›å»ºçˆ¶ç‰©ä½“
         GameObject Parent = new GameObject(parentName);
         Parent.transform.position = spawnPos;
 
         FormationCore core = Parent.AddComponent<FormationCore>();
         ShapeFormationController formationCtrl = Parent.AddComponent<ShapeFormationController>();
 
-        for(int i = 0; i < bulletPositions.Length; i++)
+        for (int i = 0; i < bulletPositions.Length; i++)
         {
             Vector2 localPos = bulletPositions[i];
 
-            // 1. ´Ó¶ÔÏó³Ø»ñÈ¡×Óµ¯
+            // 1. ä»å¯¹è±¡æ± è·å–å­å¼¹
             GameObject bullet = ObjectPoolManager.Instance.Get(projectileKey);
             if (bullet == null) continue;
 
-            // 2. ÈÏÔô×÷¸¸£¬°ÚºÃÕóĞÍ
+            // 2. è®¤è´¼ä½œçˆ¶ï¼Œæ‘†å¥½é˜µå‹
             bullet.transform.SetParent(Parent.transform);
             core.Register(bullet.transform);
 
-            // 3. µ÷Õû³¯Ïò
+            // 3. è°ƒæ•´æœå‘
             float rotAngle = Mathf.Atan2(localPos.y, localPos.x) * Mathf.Rad2Deg;
             bullet.transform.rotation = Quaternion.Euler(0, 0, rotAngle);
 
-            // 4. ¿ªÆôÕóĞÍ½Ó¹ÜÄ£Ê½
+            // 4. å¼€å¯é˜µå‹æ¥ç®¡æ¨¡å¼
             Enemy_Projectile p = bullet.GetComponent<Enemy_Projectile>();
             if (p != null)
             {
@@ -428,7 +520,7 @@ public class BossBulletEmitter : MonoBehaviour
 
     private GameObject SpawnProjectile(Vector2 dir, Vector3 spawnPos, string objectPoolKey, float speedOverride)
     {
-        //¶ÔÏó³Øµ÷ÓÃ
+        //å¯¹è±¡æ± è°ƒç”¨
         GameObject bullet = ObjectPoolManager.Instance?.Get(objectPoolKey);
         if (bullet == null) return null;
         bullet.transform.position = spawnPos;
@@ -438,7 +530,7 @@ public class BossBulletEmitter : MonoBehaviour
             projScript.Setup(dir);
             projScript.speed = speedOverride;
 
-            // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃĞÂµÄÎ»ÔËËã¼ì²éÊÇ·ñĞèÒª¹ÒÔØ¼ÓËÙÆ÷
+            // ã€ä¿®æ”¹ã€‘ï¼šä½¿ç”¨æ–°çš„ä½è¿ç®—æ£€æŸ¥æ˜¯å¦éœ€è¦æŒ‚è½½åŠ é€Ÿå™¨
             if (IsCurrentAttackAccelerated())
             {
                 BulletAcceleration acc = bullet.GetComponent<BulletAcceleration>();
@@ -448,7 +540,7 @@ public class BossBulletEmitter : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning($"[Emitter] {bullet.name} È±ÉÙ BulletAcceleration ×é¼ş£¬¼ÓËÙÎ´ÉúĞ§¡£", bullet);
+                    Debug.LogWarning($"[Emitter] {bullet.name} ç¼ºå°‘ BulletAcceleration ç»„ä»¶ï¼ŒåŠ é€Ÿæœªç”Ÿæ•ˆã€‚", bullet);
                 }
             }
         }
@@ -457,7 +549,7 @@ public class BossBulletEmitter : MonoBehaviour
 }
 
 // ==========================================
-// ¸¨ÖúÀà±£³Ö²»±ä
+// è¾…åŠ©ç±»ä¿æŒä¸å˜
 public class RotatingFormation : FormationBase
 {
     public Vector2 direction;
@@ -487,11 +579,11 @@ public class RotatingFormation : FormationBase
     }
 }
 
-//rotating formationµÈformation ÀàµÄ»ùÀà
+//rotating formationç­‰formation ç±»çš„åŸºç±»
 public class FormationBase : MonoBehaviour
 {
     protected virtual void Update()
     {
-        
+
     }
 }

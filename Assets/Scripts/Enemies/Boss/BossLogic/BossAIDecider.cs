@@ -1,119 +1,293 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Boss çš„å†³ç­–å¤§è„‘ã€‚
+///
+/// Inspector æŒ‰è¯­ä¹‰åˆ†åˆ—è¡¨ï¼Œæ–¹ä¾¿è°ƒè¯•ï¼›å†…éƒ¨ä»åˆå¹¶æˆä¸€ä¸ªç»Ÿä¸€å¡æ± æŠ½å¡ï¼Œ
+/// æŠ½å¡é€»è¾‘ä¸æŠ€èƒ½ç±»å‹å®Œå…¨æ— å…³ï¼ˆåªè¯»åŸºç±»çš„ baseWeight / min / maxCastDistance / cooldownï¼‰ã€‚
+///
+/// ã€æœ¬æ¬¡æ”¹åŠ¨ã€‘Specials æ‹†æˆ SpecialBullets / SpecialMelees ä¸¤ä¸ªæ¡¶ã€‚
+/// æ³¨æ„å®ƒä»¬çš„ç±»å‹ä»æ˜¯ List&lt;ActionNode&gt; è€Œä¸æ˜¯ List&lt;LaserNode&gt; â€”â€” è¿™æ˜¯æœ‰æ„çš„ï¼š
+/// æŒ‰è¯­ä¹‰åˆ†æ¡¶è€ŒéæŒ‰ç±»å‹åˆ†æ¡¶ï¼Œä»¥åå†åŠ ç‰¹æ®ŠæŠ€èƒ½åªè¦ä¸¢è¿›å¯¹åº”çš„æ¡¶ï¼Œæœ¬æ–‡ä»¶ä¸€è¡Œéƒ½ä¸ç”¨æ”¹ã€‚
+/// </summary>
 public class BossAIDecider : MonoBehaviour
 {
     private BossController boss;
 
-    [Header("--- ¼¼ÄÜ³ØÓëÌØÕĞ ---")]
-    [SerializeField] List<ActionNode> phase1Action; // ¡¾ĞŞ¸Ä¡¿£ºÖ±½Ó´æ·Å×Ê²ú£¬²»ÔÙÌ×¿Ç
-    [SerializeField] List<ActionNode> phase2Action;
-    [Tooltip("µ±±»±ÆÈëËÀ½ÇÊ±£¬Ç¿ÖÆ³é³öµÄ±£Ãüµ×ÅÆ")]
-    public ActionNode tpSkill;
+    // ==========================================================
+    //  Inspectorï¼šæŒ‰è¯­ä¹‰åˆ†åˆ—è¡¨ï¼Œä»…ä¸ºè°ƒè¯•æ–¹ä¾¿
+    // ==========================================================
 
-    private List<ActionNode> currentAttackNodes;
+    [Header("--- ä¸€é˜¶æ®µæ‹›å¼æ±  ---")]
+    [SerializeField] private List<BulletNode> phase1Bullets = new List<BulletNode>();
+    [SerializeField] private List<MeleeNode> phase1Melees = new List<MeleeNode>();
+    [SerializeField] private List<TeleportNode> phase1Teleports = new List<TeleportNode>();
 
-    // ¡¾ĞŞ¸Ä¡¿£ºÅ×Æú¹Ì¶¨±äÁ¿£¬µ±Ç°¿¨³ØÖĞ×îÔ¶µÄÊ©·¨¾àÀë£¬¾ÍÊÇ Boss µÄÓĞĞ§Ë÷µĞ¾àÀë
-    public bool canAttack => boss.DistanceToPlayer <= GetMaxAggroRange();
+    [Tooltip("è¿œç¨‹ç³»ç‰¹æ®ŠæŠ€èƒ½ï¼ˆæ¿€å…‰ç­‰ï¼‰ã€‚æ”¾ä»»ä½• ActionNode æ´¾ç”Ÿèµ„äº§å³å¯ã€‚")]
+    [SerializeField] private List<ActionNode> phase1SpecialBullets = new List<ActionNode>();
 
-    void Start()
+    [Tooltip("è¿‘æˆ˜ç³»ç‰¹æ®ŠæŠ€èƒ½ï¼ˆçªè¿›æ–©ç­‰ï¼‰ã€‚æ”¾ä»»ä½• ActionNode æ´¾ç”Ÿèµ„äº§å³å¯ã€‚")]
+    [SerializeField] private List<ActionNode> phase1SpecialMelees = new List<ActionNode>();
+
+    [Header("--- äºŒé˜¶æ®µæ‹›å¼æ±  ---")]
+    [SerializeField] private List<BulletNode> phase2Bullets = new List<BulletNode>();
+    [SerializeField] private List<MeleeNode> phase2Melees = new List<MeleeNode>();
+    [SerializeField] private List<TeleportNode> phase2Teleports = new List<TeleportNode>();
+    [SerializeField] private List<ActionNode> phase2SpecialBullets = new List<ActionNode>();
+    [SerializeField] private List<ActionNode> phase2SpecialMelees = new List<ActionNode>();
+
+    [Header("--- ç´§æ€¥ä¼ é€ï¼ˆè¢«é€¼æ­»è§’æ—¶çš„ä¿å‘½åº•ç‰Œï¼‰---")]
+    [Tooltip("è¢«é€¼å…¥å¢™è§’æ—¶ä»è¿™é‡ŒéšæœºæŠ½ä¸€å¼ ã€‚ç•™ç©ºåˆ™ä¸åšæ­»è§’ç‰¹åˆ¤ã€‚")]
+    [SerializeField] private List<TeleportNode> emergencyTeleports = new List<TeleportNode>();
+
+    [Header("--- æ„å›¾é¢„çº¦å‚æ•° ---")]
+    [Tooltip("æŠ½åˆ°å¤Ÿä¸ç€çš„ç‰Œæ—¶ï¼Œæœ€å¤šå…è®¸è¿ç»­å‡ è½®ä¸ºå®ƒé ä½ã€‚è¶…è¿‡åˆ™æ”¾å¼ƒè¿™å¼ ç‰Œï¼Œ" +
+             "é¿å…ç©å®¶ç«™åœ¨å¤Ÿä¸åˆ°çš„åœ°æ–¹æ—¶ Boss åŸåœ°ç½šç«™ã€‚")]
+    [SerializeField] private int maxPendingAttempts = 3;
+
+    [Tooltip("å¡æ± å…¨ç©ºæˆ–å…¨åœ¨å†·å´æ—¶çš„å…œåº•ç‰Œã€‚å¼ºçƒˆå»ºè®®é…ä¸€å¼ ï¼Œå¦åˆ™ä¼šå‡ºç°çŠ¶æ€æŠ–åŠ¨ã€‚")]
+    [SerializeField] private ActionNode fallbackNode;
+
+    // ==========================================================
+    //  è¿è¡Œæ—¶æ•°æ®
+    // ==========================================================
+
+    private readonly List<ActionNode> currentPool = new List<ActionNode>();
+    private readonly List<ActionNode> validBuffer = new List<ActionNode>(16);
+    private readonly Dictionary<ActionNode, float> nextAvailableTime
+        = new Dictionary<ActionNode, float>();
+
+    /// <summary>å½“å‰é¢„çº¦çš„æ„å›¾ï¼šæƒ³ç”¨ä½†æš‚æ—¶å¤Ÿä¸ç€çš„ç‰Œã€‚MoveState ä¼šæœå®ƒçš„å°„ç¨‹é ä½ã€‚</summary>
+    public ActionNode PendingNode { get; private set; }
+    private int pendingAttempts;
+
+    public bool canAttack => boss != null && boss.DistanceToPlayer <= GetMaxAggroRange();
+
+    void Awake()
     {
         boss = GetComponent<BossController>();
-        currentAttackNodes = phase1Action;
+        RebuildPool(false);
     }
 
     public void SwitchToPhase2()
     {
-        Debug.Log("[BossAIDecider] ÇĞ»»µ½¶ş½×¶ÎÕĞÊ½³Ø£¡");
-        currentAttackNodes = phase2Action;
+        Debug.Log("[BossAIDecider] åˆ‡æ¢åˆ°äºŒé˜¶æ®µæ‹›å¼æ± ï¼");
+        RebuildPool(true);
+        ClearPending();
+        nextAvailableTime.Clear(); // è½¬é˜¶æ®µé‡ç½®æ‰€æœ‰å†·å´
     }
 
-    // ¸¨Öú·½·¨£º¶¯Ì¬»ñÈ¡µ±Ç°¿¨³ØµÄ×îÔ¶Éä³Ì
+    private void RebuildPool(bool phase2)
+    {
+        currentPool.Clear();
+
+        if (phase2)
+        {
+            AddRange(phase2Bullets);
+            AddRange(phase2Melees);
+            AddRange(phase2Teleports);
+            AddRange(phase2SpecialBullets);
+            AddRange(phase2SpecialMelees);
+        }
+        else
+        {
+            AddRange(phase1Bullets);
+            AddRange(phase1Melees);
+            AddRange(phase1Teleports);
+            AddRange(phase1SpecialBullets);
+            AddRange(phase1SpecialMelees);
+        }
+
+        if (currentPool.Count == 0)
+            Debug.LogWarning($"[BossAIDecider] {(phase2 ? "äºŒ" : "ä¸€")}é˜¶æ®µæ‹›å¼æ± ä¸ºç©ºï¼", this);
+    }
+
+    private void AddRange<T>(List<T> src) where T : ActionNode
+    {
+        if (src == null) return;
+        for (int i = 0; i < src.Count; i++)
+        {
+            if (src[i] != null) currentPool.Add(src[i]);
+        }
+    }
+
+    // ==========================================================
+    //  è·ç¦»å»ºè®®ï¼šä¾› MoveState ä½¿ç”¨
+    // ==========================================================
+
     private float GetMaxAggroRange()
     {
-        if (currentAttackNodes == null || currentAttackNodes.Count == 0) return 5f;
+        if (currentPool.Count == 0) return 5f;
+
         float maxRange = 0f;
-        foreach (var node in currentAttackNodes)
+        for (int i = 0; i < currentPool.Count; i++)
         {
-            if (node != null && node.maxCastDistance > maxRange) maxRange = node.maxCastDistance;
+            if (currentPool[i].maxCastDistance > maxRange) maxRange = currentPool[i].maxCastDistance;
         }
         return maxRange;
     }
 
-    // ¡¾ĞÂÔö¼Ü¹¹ÌØĞÔ¡¿£ºÍÆËãµ±Ç°¿¨³ØµÄ×îÓÅÀ­³¶¾àÀë£¬¹©Ë«ÍÈ£¨MoveState£©Ê¹ÓÃ
+    /// <summary>
+    /// æ¨ç®—å½“å‰åº”è¯¥ä¿æŒçš„æ¥æ•Œè·ç¦»ï¼Œä¾› MoveState ä½¿ç”¨ã€‚
+    /// ä¼˜å…ˆè¿”å›ã€Œé¢„çº¦æ„å›¾ã€çš„ç†æƒ³è·ç¦» â€”â€” è¿™æ˜¯è®© Boss èƒ½ä¸»åŠ¨å†²ä¸Šå»è¿‘æˆ˜çš„å…³é”®ã€‚
+    /// </summary>
     public float GetOptimalEngagementDistance()
     {
-        if (currentAttackNodes == null || currentAttackNodes.Count == 0) return 5f;
+        if (PendingNode != null) return MidRange(PendingNode);
 
-        ActionNode bestNode = null;
+        ActionNode best = null;
         int maxWeight = -1;
 
-        // ÕÒ³öµ±Ç°È¨ÖØ×î¸ß£¨×îÏëÓÃ£©µÄ¼¼ÄÜ
-        foreach (var node in currentAttackNodes)
+        for (int i = 0; i < currentPool.Count; i++)
         {
-            if (node != null && node.baseWeight > maxWeight)
+            ActionNode node = currentPool[i];
+            if (node.baseWeight > maxWeight)
             {
                 maxWeight = node.baseWeight;
-                bestNode = node;
+                best = node;
             }
         }
 
-        // È¡¸Ã¼¼ÄÜ×î´ó×îĞ¡Éä³ÌµÄÖĞ¼äÖµ£¬×÷ÎªÒÆ¶¯µÄ·çóİÄ¿±êµã
-        if (bestNode != null)
-        {
-            return (bestNode.minCastDistance + bestNode.maxCastDistance) / 2f;
-        }
-        return 5f;
+        return best != null ? MidRange(best) : 5f;
     }
+
+    private float MidRange(ActionNode node)
+        => (node.minCastDistance + node.maxCastDistance) * 0.5f;
+
+    // ==========================================================
+    //  æŠ½å¡
+    // ==========================================================
 
     public ActionNode SelectSkill()
     {
-        // 1. ËÀ½ÇÌØÅĞÀ¹½Ø
-        if (boss.bossState.bossMechanic.isCornered && boss.bossState.bossMechanic.currentTeleportTimer <= 0)
-        {
-            if (tpSkill != null)
-            {
-                Debug.Log("[AI] ±»±ÆÈëËÀ½Ç£¡Ç¿ĞĞÇĞÅÆ³öÀÏÇ§£º´«ËÍ£¡");
-                boss.bossState.bossMechanic.currentTeleportTimer = boss.bossState.bossMechanic.teleportCooldown;
-                return tpSkill;
-            }
-        }
-
-        // 2. ³£¹æ³é¿¨£ºÊµÊ±¹¹½¨ÓĞĞ§¿¨³Ø
-        if (currentAttackNodes == null || currentAttackNodes.Count == 0) return null;
-
         float dist = boss.DistanceToPlayer;
-        List<ActionNode> validNodes = new List<ActionNode>();
-        int totalSum = 0;
 
-        // ±éÀúËùÓĞÅÆ£¬Ö»ÓĞ¾àÀëºÏÊÊµÄÅÆ²ÅÓĞ×Ê¸ñÈë³Ø
-        foreach (ActionNode node in currentAttackNodes)
+        // ---- ç¬¬ä¸€å±‚ï¼šå¼ºåˆ¶æ‰“æ–­ï¼ˆæ­»è§’é€ƒç”Ÿï¼‰----
+        ActionNode emergency = TrySelectEmergency();
+        if (emergency != null)
         {
-            if (node == null) continue;
+            ClearPending();
+            return Commit(emergency);
+        }
 
-            if (dist >= node.minCastDistance && dist <= node.maxCastDistance)
+        // ---- ç¬¬äºŒå±‚ï¼šå…‘ç°é¢„çº¦ ----
+        if (PendingNode != null)
+        {
+            if (IsInRange(PendingNode, dist) && IsOffCooldown(PendingNode))
             {
-                validNodes.Add(node);
-                totalSum += node.baseWeight; // ¡¾ĞŞ¸Ä¡¿£ºÖ±½Ó¶ÁÈ¡×Ê²úµÄ»ù´¡È¨ÖØ
+                ActionNode node = PendingNode;
+                ClearPending();
+                return Commit(node);
+            }
+
+            pendingAttempts++;
+            if (pendingAttempts > maxPendingAttempts)
+            {
+                Debug.Log($"[AI] é¢„çº¦ {PendingNode.actionName} é ä½å¤±è´¥ {pendingAttempts} æ¬¡ï¼Œæ”¾å¼ƒã€‚");
+                ClearPending();
+            }
+            else
+            {
+                return null; // å› MoveState ç»§ç»­é ä½
             }
         }
 
-        if (totalSum <= 0) return null; // Ã»ÓĞÈÎºÎ¼¼ÄÜµÄ¾àÀëºÏÊÊ
+        // ---- ç¬¬ä¸‰å±‚ï¼šå¸¸è§„åŠ æƒæŠ½å¡ ----
+        ActionNode picked = DrawFromPool(node => IsInRange(node, dist) && IsOffCooldown(node));
+        if (picked != null) return Commit(picked);
 
-        // 3. °´È¨ÖØËæ»ú³éÈ¡
-        int rn = Random.Range(1, totalSum + 1);
-        int compareNum = 0;
-
-        foreach (ActionNode node in validNodes)
+        // ---- ç¬¬å››å±‚ï¼šå¤Ÿä¸ç€å°±é¢„çº¦ ----
+        ActionNode wanted = DrawFromPool(node => IsOffCooldown(node));
+        if (wanted != null)
         {
-            compareNum += node.baseWeight;
-            if (rn <= compareNum)
-            {
-                Debug.Log($"[AI] Ëæ»ú³é¿¨: {node.actionName}");
-                return node;
-            }
+            PendingNode = wanted;
+            pendingAttempts = 0;
+            Debug.Log($"[AI] æƒ³ç”¨ {wanted.actionName} ä½†è·ç¦»ä¸åˆé€‚ï¼ˆå½“å‰ {dist:F1}ï¼Œ" +
+                      $"éœ€è¦ {wanted.minCastDistance}~{wanted.maxCastDistance}ï¼‰ï¼Œå…ˆå»é ä½ã€‚");
+            return null;
+        }
+
+        // ---- ç¬¬äº”å±‚ï¼šå…œåº• ----
+        if (fallbackNode != null) return Commit(fallbackNode);
+
+        return null;
+    }
+
+    private ActionNode DrawFromPool(System.Func<ActionNode, bool> filter)
+    {
+        validBuffer.Clear();
+        int totalWeight = 0;
+
+        for (int i = 0; i < currentPool.Count; i++)
+        {
+            ActionNode node = currentPool[i];
+            if (node.baseWeight <= 0) continue;
+            if (!filter(node)) continue;
+
+            validBuffer.Add(node);
+            totalWeight += node.baseWeight;
+        }
+
+        if (totalWeight <= 0) return null;
+
+        int roll = Random.Range(1, totalWeight + 1);
+        int acc = 0;
+
+        for (int i = 0; i < validBuffer.Count; i++)
+        {
+            acc += validBuffer[i].baseWeight;
+            if (roll <= acc) return validBuffer[i];
         }
 
         return null;
+    }
+
+    private ActionNode TrySelectEmergency()
+    {
+        BossMechanic mech = boss.bossState.bossMechanic;
+
+        if (!mech.isCornered) return null;
+        if (mech.currentTeleportTimer > 0) return null;
+        if (emergencyTeleports == null || emergencyTeleports.Count == 0) return null;
+
+        validBuffer.Clear();
+        for (int i = 0; i < emergencyTeleports.Count; i++)
+        {
+            if (emergencyTeleports[i] != null) validBuffer.Add(emergencyTeleports[i]);
+        }
+        if (validBuffer.Count == 0) return null;
+
+        mech.currentTeleportTimer = mech.teleportCooldown;
+
+        ActionNode pick = validBuffer[Random.Range(0, validBuffer.Count)];
+        Debug.Log($"[AI] è¢«é€¼å…¥æ­»è§’ï¼å¼ºè¡Œåˆ‡ç‰Œå‡ºè€åƒï¼š{pick.actionName}");
+        return pick;
+    }
+
+    // ==========================================================
+    //  è¾…åŠ©
+    // ==========================================================
+
+    private bool IsInRange(ActionNode node, float dist)
+        => dist >= node.minCastDistance && dist <= node.maxCastDistance;
+
+    private bool IsOffCooldown(ActionNode node)
+    {
+        if (node.cooldown <= 0f) return true;
+        return !nextAvailableTime.TryGetValue(node, out float readyAt) || Time.time >= readyAt;
+    }
+
+    private ActionNode Commit(ActionNode node)
+    {
+        if (node.cooldown > 0f) nextAvailableTime[node] = Time.time + node.cooldown;
+        Debug.Log($"[AI] å‡ºç‰Œ: {node.actionName}ï¼ˆ{node.GetType().Name}ï¼‰");
+        return node;
+    }
+
+    private void ClearPending()
+    {
+        PendingNode = null;
+        pendingAttempts = 0;
     }
 }

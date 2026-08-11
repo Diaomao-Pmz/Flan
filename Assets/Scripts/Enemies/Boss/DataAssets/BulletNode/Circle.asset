@@ -20,5 +20,7 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
+  phases: []
   AttackName: Circle
   formationDuration: 0
+  attackDuration: 3

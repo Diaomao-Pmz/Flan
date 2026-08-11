@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1257e99a183cc24987c1e194c4bd38e, type: 3}
+  m_Name: DashAttack
+  m_EditorClassIdentifier: Assembly-CSharp::DashAttackNode
+  actionName: DashAttack
+  baseWeight: 100
+  cooldown: 0
+  minCastDistance: 5
+  maxCastDistance: 12
+  chargeAnimName: 
+  activeAnimName: 
+  recoverAnimName: 
+  windupBeforeDash: 0.35
+  dashSpeed: 14
+  maxDashDistance: 10
+  stopDistance: 1.2
+  dashTimeout: 1.2
+  stopOnWall: 1
+  pauseAfterDash: 0.1
+  swings:
+  - windupTime: 0
+    hitboxDuration: 0.5
+    recoverTime: 0
+    hitboxOffset: {x: 1.5, y: 0}
+    hitboxSize: {x: 1, y: 2}
+    damage: 20
+    swingAnimName: 
+  faceTargetEachSwing: 0
+  dashAnimName: 

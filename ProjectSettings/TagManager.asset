@@ -49,6 +49,9 @@ TagManager:
   - name: background
     uniqueID: 3697120471
     locked: 0
+  - name: particle
+    uniqueID: 2885951753
+    locked: 0
   - name: ground
     uniqueID: 70045743
     locked: 0
@@ -60,9 +63,6 @@ TagManager:
     locked: 0
   - name: Enemy
     uniqueID: 2779875259
-    locked: 0
-  - name: particle
-    uniqueID: 2885951753
     locked: 0
   - name: player
     uniqueID: 525374203

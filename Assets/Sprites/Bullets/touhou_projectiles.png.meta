@@ -688,18 +688,18 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
-    wrapU: 1
-    wrapV: 1
-    wrapW: 1
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -780,12 +780,12 @@ TextureImporter:
       name: touhou_projectiles_0
       rect:
         serializedVersion: 2
-        x: 9
+        x: 10
         y: 528
-        width: 258
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        width: 255
+        height: 15
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -802,12 +802,12 @@ TextureImporter:
       name: touhou_projectiles_1
       rect:
         serializedVersion: 2
-        x: 9
-        y: 479
-        width: 258
-        height: 49
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 269
+        y: 528
+        width: 48
+        height: 16
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -824,12 +824,12 @@ TextureImporter:
       name: touhou_projectiles_2
       rect:
         serializedVersion: 2
-        x: 268
-        y: 527
-        width: 50
-        height: 18
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 318
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -846,12 +846,12 @@ TextureImporter:
       name: touhou_projectiles_3
       rect:
         serializedVersion: 2
-        x: 317
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 334
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -868,12 +868,12 @@ TextureImporter:
       name: touhou_projectiles_4
       rect:
         serializedVersion: 2
-        x: 332
-        y: 463
-        width: 129
-        height: 65
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 350
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -890,12 +890,12 @@ TextureImporter:
       name: touhou_projectiles_5
       rect:
         serializedVersion: 2
-        x: 333
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 366
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -912,12 +912,12 @@ TextureImporter:
       name: touhou_projectiles_6
       rect:
         serializedVersion: 2
-        x: 349
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 382
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -934,12 +934,12 @@ TextureImporter:
       name: touhou_projectiles_7
       rect:
         serializedVersion: 2
-        x: 365
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 398
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -956,12 +956,12 @@ TextureImporter:
       name: touhou_projectiles_8
       rect:
         serializedVersion: 2
-        x: 381
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 414
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -978,12 +978,12 @@ TextureImporter:
       name: touhou_projectiles_9
       rect:
         serializedVersion: 2
-        x: 397
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 430
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1000,12 +1000,12 @@ TextureImporter:
       name: touhou_projectiles_10
       rect:
         serializedVersion: 2
-        x: 413
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 446
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1022,12 +1022,12 @@ TextureImporter:
       name: touhou_projectiles_11
       rect:
         serializedVersion: 2
-        x: 429
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 462
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1044,12 +1044,12 @@ TextureImporter:
       name: touhou_projectiles_12
       rect:
         serializedVersion: 2
-        x: 445
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 478
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1066,12 +1066,12 @@ TextureImporter:
       name: touhou_projectiles_13
       rect:
         serializedVersion: 2
-        x: 461
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 494
+        y: 529
+        width: 15
+        height: 15
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1088,12 +1088,12 @@ TextureImporter:
       name: touhou_projectiles_14
       rect:
         serializedVersion: 2
-        x: 461
-        y: 464
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 510
+        y: 529
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1110,12 +1110,12 @@ TextureImporter:
       name: touhou_projectiles_15
       rect:
         serializedVersion: 2
-        x: 477
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 10
+        y: 480
+        width: 256
+        height: 47
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1132,12 +1132,12 @@ TextureImporter:
       name: touhou_projectiles_16
       rect:
         serializedVersion: 2
-        x: 493
-        y: 528
-        width: 17
-        height: 17
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 273
+        y: 499
+        width: 12
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1154,12 +1154,12 @@ TextureImporter:
       name: touhou_projectiles_17
       rect:
         serializedVersion: 2
-        x: 509
-        y: 528
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 278
+        y: 465
+        width: 55
+        height: 61
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1176,12 +1176,12 @@ TextureImporter:
       name: touhou_projectiles_18
       rect:
         serializedVersion: 2
-        x: 272
-        y: 498
-        width: 14
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 333
+        y: 464
+        width: 127
+        height: 63
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1198,12 +1198,12 @@ TextureImporter:
       name: touhou_projectiles_19
       rect:
         serializedVersion: 2
-        x: 277
-        y: 464
-        width: 57
-        height: 63
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 462
+        y: 465
+        width: 62
+        height: 62
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1220,12 +1220,12 @@ TextureImporter:
       name: touhou_projectiles_20
       rect:
         serializedVersion: 2
-        x: 268
-        y: 484
-        width: 10
-        height: 6
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 269
+        y: 485
+        width: 8
+        height: 4
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1242,12 +1242,12 @@ TextureImporter:
       name: touhou_projectiles_21
       rect:
         serializedVersion: 2
-        x: 9
-        y: 351
-        width: 258
-        height: 130
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 14
+        y: 465
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1264,12 +1264,12 @@ TextureImporter:
       name: touhou_projectiles_22
       rect:
         serializedVersion: 2
-        x: 13
-        y: 464
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 30
+        y: 465
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1286,12 +1286,12 @@ TextureImporter:
       name: touhou_projectiles_23
       rect:
         serializedVersion: 2
-        x: 29
-        y: 464
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 46
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1308,12 +1308,12 @@ TextureImporter:
       name: touhou_projectiles_24
       rect:
         serializedVersion: 2
-        x: 45
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 62
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1330,12 +1330,12 @@ TextureImporter:
       name: touhou_projectiles_25
       rect:
         serializedVersion: 2
-        x: 61
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 78
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1352,12 +1352,12 @@ TextureImporter:
       name: touhou_projectiles_26
       rect:
         serializedVersion: 2
-        x: 77
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 94
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1374,12 +1374,12 @@ TextureImporter:
       name: touhou_projectiles_27
       rect:
         serializedVersion: 2
-        x: 93
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 110
+        y: 465
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1396,12 +1396,12 @@ TextureImporter:
       name: touhou_projectiles_28
       rect:
         serializedVersion: 2
-        x: 109
-        y: 464
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 126
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1418,12 +1418,12 @@ TextureImporter:
       name: touhou_projectiles_29
       rect:
         serializedVersion: 2
-        x: 125
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 142
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1440,12 +1440,12 @@ TextureImporter:
       name: touhou_projectiles_30
       rect:
         serializedVersion: 2
-        x: 141
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 158
+        y: 465
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1462,12 +1462,12 @@ TextureImporter:
       name: touhou_projectiles_31
       rect:
         serializedVersion: 2
-        x: 157
-        y: 464
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 174
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1484,12 +1484,12 @@ TextureImporter:
       name: touhou_projectiles_32
       rect:
         serializedVersion: 2
-        x: 173
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 190
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1506,12 +1506,12 @@ TextureImporter:
       name: touhou_projectiles_33
       rect:
         serializedVersion: 2
-        x: 189
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 206
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1528,12 +1528,12 @@ TextureImporter:
       name: touhou_projectiles_34
       rect:
         serializedVersion: 2
-        x: 205
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 222
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1550,12 +1550,12 @@ TextureImporter:
       name: touhou_projectiles_35
       rect:
         serializedVersion: 2
-        x: 221
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 238
+        y: 465
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1572,12 +1572,12 @@ TextureImporter:
       name: touhou_projectiles_36
       rect:
         serializedVersion: 2
-        x: 237
-        y: 464
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 254
+        y: 465
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1594,12 +1594,12 @@ TextureImporter:
       name: touhou_projectiles_37
       rect:
         serializedVersion: 2
-        x: 253
-        y: 464
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 396
+        y: 336
+        width: 130
+        height: 129
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1616,12 +1616,12 @@ TextureImporter:
       name: touhou_projectiles_38
       rect:
         serializedVersion: 2
-        x: 269
-        y: 400
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 10
+        y: 336
+        width: 256
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1638,12 +1638,12 @@ TextureImporter:
       name: touhou_projectiles_39
       rect:
         serializedVersion: 2
-        x: 333
-        y: 400
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 270
+        y: 401
+        width: 62
+        height: 62
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1660,12 +1660,12 @@ TextureImporter:
       name: touhou_projectiles_40
       rect:
         serializedVersion: 2
-        x: 398
-        y: 337
-        width: 129
-        height: 126
-      alignment: 9
-      pivot: {x: 0.5, y: 0.49489242}
+        x: 334
+        y: 401
+        width: 62
+        height: 62
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1682,12 +1682,12 @@ TextureImporter:
       name: touhou_projectiles_41
       rect:
         serializedVersion: 2
-        x: 271
-        y: 367
-        width: 29
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 272
+        y: 368
+        width: 27
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1704,12 +1704,12 @@ TextureImporter:
       name: touhou_projectiles_42
       rect:
         serializedVersion: 2
-        x: 271
-        y: 335
-        width: 29
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 305
+        y: 368
+        width: 26
+        height: 29
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1726,12 +1726,12 @@ TextureImporter:
       name: touhou_projectiles_43
       rect:
         serializedVersion: 2
-        x: 304
-        y: 367
-        width: 28
+        x: 337
+        y: 368
+        width: 27
         height: 31
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1748,12 +1748,12 @@ TextureImporter:
       name: touhou_projectiles_44
       rect:
         serializedVersion: 2
-        x: 333
-        y: 319
-        width: 63
-        height: 49
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 368
+        y: 368
+        width: 27
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1770,12 +1770,12 @@ TextureImporter:
       name: touhou_projectiles_45
       rect:
         serializedVersion: 2
-        x: 336
-        y: 367
-        width: 29
-        height: 33
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 272
+        y: 336
+        width: 27
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1792,12 +1792,12 @@ TextureImporter:
       name: touhou_projectiles_46
       rect:
         serializedVersion: 2
-        x: 367
-        y: 367
-        width: 29
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 300
+        y: 288
+        width: 64
+        height: 77
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1814,12 +1814,12 @@ TextureImporter:
       name: touhou_projectiles_47
       rect:
         serializedVersion: 2
-        x: 10
-        y: 304
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 334
+        y: 320
+        width: 61
+        height: 47
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1836,12 +1836,12 @@ TextureImporter:
       name: touhou_projectiles_48
       rect:
         serializedVersion: 2
-        x: 42
-        y: 304
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 11
+        y: 305
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1858,12 +1858,12 @@ TextureImporter:
       name: touhou_projectiles_49
       rect:
         serializedVersion: 2
-        x: 74
-        y: 304
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 43
+        y: 305
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1880,12 +1880,12 @@ TextureImporter:
       name: touhou_projectiles_50
       rect:
         serializedVersion: 2
-        x: 106
-        y: 304
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 75
+        y: 305
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1902,12 +1902,12 @@ TextureImporter:
       name: touhou_projectiles_51
       rect:
         serializedVersion: 2
-        x: 138
-        y: 304
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 107
+        y: 305
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1924,12 +1924,12 @@ TextureImporter:
       name: touhou_projectiles_52
       rect:
         serializedVersion: 2
-        x: 170
-        y: 304
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 139
+        y: 305
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1946,12 +1946,12 @@ TextureImporter:
       name: touhou_projectiles_53
       rect:
         serializedVersion: 2
-        x: 202
-        y: 304
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 171
+        y: 305
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1968,12 +1968,12 @@ TextureImporter:
       name: touhou_projectiles_54
       rect:
         serializedVersion: 2
-        x: 234
-        y: 304
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 203
+        y: 305
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1990,12 +1990,12 @@ TextureImporter:
       name: touhou_projectiles_55
       rect:
         serializedVersion: 2
-        x: 270
-        y: 320
-        width: 15
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 235
+        y: 305
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2012,12 +2012,12 @@ TextureImporter:
       name: touhou_projectiles_56
       rect:
         serializedVersion: 2
-        x: 270
-        y: 289
-        width: 31
-        height: 31
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 271
+        y: 321
+        width: 13
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2034,12 +2034,12 @@ TextureImporter:
       name: touhou_projectiles_57
       rect:
         serializedVersion: 2
-        x: 286
-        y: 320
-        width: 15
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 287
+        y: 321
+        width: 13
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2056,12 +2056,12 @@ TextureImporter:
       name: touhou_projectiles_58
       rect:
         serializedVersion: 2
-        x: 299
-        y: 287
-        width: 66
-        height: 79
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 10
+        y: 288
+        width: 64
+        height: 16
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2078,12 +2078,12 @@ TextureImporter:
       name: touhou_projectiles_59
       rect:
         serializedVersion: 2
-        x: 365
-        y: 288
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 76
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2100,12 +2100,12 @@ TextureImporter:
       name: touhou_projectiles_60
       rect:
         serializedVersion: 2
-        x: 396
-        y: 288
-        width: 49
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 92
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2122,12 +2122,12 @@ TextureImporter:
       name: touhou_projectiles_61
       rect:
         serializedVersion: 2
-        x: 9
-        y: 287
-        width: 66
-        height: 18
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 108
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2144,12 +2144,12 @@ TextureImporter:
       name: touhou_projectiles_62
       rect:
         serializedVersion: 2
-        x: 75
-        y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 124
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2166,12 +2166,12 @@ TextureImporter:
       name: touhou_projectiles_63
       rect:
         serializedVersion: 2
-        x: 91
-        y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 140
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2188,12 +2188,12 @@ TextureImporter:
       name: touhou_projectiles_64
       rect:
         serializedVersion: 2
-        x: 107
-        y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 156
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2210,12 +2210,12 @@ TextureImporter:
       name: touhou_projectiles_65
       rect:
         serializedVersion: 2
-        x: 123
-        y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 172
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2232,12 +2232,12 @@ TextureImporter:
       name: touhou_projectiles_66
       rect:
         serializedVersion: 2
-        x: 139
-        y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 188
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2254,12 +2254,12 @@ TextureImporter:
       name: touhou_projectiles_67
       rect:
         serializedVersion: 2
-        x: 155
-        y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 204
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2276,12 +2276,12 @@ TextureImporter:
       name: touhou_projectiles_68
       rect:
         serializedVersion: 2
-        x: 171
-        y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 220
+        y: 290
+        width: 12
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2298,12 +2298,12 @@ TextureImporter:
       name: touhou_projectiles_69
       rect:
         serializedVersion: 2
-        x: 187
-        y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 271
+        y: 290
+        width: 29
+        height: 29
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2320,12 +2320,12 @@ TextureImporter:
       name: touhou_projectiles_70
       rect:
         serializedVersion: 2
-        x: 203
+        x: 366
         y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        width: 30
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2342,12 +2342,12 @@ TextureImporter:
       name: touhou_projectiles_71
       rect:
         serializedVersion: 2
-        x: 219
+        x: 397
         y: 289
-        width: 14
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        width: 47
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2364,12 +2364,12 @@ TextureImporter:
       name: touhou_projectiles_72
       rect:
         serializedVersion: 2
-        x: 467
-        y: 293
-        width: 20
-        height: 22
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 468
+        y: 294
+        width: 18
+        height: 20
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2386,12 +2386,12 @@ TextureImporter:
       name: touhou_projectiles_73
       rect:
         serializedVersion: 2
-        x: 7
-        y: 253
-        width: 258
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 8
+        y: 254
+        width: 256
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2408,12 +2408,12 @@ TextureImporter:
       name: touhou_projectiles_74
       rect:
         serializedVersion: 2
-        x: 7
-        y: 189
-        width: 258
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 269
+        y: 152
+        width: 67
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2430,12 +2430,12 @@ TextureImporter:
       name: touhou_projectiles_75
       rect:
         serializedVersion: 2
-        x: 268
-        y: 151
-        width: 69
-        height: 130
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 335
+        y: 152
+        width: 12
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2452,12 +2452,12 @@ TextureImporter:
       name: touhou_projectiles_76
       rect:
         serializedVersion: 2
-        x: 334
-        y: 151
-        width: 14
-        height: 130
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 351
+        y: 152
+        width: 13
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2474,12 +2474,12 @@ TextureImporter:
       name: touhou_projectiles_77
       rect:
         serializedVersion: 2
-        x: 350
-        y: 151
-        width: 15
-        height: 130
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 368
+        y: 196
+        width: 10
+        height: 70
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2496,12 +2496,12 @@ TextureImporter:
       name: touhou_projectiles_78
       rect:
         serializedVersion: 2
-        x: 367
-        y: 195
-        width: 12
-        height: 72
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 399
+        y: 253
+        width: 10
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2518,12 +2518,12 @@ TextureImporter:
       name: touhou_projectiles_79
       rect:
         serializedVersion: 2
-        x: 398
-        y: 252
-        width: 12
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 411
+        y: 249
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2540,12 +2540,12 @@ TextureImporter:
       name: touhou_projectiles_80
       rect:
         serializedVersion: 2
-        x: 410
-        y: 248
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 421
+        y: 253
+        width: 19
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2562,12 +2562,12 @@ TextureImporter:
       name: touhou_projectiles_81
       rect:
         serializedVersion: 2
-        x: 420
-        y: 252
-        width: 21
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 449
+        y: 253
+        width: 11
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2584,12 +2584,12 @@ TextureImporter:
       name: touhou_projectiles_82
       rect:
         serializedVersion: 2
-        x: 448
-        y: 252
-        width: 13
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 461
+        y: 253
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2606,12 +2606,12 @@ TextureImporter:
       name: touhou_projectiles_83
       rect:
         serializedVersion: 2
-        x: 460
-        y: 252
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 473
+        y: 253
+        width: 16
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2628,12 +2628,12 @@ TextureImporter:
       name: touhou_projectiles_84
       rect:
         serializedVersion: 2
-        x: 472
-        y: 252
-        width: 18
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 8
+        y: 190
+        width: 256
+        height: 62
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2650,12 +2650,12 @@ TextureImporter:
       name: touhou_projectiles_85
       rect:
         serializedVersion: 2
-        x: 399
-        y: 230
-        width: 10
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 400
+        y: 231
+        width: 8
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2672,12 +2672,12 @@ TextureImporter:
       name: touhou_projectiles_86
       rect:
         serializedVersion: 2
-        x: 408
-        y: 230
-        width: 8
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 409
+        y: 231
+        width: 6
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2694,12 +2694,12 @@ TextureImporter:
       name: touhou_projectiles_87
       rect:
         serializedVersion: 2
-        x: 414
-        y: 230
-        width: 8
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 415
+        y: 231
+        width: 6
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2716,12 +2716,12 @@ TextureImporter:
       name: touhou_projectiles_88
       rect:
         serializedVersion: 2
-        x: 420
-        y: 230
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 421
+        y: 231
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2738,12 +2738,12 @@ TextureImporter:
       name: touhou_projectiles_89
       rect:
         serializedVersion: 2
-        x: 431
-        y: 230
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 432
+        y: 231
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2760,12 +2760,12 @@ TextureImporter:
       name: touhou_projectiles_90
       rect:
         serializedVersion: 2
-        x: 440
-        y: 230
-        width: 17
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 441
+        y: 231
+        width: 15
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2782,12 +2782,12 @@ TextureImporter:
       name: touhou_projectiles_91
       rect:
         serializedVersion: 2
-        x: 398
-        y: 204
-        width: 7
-        height: 20
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 399
+        y: 205
+        width: 5
+        height: 18
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2804,12 +2804,12 @@ TextureImporter:
       name: touhou_projectiles_92
       rect:
         serializedVersion: 2
-        x: 405
-        y: 208
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 406
+        y: 209
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2826,12 +2826,12 @@ TextureImporter:
       name: touhou_projectiles_93
       rect:
         serializedVersion: 2
-        x: 414
-        y: 208
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 415
+        y: 209
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2848,12 +2848,12 @@ TextureImporter:
       name: touhou_projectiles_94
       rect:
         serializedVersion: 2
-        x: 427
-        y: 208
-        width: 16
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 428
+        y: 209
+        width: 14
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2870,12 +2870,12 @@ TextureImporter:
       name: touhou_projectiles_95
       rect:
         serializedVersion: 2
-        x: 443
-        y: 208
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 444
+        y: 209
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2892,12 +2892,12 @@ TextureImporter:
       name: touhou_projectiles_96
       rect:
         serializedVersion: 2
-        x: 460
-        y: 208
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 461
+        y: 209
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2914,12 +2914,12 @@ TextureImporter:
       name: touhou_projectiles_97
       rect:
         serializedVersion: 2
-        x: 471
-        y: 208
-        width: 8
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 472
+        y: 209
+        width: 6
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2936,12 +2936,12 @@ TextureImporter:
       name: touhou_projectiles_98
       rect:
         serializedVersion: 2
-        x: 11
-        y: 124
-        width: 26
-        height: 66
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 12
+        y: 125
+        width: 24
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2958,12 +2958,12 @@ TextureImporter:
       name: touhou_projectiles_99
       rect:
         serializedVersion: 2
-        x: 43
-        y: 124
-        width: 26
-        height: 66
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 44
+        y: 125
+        width: 24
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -2980,12 +2980,12 @@ TextureImporter:
       name: touhou_projectiles_100
       rect:
         serializedVersion: 2
-        x: 75
-        y: 124
-        width: 26
-        height: 66
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 76
+        y: 125
+        width: 24
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3002,12 +3002,12 @@ TextureImporter:
       name: touhou_projectiles_101
       rect:
         serializedVersion: 2
-        x: 107
-        y: 124
-        width: 26
-        height: 66
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 108
+        y: 125
+        width: 24
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3024,12 +3024,12 @@ TextureImporter:
       name: touhou_projectiles_102
       rect:
         serializedVersion: 2
-        x: 139
-        y: 124
-        width: 26
-        height: 66
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 140
+        y: 125
+        width: 24
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3046,12 +3046,12 @@ TextureImporter:
       name: touhou_projectiles_103
       rect:
         serializedVersion: 2
-        x: 171
-        y: 124
-        width: 26
-        height: 66
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 172
+        y: 125
+        width: 24
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3068,12 +3068,12 @@ TextureImporter:
       name: touhou_projectiles_104
       rect:
         serializedVersion: 2
-        x: 203
-        y: 124
-        width: 26
-        height: 66
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 204
+        y: 125
+        width: 24
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3090,12 +3090,12 @@ TextureImporter:
       name: touhou_projectiles_105
       rect:
         serializedVersion: 2
-        x: 235
-        y: 124
-        width: 26
-        height: 66
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 236
+        y: 125
+        width: 24
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3112,12 +3112,12 @@ TextureImporter:
       name: touhou_projectiles_106
       rect:
         serializedVersion: 2
-        x: 367
-        y: 167
-        width: 15
-        height: 30
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 368
+        y: 168
+        width: 13
+        height: 28
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3134,12 +3134,12 @@ TextureImporter:
       name: touhou_projectiles_107
       rect:
         serializedVersion: 2
-        x: 397
-        y: 186
-        width: 9
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 398
+        y: 187
+        width: 7
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3156,12 +3156,12 @@ TextureImporter:
       name: touhou_projectiles_108
       rect:
         serializedVersion: 2
-        x: 405
-        y: 186
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 406
+        y: 187
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3178,12 +3178,12 @@ TextureImporter:
       name: touhou_projectiles_109
       rect:
         serializedVersion: 2
-        x: 415
-        y: 186
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 416
+        y: 187
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3200,12 +3200,12 @@ TextureImporter:
       name: touhou_projectiles_110
       rect:
         serializedVersion: 2
-        x: 428
-        y: 186
-        width: 16
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 429
+        y: 187
+        width: 14
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3222,12 +3222,12 @@ TextureImporter:
       name: touhou_projectiles_111
       rect:
         serializedVersion: 2
-        x: 451
-        y: 186
-        width: 15
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 452
+        y: 187
+        width: 13
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3244,12 +3244,12 @@ TextureImporter:
       name: touhou_projectiles_112
       rect:
         serializedVersion: 2
-        x: 465
-        y: 186
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 466
+        y: 187
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3266,12 +3266,12 @@ TextureImporter:
       name: touhou_projectiles_113
       rect:
         serializedVersion: 2
-        x: 477
-        y: 186
-        width: 9
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 478
+        y: 187
+        width: 7
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3288,12 +3288,12 @@ TextureImporter:
       name: touhou_projectiles_114
       rect:
         serializedVersion: 2
-        x: 485
-        y: 186
-        width: 12
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 486
+        y: 187
+        width: 10
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3310,12 +3310,12 @@ TextureImporter:
       name: touhou_projectiles_115
       rect:
         serializedVersion: 2
-        x: 397
-        y: 164
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 398
+        y: 165
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3332,12 +3332,12 @@ TextureImporter:
       name: touhou_projectiles_116
       rect:
         serializedVersion: 2
-        x: 408
-        y: 164
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 409
+        y: 165
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3354,12 +3354,12 @@ TextureImporter:
       name: touhou_projectiles_117
       rect:
         serializedVersion: 2
-        x: 423
-        y: 164
-        width: 19
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 424
+        y: 165
+        width: 17
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3376,12 +3376,12 @@ TextureImporter:
       name: touhou_projectiles_118
       rect:
         serializedVersion: 2
-        x: 442
-        y: 164
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 443
+        y: 165
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3398,12 +3398,12 @@ TextureImporter:
       name: touhou_projectiles_119
       rect:
         serializedVersion: 2
-        x: 452
-        y: 164
-        width: 9
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 453
+        y: 165
+        width: 7
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3420,12 +3420,12 @@ TextureImporter:
       name: touhou_projectiles_120
       rect:
         serializedVersion: 2
-        x: 460
-        y: 164
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 461
+        y: 165
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3442,12 +3442,12 @@ TextureImporter:
       name: touhou_projectiles_121
       rect:
         serializedVersion: 2
-        x: 471
-        y: 164
-        width: 19
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 472
+        y: 165
+        width: 17
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3464,12 +3464,12 @@ TextureImporter:
       name: touhou_projectiles_122
       rect:
         serializedVersion: 2
-        x: 489
-        y: 164
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 490
+        y: 165
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3486,12 +3486,12 @@ TextureImporter:
       name: touhou_projectiles_123
       rect:
         serializedVersion: 2
-        x: 499
-        y: 160
-        width: 7
-        height: 20
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 500
+        y: 161
+        width: 5
+        height: 18
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3508,12 +3508,12 @@ TextureImporter:
       name: touhou_projectiles_124
       rect:
         serializedVersion: 2
-        x: 272
-        y: 128
-        width: 14
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 273
+        y: 129
+        width: 12
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3530,12 +3530,12 @@ TextureImporter:
       name: touhou_projectiles_125
       rect:
         serializedVersion: 2
-        x: 286
-        y: 128
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 287
+        y: 129
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3552,12 +3552,12 @@ TextureImporter:
       name: touhou_projectiles_126
       rect:
         serializedVersion: 2
-        x: 295
-        y: 124
-        width: 7
-        height: 19
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 296
+        y: 125
+        width: 5
+        height: 17
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3574,12 +3574,12 @@ TextureImporter:
       name: touhou_projectiles_127
       rect:
         serializedVersion: 2
-        x: 302
-        y: 128
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 303
+        y: 129
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3596,12 +3596,12 @@ TextureImporter:
       name: touhou_projectiles_128
       rect:
         serializedVersion: 2
-        x: 313
-        y: 128
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 314
+        y: 129
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3618,12 +3618,12 @@ TextureImporter:
       name: touhou_projectiles_129
       rect:
         serializedVersion: 2
-        x: 322
-        y: 128
-        width: 17
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 323
+        y: 129
+        width: 15
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3640,12 +3640,12 @@ TextureImporter:
       name: touhou_projectiles_130
       rect:
         serializedVersion: 2
-        x: 344
-        y: 128
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 345
+        y: 129
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3662,12 +3662,12 @@ TextureImporter:
       name: touhou_projectiles_131
       rect:
         serializedVersion: 2
-        x: 356
-        y: 128
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 357
+        y: 129
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3684,12 +3684,12 @@ TextureImporter:
       name: touhou_projectiles_132
       rect:
         serializedVersion: 2
-        x: 366
-        y: 128
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 367
+        y: 129
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3706,12 +3706,12 @@ TextureImporter:
       name: touhou_projectiles_133
       rect:
         serializedVersion: 2
-        x: 384
-        y: 124
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 385
+        y: 125
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3728,12 +3728,12 @@ TextureImporter:
       name: touhou_projectiles_134
       rect:
         serializedVersion: 2
-        x: 395
-        y: 128
-        width: 19
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 396
+        y: 129
+        width: 17
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3750,12 +3750,12 @@ TextureImporter:
       name: touhou_projectiles_135
       rect:
         serializedVersion: 2
-        x: 412
-        y: 124
-        width: 7
-        height: 19
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 413
+        y: 125
+        width: 5
+        height: 17
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3772,12 +3772,12 @@ TextureImporter:
       name: touhou_projectiles_136
       rect:
         serializedVersion: 2
-        x: 419
-        y: 128
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 420
+        y: 129
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3794,12 +3794,12 @@ TextureImporter:
       name: touhou_projectiles_137
       rect:
         serializedVersion: 2
-        x: 430
-        y: 128
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 431
+        y: 129
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3816,12 +3816,12 @@ TextureImporter:
       name: touhou_projectiles_138
       rect:
         serializedVersion: 2
-        x: 439
-        y: 128
-        width: 12
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 440
+        y: 129
+        width: 10
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3838,12 +3838,12 @@ TextureImporter:
       name: touhou_projectiles_139
       rect:
         serializedVersion: 2
-        x: 452
-        y: 128
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 453
+        y: 129
+        width: 14
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3860,12 +3860,12 @@ TextureImporter:
       name: touhou_projectiles_140
       rect:
         serializedVersion: 2
-        x: 467
-        y: 128
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 468
+        y: 129
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3882,12 +3882,12 @@ TextureImporter:
       name: touhou_projectiles_141
       rect:
         serializedVersion: 2
-        x: 8
-        y: 93
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 9
+        y: 94
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3904,12 +3904,12 @@ TextureImporter:
       name: touhou_projectiles_142
       rect:
         serializedVersion: 2
-        x: 40
-        y: 93
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 41
+        y: 94
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3926,12 +3926,12 @@ TextureImporter:
       name: touhou_projectiles_143
       rect:
         serializedVersion: 2
-        x: 72
-        y: 93
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 73
+        y: 94
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3948,12 +3948,12 @@ TextureImporter:
       name: touhou_projectiles_144
       rect:
         serializedVersion: 2
-        x: 104
-        y: 93
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 105
+        y: 94
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3970,12 +3970,12 @@ TextureImporter:
       name: touhou_projectiles_145
       rect:
         serializedVersion: 2
-        x: 467
-        y: 293
-        width: 20
-        height: 22
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 137
+        y: 94
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -3992,12 +3992,12 @@ TextureImporter:
       name: touhou_projectiles_146
       rect:
         serializedVersion: 2
-        x: 168
-        y: 93
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 169
+        y: 94
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4014,12 +4014,12 @@ TextureImporter:
       name: touhou_projectiles_147
       rect:
         serializedVersion: 2
-        x: 200
-        y: 93
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 201
+        y: 94
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4036,12 +4036,12 @@ TextureImporter:
       name: touhou_projectiles_148
       rect:
         serializedVersion: 2
-        x: 232
-        y: 93
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 233
+        y: 94
+        width: 31
+        height: 30
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4058,12 +4058,12 @@ TextureImporter:
       name: touhou_projectiles_149
       rect:
         serializedVersion: 2
-        x: 271
-        y: 106
-        width: 8
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 272
+        y: 107
+        width: 6
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4080,12 +4080,12 @@ TextureImporter:
       name: touhou_projectiles_150
       rect:
         serializedVersion: 2
-        x: 278
-        y: 106
-        width: 19
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 279
+        y: 107
+        width: 17
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4102,12 +4102,12 @@ TextureImporter:
       name: touhou_projectiles_151
       rect:
         serializedVersion: 2
-        x: 298
-        y: 106
-        width: 16
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 299
+        y: 107
+        width: 14
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4124,12 +4124,12 @@ TextureImporter:
       name: touhou_projectiles_152
       rect:
         serializedVersion: 2
-        x: 320
-        y: 106
-        width: 14
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 321
+        y: 107
+        width: 12
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4146,12 +4146,12 @@ TextureImporter:
       name: touhou_projectiles_153
       rect:
         serializedVersion: 2
-        x: 330
-        y: 106
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 331
+        y: 107
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4168,12 +4168,12 @@ TextureImporter:
       name: touhou_projectiles_154
       rect:
         serializedVersion: 2
-        x: 342
-        y: 106
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 343
+        y: 107
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4190,12 +4190,12 @@ TextureImporter:
       name: touhou_projectiles_155
       rect:
         serializedVersion: 2
-        x: 353
-        y: 106
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 354
+        y: 107
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4212,12 +4212,12 @@ TextureImporter:
       name: touhou_projectiles_156
       rect:
         serializedVersion: 2
-        x: 363
-        y: 106
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 364
+        y: 107
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4234,12 +4234,12 @@ TextureImporter:
       name: touhou_projectiles_157
       rect:
         serializedVersion: 2
-        x: 375
-        y: 106
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 376
+        y: 107
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4256,12 +4256,12 @@ TextureImporter:
       name: touhou_projectiles_158
       rect:
         serializedVersion: 2
-        x: 393
-        y: 106
-        width: 10
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 394
+        y: 107
+        width: 8
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4278,12 +4278,12 @@ TextureImporter:
       name: touhou_projectiles_159
       rect:
         serializedVersion: 2
-        x: 403
-        y: 106
-        width: 24
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 404
+        y: 107
+        width: 22
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4300,12 +4300,12 @@ TextureImporter:
       name: touhou_projectiles_160
       rect:
         serializedVersion: 2
-        x: 8
-        y: 29
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 9
+        y: 30
+        width: 62
+        height: 62
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4322,12 +4322,12 @@ TextureImporter:
       name: touhou_projectiles_161
       rect:
         serializedVersion: 2
-        x: 72
-        y: 29
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 73
+        y: 30
+        width: 62
+        height: 62
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4344,12 +4344,12 @@ TextureImporter:
       name: touhou_projectiles_162
       rect:
         serializedVersion: 2
-        x: 136
-        y: 29
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 137
+        y: 30
+        width: 62
+        height: 62
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4366,12 +4366,12 @@ TextureImporter:
       name: touhou_projectiles_163
       rect:
         serializedVersion: 2
-        x: 200
-        y: 29
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 201
+        y: 30
+        width: 62
+        height: 62
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4388,12 +4388,12 @@ TextureImporter:
       name: touhou_projectiles_164
       rect:
         serializedVersion: 2
-        x: 273
-        y: 84
-        width: 13
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 274
+        y: 85
+        width: 11
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4410,12 +4410,12 @@ TextureImporter:
       name: touhou_projectiles_165
       rect:
         serializedVersion: 2
-        x: 286
-        y: 84
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 287
+        y: 85
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4432,12 +4432,12 @@ TextureImporter:
       name: touhou_projectiles_166
       rect:
         serializedVersion: 2
-        x: 298
-        y: 84
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 299
+        y: 85
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4454,12 +4454,12 @@ TextureImporter:
       name: touhou_projectiles_167
       rect:
         serializedVersion: 2
-        x: 309
-        y: 84
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 310
+        y: 85
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4476,12 +4476,12 @@ TextureImporter:
       name: touhou_projectiles_168
       rect:
         serializedVersion: 2
-        x: 319
-        y: 84
-        width: 23
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 320
+        y: 85
+        width: 21
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4498,12 +4498,12 @@ TextureImporter:
       name: touhou_projectiles_169
       rect:
         serializedVersion: 2
-        x: 343
-        y: 84
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 344
+        y: 85
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4520,12 +4520,12 @@ TextureImporter:
       name: touhou_projectiles_170
       rect:
         serializedVersion: 2
-        x: 359
-        y: 84
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 360
+        y: 85
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4542,12 +4542,12 @@ TextureImporter:
       name: touhou_projectiles_171
       rect:
         serializedVersion: 2
-        x: 370
-        y: 84
-        width: 8
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 371
+        y: 85
+        width: 6
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4564,12 +4564,12 @@ TextureImporter:
       name: touhou_projectiles_172
       rect:
         serializedVersion: 2
-        x: 384
-        y: 84
-        width: 18
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 385
+        y: 85
+        width: 16
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4586,12 +4586,12 @@ TextureImporter:
       name: touhou_projectiles_173
       rect:
         serializedVersion: 2
-        x: 403
-        y: 84
-        width: 13
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 404
+        y: 85
+        width: 11
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4608,12 +4608,12 @@ TextureImporter:
       name: touhou_projectiles_174
       rect:
         serializedVersion: 2
-        x: 415
-        y: 84
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 416
+        y: 85
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4630,12 +4630,12 @@ TextureImporter:
       name: touhou_projectiles_175
       rect:
         serializedVersion: 2
-        x: 426
-        y: 81
-        width: 6
-        height: 8
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 427
+        y: 82
+        width: 4
+        height: 6
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4652,12 +4652,12 @@ TextureImporter:
       name: touhou_projectiles_176
       rect:
         serializedVersion: 2
-        x: 439
-        y: 84
-        width: 12
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 440
+        y: 85
+        width: 10
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4674,12 +4674,12 @@ TextureImporter:
       name: touhou_projectiles_177
       rect:
         serializedVersion: 2
-        x: 452
-        y: 80
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 453
+        y: 81
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4696,12 +4696,12 @@ TextureImporter:
       name: touhou_projectiles_178
       rect:
         serializedVersion: 2
-        x: 463
-        y: 80
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 464
+        y: 81
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4718,12 +4718,12 @@ TextureImporter:
       name: touhou_projectiles_179
       rect:
         serializedVersion: 2
-        x: 473
-        y: 84
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 474
+        y: 85
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4740,12 +4740,12 @@ TextureImporter:
       name: touhou_projectiles_180
       rect:
         serializedVersion: 2
-        x: 484
-        y: 84
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 485
+        y: 85
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4762,12 +4762,12 @@ TextureImporter:
       name: touhou_projectiles_181
       rect:
         serializedVersion: 2
-        x: 272
-        y: 62
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 273
+        y: 63
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4784,12 +4784,12 @@ TextureImporter:
       name: touhou_projectiles_182
       rect:
         serializedVersion: 2
-        x: 283
-        y: 58
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 284
+        y: 59
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4806,12 +4806,12 @@ TextureImporter:
       name: touhou_projectiles_183
       rect:
         serializedVersion: 2
-        x: 300
-        y: 62
-        width: 12
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 301
+        y: 63
+        width: 10
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4828,12 +4828,12 @@ TextureImporter:
       name: touhou_projectiles_184
       rect:
         serializedVersion: 2
-        x: 311
-        y: 62
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 312
+        y: 63
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4850,12 +4850,12 @@ TextureImporter:
       name: touhou_projectiles_185
       rect:
         serializedVersion: 2
-        x: 323
-        y: 58
-        width: 15
-        height: 19
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 324
+        y: 59
+        width: 13
+        height: 17
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4872,12 +4872,12 @@ TextureImporter:
       name: touhou_projectiles_186
       rect:
         serializedVersion: 2
-        x: 339
-        y: 58
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 340
+        y: 59
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4894,12 +4894,12 @@ TextureImporter:
       name: touhou_projectiles_187
       rect:
         serializedVersion: 2
-        x: 349
-        y: 62
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 350
+        y: 63
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4916,12 +4916,12 @@ TextureImporter:
       name: touhou_projectiles_188
       rect:
         serializedVersion: 2
-        x: 361
-        y: 62
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 362
+        y: 63
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4938,12 +4938,12 @@ TextureImporter:
       name: touhou_projectiles_189
       rect:
         serializedVersion: 2
-        x: 379
-        y: 62
-        width: 17
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 380
+        y: 63
+        width: 15
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4960,12 +4960,12 @@ TextureImporter:
       name: touhou_projectiles_190
       rect:
         serializedVersion: 2
-        x: 272
-        y: 40
-        width: 18
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 273
+        y: 41
+        width: 16
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -4982,12 +4982,12 @@ TextureImporter:
       name: touhou_projectiles_191
       rect:
         serializedVersion: 2
-        x: 291
-        y: 40
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 292
+        y: 41
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5004,12 +5004,12 @@ TextureImporter:
       name: touhou_projectiles_192
       rect:
         serializedVersion: 2
-        x: 301
-        y: 40
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 302
+        y: 41
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5026,12 +5026,12 @@ TextureImporter:
       name: touhou_projectiles_193
       rect:
         serializedVersion: 2
-        x: 318
-        y: 40
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 319
+        y: 41
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5048,12 +5048,12 @@ TextureImporter:
       name: touhou_projectiles_194
       rect:
         serializedVersion: 2
-        x: 328
-        y: 40
-        width: 19
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 329
+        y: 41
+        width: 17
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5070,12 +5070,12 @@ TextureImporter:
       name: touhou_projectiles_195
       rect:
         serializedVersion: 2
-        x: 346
-        y: 40
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 347
+        y: 41
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5092,12 +5092,12 @@ TextureImporter:
       name: touhou_projectiles_196
       rect:
         serializedVersion: 2
-        x: 358
-        y: 40
-        width: 13
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 359
+        y: 41
+        width: 11
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5114,12 +5114,12 @@ TextureImporter:
       name: touhou_projectiles_197
       rect:
         serializedVersion: 2
-        x: 375
-        y: 40
-        width: 19
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 376
+        y: 41
+        width: 17
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5136,12 +5136,12 @@ TextureImporter:
       name: touhou_projectiles_198
       rect:
         serializedVersion: 2
-        x: 400
-        y: 40
-        width: 12
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 401
+        y: 41
+        width: 10
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5158,12 +5158,12 @@ TextureImporter:
       name: touhou_projectiles_199
       rect:
         serializedVersion: 2
-        x: 413
-        y: 40
-        width: 11
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 414
+        y: 41
+        width: 9
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5180,12 +5180,12 @@ TextureImporter:
       name: touhou_projectiles_200
       rect:
         serializedVersion: 2
-        x: 426
-        y: 40
-        width: 11
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 427
+        y: 41
+        width: 9
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5202,12 +5202,12 @@ TextureImporter:
       name: touhou_projectiles_201
       rect:
         serializedVersion: 2
-        x: 443
-        y: 40
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 444
+        y: 41
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5224,12 +5224,12 @@ TextureImporter:
       name: touhou_projectiles_202
       rect:
         serializedVersion: 2
-        x: 455
-        y: 40
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 456
+        y: 41
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5246,12 +5246,12 @@ TextureImporter:
       name: touhou_projectiles_203
       rect:
         serializedVersion: 2
-        x: 465
-        y: 40
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 466
+        y: 41
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5268,12 +5268,12 @@ TextureImporter:
       name: touhou_projectiles_204
       rect:
         serializedVersion: 2
-        x: 271
-        y: 18
-        width: 14
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 272
+        y: 19
+        width: 12
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5290,12 +5290,12 @@ TextureImporter:
       name: touhou_projectiles_205
       rect:
         serializedVersion: 2
-        x: 281
-        y: 18
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 282
+        y: 19
+        width: 10
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5312,12 +5312,12 @@ TextureImporter:
       name: touhou_projectiles_206
       rect:
         serializedVersion: 2
-        x: 292
-        y: 18
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 293
+        y: 19
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5334,12 +5334,12 @@ TextureImporter:
       name: touhou_projectiles_207
       rect:
         serializedVersion: 2
-        x: 305
-        y: 18
-        width: 16
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 306
+        y: 19
+        width: 14
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5356,12 +5356,12 @@ TextureImporter:
       name: touhou_projectiles_208
       rect:
         serializedVersion: 2
-        x: 328
-        y: 18
-        width: 12
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 329
+        y: 19
+        width: 10
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5378,12 +5378,12 @@ TextureImporter:
       name: touhou_projectiles_209
       rect:
         serializedVersion: 2
-        x: 340
-        y: 18
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 341
+        y: 19
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5400,12 +5400,12 @@ TextureImporter:
       name: touhou_projectiles_210
       rect:
         serializedVersion: 2
-        x: 350
-        y: 18
-        width: 11
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 351
+        y: 19
+        width: 9
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5422,12 +5422,12 @@ TextureImporter:
       name: touhou_projectiles_211
       rect:
         serializedVersion: 2
-        x: 362
-        y: 18
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 363
+        y: 19
+        width: 8
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5444,12 +5444,12 @@ TextureImporter:
       name: touhou_projectiles_212
       rect:
         serializedVersion: 2
-        x: 372
-        y: 14
-        width: 11
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 373
+        y: 15
+        width: 9
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5466,12 +5466,12 @@ TextureImporter:
       name: touhou_projectiles_213
       rect:
         serializedVersion: 2
-        x: 384
-        y: 18
-        width: 10
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 385
+        y: 19
+        width: 8
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5488,12 +5488,12 @@ TextureImporter:
       name: touhou_projectiles_214
       rect:
         serializedVersion: 2
-        x: 394
-        y: 18
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 395
+        y: 19
+        width: 14
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5510,12 +5510,12 @@ TextureImporter:
       name: touhou_projectiles_215
       rect:
         serializedVersion: 2
-        x: 416
-        y: 18
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 417
+        y: 19
+        width: 15
+        height: 14
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5532,12 +5532,12 @@ TextureImporter:
       name: touhou_projectiles_216
       rect:
         serializedVersion: 2
-        x: 434
-        y: 18
-        width: 14
-        height: 15
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 435
+        y: 19
+        width: 12
+        height: 13
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5554,12 +5554,12 @@ TextureImporter:
       name: touhou_projectiles_217
       rect:
         serializedVersion: 2
-        x: 447
-        y: 18
-        width: 17
-        height: 12
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 448
+        y: 19
+        width: 15
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -5584,7 +5584,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":40.0,"y":16.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       touhou_projectiles_0: -5653806206287591474
       touhou_projectiles_1: 7074728631859274293
