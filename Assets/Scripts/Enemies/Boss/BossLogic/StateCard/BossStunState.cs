@@ -48,6 +48,11 @@ public class BossStunState : IState
         }
     }
 
+    public void FixedUpdate()
+    {
+
+    }
+
     public void Exit()
     {
         Debug.Log("[BossStunState] 破防结束，Boss 护盾重新生成！");

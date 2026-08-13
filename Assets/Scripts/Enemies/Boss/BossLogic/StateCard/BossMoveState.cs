@@ -61,6 +61,11 @@ public class BossMoveState : IState
         }
     }
 
+    public void FixedUpdate()
+    {
+
+    }
+
     public void Exit()
     {
         if (rb != null) rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);

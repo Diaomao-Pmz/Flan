@@ -137,11 +137,16 @@ GameObject:
   - component: {fileID: 5733765367692229036}
   - component: {fileID: 814747287741668556}
   - component: {fileID: 4010823948216972897}
-  - component: {fileID: 5979982268278417490}
-  - component: {fileID: 4524576765466074882}
-  - component: {fileID: 7907469330313131092}
-  - component: {fileID: 6570229770990150082}
-  - component: {fileID: 7743760226267809492}
+  - component: {fileID: 2644181897110860729}
+  - component: {fileID: 3844159893879459573}
+  - component: {fileID: 7094499475234919657}
+  - component: {fileID: 3047515527440230120}
+  - component: {fileID: 3572727015189302073}
+  - component: {fileID: 2451382357168901190}
+  - component: {fileID: 6525673544833516776}
+  - component: {fileID: 7477124791280542975}
+  - component: {fileID: 330089295282858923}
+  - component: {fileID: 7312292525726184837}
   m_Layer: 21
   m_Name: Player 1
   m_TagString: Player
@@ -325,7 +330,185 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &5979982268278417490
+--- !u!114 &2644181897110860729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4132750454637263286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 4c43e114ff904514cb260bd479333784, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4132750454637263286}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3844159893879459573}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnJumpPerformed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 9f943daa-5173-466a-ba16-432950b404e7
+    m_ActionName: 'Player/Jump[/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3844159893879459573}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnDashPerformed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 175c3d12-b616-456b-8fc0-580495ee9fd1
+    m_ActionName: 'Player/Dash[/Keyboard/leftShift]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3844159893879459573}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnCrouchSlidePerformed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 5f9f9123-d185-4072-a8b1-52c7cda140f6
+    m_ActionName: 'Player/CrouchOrSlide[/Keyboard/leftCtrl]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3844159893879459573}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnMainAttackPerformed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 683f643a-b51d-4e1f-81e9-f7c81a170d5d
+    m_ActionName: 'Player/MainAttack[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3844159893879459573}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnSubAttackPerformed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3afd2588-04ee-4bbd-80a0-6460013cc639
+    m_ActionName: 'Player/SubAttack[/Mouse/rightButton]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3844159893879459573}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnFlyPerformed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 2bade85c-904f-44ad-9e59-6db212afd7ce
+    m_ActionName: 'Player/Fly[/Keyboard/q]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3844159893879459573}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnMove
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: b9791fc7-3baa-4181-ad40-206db4eb63dc
+    m_ActionName: 'Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
+--- !u!114 &3844159893879459573
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -337,21 +520,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca66d4c7420ccc94bb2ed0f760127281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  stateMachine: {fileID: 0}
-  loadoutManager: {fileID: 0}
-  stats:
-    cooldownReduction: 0
-  health:
-    maxHP: 100
-    currentHP: 100
-    maxMP: 100
-    currentMP: 100
-    isUntargetable: 0
-  combat:
-    comboWindowTolerance: 0
+  stateMachine: {fileID: 3572727015189302073}
+  loadoutManager: {fileID: 6525673544833516776}
   facingDirection: 1
-  skillTreePanel: {fileID: 0}
---- !u!114 &4524576765466074882
+--- !u!114 &7094499475234919657
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -360,13 +532,54 @@ MonoBehaviour:
   m_GameObject: {fileID: 4132750454637263286}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 559c2db90ca62e74ea1ff8ddc08cb4a1, type: 3}
+  m_Script: {fileID: 11500000, guid: 6eebf8195c7d61d4993c52e6b94b92a5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.LoadoutManager
-  jumpGemSlot: 0
-  dashGemSlot: 0
-  slideGemSlot: 0
---- !u!114 &7907469330313131092
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerCommandRouter
+  jumpBufferTime: 0.15
+  dashBufferTime: 0.15
+  crouchBufferTime: 0.15
+  useHeldCrouchOnLanding: 1
+  directionThreshold: 0.1
+  verboseLog: 0
+--- !u!114 &3047515527440230120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4132750454637263286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7000653d82da384689c347ffa9d71b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerState
+  movementConfig: {fileID: 11400000, guid: 3e514375332815549b5084a3da7fc7d1, type: 2}
+  combatConfig: {fileID: 11400000, guid: b1a83f28ca762b8499b26accf98de905, type: 2}
+  stats:
+    moveSpeed:
+      baseValue: 6
+    jumpForce:
+      baseValue: 13
+    dashSpeed:
+      baseValue: 12
+    maxJumps:
+      baseValue: 1
+    cooldownReduction:
+      baseValue: 0
+    comboWindowTolerance:
+      baseValue: 0
+    damageMultiplier:
+      baseValue: 1
+  health:
+    maxHP: 100
+    currentHP: 100
+    maxMP: 100
+    currentMP: 100
+    invulnerableDuration: 0.35
+    isUntargetableDisplay: 0
+  playerLayerName: Player
+  phaseThroughLayerName: Invincible
+--- !u!114 &3572727015189302073
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -378,52 +591,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fb797c9023f0924fb1f73e0bd7798ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStateMachine
-  anim: {fileID: 0}
-  rb: {fileID: 0}
-  dashTrail: {fileID: 0}
-  playerController: {fileID: 0}
-  moveSpeed: 6
-  maxJumps: 2
+  anim: {fileID: 4010823948216972897}
+  rb: {fileID: 5733765367692229036}
+  dashTrail: {fileID: 220130145170942875}
+  playerController: {fileID: 3844159893879459573}
+  playerState: {fileID: 3047515527440230120}
+  loadout: {fileID: 6525673544833516776}
+  commandRouter: {fileID: 7094499475234919657}
+  sensor: {fileID: 2451382357168901190}
   jumpCount: 0
-  jumpForce: 14
-  groundCheck: {fileID: 0}
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  dashSpeed: 18
-  dashDuration: 0.2
   dashSkill:
     totalCD: 2
     interval: 0.15
     comboWindow: 0.3
     maxCombo: 1
-  slideStartSpeedMultiplier: 1.2
-  slideDeceleration: 15
-  crouchSpeedMultiplier: 0.5
   slideSkill:
     totalCD: 2
     interval: 0.15
     comboWindow: 0.3
     maxCombo: 1
-  ceilingCheck: {fileID: 0}
-  coll: {fileID: 0}
-  originalColliderSize: {x: 0, y: 0}
-  originalColliderOffset: {x: 0, y: 0}
+  isBreakingHitStun: 0
+--- !u!114 &2451382357168901190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4132750454637263286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05e8d6e6503d6e1418e22b814817ff7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerSensor
+  groundCheck: {fileID: 1937891343062399750}
+  ceilingCheck: {fileID: 248158379718838653}
   hurtboxCore: {fileID: 2461580532340278717}
-  projectilePrefab: {fileID: 0}
-  firePoint: {fileID: 0}
-  dashAnchorPos: {x: 0, y: 0}
-  slideAnchorPos: {x: 0, y: 0}
-  jumpAnchorPos: {x: 0, y: 0}
-  anchorPrefab: {fileID: 0}
-  activeDashAnchor: {fileID: 0}
-  activeSlideAnchor: {fileID: 0}
-  activeJumpAnchor: {fileID: 0}
-  isDashRelay: 0
-  isSlideRelay: 0
-  isJumpRelay: 0
-  hasJumpAnchor: 0
---- !u!114 &6570229770990150082
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  drawGizmos: 1
+--- !u!114 &6525673544833516776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4132750454637263286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 559c2db90ca62e74ea1ff8ddc08cb4a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.LoadoutManager
+  jumpGem: {fileID: 0}
+  dashGem: {fileID: 0}
+  slideGem: {fileID: 0}
+  activeGem: {fileID: 0}
+  forbidDuplicateGems: 1
+--- !u!114 &7477124791280542975
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -435,8 +659,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1602970f70e0f73459d1500c27d2bc05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ComboInputBuffer
-  rootNodes: []
---- !u!114 &7743760226267809492
+  rootNodes:
+  - {fileID: 11400000, guid: b13bc296744cadf47958870dbc0a8465, type: 2}
+  - {fileID: 11400000, guid: 69468ccf7a353984d8485855672c1ccd, type: 2}
+  - {fileID: 11400000, guid: a1cdab3a0f201784abc39fc4afe6503f, type: 2}
+  - {fileID: 11400000, guid: ff93485aa25713048beeb8ee1833ae9b, type: 2}
+  bufferLifespan: 0.2
+  allowCancelWindowRecovery: 1
+  verboseLog: 0
+--- !u!114 &330089295282858923
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -445,14 +676,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 4132750454637263286}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f24c9e63f585bc040bdcde8cec9b5185, type: 3}
+  m_Script: {fileID: 11500000, guid: cf339acb81f6f2448b16144ec3fbe7ec, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
-  interactPoint: {fileID: 8512573168038159849}
-  interactRadius: 0.7
-  interactableLayer:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHitDetection
+  showHitbox: 1
+  toggleKey: 284
+  enemyLayer:
     serializedVersion: 2
-    m_Bits: 2048
+    m_Bits: 0
+  maxTargetsPerCheck: 16
+--- !u!114 &7312292525726184837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4132750454637263286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6a0cfc0c43ed5b4f9d021beb9dbc596, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerWeaponEmitter
+  projectilePrefab: {fileID: 2589707116977578368, guid: 5585b1c7b410760498cc710938e5a159, type: 3}
+  firePoint: {fileID: 8254937899854107013}
+  useEightWayAiming: 1
 --- !u!1 &7279869093367557001
 GameObject:
   m_ObjectHideFlags: 0
@@ -659,7 +906,7 @@ TrailRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1409015543
-  m_SortingLayer: 7
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Time: 0.25

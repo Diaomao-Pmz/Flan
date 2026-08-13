@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RR
   m_EditorClassIdentifier: Assembly-CSharp::BulletNode
   actionName: RR
-  baseWeight: 100000
+  baseWeight: 100
   cooldown: 0
   minCastDistance: 0
   maxCastDistance: 15

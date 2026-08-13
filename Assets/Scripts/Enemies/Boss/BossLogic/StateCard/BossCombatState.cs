@@ -55,6 +55,11 @@ public class BossActionExecuter : IState
         }
     }
 
+    public void FixedUpdate()
+    {
+
+    }
+
     public void Update()
     {
         // 当满足攻击条件，且当前没有正在执行的攻击协程时，启动攻击

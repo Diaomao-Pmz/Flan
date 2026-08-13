@@ -1616,8 +1616,8 @@ TextureImporter:
       name: touhou_projectiles_38
       rect:
         serializedVersion: 2
-        x: 10
-        y: 336
+        x: 9
+        y: 351
         width: 256
         height: 128
       alignment: 7
@@ -1661,7 +1661,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 334
-        y: 401
+        y: 400
         width: 62
         height: 62
       alignment: 7
