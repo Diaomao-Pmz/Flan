@@ -3,27 +3,25 @@ using UnityEngine;
 namespace Flandre.CombatSystem
 {
     /// <summary>
-    /// 【远程发射器】—— 由动画事件调用。
+    /// 【远程发射器】—— 由动画事件调用，已接入对象池。
     ///
     /// ⚠️ 必须和 Animator 挂在同一个 GameObject 上，否则动画事件找不到它。
     ///
     /// ==========================================================
-    /// 【批次G 改动】子弹跟着武器走，不再是全局唯一预制体
+    /// 【接池改造】Instantiate → ObjectPoolManager.Get(key)
     ///
-    /// 既然武器分近战/远程，而且主副槽可以任意组合出「远近/远远」，
-    /// 那"这一发子弹长什么样"就应该由【打出这一段的那把武器】决定。
+    /// 这是 readme 第一军规的落实 ——
+    /// 敌人子弹早就走池了，玩家子弹一直在裸生成，同屏一多就是 GC 卡顿。
     ///
-    /// 取值优先级：
-    ///   1. 当前这一段连招所属武器的 projectilePrefab
-    ///   2. 本组件上的 fallbackProjectilePrefab（没装武器时的兜底）
+    /// 注意生成端与回收端【必须同时改】。
+    /// 只改这里、Player_Projectile 还在 Destroy 的话，
+    /// 结果是：从池里取出来 → 撞墙被销毁 → 池里少一个 → 几十发之后池空了，
+    /// 玩家彻底射不出子弹。这比不接池糟糕得多，而且症状延迟出现。
     ///
-    /// 于是「主武器是弓、副武器是枪」时，左键射箭、右键射子弹，
-    /// 本文件一行都不用改。
+    /// 【子弹按武器走】
+    /// 打出这一段的是哪把武器，就用哪把武器的 pool key。
+    /// 于是「主武器是弓、副武器是枪」时左键射箭、右键射子弹，本文件一行不用改。
     /// ==========================================================
-    ///
-    /// 【尚未改动 · 阶段6】
-    ///   这里仍在用 Instantiate。按 readme 第一军规应当走 ObjectPoolManager ——
-    ///   敌人子弹已经走池，玩家子弹还在裸生成，同屏一多就是 GC 卡顿。
     /// </summary>
     public class PlayerWeaponEmitter : MonoBehaviour
     {
@@ -32,11 +30,8 @@ namespace Flandre.CombatSystem
         public Transform firePoint;
 
         [Header("兜底配置 (未装备武器时使用)")]
-        [Tooltip("没有 WeaponLoadout 或武器未配子弹时的默认预制体")]
-        public GameObject fallbackProjectilePrefab;
-
-        [Tooltip("兜底子弹速度")]
-        public float fallbackProjectileSpeed = 12f;
+        [Tooltip("没有 WeaponLoadout、或武器未配 pool key 时使用的池 key")]
+        public string fallbackProjectilePoolKey = "";
 
         [Tooltip("兜底是否使用八向瞄准")]
         public bool fallbackEightWayAiming = true;
@@ -62,26 +57,37 @@ namespace Flandre.CombatSystem
             // 打出这一段的是哪把武器？用它的子弹
             WeaponMoveSet weapon = comboBuffer != null ? comboBuffer.ActiveWeapon : null;
 
-            GameObject prefab = (weapon != null && weapon.projectilePrefab != null)
-                ? weapon.projectilePrefab
-                : fallbackProjectilePrefab;
+            string poolKey = (weapon != null && weapon.HasProjectile)
+                ? weapon.projectilePoolKey
+                : fallbackProjectilePoolKey;
 
-            if (prefab == null)
+            if (string.IsNullOrEmpty(poolKey))
             {
                 Debug.LogWarning(
-                    "[发射器] 当前武器没配子弹预制体，兜底也为空，本次发射已跳过。\n" +
-                    "远程武器请在 WeaponMoveSet 资产上填 Projectile Prefab。", this);
+                    "[发射器] 当前武器没配 Projectile Pool Key，兜底也为空，本次发射已跳过。\n" +
+                    "远程武器请在 WeaponMoveSet 资产上填写 Projectile Pool Key。", this);
                 return;
             }
+
+            // key 未注册时池会自己报 LogError，这里拿到 null 就静默跳过，避免刷屏
+            GameObject bullet = ObjectPoolManager.Instance?.Get(poolKey);
+            if (bullet == null) return;
+
+            bullet.transform.position = firePoint.position;
 
             bool eightWay = (weapon != null) ? weapon.useEightWayAiming : fallbackEightWayAiming;
             Vector2 shootDirection = ResolveDirection(eightWay);
 
-            // TODO: 阶段6 改走 ObjectPoolManager + IPoolable
-            GameObject bullet = Instantiate(prefab, firePoint.position, Quaternion.identity);
-
             Player_Projectile proj = bullet.GetComponent<Player_Projectile>();
-            if (proj != null) proj.Setup(shootDirection);
+            if (proj != null)
+            {
+                proj.Setup(shootDirection);
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"[发射器] 池「{poolKey}」取出的对象上没有 Player_Projectile 组件。", bullet);
+            }
         }
 
         private Vector2 ResolveDirection(bool useEightWay)
