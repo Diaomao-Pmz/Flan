@@ -1,4 +1,6 @@
+using Flandre.CombatSystem;
 using UnityEngine;
+
 
 // 定义传送的战术策略
 public enum TeleportTargetType
@@ -11,6 +13,8 @@ public enum TeleportTargetType
 [CreateAssetMenu(fileName = "NewTeleportNode", menuName = "ScriptableObjects/TeleportNode")]
 public class TeleportNode : ActionNode
 {
+    public override ActionCategory DefaultCategory => ActionCategory.Teleport;
+
     [Header("--- 传送专属配置 ---")]
     [Tooltip("传送前摇（秒）。0 表示瞬发。")]
     public float teleportDelay = 0.2f;

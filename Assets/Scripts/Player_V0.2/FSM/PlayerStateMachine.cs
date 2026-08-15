@@ -90,6 +90,15 @@ public class PlayerStateMachine : MonoBehaviour
     /// <summary>本次动作是否由「受身打断」触发。由路由器置位，问完宝石立刻清零</summary>
     [HideInInspector] public bool isBreakingHitStun = false;
 
+    /// <summary>
+    /// 【携带动量】滑铲的冲劲，可以跨状态传递给连招与蓄力。
+    /// 只有滑铲/连招/蓄力会保留它，进入其他状态时由 ChangeState 统一清空。
+    /// </summary>
+    public readonly SlideMomentum slideMomentum = new SlideMomentum();
+
+    /// <summary>上一个状态。用于「从哪来」这类判断</summary>
+    public IState previousState { get; private set; }
+
     private ComboInputBuffer cachedInputBuffer;
     public ComboInputBuffer inputBuffer
     {
@@ -196,8 +205,10 @@ public class PlayerStateMachine : MonoBehaviour
         }
 
         isTransitioning = true;
+        previousState = currentState;
         currentState?.Exit();
         currentState = newState;
+        ClearMomentumIfNeeded();
         currentState.Enter();
         isTransitioning = false;
 
@@ -208,8 +219,10 @@ public class PlayerStateMachine : MonoBehaviour
             pendingState = null;
 
             isTransitioning = true;
+            previousState = currentState;
             currentState.Exit();
             currentState = next;
+            ClearMomentumIfNeeded();
             currentState.Enter();
             isTransitioning = false;
 
@@ -220,6 +233,24 @@ public class PlayerStateMachine : MonoBehaviour
                 break;
             }
         }
+    }
+
+    /// <summary>
+    /// 【携带动量的唯一清除点】
+    ///
+    /// 只有滑铲/连招/蓄力三个状态会保留动量，
+    /// 进入其他任何状态（跳跃、冲刺、受击、待机…）都自动清空。
+    ///
+    /// 集中在这里做，是为了不需要在每张卡带里各写一遍 —— 也就不可能漏。
+    /// 以后新增状态时默认就是"清空"，这是更安全的默认值。
+    /// </summary>
+    private void ClearMomentumIfNeeded()
+    {
+        bool keeps = currentState == slideState
+                  || currentState == comboState
+                  || currentState == chargeState;
+
+        if (!keeps) slideMomentum.Clear();
     }
 
     // ==========================================

@@ -60,6 +60,14 @@ namespace Flandre.CombatSystem.Gems
         private GameObject anchorVisual;
         private bool isHoldingBuffs = false;
 
+        /// <summary>
+        /// 蓄力突刺时无视沿途敌人，一定冲到最远端。
+        ///
+        /// 设计意图：Relay 的玩法核心是"先跑位再传送回来"，
+        /// 半路被敌人截停会让锚点的距离失去意义。
+        /// </summary>
+        public override bool IgnoresThrustInterruption => true;
+
         public override void OnEquip()
         {
             var cfg = Cfg;

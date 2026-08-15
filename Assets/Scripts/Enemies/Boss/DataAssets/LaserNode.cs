@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Flandre.CombatSystem;
 
 /// <summary>
 /// 固定方向激光。
@@ -11,6 +12,8 @@
 [CreateAssetMenu(fileName = "NewLaserNode", menuName = "ScriptableObjects/LaserNode")]
 public class LaserNode : ActionNode
 {
+    public override ActionCategory DefaultCategory => ActionCategory.SpecialBullet;
+
     [Header("--- 时序 ---")]
     [Tooltip("预警时长（秒）。玩家靠这段时间读招走位，是主要的难度旋钮。")]
     public float telegraphTime = 1.0f;

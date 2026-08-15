@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Flandre.CombatSystem;
 
 public enum BossAttackType
 {
@@ -43,6 +44,8 @@ public class BulletPhase
 [CreateAssetMenu(fileName = "NewBulletNode", menuName = "ScriptableObjects/BulletNode")]
 public class BulletNode : ActionNode
 {
+    public override ActionCategory DefaultCategory => ActionCategory.Bullet;
+
     [Header("--- 组合弹幕配置 ---")]
     [Tooltip("弹幕段列表。留空则回退到下方的旧版单形态字段。")]
     public List<BulletPhase> phases = new List<BulletPhase>();

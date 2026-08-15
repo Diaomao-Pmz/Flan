@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be0de81e39bad9a48943fc681e250da6, type: 3}
+  m_Name: MainWeapon
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.WeaponMoveSet
+  displayName: Main
+  weaponType: 0
+  icon: {fileID: 0}
+  description: 
+  openers:
+  - {fileID: 11400000, guid: ff93485aa25713048beeb8ee1833ae9b, type: 2}
+  followUps:
+  - {fileID: 11400000, guid: 230a9ed5f65482f4cb1336ab55f59e14, type: 2}
+  - {fileID: 11400000, guid: f91ddddd4a0bac049b9d6065f0a0c0e3, type: 2}
+  - {fileID: 11400000, guid: b13bc296744cadf47958870dbc0a8465, type: 2}
+  - {fileID: 11400000, guid: 6527905d3ea5fe846a2e0f7637aabd23, type: 2}
+  - {fileID: 11400000, guid: ab1b05c724cbfa1439f95d6ad267956a, type: 2}
+  chargeTimeLv1: 1
+  chargeTimeLv2: 2.5
+  chargeTimeLv3: 5
+  chargeCooldown: 0.7
+  chargeEffectLv1: FXL_AA1
+  chargeEffectLv2: FXL_AA2
+  chargeEffectLv3: FXL_AA3
+  chargeEffectOffset: {x: 0, y: 0}
+  chargeEffectScale: {x: 1, y: 1}
+  chargeEffectRotation: 0
+  projectilePoolKey: 
+  projectilePrefabForValidation: {fileID: 0}
+  useEightWayAiming: 1

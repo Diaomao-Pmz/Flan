@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Flandre.CombatSystem;
 
 /// <summary>
 /// 突进斩：先冲到玩家面前，再打出一套挥击。
@@ -8,6 +9,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewDashAttackNode", menuName = "ScriptableObjects/DashAttackNode")]
 public class DashAttackNode : ActionNode
 {
+    public override ActionCategory DefaultCategory => ActionCategory.SpecialMelee;
+
     [Header("--- 第一阶段：位移 ---")]
     [Tooltip("起跳前摇（秒）。玩家靠这段时间读招。")]
     public float windupBeforeDash = 0.35f;

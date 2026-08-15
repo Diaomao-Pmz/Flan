@@ -332,6 +332,19 @@ namespace Flandre.CombatSystem
             }
         }
 
+        /// <summary>
+        /// 【批次O 新增】有没有宝石让蓄力突刺无视沿途敌人？
+        /// 任何一颗说 true 就算 true。
+        /// </summary>
+        public bool IgnoresThrustInterruption()
+        {
+            foreach (var kv in runtimes)
+            {
+                if (kv.Value != null && kv.Value.IgnoresThrustInterruption) return true;
+            }
+            return false;
+        }
+
         // ==========================================
         // 主动技能
         // ==========================================

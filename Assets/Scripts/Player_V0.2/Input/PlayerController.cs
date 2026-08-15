@@ -129,11 +129,34 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    [Header("Fly 键设置")]
+    [Tooltip("按住不超过这个时长就松手，算作「点按」，会触发 fly 衍生")]
+    public float flyTapThreshold = 0.2f;
+
+    private float flyPressTime;
+
+    /// <summary>
+    /// 飞行键。有两路语义，各走各的通道：
+    ///   长按 → isFlyHeld 布尔，供 Jump/Fall 的悬停蓄力读取
+    ///   点按 → InputCmd.Fly 脉冲，供「打出 AAn 后跃起进飞行」的衍生使用
+    ///
+    /// 脉冲在【松手时】才发 —— 因为按下的那一刻还分不清是点按还是长按。
+    /// 这是"同一个键两种用法"必然要付的代价：点按的响应会晚一个抬手的时间。
+    /// </summary>
     public void OnFlyPerformed(InputAction.CallbackContext ctx)
     {
-        // 只供 JumpState / FallState / FlyState 读取布尔值，不发脉冲
-        if (ctx.started) isFlyHeld = true;
-        else if (ctx.canceled) isFlyHeld = false;
+        if (ctx.started)
+        {
+            isFlyHeld = true;
+            flyPressTime = Time.time;
+        }
+        else if (ctx.canceled)
+        {
+            isFlyHeld = false;
+
+            bool wasTap = (Time.time - flyPressTime) <= flyTapThreshold;
+            if (wasTap) commandRouter.OnCommand(InputCmd.Fly);
+        }
     }
 
     /// <summary>
@@ -165,10 +188,12 @@ public class PlayerController : MonoBehaviour
         {
             isMainAttackHeld = false;
 
-            if (!isMainChargeConsumed)
-            {
-                inputBuffer.OnReceiveChargeRelease(InputCmd.MainAttack, mainAttackHoldTime);
-            }
+            // 【批次J 改动】松手不再直接出招。
+            //
+            // 蓄力的释放由 ChargeState 主导 —— 只有它知道当前蓄到了几级。
+            // 这里只通知连招引擎清掉缓存里那条按下指令，
+            // 免得松手后它又跑出来打一发普攻。
+            inputBuffer.OnAttackReleased(InputCmd.MainAttack);
         }
     }
 
@@ -184,15 +209,16 @@ public class PlayerController : MonoBehaviour
         else if (ctx.canceled)
         {
             isSubAttackHeld = false;
-
-            if (!isSubChargeConsumed)
-            {
-                inputBuffer.OnReceiveChargeRelease(InputCmd.SubAttack, subAttackHoldTime);
-            }
+            inputBuffer.OnAttackReleased(InputCmd.SubAttack);
         }
     }
 
+    // 【批次J】蓄力不再「自动放」，因此这两个「已消耗」标记失去了原本的用途。
+    // 保留是为了不破坏可能存在的外部调用，新代码不要再用。
+    [System.Obsolete("批次J 起蓄力改为松手释放，不再需要消耗标记")]
     public void ConsumeMainCharge() { isMainChargeConsumed = true; }
+
+    [System.Obsolete("批次J 起蓄力改为松手释放，不再需要消耗标记")]
     public void ConsumeSubCharge() { isSubChargeConsumed = true; }
 
     // ==========================================

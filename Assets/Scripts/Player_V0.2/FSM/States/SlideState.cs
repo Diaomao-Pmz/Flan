@@ -4,15 +4,10 @@ using Flandre.CombatSystem;
 /// <summary>
 /// 滑铲状态。跑动中按 C 触发，速度衰减到阈值后自动转入蹲下。
 ///
-/// 【批次E 改动】减速积分与速度写入挪到 FixedUpdate，用 fixedDeltaTime。
+/// 【批次O 改动】每帧把当前速度同步给 sm.slideMomentum。
 ///
-/// 这一处是本批次里最值得挪的：
-/// 滑铲距离 = 初速 与 减速率 的积分结果。
-/// 减速写在 Update 里时，帧率越高积分步长越细、每步误差越小，
-/// 高低帧下滑出去的距离会实打实地差一截。
-/// 挪到固定步长后，30fps 和 144fps 滑一样远。
-///
-/// 阈值判断留在 Update，保证切蹲下的时机跟手。
+/// 这样玩家在滑铲途中出招时，连招/蓄力状态可以接手这股冲劲继续滑 ——
+/// 而滑铲的减速逻辑仍然只有这一份，没有被复制到别的状态里去。
 /// </summary>
 public class SlideState : PlayerStateBase
 {
@@ -61,6 +56,9 @@ public class SlideState : PlayerStateBase
         {
             slideDirection = sm.playerController.facingDirection;
         }
+
+        // 立刻登记动量，这样出招那一帧接手的状态就能拿到正确的速度
+        sm.slideMomentum.Set(currentSlideSpeed, slideDirection);
     }
 
     public override void Update()
@@ -80,6 +78,9 @@ public class SlideState : PlayerStateBase
         sm.rb.linearVelocity = new Vector2(
             slideDirection * currentSlideSpeed,
             sm.rb.linearVelocity.y);
+
+        // 同步给携带动量：玩家随时可能在这一帧出招接手
+        sm.slideMomentum.Set(currentSlideSpeed, slideDirection);
     }
 
     public override void Exit()
@@ -92,5 +93,9 @@ public class SlideState : PlayerStateBase
         if (sm.dashTrail != null) sm.dashTrail.emitting = false;
 
         sm.SetColliderHeight(false);
+
+        // 注意：这里【不】清空 slideMomentum ——
+        // 是否保留由 PlayerStateMachine.ChangeState 按目标状态统一裁决。
+        // 切去连招/蓄力时保留，切去别的地方自动清空。
     }
 }

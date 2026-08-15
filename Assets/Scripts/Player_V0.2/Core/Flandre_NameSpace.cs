@@ -34,7 +34,17 @@ namespace Flandre.CombatSystem
         Shoot,
 
         /// <summary>C 键。落到滑铲还是蹲下由决策层判断</summary>
-        Crouch
+        Crouch,
+
+        /// <summary>
+        /// Q 键【点按】。
+        ///
+        /// 注意 fly 键有两路语义，各走各的通道：
+        ///   长按 → isFlyHeld 布尔，供 Jump/Fall 的悬停蓄力读取
+        ///   点按 → 本指令，供「打出 AAn 后跃起进飞行」的衍生使用
+        /// 两者不冲突：点按不够长，不会触发悬停蓄力。
+        /// </summary>
+        Fly
     }
 
     /// <summary>可以装备宝石的三个基础动作</summary>

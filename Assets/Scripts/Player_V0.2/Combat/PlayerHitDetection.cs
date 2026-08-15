@@ -4,57 +4,68 @@ using UnityEngine;
 using Flandre.CombatSystem;
 
 /// <summary>
-/// ¡¾¹¥»÷ÅĞ¶¨¿ò¡¿
+/// ã€æ”»å‡»åˆ¤å®šæ¡†ã€‘
 ///
 /// ==========================================================
-/// ¡¾Åú´ÎF ¸Ä¶¯¡¿
+/// ã€æ‰¹æ¬¡N æ–°å¢ã€‘å‘½ä¸­é€šçŸ¥ç®¡é“
 ///
-/// 1. Ö§³ÖÒ»ÕĞ¶à¶ÎÅĞ¶¨¡£
-///    Ô­ÏÈÒ»¸öÕĞÊ½Ö»ÓĞÒ»¸ö hitbox ´°¿Ú£¬¶øÇÒ TriggerAttackHitbox ÖØÈëÊ±
-///    »á StopCoroutine Æş¶ÏÉÏÒ»´Î ¡ª¡ª Ïë¿¿Á¬´òÈı´Î¶¯»­ÊÂ¼şÄ£ÄâÈıÁ¬Õ¶£¬
-///    ½á¹ûÊÇÈı´Î»¥Ïà´ò¶Ï£¬Ö»ÓĞ×îºóÒ»´ÎÉúĞ§¡£
-///    ÏÖÔÚÒ»´Î¶¯»­ÊÂ¼ş¾ÍÄÜÅÜÍêÕû¸ö´°¿ÚĞòÁĞ¡£
+/// åˆ¤å®šæ¡†æ‰“ä¸­æ•Œäººåï¼ŒåŸå…ˆã€ä¸å‘Šè¯‰ä»»ä½•äººã€‘â€”â€” ä¼¤å®³ç®—å®Œå°±ç»“æŸäº†ã€‚
+/// ä½†æœ‰ä¸‰ä¸ªåŠŸèƒ½éƒ½éœ€è¦çŸ¥é“"åˆšæ‰“ä¸­äº†è°"ï¼š
+///   è‡ªåŠ¨æœå‘    â€”â€” æ»‘é“²æ”»å‡»å‘½ä¸­åè½¬å‘é‚£ä¸ªæ•Œäºº
+///   å‘½ä¸­å› MP   â€”â€” æŒ‰æ‹›å¼ä¼¤å®³å›è“
+///   è“„åŠ›çªåˆº    â€”â€” dash é€”ä¸­ç¬¬ä¸€ä¸ªç¢°åˆ°çš„æ•Œäºº
 ///
-/// 2. Gizmos ¸ÄÎª»æÖÆ¡¾µ±Ç°ÕıÔÚÉúĞ§µÄÄÇÒ»¶Î´°¿Ú¡¿¡£
-///    Ô­ÏÈ»­µÄÊÇ buffer.currentNode µÄ²ÎÊı ¡ª¡ª
-///    µ«Á¬ÕĞÍÆ½øºó currentNode ÒÑ¾­±äÁË£¬»­³öÀ´µÄ¿òºÍÊµ¼ÊÅĞ¶¨¶Ô²»ÉÏ£¬
-///    µ÷ÅĞ¶¨¿òÊ±»á±»Îóµ¼¡£
+/// ä¸‰ä¸ªéœ€æ±‚åŒä¸€æ¡ç®¡é“ï¼Œæ‰€ä»¥ç°åœ¨å¹¿æ’­å‡ºå»ï¼Œè€Œä¸æ˜¯å„è‡ªå†å†™ä¸€éæ£€æµ‹ã€‚
 ///
-/// 3. ÒÆ³ı¾ÉÊäÈëÏµÍ³ Input.GetKeyDown(F3)£¬¸ÄÎªÌõ¼ş±àÒë±£»¤¡£
+/// æ¯”å–»ï¼šåŸå…ˆæ˜¯æ”¶é“¶å‘˜æ”¶å®Œé’±å°±æŠŠå°ç¥¨æ‰”äº†ã€‚
+///       ç°åœ¨ç•™ä¸€ä»½è´¦ â€”â€” è´¢åŠ¡ã€ä¼šå‘˜ç§¯åˆ†ã€åº“å­˜éƒ½è¦çœ‹è¿™å¼ å•å­ã€‚
 /// ==========================================================
 /// </summary>
 public class PlayerHitDetection : MonoBehaviour
 {
     private PlayerController player;
+    private TargetFinder targetFinder;
 
-    [Header("Debug ÉèÖÃ")]
+    [Header("Debug è®¾ç½®")]
     public bool showHitbox = true;
 
-    [Tooltip("°´´Ë¼üÇĞ»»ÅĞ¶¨¿òÏÔÊ¾¡£½öÔÚ¾ÉÊäÈëÏµÍ³¿ÉÓÃÊ±ÉúĞ§")]
+    [Tooltip("æŒ‰æ­¤é”®åˆ‡æ¢åˆ¤å®šæ¡†æ˜¾ç¤ºã€‚ä»…åœ¨æ—§è¾“å…¥ç³»ç»Ÿå¯ç”¨æ—¶ç”Ÿæ•ˆ")]
     public KeyCode toggleKey = KeyCode.F3;
 
-    [Header("ÃüÖĞÉèÖÃ")]
-    [Tooltip("ÄÄĞ©Í¼²ãËãµĞÈË¡£Áô¿ÕÔòÍË»¯Îª°´ Tag ÅĞ¶Ï")]
-    public LayerMask enemyLayer;
+    [Header("å‘½ä¸­è®¾ç½®")]
+    [Tooltip("æ•Œäºº Tag")]
+    public string enemyTag = "Enemy";
 
-    [Tooltip("µ¥´ÎÅĞ¶¨×î¶àÄÜÃüÖĞ¶àÉÙ¸öÄ¿±ê")]
-    public int maxTargetsPerCheck = 16;
+    // ==========================================================
+    // å‘½ä¸­å¹¿æ’­
+    // ==========================================================
+
+    /// <summary>å‘½ä¸­æ•Œäººæ—¶å¹¿æ’­ (æ•Œäººæœ¬ä½“, æœ¬æ¬¡ä¼¤å®³)ã€‚å‘½ä¸­å›MPã€æ‰“å‡»æ„Ÿåé¦ˆè®¢é˜…è¿™ä¸ª</summary>
+    public event System.Action<EntityBase, int> OnEnemyHit;
+
+    /// <summary>æœ¬æ¬¡æ‹›å¼æœ€åå‘½ä¸­çš„ç›®æ ‡ã€‚æ‹›å¼å¼€å§‹æ—¶æ¸…ç©º</summary>
+    public Transform LastHitTarget { get; private set; }
+
+    /// <summary>æœ¬æ¬¡æ‹›å¼ä¸€å…±å‘½ä¸­äº†å‡ ä¸ªç›®æ ‡</summary>
+    public int HitCountThisAttack { get; private set; }
 
     private Coroutine activeHitboxCoroutine;
     private readonly HashSet<Collider2D> alreadyHitEnemies = new HashSet<Collider2D>();
 
-    // ¸´ÓÃ»º³å£¬±ÜÃâÃ¿Ö¡ OverlapBoxAll ²úÉú GC
+    // å¤ç”¨ç¼“å†²ï¼Œé¿å…æ¯å¸§äº§ç”Ÿ GC
     private readonly List<Collider2D> overlapResults = new List<Collider2D>(16);
     private ContactFilter2D overlapFilter;
     private readonly List<HitboxWindow> windowBuffer = new List<HitboxWindow>();
 
-    // µ±Ç°ÕıÔÚÉúĞ§µÄ´°¿Ú£¨¹© Gizmos ¾«È·»æÖÆ£©
+    // å½“å‰æ­£åœ¨ç”Ÿæ•ˆçš„çª—å£ï¼ˆä¾› Gizmos ç²¾ç¡®ç»˜åˆ¶ï¼‰
     private HitboxWindow activeWindow;
     private bool isHitboxActiveThisFrame = false;
 
     void Awake()
     {
         player = GetComponent<PlayerController>();
+        targetFinder = GetComponent<TargetFinder>();
+
         overlapFilter = ContactFilter2D.noFilter;
         overlapFilter.useTriggers = Physics2D.queriesHitTriggers;
     }
@@ -62,31 +73,31 @@ public class PlayerHitDetection : MonoBehaviour
     void Update()
     {
 #if ENABLE_LEGACY_INPUT_MANAGER
-        // Ìõ¼ş±àÒë±£»¤£ºActive Input Handling ÉèÎª¡¸Input System Package (New)¡¹Ê±
-        // Input.GetKeyDown »áÖ±½ÓÅ×Òì³£¡£¼ÓÁËÕâ²ã±£»¤ºóÁ½ÖÖÉèÖÃÏÂ¶¼ÄÜ±àÒëÔËĞĞ¡£
         if (Input.GetKeyDown(toggleKey)) showHitbox = !showHitbox;
 #endif
     }
 
     // ==========================================================
-    // ¶¯»­ÊÂ¼şÈë¿Ú
+    // åŠ¨ç”»äº‹ä»¶å…¥å£
     // ==========================================================
 
     /// <summary>
-    /// ÓÉ¶¯»­ÊÂ¼ş´¥·¢£º¿ªÊ¼ÅÜ±¾ÕĞÊ½µÄÅĞ¶¨´°¿ÚĞòÁĞ¡£
+    /// ç”±åŠ¨ç”»äº‹ä»¶è§¦å‘ï¼šå¼€å§‹è·‘æœ¬æ‹›å¼çš„åˆ¤å®šçª—å£åºåˆ—ã€‚
     ///
-    /// Ò»´Îµ÷ÓÃÅÜÍêÕû¸öÕĞÊ½µÄËùÓĞ¶Î¡£
-    /// ¡¾²»Òª¡¿ÎªÁË×öÈıÁ¬Õ¶¶øÔÚ¶¯»­Àï²åÈı¸ö TriggerAttackHitbox ÊÂ¼ş ¡ª¡ª
-    /// ÄÇÑùºóÃæµÄ»áÆş¶ÏÇ°ÃæµÄ¡£ÕıÈ·×ö·¨ÊÇÔÚ ComboNode ÀïÅäÈıÌõ HitboxWindow¡£
+    /// ä¸€æ¬¡è°ƒç”¨è·‘å®Œæ•´ä¸ªæ‹›å¼çš„æ‰€æœ‰æ®µã€‚
+    /// ã€ä¸è¦ã€‘ä¸ºäº†åšä¸‰è¿æ–©è€Œåœ¨åŠ¨ç”»é‡Œæ’ä¸‰ä¸ª TriggerAttackHitbox äº‹ä»¶ â€”â€”
+    /// é‚£æ ·åé¢çš„ä¼šææ–­å‰é¢çš„ã€‚æ­£ç¡®åšæ³•æ˜¯åœ¨ ComboNode é‡Œé…ä¸‰æ¡ HitboxWindowã€‚
     /// </summary>
     public void TriggerAttackHitbox()
     {
         ComboNode currentNode = player.inputBuffer.currentNode;
         if (currentNode == null) return;
 
-        // ÉÏÒ»ÕĞµÄÅĞ¶¨»¹ÔÚ¾ÍÇ¿ĞĞÆş¶Ï£¬²¢Çå¿ÕÃüÖĞÃûµ¥
         if (activeHitboxCoroutine != null) StopCoroutine(activeHitboxCoroutine);
+
         alreadyHitEnemies.Clear();
+        LastHitTarget = null;
+        HitCountThisAttack = 0;
 
         activeHitboxCoroutine = StartCoroutine(HitboxSequenceCoroutine(currentNode));
     }
@@ -105,13 +116,12 @@ public class PlayerHitDetection : MonoBehaviour
     }
 
     // ==========================================================
-    // ÅĞ¶¨ĞòÁĞ
+    // åˆ¤å®šåºåˆ—
     // ==========================================================
 
     private IEnumerator HitboxSequenceCoroutine(ComboNode node)
     {
-        // È¡³ö±¾ÕĞÊ½µÄËùÓĞÅĞ¶¨´°¿Ú¡£
-        // Ã»Åä¶à¶ÎµÄ»°£¬»á×Ô¶¯ÓÃ¾É°æµ¥¶Î²ÎÊıºÏ³ÉÒ»Ìõ ¡ª¡ª ÒÑÅäºÃµÄ×Ê²úÎŞĞè¸Ä¶¯¡£
+        // æ²¡é…å¤šæ®µçš„è¯ä¼šè‡ªåŠ¨ç”¨æ—§ç‰ˆå•æ®µå‚æ•°åˆæˆä¸€æ¡ â€”â€” å·²é…å¥½çš„èµ„äº§æ— éœ€æ”¹åŠ¨
         node.CollectWindows(windowBuffer);
 
         float sequenceTime = 0f;
@@ -120,7 +130,6 @@ public class PlayerHitDetection : MonoBehaviour
         {
             HitboxWindow window = windowBuffer[i];
 
-            // µÈµ½±¾¶Î¸Ã¿ªÊ¼µÄÊ±¿Ì
             float waitTime = window.startDelay - sequenceTime;
             if (waitTime > 0f)
             {
@@ -128,7 +137,7 @@ public class PlayerHitDetection : MonoBehaviour
                 sequenceTime += waitTime;
             }
 
-            // ±¾¶ÎÊÇ·ñÖØĞÂÔÊĞíÃüÖĞÍ¬Ò»¸öµĞÈË£¨ÈıÁ¬Õ¶Ã¿µ¶¶¼³ÔÉËº¦£©
+            // æœ¬æ®µæ˜¯å¦é‡æ–°å…è®¸å‘½ä¸­åŒä¸€ä¸ªæ•Œäººï¼ˆä¸‰è¿æ–©æ¯åˆ€éƒ½åƒä¼¤å®³ï¼‰
             if (window.refreshHitList) alreadyHitEnemies.Clear();
 
             yield return RunSingleWindow(node, window);
@@ -152,7 +161,7 @@ public class PlayerHitDetection : MonoBehaviour
         {
             CheckOverlap(node, window);
 
-            // duration Îª 0 ¡ú Ë²¼äÉËº¦£¬Ö»ÅĞ¶¨Ò»Ö¡
+            // duration ä¸º 0 â†’ ç¬é—´ä¼¤å®³ï¼Œåªåˆ¤å®šä¸€å¸§
             if (window.duration <= 0f) break;
 
             yield return null;
@@ -169,31 +178,68 @@ public class PlayerHitDetection : MonoBehaviour
         Vector2 finalOffset = new Vector2(window.offset.x * dirX, window.offset.y);
         Vector2 boxCenter = (Vector2)transform.position + finalOffset;
 
-        int count = Physics2D.OverlapBox(boxCenter, window.size, 0f, overlapFilter, overlapResults);
+        overlapResults.Clear();
+        Physics2D.OverlapBox(boxCenter, window.size, 0f, overlapFilter, overlapResults);
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < overlapResults.Count; i++)
         {
             Collider2D hit = overlapResults[i];
             if (hit == null) continue;
             if (alreadyHitEnemies.Contains(hit)) continue;
-            if (!hit.CompareTag("Enemy")) continue;
+            if (!hit.CompareTag(enemyTag)) continue;
 
             alreadyHitEnemies.Add(hit);
 
-            // ±ØĞëÓÃ GetComponentInParent ¡ª¡ª ÅĞ¶¨¿ò³£¹ÒÔÚ×ÓÎïÌåÉÏ£¬
-            // Ö±½Ó GetComponent »á¿³ÖĞµ«²»µôÑª
+            // å¿…é¡»ç”¨ GetComponentInParent â€”â€” åˆ¤å®šæ¡†å¸¸æŒ‚åœ¨å­ç‰©ä½“ä¸Šï¼Œ
+            // ç›´æ¥ GetComponent ä¼šç ä¸­ä½†ä¸æ‰è¡€
             EntityBase enemy = hit.GetComponentInParent<EntityBase>();
 
-            if (enemy != null)
+            if (enemy == null)
             {
-                enemy.TakeDamage(new DamageInfo(
-                    window.damage, DamageType.Melee, transform.position, gameObject));
+                Debug.LogWarning($"[åˆ¤å®š] ç ä¸­äº† {hit.name}ï¼Œä½†å®ƒå’Œå®ƒçš„çˆ¶èŠ‚ç‚¹ä¸Šéƒ½æ²¡æœ‰ EntityBase", hit);
+                continue;
             }
-            else
-            {
-                Debug.LogWarning($"[ÅĞ¶¨] ¿³ÖĞÁË {hit.name}£¬µ«ËüºÍËüµÄ¸¸½ÚµãÉÏ¶¼Ã»ÓĞ EntityBase", hit);
-            }
+
+            // æŠŠæœ¬æ‹›çš„æ‰“æ–­èƒ½åŠ›ä¸€å¹¶ä¼ è¿‡å»ã€‚
+            // ã€æ³¨æ„ã€‘æ‰“æ–­ä¸å¦ç”±å—å‡»æ–¹è£å†³ â€”â€” è¿™é‡Œåªå£°æ˜"æˆ‘èƒ½ç ´å“ªå‡ ç±»"ï¼Œ
+            // è‡³äºæ•Œäººå½“å‰åœ¨åšçš„åŠ¨ä½œç®—ä¸ç®—é‚£ä¸€ç±»ã€ç ´äº†ä¹‹åæ€ä¹ˆè¡¨ç°ï¼Œ
+            // å…¨æ˜¯æ•Œäººä¾§çš„äº‹ã€‚è¿™å’Œå‡»é€€åŠ›åº¦å½’å—å‡»æ–¹ç®¡æ˜¯åŒä¸€æ¡åŸåˆ™ã€‚
+            enemy.TakeDamage(new DamageInfo(
+                window.damage, DamageType.Melee, transform.position, gameObject,
+                node.breakMask));
+
+            // ---- å‘½ä¸­è®°è´¦ä¸å¹¿æ’­ ----
+            LastHitTarget = enemy.transform;
+            HitCountThisAttack++;
+
+            OnEnemyHit?.Invoke(enemy, window.damage);
+
+            // ---- è‡ªåŠ¨æœå‘ ----
+            TryFaceTarget(node, enemy.transform);
         }
+    }
+
+    /// <summary>
+    /// ã€æ‰¹æ¬¡N æ–°å¢ã€‘å‘½ä¸­åè‡ªåŠ¨è½¬å‘ç›®æ ‡ã€‚
+    ///
+    /// ç”¨äºæ»‘é“²æ”»å‡»è¿™ç±»"è¾¹å†²è¾¹ç "çš„æ‹›å¼ï¼š
+    ///   å‘½ä¸­æ•Œäºº â†’ é¢å‘é‚£ä¸ªæ•Œäºº
+    ///   æ²¡å‘½ä¸­   â†’ ç»´æŒåŸæœå‘ï¼ˆæ»‘é“²æ–¹å‘ï¼‰
+    ///
+    /// åªæœ‰å‹¾äº† faceTargetOnHit çš„æ‹›å¼æ‰ä¼šè½¬ï¼Œ
+    /// æ™®é€šå¹³A ä¸è¯¥å› ä¸ºç åˆ°èƒŒåçš„æ•Œäººå°±çªç„¶è½¬èº«ã€‚
+    /// </summary>
+    private void TryFaceTarget(ComboNode node, Transform target)
+    {
+        if (node == null || !node.faceTargetOnHit) return;
+        if (player == null || target == null) return;
+
+        int facing = (targetFinder != null)
+            ? targetFinder.GetFacingTowards(target)
+            : (target.position.x > transform.position.x ? 1 : -1);
+
+        // 0 è¡¨ç¤ºé‡å ï¼Œæ­¤æ—¶ä¸è½¬èº«ï¼Œé¿å…å·¦å³æŠ–åŠ¨
+        if (facing != 0) player.SetFacingDirection(facing);
     }
 
     // ==========================================================
@@ -205,14 +251,14 @@ public class PlayerHitDetection : MonoBehaviour
         if (!showHitbox || !Application.isPlaying) return;
         if (!isHitboxActiveThisFrame || activeWindow == null) return;
 
-        // »­¡¾µ±Ç°ÕıÔÚÉúĞ§µÄÄÇÒ»¶Î¡¿£¬¶ø²»ÊÇ buffer.currentNode µÄ²ÎÊı¡£
-        // Á¬ÕĞÍÆ½øºó currentNode ÒÑ¾­±äÁË£¬ÓÃËü»­³öÀ´µÄ¿òºÍÊµ¼ÊÅĞ¶¨¶Ô²»ÉÏ¡£
+        // ç”»ã€å½“å‰æ­£åœ¨ç”Ÿæ•ˆçš„é‚£ä¸€æ®µã€‘ï¼Œè€Œä¸æ˜¯ currentNode çš„å‚æ•° â€”â€”
+        // è¿æ‹›æ¨è¿›å currentNode å·²ç»å˜äº†ï¼Œç”¨å®ƒç”»å‡ºæ¥çš„æ¡†å’Œå®é™…åˆ¤å®šå¯¹ä¸ä¸Š
         float dirX = (player != null) ? player.facingDirection : 1f;
 
         Vector2 finalOffset = new Vector2(activeWindow.offset.x * dirX, activeWindow.offset.y);
         Vector2 centerPos = (Vector2)transform.position + finalOffset;
 
-        Gizmos.color = new Color(0f, 1f, 0f, 1f);
+        Gizmos.color = Color.green;
         Gizmos.DrawWireCube(centerPos, activeWindow.size);
     }
 }

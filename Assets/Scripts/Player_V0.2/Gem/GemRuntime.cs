@@ -95,6 +95,18 @@ namespace Flandre.CombatSystem
         /// </summary>
         public virtual bool TryHandleAirCommand(InputCmd cmd) => false;
 
+        /// <summary>
+        /// 【批次O 新增】蓄力突刺途中，本宝石是否让玩家无视沿途的敌人？
+        ///
+        /// 默认 false = 撞到第一个敌人就对它打出蓄力招。
+        /// Relay 覆写为 true = 一定冲到最远端再打（配合锚点传送的玩法）。
+        ///
+        /// 之所以做成"问宝石"而不是在 ChargeState 里写死
+        /// "检查装的是不是 Relay"，是因为以后想让别的宝石也有这个特性时，
+        /// 只需要改那颗宝石自己 —— 蓄力状态一行都不用动。
+        /// </summary>
+        public virtual bool IgnoresThrustInterruption => false;
+
         /// <summary>主动技能引爆。只有插在 Active 槽时才会被调用</summary>
         public virtual void ExecuteActive() { }
 

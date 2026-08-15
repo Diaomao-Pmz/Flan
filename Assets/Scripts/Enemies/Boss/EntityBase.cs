@@ -50,6 +50,24 @@ public abstract class EntityBase : MonoBehaviour, IDamageable
         TakeDamage(new DamageInfo(damage, type, transform.position, null));
     }
 
+    /// <summary>
+    /// 供子类同步血量用。
+    ///
+    /// 【为什么需要它】BossController 把伤害转发给了自己的黑板（BossState），
+    /// 基类这份 currentHP 于是永远不会被扣，一直显示满血。
+    /// 有了这个入口，子类可以把黑板的血量镜像回来，让基类字段说真话 ——
+    /// 这样任何写在 EntityBase 上的通用逻辑（承伤统计、受击闪白…）
+    /// 对 Boss 和小怪的表现才会一致。
+    ///
+    /// 注意它【不会】触发 Die() —— 死亡时机由持有真实血量的一方决定，
+    /// 否则会出现两套系统同时宣告死亡的竞态。
+    /// </summary>
+    protected void SetCurrentHP(int value)
+    {
+        currentHP = Mathf.Clamp(value, 0, maxHP);
+        OnStatChanged?.Invoke();
+    }
+
     public virtual void Heal(int amount)
     {
         if (isDead) return;

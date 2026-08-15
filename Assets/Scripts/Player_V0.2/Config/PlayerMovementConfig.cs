@@ -56,6 +56,16 @@ namespace Flandre.CombatSystem
         public float flyCancelJumpForce = 8f;
         public float flySpeed = 5f;
 
+        [Header("Fly 衍生 (打出蓄力招后点按 Q 跃起进飞行)")]
+        [Tooltip("跃起阶段的速度")]
+        public float flyLeapSpeed = 14f;
+
+        [Tooltip("跃起阶段持续多久，之后转为正常飞行操控")]
+        public float flyLeapDuration = 0.25f;
+
+        [Tooltip("没有按方向键时，跃起默认朝哪个方向。(0,1)=正上方")]
+        public Vector2 flyLeapDefaultDirection = new Vector2(0f, 1f);
+
         [Header("Sensor Settings (原先是散落在代码里的魔法数字)")]
         [Tooltip("地面检测盒尺寸，原 IsGrounded() 中硬编码 (0.5, 0.2)")]
         public Vector2 groundCheckBoxSize = new Vector2(0.5f, 0.2f);

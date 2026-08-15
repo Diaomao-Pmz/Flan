@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be0de81e39bad9a48943fc681e250da6, type: 3}
+  m_Name: SubWeapon
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.WeaponMoveSet
+  displayName: Sub
+  weaponType: 1
+  icon: {fileID: 0}
+  description: 
+  openers:
+  - {fileID: 11400000, guid: a1cdab3a0f201784abc39fc4afe6503f, type: 2}
+  followUps:
+  - {fileID: 11400000, guid: f93a7f4adbd77a34d9fa772db87b8d08, type: 2}
+  - {fileID: 11400000, guid: b60cc9455156a9e4e8f1897d7d75ebc9, type: 2}
+  - {fileID: 11400000, guid: 69468ccf7a353984d8485855672c1ccd, type: 2}
+  - {fileID: 11400000, guid: 87f3406d0748dde4b8a8dccb9e2f5e0b, type: 2}
+  - {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
+  chargeTimeLv1: 0.4
+  chargeTimeLv2: 0.9
+  chargeTimeLv3: 1.5
+  chargeCooldown: 0.7
+  chargeEffectLv1: 
+  chargeEffectLv2: 
+  chargeEffectLv3: 
+  chargeEffectOffset: {x: 0, y: 0}
+  projectilePoolKey: P_Bullet
+  projectilePrefabForValidation: {fileID: 2589707116977578368, guid: 5585b1c7b410760498cc710938e5a159, type: 3}
+  useEightWayAiming: 1

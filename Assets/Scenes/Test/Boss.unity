@@ -1498,10 +1498,54 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectPoolManager
   poolConfigs:
-  - key: EnemyBullet
+  - key: E_Bullet
     prefab: {fileID: 2589707116977578368, guid: 09f4fcf80f38d9f4b927c96f89d6ddb8, type: 3}
     prewarmCount: 30
     maxSize: 200
+  - key: P_Bullet
+    prefab: {fileID: 2589707116977578368, guid: 5585b1c7b410760498cc710938e5a159, type: 3}
+    prewarmCount: 10
+    maxSize: 20
+  - key: FX_A1
+    prefab: {fileID: 2819290616138335727, guid: d2fcde31f9dd58a42ad57c69158e742b, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_A2
+    prefab: {fileID: 2819290616138335727, guid: e4fa31d384c73784aba3e67dc3440fd2, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_A3
+    prefab: {fileID: 2819290616138335727, guid: 4f98a631af0ac2d44b2f9c6488fdcae2, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_AA1
+    prefab: {fileID: 2819290616138335727, guid: 9a95ad2cf5e725543b48dad37ab78e17, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_AA2
+    prefab: {fileID: 2819290616138335727, guid: 13d472be02f683f45b2ec38d50645ffd, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_AA3
+    prefab: {fileID: 2819290616138335727, guid: b48052af9d464774992ddb6a3c10553e, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_BB
+    prefab: {fileID: 2819290616138335727, guid: 3add2d3ba2c99ac478d6361d61538188, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FXL_AA1
+    prefab: {fileID: 3587092818806866930, guid: 84fa3621a7b1bfa469d7f23301e5f547, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FXL_AA2
+    prefab: {fileID: 3587092818806866930, guid: 140b47d5ea4dd0145b1c5d5d20999a63, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FXL_AA3
+    prefab: {fileID: 3587092818806866930, guid: bd17b62f5cb2eb04c885710f7c1f3300, type: 3}
+    prewarmCount: 5
+    maxSize: 20
 --- !u!4 &771204821
 Transform:
   m_ObjectHideFlags: 0
@@ -2557,6 +2601,7 @@ GameObject:
   - component: {fileID: 1257834513}
   - component: {fileID: 1257834512}
   - component: {fileID: 1257834511}
+  - component: {fileID: 1257834515}
   m_Layer: 5
   m_Name: Player_Canvas_HUD
   m_TagString: Untagged
@@ -2649,6 +2694,25 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1257834515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1257834510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 752b0fc035082a849a3902d4bacb350f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.TargetFinder
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  defaultSearchRadius: 12
+  alsoCheckTag: 1
+  enemyTag: Enemy
+  drawGizmos: 0
 --- !u!1 &1272420162
 GameObject:
   m_ObjectHideFlags: 0
@@ -3353,6 +3417,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2644181897110860729, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      propertyPath: m_DeviceLostEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3286114150682490114, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
       propertyPath: m_LocalPosition.x
       value: -7.268
@@ -3393,9 +3461,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3572727015189302073, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      propertyPath: dashSkill.totalCD
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4132750454637263286, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
       propertyPath: m_Name
-      value: Player 1
+      value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 7094499475234919657, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      propertyPath: verboseLog
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7094499475234919657, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
       propertyPath: directionThreshold
@@ -3408,7 +3484,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4132750454637263286, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1827415882}
+    - targetCorrespondingSourceObject: {fileID: 4132750454637263286, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1827415883}
   m_SourcePrefab: {fileID: 100100000, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
 --- !u!1 &1669677075
 GameObject:
@@ -3686,6 +3768,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1950682223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1827415866 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4132750454637263286, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+  m_PrefabInstance: {fileID: 1636495891}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1827415882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827415866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95113025a73f1374fbd650088001dfa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.WeaponLoadout
+  mainWeapon: {fileID: 11400000, guid: d8942c963d6a5a64da477ade8898a13a, type: 2}
+  subWeapon: {fileID: 11400000, guid: 472877d09026e1e4ca1b194c5c2b1abb, type: 2}
+  allowSameWeaponBothSlots: 1
+--- !u!114 &1827415883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827415866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 333379e746c40a749ae89ef8dd8ec8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerEffectSpawner
+  effectRoot: {fileID: 0}
+  defaultAttackEffectKey: 
+  defaultEffectLifetime: 0.4
+  verboseLog: 1
 --- !u!1 &1937482719
 GameObject:
   m_ObjectHideFlags: 0

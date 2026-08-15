@@ -90,11 +90,31 @@ public class ComboNode : ScriptableObject
     [Tooltip("按键序列：例如'上+攻击'，Size填2，Element0填Up，Element1填MainAttack")]
     public List<InputCmd> inputSequence = new List<InputCmd>() { InputCmd.MainAttack };
 
-    [Header("蓄力设定 (Charge Settings)")]
-    [Tooltip("这是否是一个需要长按蓄力的招式？")]
+    // ==========================================================
+    // 蓄力设定 (批次J 重做：从「一个阈值」升级为「等级系统」)
+    // ==========================================================
+    [Header("蓄力设定")]
+    [Tooltip("这是否是一个蓄力招式？勾上后必须填下方的蓄力等级")]
     public bool isChargeSkill = false;
 
-    [Tooltip("需要蓄满多少秒才能释放？(仅在 isChargeSkill 为 true 时有效)")]
+    [Tooltip(
+        "本招属于第几级蓄力 (AA1=1 / AA2=2 / AA3=3)。\n" +
+        "松手时，引擎会在【等级 <= 当前蓄力等级】的候选里挑最高的那一个。\n" +
+        "所以玩家蓄到 2 级松手会出 AA2，蓄到 3 级松手会出 AA3。")]
+    [Range(0, 3)]
+    public int chargeLevel = 0;
+
+    [Tooltip(
+        "【打完我之后】，玩家继续按住攻击键时，蓄力从第几级起步。\n\n" +
+        "这是「连段是蓄力的助跑」这一设计的实现处：\n" +
+        "  A2 填 1 → A1+A2 后按住直接从 AA1 起步\n" +
+        "  A3 填 2 → A1+A2+A3 后按住直接从 AA2 起步\n\n" +
+        "注意上限永远是 3，变的只是起点 —— 所以短连段也能蓄满，只是慢一些。")]
+    [Range(0, 3)]
+    public int chargeStartLevelAfter = 0;
+
+    [System.Obsolete("批次J 起改用武器上的 chargeTimeLv1/2/3 阈值，本字段不再被读取")]
+    [HideInInspector]
     public float requiredChargeTime = 1.0f;
 
     [Header("动画与表现")]
@@ -134,6 +154,75 @@ public class ComboNode : ScriptableObject
     // ==========================================================
     // 【批次G 新增】连段深度限制
     // ==========================================================
+    // ==========================================================
+    // 特效 (改为动画事件 + 对象池驱动)
+    // ==========================================================
+    [Header("特效")]
+    [Tooltip(
+        "本招的特效【对象池 key】。必须与 ObjectPoolManager 上注册的 key 一致。\n\n" +
+        "由动画事件 PlayEffect 触发。特效跟着招式数据走，不再跟着动画曲线走 ——\n" +
+        "所以三段普攻可以共用同一个动画剪辑，特效照样不同。")]
+    public string effectKey = "";
+
+    [Tooltip("特效存活时长。填 0 则使用 PlayerEffectSpawner 上的默认值")]
+    public float effectLifetime = 0f;
+
+    [Tooltip(
+        "勾选 = 特效偏移复用下方判定框的 Hitbox Offset（省一次配置）\n" +
+        "取消 = 用下面的 Effect Offset 单独调")]
+    public bool useHitboxOffsetForEffect = true;
+
+    [Tooltip(
+        "特效偏移。仅在上方取消勾选时生效。\n\n" +
+        "注意这是【局部坐标】：特效挂成角色子物体，\n" +
+        "而角色翻转用的是 transform 旋转，子物体会自动跟着转 ——\n" +
+        "所以这里【不需要】像判定框那样手动处理左右朝向。")]
+    public Vector2 effectOffset = Vector2.zero;
+
+    [Tooltip(
+        "特效缩放。(1,1) 为预制体原始大小。\n\n" +
+        "⚠️ 想让特效左右翻转【不要】把 X 填负数 ——\n" +
+        "特效是角色的子物体，角色转身时用的是 transform 旋转，子物体已经自动翻了。\n" +
+        "再填负数会翻两次，等于没翻。")]
+    public Vector2 effectScale = Vector2.one;
+
+    [Tooltip(
+        "特效旋转角度（度）。正值逆时针。\n" +
+        "斜劈填 15~30，上挑填 90 左右，下砸填 -90 左右。\n" +
+        "角色朝左时会自动镜像，不需要另配一份。")]
+    public float effectRotation = 0f;
+
+    // ==========================================================
+    // 目标交互
+    // ==========================================================
+    // ==========================================================
+    // 打断能力
+    // ==========================================================
+    [Header("打断能力")]
+    [Tooltip(
+        "本招能打断敌人的哪几类动作。留 None = 没有打断能力（普通平A）。\n\n" +
+        "按当前设计：\n" +
+        "  AA1 → 勾 Melee\n" +
+        "  AA2 → 勾 Bullet\n" +
+        "  AA3 → 选 All Attacks（近战+弹幕+全部特殊技）\n\n" +
+        "注意这是【对位】不是【等级】—— AA2 打不断近战，这是刻意的。\n" +
+        "传送类动作永不可打断，所以不要指望勾上 Teleport 会有效果。")]
+    public ActionCategory breakMask = ActionCategory.None;
+
+    [Header("目标交互")]
+    [Tooltip(
+        "命中敌人后自动转向那个敌人。\n\n" +
+        "给滑铲攻击这类「边冲边砍」的招式用：命中就转向，没命中维持滑铲方向。\n" +
+        "普通平A【不建议】勾选 —— 砍到背后的敌人时会突然转身，手感很怪。")]
+    public bool faceTargetOnHit = false;
+
+    [Tooltip(
+        "继承滑铲动量。\n\n" +
+        "勾选 = 滑铲途中打出本招时，滑行继续（滑铲攻击要的就是这个）\n" +
+        "取消 = 本招会中止滑行，改用自己的 Forward Thrust\n\n" +
+        "默认勾选。想做「一刀刹停」这类招式时取消。")]
+    public bool inheritMomentum = true;
+
     [Header("连段深度限制 (武器化)")]
     [Tooltip("本招最早能出现在第几段。1 = 可作起手。填 0 表示不限制")]
     public int minComboDepth = 0;
@@ -204,6 +293,22 @@ public class ComboNode : ScriptableObject
     public bool CanBeCanceledByMovement => cancelPermission.byMovement;
 
     /// <summary>
+    /// 特效应该放在哪个局部坐标。
+    /// 勾了复用就返回判定框偏移，否则返回单独配置的偏移。
+    /// </summary>
+    public Vector2 GetEffectOffset()
+    {
+        if (!useHitboxOffsetForEffect) return effectOffset;
+
+        // 有多段判定时取第一段的偏移，否则用旧版单段参数
+        if (HasMultipleWindows && hitboxWindows[0] != null) return hitboxWindows[0].offset;
+        return hitboxOffset;
+    }
+
+    /// <summary>本招是否为蓄力招（且等级配置有效）</summary>
+    public bool IsValidChargeNode => isChargeSkill && chargeLevel > 0;
+
+    /// <summary>
     /// 本招式能否出现在第 depth 段。
     /// depth 从 1 开始计数：起手是第 1 段。
     /// min / max 填 0 表示该侧不限制。
@@ -214,4 +319,22 @@ public class ComboNode : ScriptableObject
         if (maxComboDepth > 0 && depth > maxComboDepth) return false;
         return true;
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (isChargeSkill && chargeLevel <= 0)
+        {
+            Debug.LogWarning(
+                $"[连招节点] 「{nodeName}」勾选了 isChargeSkill 但 chargeLevel 是 0，" +
+                "松手时永远不会被选中。请填 1/2/3。", this);
+        }
+
+        if (!isChargeSkill && chargeLevel > 0)
+        {
+            Debug.LogWarning(
+                $"[连招节点] 「{nodeName}」填了 chargeLevel 但没勾 isChargeSkill，等级不会生效。", this);
+        }
+    }
+#endif
 }

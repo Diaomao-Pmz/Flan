@@ -12,19 +12,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82ed1730d3f804647b3f8b7bbb1573b1, type: 3}
   m_Name: A3
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
-  nodeName: "\u5E73A\u7B2C3\u6BB5"
-  comboWindow: 0
+  nodeName: A3
+  comboWindow: 0.7
   castCondition: 0
   requiredState: 0
   inputSequence: 04000000
   isChargeSkill: 0
+  chargeLevel: 0
+  chargeStartLevelAfter: 2
   requiredChargeTime: 1
-  attackClip: {fileID: 7400000, guid: ce62dc9dc1b7f8a4491c0de209a17380, type: 2}
+  attackClip: {fileID: 7400000, guid: 6906bb126aa6c5f4aada72543eb70a6c, type: 2}
   forwardThrust: {x: 0, y: 0}
+  cancelPermission:
+    byMainWeapon: 1
+    bySubWeapon: 1
+    byMovement: 1
+  hitboxWindows: []
   damage: 10
   hitboxSize: {x: 0.46, y: 0.37}
   hitboxOffset: {x: 0.67, y: 0.78}
   hitboxDuration: 0.5
   knockbackForce: 0
+  effectKey: FX_A3
+  effectLifetime: 0
+  useHitboxOffsetForEffect: 0
+  effectOffset: {x: 0.477, y: 0.386}
+  effectScale: {x: 0.94, y: 1.55}
+  effectRotation: 0
+  minComboDepth: 3
+  maxComboDepth: 3
   childNodes:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 6527905d3ea5fe846a2e0f7637aabd23, type: 2}

@@ -12,14 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82ed1730d3f804647b3f8b7bbb1573b1, type: 3}
   m_Name: A1
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
-  nodeName: "\u5E73A\u7B2C\u4E00\u6BB5"
+  nodeName: A1
   comboWindow: 0.7
   castCondition: 0
   requiredState: 0
   inputSequence: 04000000
   isChargeSkill: 0
+  chargeLevel: 0
+  chargeStartLevelAfter: 0
   requiredChargeTime: 1
-  attackClip: {fileID: 7400000, guid: 18dcf04cc55bdc44ab336f4b2dd5cafc, type: 2}
+  attackClip: {fileID: 7400000, guid: 7dd7a87907b4b314e8dc68ae5aa98a80, type: 2}
   forwardThrust: {x: 0, y: 0}
   cancelPermission:
     byMainWeapon: 1
@@ -31,6 +33,12 @@ MonoBehaviour:
   hitboxOffset: {x: 0.67, y: 0.78}
   hitboxDuration: 0.5
   knockbackForce: 0
+  effectKey: FX_A1
+  effectLifetime: 0
+  useHitboxOffsetForEffect: 0
+  effectOffset: {x: 0.41, y: 0.41}
+  effectScale: {x: 1, y: 1}
+  effectRotation: 0
   minComboDepth: 0
   maxComboDepth: 0
   childNodes:

@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82ed1730d3f804647b3f8b7bbb1573b1, type: 3}
+  m_Name: B1
+  m_EditorClassIdentifier: Assembly-CSharp::ComboNode
+  nodeName: B1
+  comboWindow: 0
+  castCondition: 0
+  requiredState: 0
+  inputSequence: 05000000
+  isChargeSkill: 0
+  chargeLevel: 0
+  chargeStartLevelAfter: 0
+  requiredChargeTime: 1
+  attackClip: {fileID: 7400000, guid: 35a10e2847a305942a187189787edd46, type: 2}
+  forwardThrust: {x: 0, y: 0}
+  cancelPermission:
+    byMainWeapon: 1
+    bySubWeapon: 1
+    byMovement: 1
+  hitboxWindows: []
+  damage: 0
+  hitboxSize: {x: 0, y: 0}
+  hitboxOffset: {x: 0, y: 0}
+  hitboxDuration: 0
+  knockbackForce: 0
+  effectKey: 
+  effectLifetime: 0
+  useHitboxOffsetForEffect: 1
+  effectOffset: {x: 0, y: 0}
+  effectScale: {x: 1, y: 1}
+  effectRotation: 0
+  minComboDepth: 0
+  maxComboDepth: 0
+  childNodes:
+  - {fileID: 11400000, guid: f93a7f4adbd77a34d9fa772db87b8d08, type: 2}
