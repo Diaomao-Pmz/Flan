@@ -21,17 +21,17 @@ MonoBehaviour:
   activeAnimName: 
   recoverAnimName: 
   phases:
-  - type: 4
+  - pattern: {fileID: 11400000, guid: 658e374a5ddaf3841b0edd08d185a203, type: 2}
     startDelay: 0
     duration: 7
     intervalOverride: 0
     formationDuration: 0
-  - type: 4
+  - pattern: {fileID: 11400000, guid: 4c0c26da1864ac0498f60121fd38a591, type: 2}
     startDelay: 1
     duration: 6
     intervalOverride: 0
     formationDuration: 0
-  - type: 4
+  - pattern: {fileID: 11400000, guid: 407278899315c23468eccdd59ded9646, type: 2}
     startDelay: 2
     duration: 5
     intervalOverride: 0

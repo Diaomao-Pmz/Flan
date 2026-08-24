@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Flandre.CombatSystem;
 
 /// <summary>
 /// 一段挥击。多段串起来就是一套近战连招。
@@ -38,8 +37,6 @@ public class MeleeSwing
 [CreateAssetMenu(fileName = "NewMeleeNode", menuName = "ScriptableObjects/MeleeNode")]
 public class MeleeNode : ActionNode
 {
-    public override ActionCategory DefaultCategory => ActionCategory.Melee;
-
     [Header("--- 近战专属配置 ---")]
     [Tooltip("挥击序列。一段就是单次攻击，多段就是连招。")]
     public List<MeleeSwing> swings = new List<MeleeSwing>();

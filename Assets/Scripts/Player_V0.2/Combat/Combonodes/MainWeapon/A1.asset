@@ -22,7 +22,9 @@ MonoBehaviour:
   chargeStartLevelAfter: 0
   requiredChargeTime: 1
   attackClip: {fileID: 7400000, guid: 7dd7a87907b4b314e8dc68ae5aa98a80, type: 2}
-  forwardThrust: {x: 0, y: 0}
+  forwardThrust: {x: 2, y: 0}
+  thrustDuration: 0.12
+  applyThrustInAir: 1
   cancelPermission:
     byMainWeapon: 1
     bySubWeapon: 1
@@ -39,6 +41,11 @@ MonoBehaviour:
   effectOffset: {x: 0.41, y: 0.41}
   effectScale: {x: 1, y: 1}
   effectRotation: 0
+  breakMask: 0
+  hitReaction: 0
+  hitReactionParam: 0
+  faceTargetOnHit: 0
+  inheritMomentum: 1
   minComboDepth: 0
   maxComboDepth: 0
   childNodes:

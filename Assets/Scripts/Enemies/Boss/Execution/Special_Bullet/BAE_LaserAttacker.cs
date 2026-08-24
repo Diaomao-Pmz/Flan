@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Flandre.CombatSystem;
+using Unity.VisualScripting;
 
 /// <summary>
 /// Boss 激光执行器。认领 LaserNode。固定方向式：预警瞬间锁定角度，之后不再跟踪。
@@ -34,11 +35,6 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
     [Tooltip("激光的发射原点。建议拖入 Boss 下的 Firepoint。留空则用 Boss 自身位置。")]
     [SerializeField] private Transform laserOrigin;
 
-    [Tooltip("绘制光束的 SpriteRenderer。\n" +
-             "【重要】建议放在场景根节点，不要挂在 Boss 底下 —— " +
-             "父级一旦有非均匀缩放或左右翻转，斜向旋转会被拉斜，视觉角度就和判定框对不上。")]
-    [SerializeField] private SpriteRenderer beamRenderer;
-
     [Tooltip("勾选 = 贴图竖着画（光束沿 +Y，Pivot 设 Bottom·Center）。东方系激光素材属于这种。")]
     [SerializeField] private bool spriteIsVertical = true;
 
@@ -59,11 +55,13 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
     private Vector2 gizmoSize;
     private float gizmoAngle;
 
+    //存储正在运行的激光，用于打断
+    private List<GameObject> currentActiveLasers = new List<GameObject>();
+
     private void Awake()
     {
         animator = GetComponent<Animator>();
         contactFilter = HitboxUtility.BuildFilter(targetLayers, detectTriggers);
-        HideBeam();
     }
 
     public System.Type NodeType => typeof(LaserNode);
@@ -79,7 +77,10 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
         // 这正是「可躲」的来源：玩家有 telegraphTime 秒离开这条线。
         Vector2 direction = ResolveDirection(ctx, origin, laser.aimAngleOffset);
 
-        PrepareRenderer(laser);
+        SpriteRenderer beamRenderer = ObjectPoolManager.Instance.Get("Laser").GetComponent<SpriteRenderer>();
+        currentActiveLasers.Add(beamRenderer.gameObject);
+
+        PrepareRenderer(beamRenderer, laser);
 
         // ---- 预警 ----
         PlayAnim(laser.chargeAnimName);
@@ -87,7 +88,7 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
         float elapsed = 0f;
         while (elapsed < laser.telegraphTime)
         {
-            DrawBeam(OriginPos, direction, laser, true);
+            DrawBeam(beamRenderer, OriginPos, direction, laser, true);
             elapsed += Time.deltaTime;
             yield return null;
         }
@@ -100,7 +101,7 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
 
         while (elapsed < laser.fireTime)
         {
-            float length = DrawBeam(OriginPos, direction, laser, false);
+            float length = DrawBeam(beamRenderer, OriginPos, direction, laser, false);
 
             tickTimer += Time.deltaTime;
             if (tickTimer >= laser.damageTickInterval)
@@ -114,7 +115,11 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
         }
 
         // ---- 收招 ----
-        HideBeam();
+        if (currentActiveLasers.Contains(beamRenderer.gameObject))
+        {
+            currentActiveLasers.Remove(beamRenderer.gameObject);
+        }
+        ObjectPoolManager.Instance.Recycle(beamRenderer.gameObject);
         PlayAnim(laser.recoverAnimName);
 
         if (laser.recoverTime > 0f)
@@ -156,7 +161,7 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
     //  表现
     // ==========================================================
 
-    private void PrepareRenderer(LaserNode laser)
+    private void PrepareRenderer(SpriteRenderer beamRenderer, LaserNode laser)
     {
         if (beamRenderer == null) return;
 
@@ -174,7 +179,7 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
     }
 
     /// <summary>画出光束并返回实际长度。</summary>
-    private float DrawBeam(Vector2 origin, Vector2 direction, LaserNode laser, bool isTelegraph)
+    private float DrawBeam(SpriteRenderer beamRenderer, Vector2 origin, Vector2 direction, LaserNode laser, bool isTelegraph)
     {
         // 默认不截断：激光保持直线打满全长，穿过一切目标。
         float length = stopAtObstacle
@@ -202,14 +207,14 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
             // 竖版贴图的 +Y 是射击方向，需要额外转 -90°
             t.rotation = Quaternion.Euler(0f, 0f, spriteIsVertical ? angle - 90f : angle);
 
-            ApplyBeamSize(length, width);
+            ApplyBeamSize(beamRenderer, length, width);
         }
 
         return length;
     }
 
     /// <summary>把光束调整到 length × width 的实际世界尺寸。</summary>
-    private void ApplyBeamSize(float length, float width)
+    private void ApplyBeamSize(SpriteRenderer beamRenderer, float length, float width)
     {
         Vector2 target = spriteIsVertical
             ? new Vector2(width, length)
@@ -237,7 +242,11 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
     private void HideBeam()
     {
         beamActive = false;
-        if (beamRenderer != null) beamRenderer.enabled = false;
+        foreach(GameObject beam in currentActiveLasers)
+        {
+            currentActiveLasers.Remove(beam);
+            ObjectPoolManager.Instance.Recycle(beam);
+        }
     }
 
     // ==========================================================

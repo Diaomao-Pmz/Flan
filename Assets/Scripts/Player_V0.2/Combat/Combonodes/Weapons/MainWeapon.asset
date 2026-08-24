@@ -24,6 +24,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b13bc296744cadf47958870dbc0a8465, type: 2}
   - {fileID: 11400000, guid: 6527905d3ea5fe846a2e0f7637aabd23, type: 2}
   - {fileID: 11400000, guid: ab1b05c724cbfa1439f95d6ad267956a, type: 2}
+  - {fileID: 11400000, guid: e3fa7a2aed9ba5840b87ba2e48362c41, type: 2}
+  - {fileID: 11400000, guid: 5f3574eaef4560641a04cef2df2758ab, type: 2}
+  - {fileID: 11400000, guid: be00c2a9df741a6488a6402bc752176f, type: 2}
+  - {fileID: 11400000, guid: 9408d96a840111045a1dae0bb494936f, type: 2}
+  - {fileID: 11400000, guid: b2bf14e8a2e67674aa23dd598b3142c9, type: 2}
+  - {fileID: 11400000, guid: 13f282d25b27cfe4a837be03e06ecf1b, type: 2}
   chargeTimeLv1: 1
   chargeTimeLv2: 2.5
   chargeTimeLv3: 5

@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82ed1730d3f804647b3f8b7bbb1573b1, type: 3}
+  m_Name: DOWN_AA1
+  m_EditorClassIdentifier: Assembly-CSharp::ComboNode
+  nodeName: AA1
+  comboWindow: 0.7
+  castCondition: 2
+  requiredState: 0
+  inputSequence: 0100000004000000
+  isChargeSkill: 1
+  chargeLevel: 1
+  chargeStartLevelAfter: 0
+  requiredChargeTime: 1.2
+  attackClip: {fileID: 7400000, guid: dbaab0c076895944ab0d335aa1972f53, type: 2}
+  forwardThrust: {x: 0, y: 0}
+  cancelPermission:
+    byMainWeapon: 0
+    bySubWeapon: 1
+    byMovement: 1
+  hitboxWindows: []
+  damage: 10
+  hitboxSize: {x: 1.2, y: 0.7}
+  hitboxOffset: {x: 0.3, y: 0.25}
+  hitboxDuration: 0.5
+  knockbackForce: 10
+  effectKey: FX_D_AA
+  effectLifetime: 0
+  useHitboxOffsetForEffect: 0
+  effectOffset: {x: 0.164, y: 0.168}
+  effectScale: {x: 0.678, y: 0.581}
+  effectRotation: -9.478
+  breakMask: 1
+  hitReaction: 1
+  hitReactionParam: 0
+  faceTargetOnHit: 0
+  inheritMomentum: 1
+  minComboDepth: 0
+  maxComboDepth: 0
+  childNodes: []

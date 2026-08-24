@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Flandre.CombatSystem;
 
 public enum BossAttackType
 {
@@ -26,7 +25,7 @@ public enum BossAttackType
 public class BulletPhase
 {
     [Tooltip("这一段用哪种弹幕形态")]
-    public BossAttackType type = BossAttackType.Random;
+    public BulletPatternBase pattern;
 
     [Tooltip("相对组合开始的延迟（秒）。0 表示与组合同时启动。")]
     public float startDelay = 0f;
@@ -44,8 +43,6 @@ public class BulletPhase
 [CreateAssetMenu(fileName = "NewBulletNode", menuName = "ScriptableObjects/BulletNode")]
 public class BulletNode : ActionNode
 {
-    public override ActionCategory DefaultCategory => ActionCategory.Bullet;
-
     [Header("--- 组合弹幕配置 ---")]
     [Tooltip("弹幕段列表。留空则回退到下方的旧版单形态字段。")]
     public List<BulletPhase> phases = new List<BulletPhase>();

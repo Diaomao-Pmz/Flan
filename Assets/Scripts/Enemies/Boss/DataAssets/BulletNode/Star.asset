@@ -20,5 +20,12 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
+  phases:
+  - pattern: {fileID: 11400000, guid: 28f8a13c62cf22d4e8490448a4c4adb0, type: 2}
+    startDelay: 0
+    duration: 6
+    intervalOverride: 0
+    formationDuration: 0.5
   AttackName: Star
   formationDuration: 0.5
+  attackDuration: 3

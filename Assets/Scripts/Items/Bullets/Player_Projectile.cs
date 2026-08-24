@@ -59,6 +59,7 @@ public class Player_Projectile : MonoBehaviour, IPoolable
     // 出厂快照。避免把被外部改写过的值带回池子
     private Vector3 originalScale;
     private float originalSpeed;
+    private int originalDamage;
 
     // 每次借出重置的存活计时器（取代原先 Awake 里的 Destroy 定时器）
     private float aliveTimer;
@@ -68,6 +69,7 @@ public class Player_Projectile : MonoBehaviour, IPoolable
         rb = GetComponent<Rigidbody2D>();
         originalScale = transform.localScale;
         originalSpeed = speed;
+        originalDamage = damage;
     }
 
     /// <summary>
@@ -80,6 +82,28 @@ public class Player_Projectile : MonoBehaviour, IPoolable
     void OnEnable()
     {
         aliveTimer = 0f;
+    }
+
+    /// <summary>
+    /// 【本批新增】按招式配置调整这一发的表现。必须在 Setup 之前调用。
+    ///
+    /// 这三项都会在回池时由 OnDespawn 还原成出厂快照 ——
+    /// 所以同一个池里的子弹既能当 B1 的普通弹，
+    /// 也能当 BB2 的"更大更快"弹，不会把脏数据带回池子。
+    /// </summary>
+    /// <param name="speedMultiplier">速度倍率，1 = 原始速度</param>
+    /// <param name="scaleMultiplier">体积倍率，1 = 原始大小</param>
+    /// <param name="damageOverride">伤害覆盖，0 或负数 = 用预制体上的原始伤害</param>
+    public void Configure(float speedMultiplier, float scaleMultiplier, int damageOverride)
+    {
+        if (speedMultiplier > 0f) speed = originalSpeed * speedMultiplier;
+
+        if (scaleMultiplier > 0f && !Mathf.Approximately(scaleMultiplier, 1f))
+        {
+            transform.localScale = originalScale * scaleMultiplier;
+        }
+
+        if (damageOverride > 0) damage = damageOverride;
     }
 
     public void Setup(Vector2 direction)
@@ -163,7 +187,8 @@ public class Player_Projectile : MonoBehaviour, IPoolable
         transform.localScale = originalScale;
         transform.rotation = Quaternion.identity;
 
-        speed = originalSpeed;      // 可能被 buff / 加速器改写过
+        speed = originalSpeed;      // 可能被 buff / 加速器 / 招式倍率改写过
+        damage = originalDamage;
         moveDirection = Vector2.zero;
         aliveTimer = 0f;
 

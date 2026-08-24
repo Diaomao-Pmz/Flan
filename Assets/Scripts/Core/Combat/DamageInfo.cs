@@ -57,6 +57,31 @@ namespace Flandre.CombatSystem
     }
 
     /// <summary>
+    /// 【受击反应】攻击方希望受击方做出什么位移表现。
+    ///
+    /// 注意这只是"希望" —— 最终怎么表现由受击方裁决。
+    /// 比如 Boss 护盾没破时，无论上挑还是下砸都统一表现为后退，
+    /// 攻击方不需要知道这条规则，也不该知道。
+    ///
+    /// 这和"击退力度归受击方管"是同一条原则：
+    /// 攻击方描述意图，受击方决定表现。
+    /// </summary>
+    public enum HitReaction
+    {
+        /// <summary>无特殊反应，走受击方的默认处理</summary>
+        None = 0,
+
+        /// <summary>水平击退（后退）</summary>
+        Knockback,
+
+        /// <summary>上挑击飞</summary>
+        Launch,
+
+        /// <summary>下砸，把目标带向地面</summary>
+        Slam,
+    }
+
+    /// <summary>
     /// 统一的伤害载荷。敌我双方共用同一份契约。
     ///
     /// 设计要点：**这里没有击退力度字段，这是有意为之。**
@@ -91,15 +116,30 @@ namespace Flandre.CombatSystem
         /// </summary>
         public readonly ActionCategory breakMask;
 
+        /// <summary>希望受击方做出的位移表现。最终是否照做由受击方决定。</summary>
+        public readonly HitReaction reaction;
+
+        /// <summary>
+        /// 反应的强度参数，含义随 reaction 变化：
+        ///   Launch → 额外浮空时间（秒）。AA3 上挑靠它实现「延长击飞」
+        ///   Slam   → 落地后的弹起速度。0 表示砸下去就不弹，AA3 下砸填正数
+        ///   其余   → 未使用
+        /// </summary>
+        public readonly float reactionParam;
+
         public DamageInfo(int amount, DamageType type, Vector2 sourcePosition,
                           GameObject instigator = null,
-                          ActionCategory breakMask = ActionCategory.None)
+                          ActionCategory breakMask = ActionCategory.None,
+                          HitReaction reaction = HitReaction.None,
+                          float reactionParam = 0f)
         {
             this.amount = amount;
             this.type = type;
             this.sourcePosition = sourcePosition;
             this.instigator = instigator;
             this.breakMask = breakMask;
+            this.reaction = reaction;
+            this.reactionParam = reactionParam;
         }
 
         /// <summary>本次攻击能否打断指定类别的动作</summary>

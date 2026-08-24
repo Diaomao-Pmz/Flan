@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4854403775312985485}
   - component: {fileID: 3284583555894441566}
   m_Layer: 0
-  m_Name: FX_BB
+  m_Name: FX_U_AA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 2819290616138335727}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.41759, y: -0.39405, z: 0}
+  m_LocalPosition: {x: -0.93498, y: -0.71053, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 8
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4193494152695329781, guid: b98a3ddde353cf543b81e3f0c5435801, type: 3}
+  m_Sprite: {fileID: 1624071520673560480, guid: d204e323ce1447945be7d99725610a00, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -103,7 +103,7 @@ Animator:
   m_GameObject: {fileID: 2819290616138335727}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: ba8cf4f1a69358b47963ffdd4c03e89e, type: 2}
+  m_Controller: {fileID: 9100000, guid: bb32ae2d2d02e0b409ccb6f6ea99f3f5, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

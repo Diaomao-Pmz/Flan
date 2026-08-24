@@ -20,5 +20,12 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
+  phases:
+  - pattern: {fileID: 11400000, guid: 1ae4d676190a23f42a15296dcc26736a, type: 2}
+    startDelay: 0
+    duration: 4
+    intervalOverride: 0
+    formationDuration: 0.5
   AttackName: Square
   formationDuration: 0.5
+  attackDuration: 3

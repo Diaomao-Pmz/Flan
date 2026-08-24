@@ -20,7 +20,5 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
-  categoryOverride: 0
-  immuneToInterrupt: 1
   teleportDelay: 0.2
   targetType: 1

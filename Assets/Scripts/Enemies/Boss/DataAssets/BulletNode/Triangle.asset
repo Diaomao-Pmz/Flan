@@ -20,6 +20,12 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
+  phases:
+  - pattern: {fileID: 11400000, guid: 18ad97e92fe400f40870913396f155b5, type: 2}
+    startDelay: 0
+    duration: 5
+    intervalOverride: 0
+    formationDuration: 0.5
   AttackName: Triangle
   formationDuration: 0.5
   attackDuration: 3

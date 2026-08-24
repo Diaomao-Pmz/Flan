@@ -5,34 +5,31 @@ using UnityEngine;
 using Flandre.CombatSystem;
 
 [RequireComponent(typeof(BossState))]
-[RequireComponent(typeof(BAE_Teleporter))]
+[RequireComponent(typeof(BAE_Teleporter))] // ¡¾ĞÂÔö¡¿Ç¿ÖÆÒªÇó¹ÒÔØ´«ËÍÆ÷×é¼ş
 public class BossController : EntityBase
 {
-    [Header("--- è¡¨ç°å±‚å¼•ç”¨ ---")]
+    [Header("--- ±íÏÖ²ãÒıÓÃ ---")]
     public GameObject shieldVisual;
     public Animator animator { get; private set; }
     [SerializeField] Transform playerTransform;
 
     public BossAIDecider AI { get; private set; }
 
-    // çŠ¶æ€å®šä¹‰
+    // ×´Ì¬¶¨Òå
     public BossActionExecuter CombatState { get; private set; }
     public BossMoveState MoveState { get; private set; }
     public BossStunState StunState { get; private set; }
 
-    // å„ä¸“èŒéƒ¨é—¨çš„æ‰§è¡Œå™¨å¼•ç”¨
+    // ¸÷×¨Ö°²¿ÃÅµÄÖ´ĞĞÆ÷ÒıÓÃ
     public BAE_BulletEmitter BulletEmitter { get; private set; }
-    public BAE_Teleporter Teleporter { get; private set; }
+    public BAE_Teleporter Teleporter { get; private set; } // ¡¾ĞÂÔö¡¿´«ËÍ×¨Ö°Ö´ĞĞÆ÷
     public BossState bossState { get; private set; }
 
-    [Header("--- ç§»åŠ¨é£ç­ç³»ç»Ÿå‚æ•° ---")]
-    public float moveSpeed = 3f;
-    public float wallCheckDistance = 1.5f;
-    public LayerMask wallLayer;
-
-    [Header("--- æ‰“æ–­è¡¨ç° ---")]
-    [Tooltip("åŠ¨ä½œè¢«æ‰“æ–­åçš„ç¡¬ç›´æ—¶é•¿ï¼ˆç§’ï¼‰ã€‚ç©å®¶çš„è¿½å‡»çª—å£")]
-    public float interruptStaggerDuration = 0.6f;
+    [Header("--- ÒÆ¶¯·çóİÏµÍ³²ÎÊı ---")]
+    // ×¢Òâ£ºmaintainDistance ÒÑ±»³¹µ×É¾³ı£¬ÓÉ MoveState ¶¯Ì¬Ïò AI Ë÷È¡
+    public float moveSpeed = 3f;              // ÒÆ¶¯ËÙ¶È
+    public float wallCheckDistance = 1.5f;    // ×²Ç½ÉäÏß¼ì²â¾àÀë
+    public LayerMask wallLayer;               // Ç½±Ú/ËÀ½ÇµÄÍ¼²ã
 
     [Header("UI For Testing")]
     public TextMeshProUGUI bossStatusText;
@@ -42,17 +39,12 @@ public class BossController : EntityBase
     public float DistanceToPlayer => Vector2.Distance(transform.position, playerTransform.position);
 
     /// <summary>
-    /// å½“å‰æ­£åœ¨æ‰§è¡Œçš„åŠ¨ä½œå¡ã€‚ç”± BossActionExecuter åœ¨å¼€æ¼”/æ”¶å·¥æ—¶å†™å…¥ã€‚
-    /// æ‰“æ–­åˆ¤å®šéœ€è¦çŸ¥é“"ç°åœ¨åšçš„æ˜¯å“ªä¸€ç±»åŠ¨ä½œ"ã€‚
+    /// Ö»¶ÁÇé±¨×ÜÏß¡£ËùÓĞÖ´ĞĞÆ÷ÓëÌõ¼ş¶ÔÏó¹²ÓÃÍ¬Ò»·İ£¬±ÜÃâ¸÷×Ô FindObjectOfType¡£
+    /// ÔÚ Start ÖĞ×é×°£¬È·±£¸÷×é¼şµÄ Awake ¶¼ÒÑÅÜÍê¡£
     /// </summary>
-    public ActionNode CurrentActionNode { get; private set; }
-
-    /// <summary>è¢«æ‰“æ–­åè¿›å…¥çš„çŸ­æš‚ç¡¬ç›´æ˜¯å¦ä»åœ¨è®¡æ—¶</summary>
-    public bool IsStaggered => Time.time < staggerEndTime;
-    private float staggerEndTime = -1f;
-
     public BossContext Context { get; private set; }
 
+    // ¡¾ĞÂÔö¡¿Node ÀàĞÍ ¡ú Ö´ĞĞÆ÷ µÄÓ³Éä±í¡£¼ÓĞÂ¼¼ÄÜ²»ÔÙĞèÒª¸ÄÈÎºÎ·ÖÅÉ´úÂë¡£
     private readonly Dictionary<Type, IBossActionExecutor> executors
         = new Dictionary<Type, IBossActionExecutor>();
 
@@ -60,19 +52,24 @@ public class BossController : EntityBase
     {
         base.Awake();
 
+        // Í³Ò»»ñÈ¡¸÷×é¼şÒıÓÃ
         bossState = GetComponent<BossState>();
         animator = GetComponent<Animator>();
         AI = GetComponent<BossAIDecider>();
         BulletEmitter = GetComponent<BAE_BulletEmitter>();
-        Teleporter = GetComponent<BAE_Teleporter>();
+        Teleporter = GetComponent<BAE_Teleporter>(); // »ñÈ¡´«ËÍÆ÷
 
         CombatState = new BossActionExecuter(this);
         MoveState = new BossMoveState(this);
-        StunState = new BossStunState(this);
+        StunState = new BossStunState(this);   // ¸´ÓÃÊµÀı£¬²»ÔÙÃ¿´ÎÆÆ¶Ü new Ò»¸ö
 
         BuildExecutorRegistry();
     }
 
+    /// <summary>
+    /// É¨Ãè¹ÒÔÚ×Ô¼ºÉíÉÏµÄËùÓĞÖ´ĞĞÆ÷£¬½¨Á¢¡¸ÈÏÁì¹ØÏµ¡¹¡£
+    /// Ö´ĞĞÆ÷Ö»Òª¹ÒÉÏÀ´¾Í»á±»×Ô¶¯·¢ÏÖ£¬²»ĞèÒªÔÚÕâÀïÖğ¸öµÇ¼Ç¡£
+    /// </summary>
     private void BuildExecutorRegistry()
     {
         executors.Clear();
@@ -83,15 +80,15 @@ public class BossController : EntityBase
 
             if (nodeType == null)
             {
-                Debug.LogError($"[BossController] {executor.GetType().Name} çš„ NodeType ä¸ºç©ºï¼Œå·²è·³è¿‡ã€‚", this);
+                Debug.LogError($"[BossController] {executor.GetType().Name} µÄ NodeType Îª¿Õ£¬ÒÑÌø¹ı¡£", this);
                 continue;
             }
 
             if (executors.ContainsKey(nodeType))
             {
                 Debug.LogError(
-                    $"[BossController] {nodeType.Name} è¢«é‡å¤è®¤é¢†ï¼š" +
-                    $"{executors[nodeType].GetType().Name} ä¸ {executor.GetType().Name}ã€‚åè€…å·²å¿½ç•¥ã€‚", this);
+                    $"[BossController] {nodeType.Name} ±»ÖØ¸´ÈÏÁì£º" +
+                    $"{executors[nodeType].GetType().Name} Óë {executor.GetType().Name}¡£ºóÕßÒÑºöÂÔ¡£", this);
                 continue;
             }
 
@@ -99,12 +96,14 @@ public class BossController : EntityBase
         }
     }
 
+    /// <summary>°´¿¨Æ¬µÄÔËĞĞÊ±ÀàĞÍÕÒµ½¶ÔÓ¦Ö´ĞĞÆ÷¡£ÕÒ²»µ½·µ»Ø null¡£</summary>
     public IBossActionExecutor GetExecutorFor(ActionNode node)
     {
         if (node == null) return null;
         return executors.TryGetValue(node.GetType(), out IBossActionExecutor executor) ? executor : null;
     }
 
+    /// <summary>Í¨ÖªËùÓĞÖ´ĞĞÆ÷Á¢¼´ÊÕÌ¯¡£ÆÆ¶Ü¡¢×ª½×¶Î¡¢ËÀÍöÊ±Í³Ò»µ÷ÓÃ¡£</summary>
     public void CancelAllExecutors()
     {
         foreach (IBossActionExecutor executor in executors.Values)
@@ -113,33 +112,29 @@ public class BossController : EntityBase
         }
     }
 
-    /// <summary>ç”± BossActionExecuter è°ƒç”¨ï¼Œç™»è®°/æ¸…é™¤å½“å‰åŠ¨ä½œå¡</summary>
-    public void SetCurrentActionNode(ActionNode node) => CurrentActionNode = node;
-
     void Start()
     {
+        // Í³Ò»³õÊ¼»¯¸÷²¿ÃÅ
         if (BulletEmitter != null) BulletEmitter.Init(playerTransform);
         if (Teleporter != null) Teleporter.Init(playerTransform);
 
+        // ×é×°Ö»¶ÁÇé±¨×ÜÏß
         Context = new BossContext(this, playerTransform);
 
+        // Í³Ò»¶©ÔÄºÚ°åÊÂ¼ş
         if (bossState != null)
         {
             bossState.bossMechanic.OnShieldBroken += HandleShieldBroken;
             bossState.bossMechanic.OnShieldBroken += HideShieldVisual;
             bossState.bossMechanic.OnShieldRecovered += ShowShieldVisual;
 
+            // ¡¾¹Ø¼üĞŞ¸Ä¡¿½«±»¶¯·À·´´«ËÍÊÂ¼ş£¬Ö±½ÓÎ¯ÍĞ¸ø´«ËÍÆ÷Ö´ĞĞËæ»ú´«ËÍ²ßÂÔ
             bossState.bossMechanic.OnTeleportTriggered += TriggerPassiveTeleport;
             bossState.bossMechanic.OnPhase2Triggered += HandlePhase2;
-            bossState.bossMechanic.OnInterruptRequested += HandleInterruptRequest;
-
             bossState.health.OnDeath += Die;
-
-            // æŠŠé»‘æ¿è¡€é‡é•œåƒå›åŸºç±»å­—æ®µï¼Œè¯¦è§ MirrorHealthToBase çš„è¯´æ˜
-            bossState.health.OnStatChanged += MirrorHealthToBase;
-            MirrorHealthToBase();
         }
 
+        // Boss ¿ªÊ¼Ê±ÏÈ½øÈë·çóİÒÆ¶¯×´Ì¬
         ChangeState(MoveState);
     }
 
@@ -156,58 +151,12 @@ public class BossController : EntityBase
         CurrentState?.Enter();
     }
 
-    // ==========================================================
-    // æ‰“æ–­
-    // ==========================================================
-
-    /// <summary>
-    /// ç©å®¶æ‰“å‡ºäº†å¸¦æ‰“æ–­èƒ½åŠ›çš„æ”»å‡»ã€‚
-    ///
-    /// ã€è£å†³åœ¨è¿™é‡Œåšï¼Œä¸åœ¨é»‘æ¿é‡Œã€‘
-    /// BossMechanic åªå¹¿æ’­"æœ‰äººæƒ³æ‰“æ–­æˆ‘"ï¼Œå®ƒä¸çŸ¥é“å½“å‰åœ¨æ¼”å“ªå¼ å¡ï¼›
-    /// è€Œ BossActionExecuter çŸ¥é“å¡ä½†ä¸è¯¥ç®¡æŠ¤ç›¾ä¸çŠ¶æ€æµè½¬ã€‚
-    /// åªæœ‰ Controller åŒæ—¶æ¡ç€è¿™ä¸¤ä»½ä¿¡æ¯ï¼Œæ‰€ä»¥è£å†³å½’å®ƒã€‚
-    /// </summary>
-    private void HandleInterruptRequest(DamageInfo info)
-    {
-        // ä¸åœ¨å‡ºæ‹› â†’ æ²¡ä»€ä¹ˆå¯æ‰“æ–­çš„
-        if (CurrentState != CombatState || CurrentActionNode == null) return;
-
-        if (!CurrentActionNode.CanBeInterruptedBy(info))
-        {
-            // æ‰“æ–­å¤±è´¥ä¹Ÿæ˜¯æœ‰æ„ä¹‰çš„åé¦ˆ â€”â€” ç©å®¶è¯¥çŸ¥é“è¿™ä¸€æ‹›ç ´ä¸äº†è¿™ä¸ªåŠ¨ä½œ
-            OnInterruptFailed?.Invoke(CurrentActionNode);
-            return;
-        }
-
-        Debug.Log($"[BossController] åŠ¨ä½œã€Œ{CurrentActionNode.actionName}ã€" +
-                  $"({CurrentActionNode.Category}) è¢«æ‰“æ–­");
-
-        CancelAllExecutors();
-        SetCurrentActionNode(null);
-
-        staggerEndTime = Time.time + interruptStaggerDuration;
-
-        OnActionInterrupted?.Invoke();
-
-        // å›åˆ°ç§»åŠ¨çŠ¶æ€ã€‚ç¡¬ç›´æœŸé—´ AI ä¸ä¼šç«‹åˆ»å†å‡ºæ‹›ï¼ˆè§ BossMoveState çš„ç­‰å¾…ï¼‰
-        ChangeState(MoveState);
-    }
-
-    /// <summary>åŠ¨ä½œè¢«æˆåŠŸæ‰“æ–­æ—¶å¹¿æ’­ã€‚ç‰¹æ•ˆã€éŸ³æ•ˆã€é¡¿å¸§è®¢é˜…è¿™ä¸ª</summary>
-    public event Action OnActionInterrupted;
-
-    /// <summary>æ‰“æ–­å¤±è´¥æ—¶å¹¿æ’­ï¼ˆéŸ§æ€§ä¸å¤Ÿï¼‰ã€‚å¯ä»¥åšä¸ª"å®"çš„å¼¹åˆ€åé¦ˆ</summary>
-    public event Action<ActionNode> OnInterruptFailed;
-
-    // ==========================================================
-    // äº‹ä»¶å“åº”
-    // ==========================================================
-
     private void HandleShieldBroken()
     {
         ChangeState(StunState);
     }
+
+    // --- ÒÔÏÂÎªÊÂ¼şÏìÓ¦µÄ·â×°·½·¨£¨ÎªÁË·½±ã OnDestroy Ê±¸É¾»µØ×¢Ïú£© ---
 
     private void TriggerPassiveTeleport()
     {
@@ -220,51 +169,29 @@ public class BossController : EntityBase
 
     private void HandlePhase2()
     {
-        Debug.Log("[BossController] è§¦å‘äºŒé˜¶æ®µï¼");
+        Debug.Log("[BossController] ´¥·¢¶ş½×¶Î£¡");
 
+        // ¡¾¸Ä¶¯¡¿²»ÔÙÖ»Í£µ¯Ä»£¬Í¨ÖªËùÓĞÖ´ĞĞÆ÷ÊÕÌ¯
         CancelAllExecutors();
-        SetCurrentActionNode(null);
 
         if (TryGetComponent(out Rigidbody2D rb)) rb.linearVelocity = Vector2.zero;
 
+        // ¡¾¹Ø¼üĞŞ¸Ä¡¿¶ş½×¶Î×ª³¡´«ËÍµ½ÖĞÑë£¬²»ÔÙĞ´ËÀ×ø±ê£¬Ö±½ÓÎ¯ÍĞ¸ø´«ËÍÆ÷
         if (Teleporter != null) Teleporter.ExecuteTeleport(TeleportTargetType.Center);
 
         if (AI != null) AI.SwitchToPhase2();
 
-        // äºŒé˜¶æ®µè½¬åœºæ˜¯ä¸€æ¬¡å¼ºåˆ¶é‡ç½®ï¼šç«‹åˆ»æ»¡ç›¾ï¼Œå¹¶æŠŠçŠ¶æ€æœºä»ç ´é˜²ä¸­æ‹½å‡ºæ¥ã€‚
+        // ¶ş½×¶Î×ª³¡ÊÇÒ»´ÎÇ¿ÖÆÖØÖÃ£ºÁ¢¿ÌÂú¶Ü£¬²¢°Ñ×´Ì¬»ú´ÓÆÆ·ÀÖĞ×§³öÀ´¡£
+        // ²»×öÕâÁ½¼şÊÂµÄ»°£¬CurrentState »áÒ»Ö±Í£ÔÚ BossStunState ÉÏÊıÍêÊ£ÓàµÄÆÆ·ÀÊ±¼ä¡£
         bossState.bossMechanic.RecoverShield();
         ChangeState(MoveState);
     }
 
     protected override void Die()
     {
-        Debug.Log("Bossè¢«å‡»è´¥äº†ï¼è§¦å‘æ­»äº¡æ¼”å‡ºï¼");
+        Debug.Log("Boss±»»÷°ÜÁË£¡´¥·¢ËÀÍöÑİ³ö£¡");
         if (CurrentState != null) CurrentState.Exit();
         CancelAllExecutors();
-        SetCurrentActionNode(null);
-    }
-
-    /// <summary>
-    /// æŠŠé»‘æ¿ä¸Šçš„è¡€é‡é•œåƒå› EntityBase çš„å­—æ®µã€‚
-    ///
-    /// ã€ä¸ºä»€ä¹ˆéœ€è¦è¿™ä¸€æ­¥ã€‘
-    /// Boss æœ‰ä¸¤å¥—è¡€é‡ï¼šEntityBase.currentHP å’Œ BossState.health.currentHPã€‚
-    /// å› ä¸º TakeDamage è¢« override æˆè½¬å‘ç»™é»‘æ¿ï¼ŒåŸºç±»é‚£ä»½ã€ä»æ¥ä¸ä¼šè¢«æ‰£ã€‘â€”â€”
-    /// å®ƒæ°¸è¿œæ˜¾ç¤ºæ»¡è¡€ã€‚
-    ///
-    /// ç›´æ¥æŠŠåŸºç±»çš„è¡€é‡å­—æ®µåˆ æ‰æ˜¯ä¸è¡Œçš„ï¼šEntityBase æ˜¯æ‰€æœ‰æ•Œäººçš„åŸºç±»ï¼Œ
-    /// ä»¥åçš„å°æ€ªä¼šç”¨å®ƒï¼Œè€Œä¸”åˆ¤å®šæ¡†ã€UI éƒ½é  GetComponentInParent&lt;EntityBase&gt;() æ‰¾ç›®æ ‡ã€‚
-    ///
-    /// æ‰€ä»¥é€‰æ‹©é•œåƒ â€”â€” è®©åŸºç±»å­—æ®µè¯´çœŸè¯ï¼Œ
-    /// è¿™æ ·ä»»ä½•å†™åœ¨ EntityBase ä¸Šçš„é€šç”¨é€»è¾‘ï¼ˆæ‰¿ä¼¤ç»Ÿè®¡ã€å—å‡»é—ªç™½â€¦ï¼‰
-    /// å¯¹ Boss å’Œå°æ€ªçš„è¡¨ç°æ‰ä¼šä¸€è‡´ï¼Œä¸ä¼šå‡ºç°"å°æ€ªæœ‰ã€Boss æ²¡æœ‰"çš„è¯¡å¼‚ç°è±¡ã€‚
-    /// </summary>
-    private void MirrorHealthToBase()
-    {
-        if (bossState == null) return;
-
-        maxHP = bossState.health.maxHP;
-        SetCurrentHP(bossState.health.currentHP);
     }
 
     void OnDestroy()
@@ -277,10 +204,7 @@ public class BossController : EntityBase
 
             bossState.bossMechanic.OnTeleportTriggered -= TriggerPassiveTeleport;
             bossState.bossMechanic.OnPhase2Triggered -= HandlePhase2;
-            bossState.bossMechanic.OnInterruptRequested -= HandleInterruptRequest;
-
             bossState.health.OnDeath -= Die;
-            bossState.health.OnStatChanged -= MirrorHealthToBase;
         }
     }
 
@@ -288,9 +212,8 @@ public class BossController : EntityBase
     {
         if (bossState != null)
         {
-            // æ•´ä¸ªè½½è·è½¬å‘ç»™é»‘æ¿ â€”â€” ä¸å†æ‹†æˆ (int, DamageType)ï¼Œ
-            // è¿™æ ·ä»¥å DamageInfo åŠ å­—æ®µæ—¶æœ¬è¡Œä¸ç”¨æ”¹ã€‚
-            bossState.bossMechanic.TakeDamage(info);
+            // ½«ÉËº¦ÇëÇó×ª·¢¸øºÚ°å (BossState) ´¦Àí
+            bossState.bossMechanic.TakeDamage(info.amount, info.type);
         }
     }
 }

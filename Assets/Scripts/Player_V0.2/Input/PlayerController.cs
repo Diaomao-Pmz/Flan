@@ -44,6 +44,15 @@ public class PlayerController : MonoBehaviour
     public Vector2 moveInput { get; private set; }
     public int facingDirection = 1;
 
+    /// <summary>
+    /// 鼠标/指针的屏幕坐标。由 PlayerAimProvider 转成世界方向。
+    ///
+    /// 【为什么放在这里】本文件是全项目唯一允许接触 Input System 的地方。
+    /// 让瞄准组件自己去读 Mouse.current 的话，这条规矩就破了 ——
+    /// 以后想支持手柄右摇杆瞄准、或者做输入录制回放，会发现输入源散落在好几处。
+    /// </summary>
+    public Vector2 screenAimPosition { get; private set; }
+
     // ==========================================
     // 持续按压与蓄力状态记录区
     // ==========================================
@@ -73,6 +82,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        PollPointer();
+
         bool isHit = (stateMachine != null && stateMachine.currentState == stateMachine.hitState);
 
         // 蓄力秒表走字 (双轨独立计时)
@@ -81,6 +92,28 @@ public class PlayerController : MonoBehaviour
             if (isMainAttackHeld) mainAttackHoldTime += Time.deltaTime;
             if (isSubAttackHeld) subAttackHoldTime += Time.deltaTime;
         }
+    }
+
+    /// <summary>
+    /// 每帧同步指针位置。
+    ///
+    /// 直接读 Mouse.current 而不是绑一个 Look Action，是为了少一步配置 ——
+    /// 你不需要去 Input Actions 资产里新建 Action 再绑函数。
+    /// 想改成 Action 驱动的话，调用下面的 OnLook 即可，两条路都留着。
+    /// </summary>
+    private void PollPointer()
+    {
+        var mouse = Mouse.current;
+        if (mouse != null) screenAimPosition = mouse.position.ReadValue();
+    }
+
+    /// <summary>
+    /// 【可选】如果你更想用 Input Actions 驱动指针（比如要支持触屏或手柄准星），
+    /// 在资产里建一个 Pass Through / Vector2 的 Look 动作，绑到这个函数即可。
+    /// </summary>
+    public void OnLook(InputAction.CallbackContext ctx)
+    {
+        screenAimPosition = ctx.ReadValue<Vector2>();
     }
 
     // ==========================================

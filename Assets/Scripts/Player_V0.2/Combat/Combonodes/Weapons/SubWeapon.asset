@@ -24,14 +24,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 69468ccf7a353984d8485855672c1ccd, type: 2}
   - {fileID: 11400000, guid: 87f3406d0748dde4b8a8dccb9e2f5e0b, type: 2}
   - {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
-  chargeTimeLv1: 0.4
-  chargeTimeLv2: 0.9
-  chargeTimeLv3: 1.5
+  chargeTimeLv1: 1
+  chargeTimeLv2: 2.5
+  chargeTimeLv3: 5
   chargeCooldown: 0.7
-  chargeEffectLv1: 
-  chargeEffectLv2: 
-  chargeEffectLv3: 
+  chargeEffectLv1: FXL_AA1
+  chargeEffectLv2: FXL_AA2
+  chargeEffectLv3: FXL_AA3
   chargeEffectOffset: {x: 0, y: 0}
+  chargeEffectScale: {x: 1, y: 1}
+  chargeEffectRotation: 0
   projectilePoolKey: P_Bullet
   projectilePrefabForValidation: {fileID: 2589707116977578368, guid: 5585b1c7b410760498cc710938e5a159, type: 3}
   useEightWayAiming: 1

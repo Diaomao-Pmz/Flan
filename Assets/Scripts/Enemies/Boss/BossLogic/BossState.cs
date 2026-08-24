@@ -13,6 +13,7 @@ public class BossState : MonoBehaviour
         bossMechanic.Init(health);
     }
 
+    // ¡¾ĞÂÔö¡¿£ºÔÚÕâ¸ö´ó×Ü¹ÜÀïÈÃ CD ÅÜÆğÀ´
     void Update()
     {
         if (bossMechanic.currentTeleportTimer > 0)
@@ -53,29 +54,10 @@ public class EnemyHealth
     }
 }
 
-/// <summary>
-/// Boss çš„æŠ¤ç›¾ / é˜¶æ®µ / ä¼ é€æœºåˆ¶ã€‚
-///
-/// ==========================================================
-/// ã€æœ¬æ‰¹æ”¹åŠ¨ã€‘
-///
-/// 1. TakeDamage æ”¹ä¸ºæ¥æ”¶å®Œæ•´çš„ DamageInfoï¼Œè€Œä¸æ˜¯æ‹†å¼€çš„ (int, DamageType)ã€‚
-///    å› ä¸ºæ‰“æ–­ä¿¡æ¯ï¼ˆbreakMaskï¼‰ä¹Ÿè¦ä¸€è·¯ä¼ è¿›æ¥ï¼Œ
-///    æ¯åŠ ä¸€ä¸ªå­—æ®µå°±æ”¹ä¸€æ¬¡ç­¾åçš„è¯ï¼Œä»¥åæ¯æ¬¡æ‰©å±•éƒ½è¦åŠ¨æ‰€æœ‰è°ƒç”¨æ–¹ã€‚
-///    ç›´æ¥ä¼ è½½è·æœ¬èº«ï¼Œæ‰©å±•æ—¶ç­¾åä¸å˜ã€‚
-///
-/// 2. æ¸…æ‰äº† 4 æ¡æ¯æ¬¡å‘½ä¸­éƒ½åˆ·å±çš„ Debug.Logï¼ˆè¿˜å¸¦å­—ç¬¦ä¸²æ‹¼æ¥ï¼Œ
-///    åœ¨å¼¹å¹•äº’æ®´æ—¶æ˜¯æŒç»­çš„ GC å‹åŠ›ï¼‰ã€‚ä¿ç•™çš„éƒ½æ”¹æˆæ¡ä»¶ç¼–è¯‘çš„ PlayerLog.Infoã€‚
-///
-/// 3. æ–°å¢ OnInterruptRequested äº‹ä»¶ â€”â€” æœ¬ç±»åªè´Ÿè´£"å¹¿æ’­ç©å®¶æƒ³æ‰“æ–­"ï¼Œ
-///    è‡³äºå½“å‰æ­£åœ¨åšçš„åŠ¨ä½œèƒ½ä¸èƒ½è¢«æ‰“æ–­ã€æ‰“æ–­åæ€ä¹ˆè¡¨ç°ï¼Œ
-///    æ˜¯ BossController çš„äº‹ã€‚é»‘æ¿ä¸åšå†³ç­–ã€‚
-/// ==========================================================
-/// </summary>
 [Serializable]
 public class BossMechanic
 {
-    [Header("--- æŠ¤ç›¾ä¸é˜¶æ®µé…ç½® ---")]
+    [Header("--- »¤¶ÜÓë½×¶ÎÅäÖÃ ---")]
     public int shieldMaxHP = 300;
     public int meleeShieldDamage = 100;
     public int rangedShieldDamage = 3;
@@ -84,12 +66,12 @@ public class BossMechanic
     public int phase2Threshold = 30;
     public float stunKnockupSpeed = 15f;
 
-    [Header("--- ç§»åŠ¨ä¸ç¯å¢ƒæ„ŸçŸ¥ ---")]
-    public bool isCornered = false;
-    public float teleportCooldown = 5f;
-    public float currentTeleportTimer = 0f;
+    [Header("--- ÒÆ¶¯Óë»·¾³¸ĞÖª (ĞÂÔö) ---")]
+    public bool isCornered = false;      // ÊÇ·ñ±»±ÆÈëÇ½½Ç
+    public float teleportCooldown = 5f;  // ´«ËÍÀäÈ´Ê±¼ä
+    public float currentTeleportTimer = 0f; // ÀäÈ´¼ÆÊ±Æ÷ (Ö»¶Á)
 
-    [Header("--- è¿è¡Œæ—¶æ•°æ® (åªè¯») ---")]
+    [Header("--- ÔËĞĞÊ±Êı¾İ (Ö»¶Á) ---")]
     public int shieldCurrentHP = 300;
     public bool isShieldBroken = false;
     public bool isPhase2 = false;
@@ -99,13 +81,6 @@ public class BossMechanic
     public event Action OnPhase2Triggered;
     public event Action OnShieldRecovered;
     public event Action OnShieldStatChanged;
-
-    /// <summary>
-    /// ç©å®¶æ‰“å‡ºäº†å¸¦æ‰“æ–­èƒ½åŠ›çš„æ”»å‡»ã€‚
-    /// ã€æœ¬äº‹ä»¶åªæ˜¯"æå‡ºè¯·æ±‚"ã€‘â€”â€” èƒ½ä¸èƒ½æ‰“æ–­ç”± BossController ç»“åˆ
-    /// å½“å‰æ­£åœ¨æ‰§è¡Œçš„åŠ¨ä½œç±»åˆ«æ¥è£å†³ã€‚é»‘æ¿ä¸åšå†³ç­–ã€‚
-    /// </summary>
-    public event Action<DamageInfo> OnInterruptRequested;
 
     private EnemyHealth health;
 
@@ -119,51 +94,43 @@ public class BossMechanic
         currentTeleportTimer = 0f;
     }
 
-    public void TakeDamage(in DamageInfo info)
+    public void TakeDamage(int rawDamage, DamageType type)
     {
-        // å…ˆå¹¿æ’­æ‰“æ–­è¯·æ±‚ â€”â€” æ— è®ºæŠ¤ç›¾åœ¨ä¸åœ¨ï¼Œæ‰“æ–­éƒ½è¯¥ç”Ÿæ•ˆã€‚
-        // é¡ºåºå¾ˆé‡è¦ï¼šæ”¾åœ¨æŠ¤ç›¾ç»“ç®—ã€ä¹‹å‰ã€‘ï¼Œ
-        // å¦åˆ™è¿™ä¸€å‡»åˆšå¥½ç ´ç›¾æ—¶ï¼Œä¼šå…ˆè¿›ç ´é˜²çŠ¶æ€å†æ”¶åˆ°æ‰“æ–­è¯·æ±‚ï¼Œé€»è¾‘å°±ç»•äº†ã€‚
-        if (info.breakMask != ActionCategory.None)
-        {
-            OnInterruptRequested?.Invoke(info);
-        }
+        // Ì½Õë 1£ºÈ·ÈÏ½Ó¿ÚÊÇ·ñÕæµÄ±»µ÷ÓÃÁË£¬ÒÔ¼°´«½øÀ´µÄÉËº¦ÀàĞÍ¶Ô²»¶Ô£¡
+        Debug.Log($"Boss ³É¹¦½ÓÊÕµ½ÉËº¦ÇëÇó£¡ÀàĞÍ: {type}, Ô­Ê¼ÉËº¦: {rawDamage}</color>");
 
         if (!isShieldBroken)
         {
-            int damageToShield = (info.type == DamageType.Melee)
-                ? meleeShieldDamage
-                : rangedShieldDamage;
-
+            // Ì½Õë 2£º¼ì²éÊÇ²»ÊÇÅĞ¶¨³ÉÁËÔ¶³ÌÉËº¦£¨Èç¹û type ÊÇ Ranged£¬Ò»´ÎÖ»¿Û 3 µã£¬ÄãÒª¿³ 100 µ¶²Å»áËé£¡£©
+            int damageToShield = (type == DamageType.Melee) ? meleeShieldDamage : rangedShieldDamage;
             shieldCurrentHP -= damageToShield;
 
-            // è¿‘æˆ˜å‡»ä¸­æŠ¤ç›¾è§¦å‘é˜²åä¼ é€
-            if (info.type == DamageType.Melee)
+            Debug.Log($"¿Û³ı»¤¶Ü: {damageToShield} µã£¬µ±Ç°Ê£Óà»¤¶Ü: {shieldCurrentHP}</color>");
+
+            if (type == DamageType.Melee)
             {
+                Debug.Log("×¼±¸´¥·¢·À·´´«ËÍ...</color>");
                 OnTeleportTriggered?.Invoke();
+                Debug.Log("<color=cyan>[´«ËÍ²âÊÔ] ´«ËÍ´¥·¢³É¹¦£¬Ã»ÓĞ±¨´í£¡</color>");
             }
 
             OnShieldStatChanged?.Invoke();
 
-            if (shieldCurrentHP <= 0) BreakShield();
+            if (shieldCurrentHP <= 0)
+            {
+                Debug.Log("»¤¶ÜÖµ¹éÁã£¡×¼±¸´¥·¢ BreakShield()</color>");
+                BreakShield();
+            }
         }
         else
         {
-            health.TakeRealDamage(info.amount);
-
+            health.TakeRealDamage(rawDamage);
             if (!isPhase2 && health.currentHP <= phase2Threshold)
             {
                 isPhase2 = true;
                 OnPhase2Triggered?.Invoke();
             }
         }
-    }
-
-    /// <summary>ã€è¿‡æ¸¡ç”¨ã€‘æ—§ç­¾åã€‚æ–°ä»£ç è¯·ç›´æ¥ä¼  DamageInfoã€‚</summary>
-    [Obsolete("è¯·æ”¹ç”¨ TakeDamage(in DamageInfo)ï¼Œä»¥ä¾¿æºå¸¦æ‰“æ–­ä¿¡æ¯ã€‚")]
-    public void TakeDamage(int rawDamage, DamageType type)
-    {
-        TakeDamage(new DamageInfo(rawDamage, type, Vector2.zero));
     }
 
     private void BreakShield()
@@ -178,6 +145,7 @@ public class BossMechanic
     {
         isShieldBroken = false;
         shieldCurrentHP = shieldMaxHP;
+        Debug.Log("[BossMechanic] »¤¶ÜÒÑ»Ö¸´£¡");
         OnShieldRecovered?.Invoke();
         OnShieldStatChanged?.Invoke();
     }

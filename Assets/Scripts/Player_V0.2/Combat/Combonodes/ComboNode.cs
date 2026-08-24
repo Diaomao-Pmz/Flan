@@ -121,7 +121,31 @@ public class ComboNode : ScriptableObject
     [Tooltip("直接把动画文件 (Anim Clip) 拖进来。请确保 Animator 里的 State 名与该动画文件名一致")]
     public AnimationClip attackClip;
     public string animName => attackClip != null ? attackClip.name : string.Empty;
+    [Tooltip(
+        "出招时的位移冲量。\n" +
+        "  X 正数 = 朝角色正面前进（A 系列用）\n" +
+        "  X 负数 = 朝背面后退（B 系列用）\n" +
+        "  Y 非 0 = 同时给一个垂直速度（跳斩、下沉斩之类）\n\n" +
+        "X 会自动乘以朝向，所以填「前进多少」即可，不用管角色朝左朝右。")]
     public Vector2 forwardThrust = new Vector2(0f, 0f);
+
+    [Tooltip(
+        "位移持续时长（秒）。速度在这段时间内线性衰减到 0。\n\n" +
+        "填 0 = 沿用旧行为：速度设一次就不再衰减，\n" +
+        "整个招式期间匀速滑行（踩冰感），一般不是你想要的。\n" +
+        "推荐 0.1 ~ 0.2，表现为「往前一顿」然后停下。")]
+    public float thrustDuration = 0.12f;
+
+    [Tooltip(
+        "空中出招时是否也产生位移。\n" +
+        "取消勾选则只有地面招式会位移（旧行为）。")]
+    public bool applyThrustInAir = true;
+
+    [Tooltip(
+        "出招期间锁死移动（默认开启，符合「攻击时不能走动」的基础设定）。\n\n" +
+        "锁的是冲量结束【之后】的那段时间 —— 冲量本身照常生效。\n" +
+        "取消勾选则保留进入攻击时的残留速度，做「边走边砍」的招式时才需要。")]
+    public bool lockMovementDuringAttack = true;
 
     // ==========================================================
     // 【批次F 新增】取消权限
@@ -198,6 +222,38 @@ public class ComboNode : ScriptableObject
     // ==========================================================
     // 打断能力
     // ==========================================================
+    // ==========================================================
+    // 弹幕参数（远程招式用 · 全部可选）
+    // ==========================================================
+    [Header("弹幕参数 (远程招式 · 留空则沿用武器默认值)")]
+    [Tooltip(
+        "本招专用的子弹池 key。留空 = 用武器 WeaponMoveSet 上配的那个。\n\n" +
+        "为什么要能按招式覆盖：B1/B2/B3 射普通弹，BB1/BB2 要射更大更快的，\n" +
+        "同一把枪需要多种弹 —— 枪是同一把，但弹匣可以换。")]
+    public string projectilePoolKeyOverride = "";
+
+    [Tooltip("一次出招连射几发。1 = 单发；速射枪式的连射填 3/6/9")]
+    [Min(1)]
+    public int projectileCount = 1;
+
+    [Tooltip("连射的发间隔（秒）。0 = 同一帧全部射出（齐射）")]
+    public float projectileInterval = 0.06f;
+
+    [Tooltip("子弹速度倍率。1 = 用预制体上的原始速度")]
+    public float projectileSpeedMultiplier = 1f;
+
+    [Tooltip("子弹体积倍率。1 = 用预制体上的原始大小")]
+    public float projectileScaleMultiplier = 1f;
+
+    [Tooltip("子弹伤害覆盖。填 0 = 用预制体上的原始伤害")]
+    public int projectileDamageOverride = 0;
+
+    [Tooltip(
+        "每一发都重新计算瞄准方向。\n" +
+        "勾选 = 连射途中玩家改方向键能改变后续子弹的方向（可微调扫射）\n" +
+        "取消 = 整轮连射沿用第一发的方向")]
+    public bool recomputeAimPerShot = true;
+
     [Header("打断能力")]
     [Tooltip(
         "本招能打断敌人的哪几类动作。留 None = 没有打断能力（普通平A）。\n\n" +
@@ -208,6 +264,22 @@ public class ComboNode : ScriptableObject
         "注意这是【对位】不是【等级】—— AA2 打不断近战，这是刻意的。\n" +
         "传送类动作永不可打断，所以不要指望勾上 Teleport 会有效果。")]
     public ActionCategory breakMask = ActionCategory.None;
+
+    [Tooltip(
+        "希望敌人做出的位移表现。\n" +
+        "  上挑 → Launch\n" +
+        "  下砸 → Slam\n" +
+        "  普通招式 → None\n\n" +
+        "注意这只是「希望」——最终怎么表现由受击方裁决。\n" +
+        "比如 Boss 护盾没破时，上挑和下砸都会统一表现为后退。")]
+    public HitReaction hitReaction = HitReaction.None;
+
+    [Tooltip(
+        "反应强度，含义随上面的类型变化：\n" +
+        "  Launch → 额外浮空时间（秒）。AA3 上挑填正数实现「延长击飞」\n" +
+        "  Slam   → 落地后的弹起速度。AA3 下砸填正数实现「落地再弹起」\n" +
+        "  其余   → 不使用")]
+    public float hitReactionParam = 0f;
 
     [Header("目标交互")]
     [Tooltip(

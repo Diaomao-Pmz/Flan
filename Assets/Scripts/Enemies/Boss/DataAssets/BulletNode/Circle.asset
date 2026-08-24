@@ -20,7 +20,12 @@ MonoBehaviour:
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
-  phases: []
+  phases:
+  - pattern: {fileID: 11400000, guid: 32ffa4e124b001a44a64f1f9eb6f10c1, type: 2}
+    startDelay: 0
+    duration: 4
+    intervalOverride: 0
+    formationDuration: 0
   AttackName: Circle
   formationDuration: 0
   attackDuration: 3

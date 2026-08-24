@@ -23,6 +23,8 @@ MonoBehaviour:
   requiredChargeTime: 1
   attackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
   forwardThrust: {x: 0, y: 0}
+  thrustDuration: 0.12
+  applyThrustInAir: 1
   cancelPermission:
     byMainWeapon: 1
     bySubWeapon: 1
@@ -33,12 +35,17 @@ MonoBehaviour:
   hitboxOffset: {x: 0, y: 0}
   hitboxDuration: 0
   knockbackForce: 0
-  effectKey: FX_BB
+  effectKey: FX_BB3
   effectLifetime: 0
   useHitboxOffsetForEffect: 0
-  effectOffset: {x: 0.31, y: 0.42}
-  effectScale: {x: 0.4, y: 0.235}
+  effectOffset: {x: 0.377, y: 0.444}
+  effectScale: {x: 0.61, y: 0.66}
   effectRotation: 9.896
+  breakMask: 0
+  hitReaction: 0
+  hitReactionParam: 0
+  faceTargetOnHit: 0
+  inheritMomentum: 1
   minComboDepth: 0
   maxComboDepth: 0
   childNodes: []

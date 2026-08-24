@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be9458cfb17c67245bae1dcc3cd54f66, type: 3}
+  m_Name: Triangle1
+  m_EditorClassIdentifier: Assembly-CSharp::TrianglePattern
+  DefaultInterval: 3
+  triangleBulletCount: 6
+  triangleBulletSpeed: 5
+  tri_rmin: 2
+  tri_rmax: 4
+  triangleOffsetY: 0
+  enableAcceleration: 1
+  accelerationRate: 1
+  formationDuration: 0.5

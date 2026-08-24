@@ -61,6 +61,9 @@ public class PlayerHitDetection : MonoBehaviour
     private HitboxWindow activeWindow;
     private bool isHitboxActiveThisFrame = false;
 
+    // 整套招式期间保留全部窗口，供 Gizmos 一并画出来
+    private bool isSequenceRunning = false;
+
     void Awake()
     {
         player = GetComponent<PlayerController>();
@@ -113,6 +116,7 @@ public class PlayerHitDetection : MonoBehaviour
         alreadyHitEnemies.Clear();
         activeWindow = null;
         isHitboxActiveThisFrame = false;
+        isSequenceRunning = false;
     }
 
     // ==========================================================
@@ -123,6 +127,7 @@ public class PlayerHitDetection : MonoBehaviour
     {
         // 没配多段的话会自动用旧版单段参数合成一条 —— 已配好的资产无需改动
         node.CollectWindows(windowBuffer);
+        isSequenceRunning = true;
 
         float sequenceTime = 0f;
 
@@ -147,6 +152,7 @@ public class PlayerHitDetection : MonoBehaviour
 
         activeWindow = null;
         isHitboxActiveThisFrame = false;
+        isSequenceRunning = false;
         activeHitboxCoroutine = null;
     }
 
@@ -206,7 +212,7 @@ public class PlayerHitDetection : MonoBehaviour
             // 全是敌人侧的事。这和击退力度归受击方管是同一条原则。
             enemy.TakeDamage(new DamageInfo(
                 window.damage, DamageType.Melee, transform.position, gameObject,
-                node.breakMask));
+                node.breakMask, node.hitReaction, node.hitReactionParam));
 
             // ---- 命中记账与广播 ----
             LastHitTarget = enemy.transform;
@@ -246,19 +252,37 @@ public class PlayerHitDetection : MonoBehaviour
     // Gizmos
     // ==========================================================
 
+    /// <summary>
+    /// 【多段判定的可视化】
+    ///
+    /// 原先只画"当前正在生效的那一段"。但多段窗口的 duration 通常只有 0.1 秒，
+    /// 一闪而过基本看不见 —— 旧版单段 duration 是 0.5 才勉强看得清。
+    ///
+    /// 现在整套招式期间把【所有窗口】都画出来：
+    ///   暗色轮廓 = 这一段还没到 / 已经过去
+    ///   亮绿实线 = 这一帧正在判定
+    /// 调框时能一眼看到三段各自在哪、有没有重叠。
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (!showHitbox || !Application.isPlaying) return;
-        if (!isHitboxActiveThisFrame || activeWindow == null) return;
+        if (!isSequenceRunning) return;
 
-        // 画【当前正在生效的那一段】，而不是 currentNode 的参数 ——
-        // 连招推进后 currentNode 已经变了，用它画出来的框和实际判定对不上
         float dirX = (player != null) ? player.facingDirection : 1f;
 
-        Vector2 finalOffset = new Vector2(activeWindow.offset.x * dirX, activeWindow.offset.y);
-        Vector2 centerPos = (Vector2)transform.position + finalOffset;
+        for (int i = 0; i < windowBuffer.Count; i++)
+        {
+            HitboxWindow w = windowBuffer[i];
+            if (w == null) continue;
 
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(centerPos, activeWindow.size);
+            bool isActive = isHitboxActiveThisFrame && ReferenceEquals(w, activeWindow);
+
+            Gizmos.color = isActive
+                ? Color.green
+                : new Color(0.3f, 0.9f, 0.3f, 0.25f);
+
+            Vector2 offset = new Vector2(w.offset.x * dirX, w.offset.y);
+            Gizmos.DrawWireCube((Vector2)transform.position + offset, w.size);
+        }
     }
 }

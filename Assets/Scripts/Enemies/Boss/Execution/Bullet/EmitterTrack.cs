@@ -17,7 +17,7 @@
 /// </summary>
 public class EmitterTrack
 {
-    public BossAttackType type;
+    public BulletPatternBase pattern;
 
     /// <summary>发射间隔（秒）。由 phase 覆盖值或 Emitter 的形态默认值决定。</summary>
     public float interval;
@@ -42,10 +42,10 @@ public class EmitterTrack
     private bool started;
 
     /// <summary>复用前重置。所有字段都要覆盖，绝不把脏数据带进下一次组合。</summary>
-    public void Setup(BossAttackType type, float startDelay, float duration,
+    public void Setup(BulletPatternBase pattern, float startDelay, float duration,
                       float interval, float formationDuration)
     {
-        this.type = type;
+        this.pattern = pattern;
         this.startDelay = startDelay;
         this.duration = duration;
         this.interval = Mathf.Max(interval, 0.01f); // 防止 0 间隔导致每帧狂喷

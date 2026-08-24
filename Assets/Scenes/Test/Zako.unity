@@ -816,6 +816,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 498310939}
   m_CullTransparentMesh: 1
+--- !u!4 &503509576 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8254937899854107013, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+  m_PrefabInstance: {fileID: 1636495891}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &530846203
 GameObject:
   m_ObjectHideFlags: 0
@@ -1506,6 +1511,10 @@ MonoBehaviour:
     prefab: {fileID: 2589707116977578368, guid: 5585b1c7b410760498cc710938e5a159, type: 3}
     prewarmCount: 10
     maxSize: 20
+  - key: Laser
+    prefab: {fileID: 2752697821031219043, guid: cdeee20b19170ff46bafe0fbcdd6fc5b, type: 3}
+    prewarmCount: 5
+    maxSize: 20
   - key: FX_A1
     prefab: {fileID: 2819290616138335727, guid: d2fcde31f9dd58a42ad57c69158e742b, type: 3}
     prewarmCount: 5
@@ -1530,8 +1539,12 @@ MonoBehaviour:
     prefab: {fileID: 2819290616138335727, guid: b48052af9d464774992ddb6a3c10553e, type: 3}
     prewarmCount: 5
     maxSize: 20
-  - key: FX_BB
-    prefab: {fileID: 2819290616138335727, guid: 3add2d3ba2c99ac478d6361d61538188, type: 3}
+  - key: FX_D_AA
+    prefab: {fileID: 2819290616138335727, guid: 173fe628d963d0b45ad2f4b79d6fc430, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_U_AA
+    prefab: {fileID: 2819290616138335727, guid: f34500f053ece154b8bb71b1170b28eb, type: 3}
     prewarmCount: 5
     maxSize: 20
   - key: FXL_AA1
@@ -1544,6 +1557,18 @@ MonoBehaviour:
     maxSize: 20
   - key: FXL_AA3
     prefab: {fileID: 3587092818806866930, guid: bd17b62f5cb2eb04c885710f7c1f3300, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_BB1
+    prefab: {fileID: 2819290616138335727, guid: 3add2d3ba2c99ac478d6361d61538188, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_BB2
+    prefab: {fileID: 2819290616138335727, guid: d0f8f9583ebb8fd44820dbab0949a988, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_BB3
+    prefab: {fileID: 2819290616138335727, guid: 456d0083f09cea5429201ffb93236ee6, type: 3}
     prewarmCount: 5
     maxSize: 20
 --- !u!4 &771204821
@@ -1750,8 +1775,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAIDecider
   phase1Bullets: []
-  phase1Melees:
-  - {fileID: 11400000, guid: 5c7bf690b46b8784ea9511d88a66c689, type: 2}
+  phase1Melees: []
   phase1Teleports: []
   phase1SpecialBullets: []
   phase1SpecialMelees: []
@@ -1783,12 +1807,11 @@ MonoBehaviour:
   maxHP: 100
   shieldVisual: {fileID: 1218982608}
   playerTransform: {fileID: 1827415898}
-  moveSpeed: 3
+  moveSpeed: 0
   wallCheckDistance: 1.5
   wallLayer:
     serializedVersion: 2
     m_Bits: 16384
-  interruptStaggerDuration: 0.6
   bossStatusText: {fileID: 733517161}
 --- !u!114 &786768191
 MonoBehaviour:
@@ -1808,9 +1831,9 @@ MonoBehaviour:
     isDead: 0
   bossMechanic:
     shieldMaxHP: 300
-    meleeShieldDamage: 10
+    meleeShieldDamage: 100
     rangedShieldDamage: 3
-    shieldRecoverTime: 5
+    shieldRecoverTime: 10
     comboExtendDuration: 1
     phase2Threshold: 30
     stunKnockupSpeed: 5
@@ -1857,39 +1880,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 2589707116977578368, guid: 09f4fcf80f38d9f4b927c96f89d6ddb8, type: 3}
   projectileKey: EnemyBullet
   firePoint: {fileID: 318592942}
-  acceleratedAttacks: 0
-  accelerationRate: 5
-  coef: 0.3
-  lineShootInterval: 1
-  lineBulletSpeed: 15
-  lineBulletScale: 1.5
-  lineOffsetY: 0
-  randomShootInterval: 0.2
-  randomBulletSpeed: 10
-  rotationShootInterval: 0.05
-  rotationBulletSpeed: 12
-  rotationAngleIncrement: 15
-  squareShootInterval: 2
-  squareBulletSpeed: 5
-  squareBulletsPerSide: 5
-  squareSize: 3
-  squareOffsetY: 0
-  triangleBulletCount: 15
-  triangleShootInterval: 1
-  triangleBulletSpeed: 5
-  tri_rmin: 1
-  tri_rmax: 2
-  triangleOffsetY: 0
-  starBulletCount: 10
-  starShootInterval: 1
-  starBulletSpeed: 5
-  star_rmin: 2
-  star_rmax: 4
-  starOffsetY: 0
-  circleShootInterval: 1.5
-  circleBulletSpeed: 8
-  circleBulletCount: 18
-  circleOffsetY: 0
 --- !u!114 &786768194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1949,7 +1939,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 16512
   laserOrigin: {fileID: 318592942}
-  beamRenderer: {fileID: 565332396}
   spriteIsVertical: 1
   tileTexture: 0
   showHitbox: 1
@@ -3460,6 +3449,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 6525673544833516776, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      propertyPath: jumpGem
+      value: 
+      objectReference: {fileID: 11400000, guid: 8511b363d7278f5499f1ebd1a891c4f0, type: 2}
     - target: {fileID: 7094499475234919657, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
       propertyPath: verboseLog
       value: 1
@@ -3482,6 +3475,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4132750454637263286, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1827415883}
+    - targetCorrespondingSourceObject: {fileID: 4132750454637263286, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1827415913}
   m_SourcePrefab: {fileID: 100100000, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
 --- !u!1 &1669677075
 GameObject:
@@ -3800,6 +3796,24 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3286114150682490114, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
   m_PrefabInstance: {fileID: 1636495891}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1827415913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827415866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b44404c3848df474da5ae019b6a34073, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerAimProvider
+  aimSource: 0
+  mouseIdleTimeout: 20000000
+  facingPolicy: 1
+  aimCamera: {fileID: 0}
+  aimOrigin: {fileID: 503509576}
+  drawGizmos: 0
 --- !u!1 &1937482719
 GameObject:
   m_ObjectHideFlags: 0

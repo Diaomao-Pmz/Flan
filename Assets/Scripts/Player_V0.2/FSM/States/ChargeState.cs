@@ -56,6 +56,9 @@ public class ChargeState : PlayerStateBase
     /// <summary>本帧的有效蓄力时间。每帧重算，不再自行累加</summary>
     private float elapsed;
 
+    /// <summary>进入蓄力架势后经过的时间。助跑偏移要靠它才不会被追平</summary>
+    private float timeInStance;
+
     private int currentLevel;
     private float originalGravity;
     private bool isValidCharge;
@@ -113,6 +116,7 @@ public class ChargeState : PlayerStateBase
             // 仍然进架势（有蓄力动作表现），但松手不会产出招式。
             // 直接踢回 Idle 会让「CD 中按住攻击」变成毫无反馈，手感更差。
             floorTime = 0f;
+            timeInStance = 0f;
             elapsed = 0f;
             currentLevel = 0;
         }
@@ -122,6 +126,7 @@ public class ChargeState : PlayerStateBase
             // 而不是从进入蓄力架势起算 —— 攻击动画那段时间也计入。
             // 起始等级因此从「起点」变成「下限」。
             floorTime = chargingWeapon.GetTimeForLevel(startLevel);
+            timeInStance = 0f;
             elapsed = CalcElapsed();
             currentLevel = chargingWeapon.GetLevelForTime(elapsed);
         }
@@ -151,8 +156,7 @@ public class ChargeState : PlayerStateBase
 
         if (isValidCharge)
         {
-            // 不再自行累加 —— 直接读虚拟手柄的「按住多久了」，
-            // 这样攻击动画期间的时间也自然计入
+            timeInStance += Time.deltaTime;
             elapsed = CalcElapsed();
 
             int newLevel = chargingWeapon.GetLevelForTime(elapsed);
@@ -332,7 +336,19 @@ public class ChargeState : PlayerStateBase
             ? sm.playerController.mainAttackHoldTime
             : sm.playerController.subAttackHoldTime;
 
-        return Mathf.Max(hold, floorTime);
+        // 【助跑必须是偏移量，不能只是取大者】
+        //
+        // 曾经写的是 Mathf.Max(hold, floorTime)，结果是：
+        // 打完 A3 进架势时 floorTime=0.9 让等级立刻跳到 2 级，
+        // 但 hold 自己的钟还在从 0.5 慢慢爬 —— 等它爬过 0.9 之后
+        // elapsed 就跟着 hold 走了，那 0.4 秒的助跑被追平，等于白给。
+        // 表现出来就是「连招后 AA2→AA3 比从头蓄还慢」。
+        //
+        // 比喻：赛跑给你让了 40 米，但发令枪一响你还是从起跑线开始跑。
+        //
+        // 正确做法是让助跑成为持续有效的偏移：
+        // 进架势那一刻正好等于 floorTime，之后每一秒都实打实往前推。
+        return Mathf.Max(hold, floorTime + timeInStance);
     }
 
     /// <summary>当前等级到下一级的进度 0~1。已满级时恒为 1</summary>
