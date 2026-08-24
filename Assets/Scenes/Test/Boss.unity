@@ -1468,99 +1468,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 733517159}
   m_CullTransparentMesh: 1
---- !u!1 &771204819
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 771204821}
-  - component: {fileID: 771204820}
-  m_Layer: 0
-  m_Name: ObjectPool
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &771204820
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 771204819}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 173a2cfe31dafaa4d8f2c4f14fa92a00, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ObjectPoolManager
-  poolConfigs:
-  - key: E_Bullet
-    prefab: {fileID: 2589707116977578368, guid: 09f4fcf80f38d9f4b927c96f89d6ddb8, type: 3}
-    prewarmCount: 30
-    maxSize: 200
-  - key: P_Bullet
-    prefab: {fileID: 2589707116977578368, guid: 5585b1c7b410760498cc710938e5a159, type: 3}
-    prewarmCount: 10
-    maxSize: 20
-  - key: FX_A1
-    prefab: {fileID: 2819290616138335727, guid: d2fcde31f9dd58a42ad57c69158e742b, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FX_A2
-    prefab: {fileID: 2819290616138335727, guid: e4fa31d384c73784aba3e67dc3440fd2, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FX_A3
-    prefab: {fileID: 2819290616138335727, guid: 4f98a631af0ac2d44b2f9c6488fdcae2, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FX_AA1
-    prefab: {fileID: 2819290616138335727, guid: 9a95ad2cf5e725543b48dad37ab78e17, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FX_AA2
-    prefab: {fileID: 2819290616138335727, guid: 13d472be02f683f45b2ec38d50645ffd, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FX_AA3
-    prefab: {fileID: 2819290616138335727, guid: b48052af9d464774992ddb6a3c10553e, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FX_BB
-    prefab: {fileID: 2819290616138335727, guid: 3add2d3ba2c99ac478d6361d61538188, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FXL_AA1
-    prefab: {fileID: 3587092818806866930, guid: 84fa3621a7b1bfa469d7f23301e5f547, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FXL_AA2
-    prefab: {fileID: 3587092818806866930, guid: 140b47d5ea4dd0145b1c5d5d20999a63, type: 3}
-    prewarmCount: 5
-    maxSize: 20
-  - key: FXL_AA3
-    prefab: {fileID: 3587092818806866930, guid: bd17b62f5cb2eb04c885710f7c1f3300, type: 3}
-    prewarmCount: 5
-    maxSize: 20
---- !u!4 &771204821
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 771204819}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.33233, y: -3.62747, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &786768182
 GameObject:
   m_ObjectHideFlags: 0
@@ -1587,7 +1494,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!61 &786768184
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1786,7 +1693,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossController
   maxHP: 100
   shieldVisual: {fileID: 1218982608}
-  playerTransform: {fileID: 0}
+  playerTransform: {fileID: 1827415898}
   moveSpeed: 3
   wallCheckDistance: 1.5
   wallLayer:
@@ -1862,39 +1769,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 2589707116977578368, guid: 09f4fcf80f38d9f4b927c96f89d6ddb8, type: 3}
   projectileKey: EnemyBullet
   firePoint: {fileID: 318592942}
-  acceleratedAttacks: 0
-  accelerationRate: 5
-  coef: 0.3
-  lineShootInterval: 1
-  lineBulletSpeed: 15
-  lineBulletScale: 1.5
-  lineOffsetY: 0
-  randomShootInterval: 0.2
-  randomBulletSpeed: 10
-  rotationShootInterval: 0.05
-  rotationBulletSpeed: 12
-  rotationAngleIncrement: 15
-  squareShootInterval: 2
-  squareBulletSpeed: 5
-  squareBulletsPerSide: 5
-  squareSize: 3
-  squareOffsetY: 0
-  triangleBulletCount: 15
-  triangleShootInterval: 1
-  triangleBulletSpeed: 5
-  tri_rmin: 1
-  tri_rmax: 2
-  triangleOffsetY: 0
-  starBulletCount: 10
-  starShootInterval: 1
-  starBulletSpeed: 5
-  star_rmin: 2
-  star_rmax: 4
-  starOffsetY: 0
-  circleShootInterval: 1.5
-  circleBulletSpeed: 8
-  circleBulletCount: 18
-  circleOffsetY: 0
 --- !u!114 &786768194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1954,7 +1828,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 16512
   laserOrigin: {fileID: 318592942}
-  beamRenderer: {fileID: 565332396}
   spriteIsVertical: 1
   tileTexture: 0
   showHitbox: 1
@@ -3804,6 +3677,124 @@ MonoBehaviour:
   defaultAttackEffectKey: 
   defaultEffectLifetime: 0.4
   verboseLog: 1
+--- !u!4 &1827415898 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3286114150682490114, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+  m_PrefabInstance: {fileID: 1636495891}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1894342353
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1894342355}
+  - component: {fileID: 1894342354}
+  m_Layer: 0
+  m_Name: ObjectPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1894342354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1894342353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 173a2cfe31dafaa4d8f2c4f14fa92a00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectPoolManager
+  poolConfigs:
+  - key: E_Bullet
+    prefab: {fileID: 2589707116977578368, guid: 09f4fcf80f38d9f4b927c96f89d6ddb8, type: 3}
+    prewarmCount: 30
+    maxSize: 200
+  - key: P_Bullet
+    prefab: {fileID: 2589707116977578368, guid: 5585b1c7b410760498cc710938e5a159, type: 3}
+    prewarmCount: 10
+    maxSize: 20
+  - key: Laser
+    prefab: {fileID: 2752697821031219043, guid: cdeee20b19170ff46bafe0fbcdd6fc5b, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_A1
+    prefab: {fileID: 2819290616138335727, guid: d2fcde31f9dd58a42ad57c69158e742b, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_A2
+    prefab: {fileID: 2819290616138335727, guid: e4fa31d384c73784aba3e67dc3440fd2, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_A3
+    prefab: {fileID: 2819290616138335727, guid: 4f98a631af0ac2d44b2f9c6488fdcae2, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_AA1
+    prefab: {fileID: 2819290616138335727, guid: 9a95ad2cf5e725543b48dad37ab78e17, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_AA2
+    prefab: {fileID: 2819290616138335727, guid: 13d472be02f683f45b2ec38d50645ffd, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_AA3
+    prefab: {fileID: 2819290616138335727, guid: b48052af9d464774992ddb6a3c10553e, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_D_AA
+    prefab: {fileID: 2819290616138335727, guid: 173fe628d963d0b45ad2f4b79d6fc430, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_U_AA
+    prefab: {fileID: 2819290616138335727, guid: f34500f053ece154b8bb71b1170b28eb, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FXL_AA1
+    prefab: {fileID: 3587092818806866930, guid: 84fa3621a7b1bfa469d7f23301e5f547, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FXL_AA2
+    prefab: {fileID: 3587092818806866930, guid: 140b47d5ea4dd0145b1c5d5d20999a63, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FXL_AA3
+    prefab: {fileID: 3587092818806866930, guid: bd17b62f5cb2eb04c885710f7c1f3300, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_BB1
+    prefab: {fileID: 2819290616138335727, guid: 3add2d3ba2c99ac478d6361d61538188, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_BB2
+    prefab: {fileID: 2819290616138335727, guid: d0f8f9583ebb8fd44820dbab0949a988, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+  - key: FX_BB3
+    prefab: {fileID: 2819290616138335727, guid: 456d0083f09cea5429201ffb93236ee6, type: 3}
+    prewarmCount: 5
+    maxSize: 20
+--- !u!4 &1894342355
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1894342353}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.33233, y: -3.62747, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1937482719
 GameObject:
   m_ObjectHideFlags: 0
@@ -4136,6 +4127,6 @@ SceneRoots:
   - {fileID: 1257834514}
   - {fileID: 1164344987}
   - {fileID: 65104230}
-  - {fileID: 771204821}
   - {fileID: 1669677076}
   - {fileID: 1636495891}
+  - {fileID: 1894342355}
