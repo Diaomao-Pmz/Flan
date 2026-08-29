@@ -279,26 +279,25 @@ public class PlayerStateMachine : MonoBehaviour
         if (currentState == comboState) comboState.isCancelable = false;
     }
 
+    /// <summary>
+    /// 由动画事件调用：攻击动画彻底播完。
+    ///
+    /// 【P1a 改动】删掉了"还按着攻击键就进蓄力"这条路。
+    ///
+    /// 旧行为是效仿空洞骑士：按下先出一发普攻，动画放完还按着才转蓄力。
+    /// 新规则把那一发普攻废除了 —— 蓄力改由 PlayerController 的
+    /// 0.15 秒长按判定【直接】进入，不再经过普攻。
+    ///
+    /// 两条路留着任何一条都会出事：长按会先出普攻再进蓄力，
+    /// 正是我们要废除的旧行为。
+    /// </summary>
     public void OnAttackAnimationEnd()
     {
         if (currentState != comboState) return;
 
-        ComboInputBuffer buffer = inputBuffer;
-        buffer.StartGracePeriod();
+        inputBuffer.StartGracePeriod();
 
-        ComboNode lastNode = buffer.currentNode;
-        bool isCurrentButtonHeld = false;
-
-        if (lastNode != null)
-        {
-            if (lastNode.inputSequence.Contains(InputCmd.MainAttack))
-                isCurrentButtonHeld = playerController.isMainAttackHeld;
-            else if (lastNode.inputSequence.Contains(InputCmd.SubAttack))
-                isCurrentButtonHeld = playerController.isSubAttackHeld;
-        }
-
-        if (isCurrentButtonHeld) ChangeState(chargeState);
-        else if (Mathf.Abs(playerController.moveInput.x) > 0.1f) ChangeState(runState);
+        if (Mathf.Abs(playerController.moveInput.x) > 0.1f) ChangeState(runState);
         else ChangeState(idleState);
     }
 
@@ -310,6 +309,9 @@ public class PlayerStateMachine : MonoBehaviour
     {
         // 受击时清空预输入缓存，否则硬直结束后挨打前按的键会突然全部兑现
         commandRouter?.ClearBuffer();
+
+        // 后摇也一并清掉：挨打已经是惩罚了，不该出来之后还被自己的后摇卡住
+        inputBuffer?.ClearHandRecovery();
 
         hitState.SetKnockbackForce(knockbackDirection);
         ChangeState(hitState);

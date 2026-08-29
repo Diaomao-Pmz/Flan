@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: A2
   comboWindow: 0.7
+  recoveryTime: 0.3
   castCondition: 0
   requiredState: 0
   inputSequence: 04000000
@@ -22,9 +23,10 @@ MonoBehaviour:
   chargeStartLevelAfter: 1
   requiredChargeTime: 1
   attackClip: {fileID: 7400000, guid: f43126ca2140fc64e8378489c1ea6fc8, type: 2}
-  forwardThrust: {x: 2, y: 0}
+  forwardThrust: {x: 8, y: 0}
   thrustDuration: 0.12
   applyThrustInAir: 1
+  lockMovementDuringAttack: 1
   cancelPermission:
     byMainWeapon: 1
     bySubWeapon: 1
@@ -41,6 +43,13 @@ MonoBehaviour:
   effectOffset: {x: 0.288, y: 0.342}
   effectScale: {x: 1.5, y: 1.35}
   effectRotation: 0
+  projectilePoolKeyOverride: 
+  projectileCount: 1
+  projectileInterval: 0.06
+  projectileSpeedMultiplier: 1
+  projectileScaleMultiplier: 1
+  projectileDamageOverride: 0
+  recomputeAimPerShot: 1
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0

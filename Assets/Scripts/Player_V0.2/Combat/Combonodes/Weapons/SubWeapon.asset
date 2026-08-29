@@ -18,6 +18,7 @@ MonoBehaviour:
   description: 
   openers:
   - {fileID: 11400000, guid: a1cdab3a0f201784abc39fc4afe6503f, type: 2}
+  - {fileID: 11400000, guid: 69468ccf7a353984d8485855672c1ccd, type: 2}
   followUps:
   - {fileID: 11400000, guid: f93a7f4adbd77a34d9fa772db87b8d08, type: 2}
   - {fileID: 11400000, guid: b60cc9455156a9e4e8f1897d7d75ebc9, type: 2}
@@ -25,8 +26,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 87f3406d0748dde4b8a8dccb9e2f5e0b, type: 2}
   - {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
   chargeTimeLv1: 1
-  chargeTimeLv2: 2.5
+  chargeTimeLv2: 2
   chargeTimeLv3: 5
+  comboChargeSpeedMultiplier: 3.5
   chargeCooldown: 0.7
   chargeEffectLv1: FXL_AA1
   chargeEffectLv2: FXL_AA2

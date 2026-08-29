@@ -1612,7 +1612,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!61 &786768184
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2307,7 +2307,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1164344984
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3401,6 +3401,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2451382357168901190, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      propertyPath: drawGizmos
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3286114150682490114, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
       propertyPath: m_LocalPosition.x
       value: -7.268
@@ -3449,6 +3453,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5403846909611154934, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 1502921057407861242, guid: 5634f870aec298a449125680922513c8, type: 3}
     - target: {fileID: 6525673544833516776, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
       propertyPath: jumpGem
       value: 
@@ -3463,6 +3471,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7094499475234919657, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
       propertyPath: useHeldCrouchOnLanding
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7477124791280542975, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}
+      propertyPath: verboseLog
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -3790,7 +3802,7 @@ MonoBehaviour:
   effectRoot: {fileID: 0}
   defaultAttackEffectKey: 
   defaultEffectLifetime: 0.4
-  verboseLog: 1
+  verboseLog: 0
 --- !u!4 &1827415898 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3286114150682490114, guid: 9e3948d188effce43b3ddf47d770c753, type: 3}

@@ -113,40 +113,73 @@ namespace Flandre.CombatSystem
         // 体型
         // ==========================================================
 
-        public void SetColliderHeight(bool isCrouching)
+        /// <summary>碰撞箱形态</summary>
+        public enum ColliderShape
+        {
+            /// <summary>站立，原始尺寸</summary>
+            Normal,
+
+            /// <summary>蹲下：压扁，整体【向下】贴地。地面蹲/铲用</summary>
+            Crouch,
+
+            /// <summary>缩腿：压扁，整体【向上】收。空中微调身位用</summary>
+            TuckUp,
+        }
+
+        public ColliderShape CurrentShape { get; private set; } = ColliderShape.Normal;
+
+        /// <summary>
+        /// 【P1b 重写】碰撞箱从两态（站/蹲）扩展为三态。
+        ///
+        /// 新增的 TuckUp 是「空中缩腿」：同样压扁，
+        /// 但整体往【上】收而不是往下贴 —— 用来躲贴着脚底飞过的攻击。
+        ///
+        /// 地面蹲下是躲头顶的，空中缩腿是躲脚下的，
+        /// 两者压扁的方向相反，所以不能共用一个布尔。
+        /// </summary>
+        public void SetColliderShape(ColliderShape shape)
         {
             if (coll == null) return;
 
-            isCrouchingNow = isCrouching;
+            CurrentShape = shape;
+            isCrouchingNow = (shape == ColliderShape.Crouch);
 
-            if (isCrouching)
-            {
-                var cfg = Cfg;
-                float heightMultiplier = cfg != null ? cfg.crouchColliderHeightMultiplier : 0.6f;
-
-                coll.size = new Vector2(originalColliderSize.x, originalColliderSize.y * heightMultiplier);
-
-                float heightDifference = originalColliderSize.y - coll.size.y;
-                coll.offset = new Vector2(
-                    originalColliderOffset.x,
-                    originalColliderOffset.y - (heightDifference * 0.5f));
-
-                // 受击小框跟着物理框按比例下降
-                if (hurtboxCore != null)
-                {
-                    hurtboxCore.localPosition = new Vector3(
-                        originalHurtboxPos.x,
-                        originalHurtboxPos.y - (heightDifference * 0.5f),
-                        originalHurtboxPos.z);
-                }
-            }
-            else
+            if (shape == ColliderShape.Normal)
             {
                 coll.size = originalColliderSize;
                 coll.offset = originalColliderOffset;
                 if (hurtboxCore != null) hurtboxCore.localPosition = originalHurtboxPos;
+                return;
+            }
+
+            var cfg = Cfg;
+            float heightMultiplier = cfg != null ? cfg.crouchColliderHeightMultiplier : 0.6f;
+
+            coll.size = new Vector2(originalColliderSize.x, originalColliderSize.y * heightMultiplier);
+
+            float heightDifference = originalColliderSize.y - coll.size.y;
+
+            // 蹲下往下收，缩腿往上收 —— 唯一的区别就是这个符号
+            float sign = (shape == ColliderShape.Crouch) ? -1f : 1f;
+            float shift = heightDifference * 0.5f * sign;
+
+            coll.offset = new Vector2(
+                originalColliderOffset.x,
+                originalColliderOffset.y + shift);
+
+            // 受击小框跟着物理框同向移动
+            if (hurtboxCore != null)
+            {
+                hurtboxCore.localPosition = new Vector3(
+                    originalHurtboxPos.x,
+                    originalHurtboxPos.y + shift,
+                    originalHurtboxPos.z);
             }
         }
+
+        /// <summary>【兼容层】旧的布尔接口</summary>
+        public void SetColliderHeight(bool isCrouching)
+            => SetColliderShape(isCrouching ? ColliderShape.Crouch : ColliderShape.Normal);
 
         // ==========================================================
         // Gizmos
@@ -155,6 +188,26 @@ namespace Flandre.CombatSystem
         private void OnDrawGizmosSelected()
         {
             if (!drawGizmos) return;
+
+            // ---- 实时碰撞箱 ----
+            //
+            // 【为什么需要这个】空中「缩腿」是把碰撞箱【向上】收，
+            // 精灵图完全不动 —— 肉眼看不出任何变化，
+            // 很容易误以为功能没生效。地面蹲下能看出来只是因为角色会往下沉一点。
+            //
+            // 有了这个框就能直接确认形状与位置对不对。
+            if (Application.isPlaying && coll != null)
+            {
+                switch (CurrentShape)
+                {
+                    case ColliderShape.Crouch: Gizmos.color = Color.yellow; break;
+                    case ColliderShape.TuckUp: Gizmos.color = Color.magenta; break;
+                    default: Gizmos.color = Color.white; break;
+                }
+
+                Vector3 center = transform.position + (Vector3)coll.offset;
+                Gizmos.DrawWireCube(center, coll.size);
+            }
 
             var cfg = Application.isPlaying ? Cfg : null;
 

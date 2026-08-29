@@ -56,6 +56,13 @@ namespace Flandre.CombatSystem
         public float flyCancelJumpForce = 8f;
         public float flySpeed = 5f;
 
+        [Header("Charge Settings")]
+        [Tooltip(
+            "蓄力期间的移动速度倍率。\n" +
+            "0.2 = 只有平时的两成，1 = 蓄力不影响移动速度。\n" +
+            "原先硬编码在 ChargeState 里，现在挪出来方便调手感。")]
+        public float chargeMoveSpeedMultiplier = 0.2f;
+
         [Header("Fly 衍生 (打出蓄力招后点按 Q 跃起进飞行)")]
         [Tooltip("跃起阶段的速度")]
         public float flyLeapSpeed = 14f;

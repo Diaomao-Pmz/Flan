@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: B1
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: B1
-  comboWindow: 0
+  comboWindow: 0.1
+  recoveryTime: 0.3
   castCondition: 0
   requiredState: 0
   inputSequence: 05000000

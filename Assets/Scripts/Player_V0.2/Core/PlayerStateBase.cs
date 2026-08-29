@@ -94,6 +94,24 @@ public abstract class PlayerStateBase : IState
         else sm.ChangeState(sm.idleState);
     }
 
+    // 缓存，避免每帧 GetComponent
+    private ComboInputBuffer cachedBuffer;
+
+    /// <summary>
+    /// 攻击后摇是否正在锁住移动。
+    ///
+    /// 放在基类是因为地面移动相关的卡带（Idle / Run）都要查它，
+    /// 以后如果蹲行、滑铲也要遵守同一条规则，直接用就行。
+    /// </summary>
+    protected bool IsMovementLockedByAttack
+    {
+        get
+        {
+            if (cachedBuffer == null) cachedBuffer = sm.GetComponent<ComboInputBuffer>();
+            return cachedBuffer != null && cachedBuffer.IsMovementLockedByRecovery();
+        }
+    }
+
     /// <summary>按水平输入翻转朝向。输入接近 0 时保持原朝向</summary>
     protected void UpdateFacing(float moveDirX)
     {

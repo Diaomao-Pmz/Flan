@@ -193,54 +193,80 @@ namespace Flandre.CombatSystem
         // shift 二义：方向+shift = 打断冲刺 / 单按 shift = 突刺
         // ==========================================================
 
+        /// <summary>
+        /// 【P1b 重写】攻击动画中的 Shift。
+        ///
+        /// 新规则很简单：**攻击动画中按 Shift 一律位移，并且打断连段。**
+        ///   单按     → 朝角色当前面朝方向冲
+        ///   方向+shift → 朝方向键方向冲（顺带改变朝向）
+        ///
+        /// 已删除的旧行为：
+        ///   「单按 = 突刺（不打断连段）」—— 新规则表里没有突刺这一项
+        ///   「蓄力中单按 = 跳级」—— 蓄力只能升一级后，跳级设计已冗余
+        ///
+        /// 蓄力中的 Shift 只是单纯位移，【不打断蓄力】。
+        /// </summary>
         private DispatchResult TryDashOrThrust()
         {
-            if (IsInCombatStance)
+            // ---- 蓄力中：纯位移，蓄力继续 ----
+            if (sm.currentState == sm.chargeState)
             {
-                // ---- 单按 shift（无方向）----
-                if (!HasDirection)
-                {
-                    // 蓄力中 → 蓄力突刺：用一次 dash 的 CD 换一级蓄力
-                    if (sm.currentState == sm.chargeState)
-                    {
-                        if (sm.chargeState.TryStartThrust())
-                        {
-                            if (verboseLog) Debug.Log("[路由器] 蓄力中单按 shift → 蓄力突刺");
-                            return DispatchResult.Success;
-                        }
+                if (verboseLog) Debug.Log("[路由器] 蓄力中 shift → 纯位移，蓄力不中断");
+                return TryDash();
+            }
 
-                        // 起势失败（等级为0 / 冲刺CD中）→ 明确拒绝。
-                        // 【不能返回 Retry】—— 否则这条指令会进缓存，
-                        // 几帧后 CD 一好就以"普通冲刺"的身份兑现，把玩家的蓄力打断。
-                        if (verboseLog) Debug.Log("[路由器] 蓄力突刺起势失败（等级不足或冲刺CD中）");
-                        return DispatchResult.Rejected;
-                    }
-
-                    // 普通连招中 → 普通突刺
-                    if (comboBuffer != null && comboBuffer.TryThrust())
-                    {
-                        if (verboseLog) Debug.Log("[路由器] 单按 shift → 突刺");
-                        return DispatchResult.Success;
-                    }
-                    // 没配突刺招式 → 退化为普通冲刺，避免按键毫无反应
-                }
-
-                // ---- 方向 + shift → 打断攻击 ----
+            // ---- 攻击动画中：位移 + 打断连段 ----
+            if (sm.currentState == sm.comboState)
+            {
                 if (!CanCancelCurrentAttackByMovement())
                 {
                     if (verboseLog) Debug.Log("[路由器] 当前招式不允许被位移打断");
                     return DispatchResult.Rejected;
                 }
+
+                DispatchResult r = TryDash();
+
+                // 只有真的冲出去了才算打断 —— CD 中被拦下时连段应该保住
+                if (r == DispatchResult.Success)
+                {
+                    if (verboseLog) Debug.Log("[路由器] 攻击中 shift → 位移并打断连段");
+                    comboBuffer?.ResetCombo();
+                }
+                return r;
             }
 
+            // ---- 连段间隔中 / 非战斗：普通冲刺，不碰连段 ----
             return TryDash();
         }
 
+        /// <summary>
+        /// 【P1b 重写】跳跃。
+        ///
+        /// **攻击动画中完全不能跳** —— 这是新规则里跳跃与冲刺/滑铲最大的区别：
+        /// 后两者能用（代价是打断连段），跳跃则是彻底禁用。
+        ///
+        /// 但【连段间隔中】可以自由跳，而且不会中断连段 ——
+        /// 「A1 放完 → 跳 → 接 b2」是合法且鼓励的操作。
+        /// </summary>
         private DispatchResult TryJumpWithCancelCheck()
         {
-            if (IsInCombatStance && !CanCancelCurrentAttackByMovement())
+            if (sm.currentState == sm.comboState)
             {
-                if (verboseLog) Debug.Log("[路由器] 当前招式不允许被跳跃打断");
+                if (verboseLog) Debug.Log("[路由器] 攻击动画中禁止跳跃");
+                return DispatchResult.Rejected;
+            }
+
+            // 【P2 暂时禁止】蓄力中跳跃
+            //
+            // 说明书 3.6 写了「蓄力期间可以跳跃」，但跳跃 = 切进 JumpState
+            // = ChargeState.Exit = 蓄了半天的力直接没了。
+            //
+            // 要支持它必须先把蓄力从「状态」解耦成「随身模块」，那是 P3 的事。
+            // 在那之前明确拦下并打日志 ——
+            // 让它悄悄清掉玩家的蓄力是更糟的体验：按了个键，力没了，还不知道为什么。
+            if (sm.currentState == sm.chargeState)
+            {
+                if (verboseLog) Debug.Log("[路由器] 蓄力中暂不支持跳跃（等 P3 蓄力解耦）");
                 return DispatchResult.Rejected;
             }
 
@@ -296,28 +322,58 @@ namespace Flandre.CombatSystem
         // ==========================================================
 
         /// <summary>
-        ///   攻击中 + 单按 → 取消当前攻击，并【重置连段】
-        ///   攻击中 + 方向 → 滑铲，连段【保留】
-        ///   非攻击        → 滑铲 / 蹲下，连段【保留】
+        /// 【P1b 重写】Ctrl 在不同时机下的三种含义。
         ///
-        /// "单按取消并重置"是玩家主动放弃这套连招的表态，所以重置符合预期；
-        /// 滑铲/蹲下只是位移，不该惩罚玩家。
+        /// | 时机 | 输入 | 行为 | 连段 |
+        /// |---|---|---|---|
+        /// | 蓄力中 | 任意 | 滑铲位移，蓄力不中断 | — |
+        /// | 攻击动画中 | 单按 | 【碰撞箱微调】，由 ComboState 持续处理 | 保留 |
+        /// | 攻击动画中 | 方向+ | 滑铲位移 | **打断** |
+        /// | 其他 | — | 蹲下 / 滑铲 | 保留 |
+        ///
+        /// 「单按微调身位」和「带方向滑铲」是两件不同的事：
+        /// 前者是原地躲擦边攻击，不该有代价；
+        /// 后者是主动位移，付出打断连段的代价换来脱离。
         /// </summary>
         private DispatchResult TryCrouchSlideOrCancel()
         {
-            if (IsInCombatStance && !HasDirection)
+            // ---- 蓄力中：纯位移，蓄力继续 ----
+            if (sm.currentState == sm.chargeState)
             {
-                if (verboseLog) Debug.Log("[路由器] 攻击中单按 ctrl → 取消攻击并重置连段");
-
-                comboBuffer?.ResetCombo();
-
-                if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
-                else if (sm.CanStand()) sm.ChangeState(sm.idleState);
-                else sm.ChangeState(sm.crouchState);
-
-                return DispatchResult.Success;
+                if (verboseLog) Debug.Log("[路由器] 蓄力中 ctrl → 纯位移，蓄力不中断");
+                return TryCrouchOrSlide();
             }
 
+            // ---- 攻击动画中 ----
+            if (sm.currentState == sm.comboState)
+            {
+                // 单按（无方向）→ 碰撞箱微调。
+                // 这件事【不切状态】，所以路由器不做任何事 ——
+                // ComboState 每帧读 isCrouchHeld 自己处理，
+                // 也只有它知道攻击结束时该把碰撞箱还原。
+                if (!HasDirection)
+                {
+                    if (verboseLog) Debug.Log("[路由器] 攻击中单按 ctrl → 碰撞箱微调（交给 ComboState）");
+                    return DispatchResult.Rejected;   // 不进缓存，避免几帧后跑出来滑铲
+                }
+
+                if (!CanCancelCurrentAttackByMovement())
+                {
+                    if (verboseLog) Debug.Log("[路由器] 当前招式不允许被位移打断");
+                    return DispatchResult.Rejected;
+                }
+
+                DispatchResult r = TryCrouchOrSlide();
+
+                if (r == DispatchResult.Success)
+                {
+                    if (verboseLog) Debug.Log("[路由器] 攻击中 方向+ctrl → 滑铲并打断连段");
+                    comboBuffer?.ResetCombo();
+                }
+                return r;
+            }
+
+            // ---- 连段间隔中 / 非战斗 ----
             return TryCrouchOrSlide();
         }
 
@@ -338,9 +394,30 @@ namespace Flandre.CombatSystem
         {
             if (!sm.dashSkill.CanExecute()) return DispatchResult.Retry;
 
+            // 【修复】按方向键先把朝向定好，再切状态。
+            //
+            // DashState 读的是 facingDirection，而 SlideState 读的是 moveInput.x ——
+            // 所以以前「方向+ctrl」正常、「方向+shift」却总是朝面朝方向冲。
+            //
+            // 以前不明显是因为跑动时朝向一直跟着方向键走；
+            // 但 P1b 删掉了「攻击中按方向键转向」之后朝向被冻住，
+            // 冲刺就用上了过期的朝向。
+            ApplyAimFacingFromInput();
+
             if (verboseLog) Debug.Log("[路由器] Dash 放行");
             sm.ChangeState(sm.dashState);
             return DispatchResult.Success;
+        }
+
+        /// <summary>有方向键输入时，把角色朝向对齐到该方向</summary>
+        private void ApplyAimFacingFromInput()
+        {
+            if (controller == null) return;
+
+            float x = controller.moveInput.x;
+            if (Mathf.Abs(x) <= directionThreshold) return;
+
+            controller.SetFacingDirection(x > 0f ? 1 : -1);
         }
 
         private DispatchResult TryCrouchOrSlide()

@@ -68,6 +68,18 @@ public class PlayerController : MonoBehaviour
     public float subAttackHoldTime { get; private set; }
     public bool isSubChargeConsumed { get; private set; }
 
+    [Header("点按 / 长按判定")]
+    [Tooltip(
+        "按住超过这个时长就判定为「长按」，直接进入蓄力（不打出普攻）。\n\n" +
+        "代价：普攻会有同等时长的输入延迟 —— 这是「同一个键区分点按与长按」\n" +
+        "必须付出的账，调小可以更跟手但更容易把长按误判成点按。")]
+    public float attackHoldThreshold = 0.15f;
+
+    // 本次按压是否已经作出「点按 / 长按」的判定。
+    // 一次按压只判定一次，判定完就不再重复触发。
+    private bool mainHoldResolved;
+    private bool subHoldResolved;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -91,6 +103,8 @@ public class PlayerController : MonoBehaviour
         {
             if (isMainAttackHeld) mainAttackHoldTime += Time.deltaTime;
             if (isSubAttackHeld) subAttackHoldTime += Time.deltaTime;
+
+            ResolveHoldIfNeeded();
         }
     }
 
@@ -208,25 +222,42 @@ public class PlayerController : MonoBehaviour
     // 攻击指令 → 连招引擎
     // ==========================================
 
+    /// <summary>
+    /// 【P1a 重写】攻击键改为「点按 / 长按」二选一。
+    ///
+    /// 按下的那一刻【什么都不做】—— 因为还分不清玩家想干嘛：
+    ///   0.15 秒内松手  → 点按 → 打出普攻
+    ///   0.15 秒后仍按着 → 长按 → 直接进蓄力（不打出普攻）
+    ///
+    /// 旧版是"按下立刻出普攻，动画放完还按着才进蓄力"（效仿空洞骑士），
+    /// 新规则把那一发普攻删掉了，用这段判定延迟来分离两种意图。
+    ///
+    /// 代价是普攻有 0.15 秒输入延迟，这是同一个键承担两种用法必然要付的账。
+    /// </summary>
     public void OnMainAttackPerformed(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
         {
             isMainAttackHeld = true;
-            isMainChargeConsumed = false;
             mainAttackHoldTime = 0f;
-            inputBuffer.OnReceiveInput(InputCmd.MainAttack);
+            mainHoldResolved = false;
         }
         else if (ctx.canceled)
         {
             isMainAttackHeld = false;
 
-            // 【批次J 改动】松手不再直接出招。
-            //
-            // 蓄力的释放由 ChargeState 主导 —— 只有它知道当前蓄到了几级。
-            // 这里只通知连招引擎清掉缓存里那条按下指令，
-            // 免得松手后它又跑出来打一发普攻。
-            inputBuffer.OnAttackReleased(InputCmd.MainAttack);
+            if (!mainHoldResolved)
+            {
+                // 还没到长按阈值就松手 → 点按 → 普攻
+                mainHoldResolved = true;
+                inputBuffer.OnAttackTap(InputCmd.MainAttack);
+            }
+            else
+            {
+                // 已判定为长按 → 蓄力的释放由 ChargeState 主导（它才知道蓄到几级），
+                // 这里只清掉预输入缓存，免得松手后又跑出来打一发普攻
+                inputBuffer.OnAttackReleased(InputCmd.MainAttack);
+            }
         }
     }
 
@@ -235,14 +266,43 @@ public class PlayerController : MonoBehaviour
         if (ctx.started)
         {
             isSubAttackHeld = true;
-            isSubChargeConsumed = false;
             subAttackHoldTime = 0f;
-            inputBuffer.OnReceiveInput(InputCmd.SubAttack);
+            subHoldResolved = false;
         }
         else if (ctx.canceled)
         {
             isSubAttackHeld = false;
-            inputBuffer.OnAttackReleased(InputCmd.SubAttack);
+
+            if (!subHoldResolved)
+            {
+                subHoldResolved = true;
+                inputBuffer.OnAttackTap(InputCmd.SubAttack);
+            }
+            else
+            {
+                inputBuffer.OnAttackReleased(InputCmd.SubAttack);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 按住超过阈值时，判定为长按并通知连招引擎进入蓄力。
+    /// 一次按压只判定一次。
+    /// </summary>
+    private void ResolveHoldIfNeeded()
+    {
+        if (isMainAttackHeld && !mainHoldResolved
+            && mainAttackHoldTime >= attackHoldThreshold)
+        {
+            mainHoldResolved = true;
+            inputBuffer.OnAttackHold(InputCmd.MainAttack);
+        }
+
+        if (isSubAttackHeld && !subHoldResolved
+            && subAttackHoldTime >= attackHoldThreshold)
+        {
+            subHoldResolved = true;
+            inputBuffer.OnAttackHold(InputCmd.SubAttack);
         }
     }
 

@@ -41,6 +41,22 @@ public class ComboState : PlayerStateBase
     private float thrustTimer;
     private float thrustDuration;
 
+    // 碰撞箱微调是否生效中
+    private bool isBodyAdjusting;
+
+    /// <summary>
+    /// 本招是哪只手打出的。
+    ///
+    /// 必须在 Enter 时就记下来 —— 因为换手抢拍时，
+    /// 新招式的 SetCurrentNode 已经把 Buffer.LastTriggerCmd 改成新的那只手了，
+    /// 等到旧招式 Exit 时再去问就问到错的手上，
+    /// 后摇会记到刚出招的那只手头上，抢拍直接失效。
+    /// </summary>
+    private InputCmd ownerCmd;
+
+    /// <summary>本次出招的编号。Exit 时用它核对"我还是不是最新的那一次"</summary>
+    private int ownerAttackId;
+
     // 兜底超时
     private float timeoutLimit;
     private float elapsed;
@@ -69,7 +85,10 @@ public class ComboState : PlayerStateBase
         originalGravity = sm.rb.gravityScale;
         wasAirborneOnEnter = !sm.IsGrounded();
 
+        isBodyAdjusting = false;
         activeNode = Buffer.currentNode;
+        ownerCmd = Buffer.LastTriggerCmd;
+        ownerAttackId = Buffer.GetHandAttackId(ownerCmd);
 
         // 空中连段反重力悬停：把角色钉在空中，防止挥剑时诡异下滑
         if (wasAirborneOnEnter)
@@ -124,19 +143,16 @@ public class ComboState : PlayerStateBase
             if (Buffer.TryAdvanceCombo()) return;
         }
 
-        // 攻击中允许微调朝向（瞄准/修招式朝向）。
+        // 【P1b 改动】攻击动画中【不再】响应方向键转向。
         //
-        // 但【冲量期间不许转】—— 位移方向是出招那一刻定死的，
-        // 转身后会出现"面朝左却继续往右滑"的诡异画面，
-        // 玩家会误以为是按方向键产生了位移。
-        if (!IsThrustActive)
-        {
-            float moveDir = sm.playerController.moveInput.x;
-            if (Mathf.Abs(moveDir) > 0.1f)
-            {
-                UpdateFacing(moveDir);
-            }
-        }
+        // 原先允许用 a/d 微调朝向，但那会让玩家在挥刀途中来回转身，
+        // 判定框跟着左右横跳，看起来像 bug。
+        //
+        // 新规则：攻击中只有【带方向键的冲刺/滑铲】能改变朝向 ——
+        // 想转身就得付出一次位移的代价，不能白嫖。
+
+        // ---- 碰撞箱微调（不打断攻击）----
+        TickBodyAdjust();
     }
 
     public override void FixedUpdate()
@@ -174,6 +190,52 @@ public class ComboState : PlayerStateBase
 
         // 空中连招期间锁死速度，不接受重力叠加
         sm.rb.linearVelocity = Vector2.zero;
+    }
+
+    /// <summary>
+    /// 【P1b 新增】攻击动画中按住 Ctrl 微调身位。
+    ///
+    /// 不打断攻击、不影响连段，只是把碰撞箱挪一点，用来躲擦边的攻击。
+    ///   地面 → 蹲下，碰撞箱向下（躲头顶）
+    ///   空中 → 缩腿，碰撞箱向上（躲脚下）
+    ///
+    /// 【为什么放在 ComboState 而不是路由器】
+    /// 路由器负责"要不要切状态"，而这件事根本不切状态 ——
+    /// 它是攻击状态内部的一个持续行为，跟着攻击一起开始、一起结束。
+    /// 放路由器里的话，攻击结束时谁来还原碰撞箱就成了问题。
+    /// </summary>
+    private void TickBodyAdjust()
+    {
+        if (sm.sensor == null) return;
+
+        // 带方向键的 Ctrl 是滑铲，不走这条路（由路由器处理）
+        bool wantsAdjust = sm.playerController.isCrouchHeld
+                           && Mathf.Abs(sm.playerController.moveInput.x) <= 0.1f;
+
+        // 【修正】每帧重算目标形态，而不是只在按键状态变化时算一次。
+        //
+        // 原先是"按下时判断一次地面还是空中"，于是：
+        //   按住 Ctrl 在地面攻击 → 应用 Crouch
+        //   保持按住跳到空中     → 按键状态没变 → 不重新判断 → 还停在 Crouch
+        // 反过来空中按住落地也一样，会停在 TuckUp。
+        //
+        // 环境是会变的，所以判断也必须跟着每帧走。
+        PlayerSensor.ColliderShape desired = PlayerSensor.ColliderShape.Normal;
+
+        if (wantsAdjust)
+        {
+            desired = sm.IsGrounded()
+                ? PlayerSensor.ColliderShape.Crouch
+                : PlayerSensor.ColliderShape.TuckUp;
+        }
+
+        isBodyAdjusting = wantsAdjust;
+
+        // 只有和当前形态不同才写，避免每帧重复设置碰撞体
+        if (sm.sensor.CurrentShape != desired)
+        {
+            sm.sensor.SetColliderShape(desired);
+        }
     }
 
     /// <summary>出招冲量是否仍在生效</summary>
@@ -251,6 +313,21 @@ public class ComboState : PlayerStateBase
 
     public override void Exit()
     {
+        // 招式结束 → 这只手开始算后摇。
+        // 无论是正常收招、被换手抢拍、还是被打断，都走这一条路，
+        // 所以不存在"某种结束方式漏了没开始后摇"的可能。
+        Buffer?.BeginHandRecovery(
+            ownerCmd,
+            activeNode != null ? activeNode.recoveryTime : 0f,
+            ownerAttackId);
+
+        // 攻击结束必须把碰撞箱还原，否则会带着蹲姿/缩腿姿态离开攻击状态
+        if (isBodyAdjusting)
+        {
+            sm.sensor?.SetColliderShape(PlayerSensor.ColliderShape.Normal);
+            isBodyAdjusting = false;
+        }
+
         HitDetection?.ForceStopHitbox();
 
         // 中断连射：否则玩家已经被击飞了，枪还在原地继续突突

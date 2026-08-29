@@ -83,6 +83,14 @@ public class ComboNode : ScriptableObject
     [Tooltip("本招打完后，玩家有多久时间可以接下一招。超时则连招断档回到起手")]
     public float comboWindow = 0.5f;
 
+    [Tooltip(
+        "后摇时长（秒）—— 打出本招后，【同一只手】要等这么久才能再出招。\n\n" +
+        "换手不受影响，这正是「换手可以抢拍」的实现基础。\n\n" +
+        "刻意用参数而不是读动画长度：动画后期会替换，\n" +
+        "参数化才不会每换一次美术就要重调手感。\n" +
+        "蓄力招按等级填，等级越高锁越久。")]
+    public float recoveryTime = 0.35f;
+
     [Header("触发限制条件 (Trigger Requirements)")]
     public CastCondition castCondition = CastCondition.Anywhere;
     public RequiredState requiredState = RequiredState.Any;
@@ -105,12 +113,11 @@ public class ComboNode : ScriptableObject
     public int chargeLevel = 0;
 
     [Tooltip(
-        "【打完我之后】，玩家继续按住攻击键时，蓄力从第几级起步。\n\n" +
-        "这是「连段是蓄力的助跑」这一设计的实现处：\n" +
-        "  A2 填 1 → A1+A2 后按住直接从 AA1 起步\n" +
-        "  A3 填 2 → A1+A2+A3 后按住直接从 AA2 起步\n\n" +
-        "注意上限永远是 3，变的只是起点 —— 所以短连段也能蓄满，只是慢一些。")]
-    [Range(0, 3)]
+        "【已废弃 · P2 起不再读取】\n\n" +
+        "蓄力等级现在由【连段深度】决定：目标等级 = 上次普攻的段数。\n" +
+        "因为「换手蓄力不加段数」要求等级与用哪只手无关，\n" +
+        "而本字段是每招式各配一份，换手时会取到另一把武器的配置，对不上。\n\n" +
+        "字段保留只为不丢失已有资产数据，可以忽略。")]
     public int chargeStartLevelAfter = 0;
 
     [System.Obsolete("批次J 起改用武器上的 chargeTimeLv1/2/3 阈值，本字段不再被读取")]

@@ -63,6 +63,13 @@ namespace Flandre.CombatSystem
         public float chargeTimeLv3 = 1.5f;
 
         [Tooltip(
+            "【蓄力加速倍率】接在普攻后面的蓄力，蓄满所需时间除以本值。\n\n" +
+            "填 1 = 关闭加速（原地起手和连段后蓄力一样快）。\n" +
+            "填 2 = 连段后蓄力速度翻倍，也就是耗时减半。\n\n" +
+            "只作用于「打完普攻接着蓄力」的情况，原地起手不享受。")]
+        public float comboChargeSpeedMultiplier = 1f;
+
+        [Tooltip(
             "打出蓄力攻击后，本武器多少秒内不能再蓄力。\n" +
             "注意这是【每把武器独立】的 —— 主武器蓄力进 CD 时，副武器照常可蓄。")]
         public float chargeCooldown = 0.7f;
