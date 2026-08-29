@@ -15,7 +15,7 @@ public class CrouchState : PlayerStateBase
 
     public override void Enter()
     {
-        sm.anim.Play(PlayerAnimHash.Crouch);
+        sm.animDriver.SetBase(PlayerAnimHash.Crouch);
         sm.SetColliderHeight(true);
     }
 

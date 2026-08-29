@@ -46,18 +46,29 @@ namespace Flandre.CombatSystem
         public bool verboseLog = false;
 
         private PlayerStateMachine sm;
+        private PlayerChargeSystem chargeSystem;
         private ComboInputBuffer buffer;
         private WeaponLoadout weapons;
 
-        // 当前挂着的蓄力光效（常驻，需要手动回收）
-        private GameObject activeChargeEffect;
-        private int activeChargeLevel = 0;
+        // ==========================================================
+        // 蓄力光效：【每只手各存一份】
+        //
+        // 原先只有一个 activeChargeEffect / activeChargeLevel，两只手共用 ——
+        // 主手蓄满挂上光效，副手蓄满时会先把主手的回收掉再挂自己的，
+        // 任意一只手结束时又把对方的清掉。表现出来就是"双手光效全丢"。
+        //
+        // 蓄力早就是每只手一个模块了，光效自然也该按槽位分开。
+        // 索引就用事件带来的 WeaponSlot。
+        // ==========================================================
+        private readonly GameObject[] activeChargeEffects = new GameObject[2];
+        private readonly int[] activeChargeLevels = new int[2];
 
         private Transform Root => effectRoot != null ? effectRoot : transform;
 
         private void Awake()
         {
             sm = GetComponent<PlayerStateMachine>();
+            chargeSystem = GetComponent<PlayerChargeSystem>();
             buffer = GetComponent<ComboInputBuffer>();
             weapons = GetComponent<WeaponLoadout>();
         }
@@ -77,13 +88,13 @@ namespace Flandre.CombatSystem
 
         private void OnDisable()
         {
-            if (sm != null && sm.chargeState != null)
+            if (chargeSystem != null)
             {
-                sm.chargeState.OnChargeLevelChanged -= HandleChargeLevelChanged;
+                chargeSystem.OnChargeLevelChanged -= HandleChargeLevelChanged;
             }
 
             // 组件被关掉时别把常驻特效落在场景里 —— 那就是池泄漏
-            ClearChargeEffect();
+            ClearAllChargeEffects();
         }
 
         private bool subscribed;
@@ -91,9 +102,11 @@ namespace Flandre.CombatSystem
         private void TrySubscribe()
         {
             if (subscribed) return;
-            if (sm == null || sm.chargeState == null) return;
+            if (chargeSystem == null) return;
 
-            sm.chargeState.OnChargeLevelChanged += HandleChargeLevelChanged;
+            // 【P3 改动】蓄力不再是状态，等级事件改由 PlayerChargeSystem 广播。
+            // 事件带上了槽位参数 —— 以后想让两只手各显示一条蓄力条，直接就能做。
+            chargeSystem.OnChargeLevelChanged += HandleChargeLevelChanged;
             subscribed = true;
         }
 
@@ -156,20 +169,20 @@ namespace Flandre.CombatSystem
         // 2. 蓄力特效（等级事件驱动）
         // ==========================================================
 
-        private void HandleChargeLevelChanged(int level)
+        private void HandleChargeLevelChanged(WeaponSlot slot, int level)
         {
-            // 等级没变就不折腾（避免每帧重建特效）
-            if (level == activeChargeLevel) return;
+            int i = (int)slot;
 
-            ClearChargeEffect();
-            activeChargeLevel = level;
+            // 等级没变就不折腾（避免每帧重建特效）
+            if (level == activeChargeLevels[i]) return;
+
+            ClearChargeEffect(slot);
+            activeChargeLevels[i] = level;
 
             if (level <= 0) return;
 
             // 蓄的是哪把武器？用它的光效
-            WeaponMoveSet weapon = (weapons != null && buffer != null)
-                ? weapons.GetWeaponForCommand(buffer.LastTriggerCmd)
-                : null;
+            WeaponMoveSet weapon = weapons != null ? weapons.GetWeapon(slot) : null;
 
             if (weapon == null) return;
 
@@ -177,22 +190,32 @@ namespace Flandre.CombatSystem
             if (string.IsNullOrEmpty(key)) return;
 
             // 常驻：一直挂着直到升级换掉、或松手清掉
-            activeChargeEffect = Spawn(
+            activeChargeEffects[i] = Spawn(
                 key, weapon.chargeEffectOffset, 0f, persistent: true,
                 weapon.chargeEffectScale, weapon.chargeEffectRotation);
 
-            if (verboseLog) Debug.Log($"[特效] 蓄力 {level} 级光效：{key}");
+            if (verboseLog) Debug.Log($"[特效] {slot} 蓄力 {level} 级光效：{key}");
         }
 
         /// <summary>回收当前蓄力光效。松手、受击、换武器时都要调</summary>
-        public void ClearChargeEffect()
+        /// <summary>回收指定手的蓄力光效</summary>
+        public void ClearChargeEffect(WeaponSlot slot)
         {
-            if (activeChargeEffect != null)
+            int i = (int)slot;
+
+            if (activeChargeEffects[i] != null)
             {
-                ObjectPoolManager.Instance?.Recycle(activeChargeEffect);
-                activeChargeEffect = null;
+                ObjectPoolManager.Instance?.Recycle(activeChargeEffects[i]);
+                activeChargeEffects[i] = null;
             }
-            activeChargeLevel = 0;
+            activeChargeLevels[i] = 0;
+        }
+
+        /// <summary>回收两只手的蓄力光效</summary>
+        public void ClearAllChargeEffects()
+        {
+            ClearChargeEffect(WeaponSlot.Main);
+            ClearChargeEffect(WeaponSlot.Sub);
         }
 
         // ==========================================================

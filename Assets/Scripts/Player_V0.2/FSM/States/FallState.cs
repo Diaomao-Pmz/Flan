@@ -19,7 +19,7 @@ public class FallState : PlayerStateBase
 
     public override void Enter()
     {
-        sm.anim.Play(PlayerAnimHash.JumpFall);
+        sm.animDriver.SetBase(PlayerAnimHash.JumpFall);
 
         originalGravity = sm.rb.gravityScale;
         hover.OnEnter(originalGravity);
@@ -47,6 +47,16 @@ public class FallState : PlayerStateBase
     public override void FixedUpdate()
     {
         if (hover.IsHovering) return;
+
+        // 空中蓄力时禁止方向键移动 —— 想调整位置只能花一次冲刺（Shift 朝鼠标方向冲）。
+        // 这让空中蓄力成为一次高风险承诺，而不是可以自由飘着蓄。
+        if (IsAirMoveLockedByCharge)
+        {
+            // 空中蓄力：方向键锁死，但限制下落速度，
+            // 否则蓄力还没蓄满人就落地了
+            ClampAirChargeFall();
+            return;
+        }
 
         ApplyHorizontalMove();
     }

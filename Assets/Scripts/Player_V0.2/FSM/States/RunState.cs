@@ -16,7 +16,7 @@ public class RunState : PlayerStateBase
 
     public override void Enter()
     {
-        sm.anim.Play(PlayerAnimHash.Run);
+        sm.animDriver.SetBase(PlayerAnimHash.Run);
         sm.jumpCount = 0; // 踩地跑动，刷新跳跃次数
     }
 

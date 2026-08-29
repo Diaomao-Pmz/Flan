@@ -67,6 +67,8 @@ public class ComboState : PlayerStateBase
     private ComboInputBuffer buffer;
     private PlayerHitDetection hitDetection;
     private PlayerWeaponEmitter weaponEmitter;
+    private PlayerAimProvider aimProvider;
+    private PlayerMomentum momentum;
 
     public ComboState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
@@ -78,6 +80,12 @@ public class ComboState : PlayerStateBase
 
     private PlayerWeaponEmitter WeaponEmitter
         => weaponEmitter != null ? weaponEmitter : (weaponEmitter = sm.GetComponent<PlayerWeaponEmitter>());
+
+    private PlayerAimProvider AimProvider
+        => aimProvider != null ? aimProvider : (aimProvider = sm.GetComponent<PlayerAimProvider>());
+
+    private PlayerMomentum Momentum
+        => momentum != null ? momentum : (momentum = sm.GetComponent<PlayerMomentum>());
 
     public override void Enter()
     {
@@ -120,7 +128,7 @@ public class ComboState : PlayerStateBase
             }
             else
             {
-                sm.anim.Play(activeNode.animName, 0, 0f);
+                sm.animDriver.SetBase(activeNode.animName, restart: true);
             }
 
             SetupThrust();
@@ -161,15 +169,24 @@ public class ComboState : PlayerStateBase
         //
         // 减速逻辑在 SlideMomentum 里，本状态只是"接手让它继续跑"，
         // 没有复制任何一行滑铲的物理参数。
+        // ---- 出招位移优先 ----
+        //
+        // 【顺序修正】蓄力位移必须排在滑铲动量【之前】。
+        // 否则滑铲后接 AA1 时，滑铲的余速会一直接管速度，
+        // 蓄力位移永远轮不到执行 —— 而蓄力位移是玩家主动打出的、
+        // 有明确方向意图的动作，理应压过被动的残余冲劲。
+        if (TickThrust()) return;
+
+        // ---- 携带动量：滑铲途中出招时，滑行继续 ----
+        //
+        // 减速逻辑在 SlideMomentum 里，本状态只是"接手让它继续跑"，
+        // 没有复制任何一行滑铲的物理参数。
         bool wantsMomentum = activeNode == null || activeNode.inheritMomentum;
 
         if (wantsMomentum && sm.slideMomentum.Tick(sm, Time.fixedDeltaTime))
         {
             return;
         }
-
-        // ---- 出招位移：短促冲量 + 线性衰减 ----
-        if (TickThrust()) return;
 
         // ---- 冲量结束后锁死移动 ----
         //
@@ -190,6 +207,8 @@ public class ComboState : PlayerStateBase
 
         // 空中连招期间锁死速度，不接受重力叠加
         sm.rb.linearVelocity = Vector2.zero;
+        // 注意：位移期间 TickThrust 已经 return 了，走不到这里 ——
+        // 所以空中的蓄力位移不会被这句抹掉
     }
 
     /// <summary>
@@ -260,6 +279,14 @@ public class ComboState : PlayerStateBase
         thrustVelocity = Vector2.zero;
 
         if (activeNode == null) return;
+
+        // 蓄力位移优先：它有自己的方向解析与动量加成
+        if (activeNode.useAimDash)
+        {
+            SetupAimDash();
+            return;
+        }
+
         if (activeNode.forwardThrust.sqrMagnitude < 0.0001f) return;
 
         // 带着滑铲动量进来时不覆盖它 ——
@@ -282,6 +309,89 @@ public class ComboState : PlayerStateBase
             // 兼容旧行为：设一次速度就不再管，整招匀速滑行
             ApplyThrustVelocity(1f);
         }
+    }
+
+    /// <summary>
+    /// 【蓄力位移】AA1 / BB1 这类"带位移的蓄力攻击"。
+    ///
+    /// 与普攻的 forwardThrust 有两点本质不同：
+    ///   ① 方向来自【瞄准】而不是角色朝向 —— 远程跟鼠标任意角度，近战四向吸附
+    ///   ② 距离受【动量池】影响 —— 冲刺/滑铲后放能挪得更远
+    ///
+    /// 第二点是对"保持机动"的奖励：站桩蓄力只能拿低保距离，
+    /// 而带着速度进蓄力再放，能挪出明显更远的身位。
+    /// </summary>
+    private void SetupAimDash()
+    {
+        Vector2 dir = ResolveAimDashDirection();
+
+        float momentumValue = Momentum != null ? Momentum.Value : 0f;
+        float distance = Mathf.Max(
+            activeNode.aimDashBaseDistance,
+            momentumValue * activeNode.aimDashMomentumScale);
+
+        thrustDuration = Mathf.Max(0.01f, activeNode.aimDashDuration);
+
+        // 位移速度按线性衰减积分反推：
+        // 速度从 v 线性降到 0、历时 t，走过的距离是 v*t/2，
+        // 所以要走 distance 就得从 2*distance/t 起步。
+        float speed = 2f * distance / thrustDuration;
+
+        thrustVelocity = dir * speed;
+        thrustTimer = 0f;
+
+        // 诊断：看不到这条日志 = 本文件没有被导入到工程里
+        if (Buffer != null && Buffer.verboseLog)
+        {
+            Debug.Log(
+                $"[蓄力位移] {activeNode.nodeName} 方向 {dir}，" +
+                $"距离 {distance:F2}（低保 {activeNode.aimDashBaseDistance}，" +
+                $"动量 {momentumValue:F1}×{activeNode.aimDashMomentumScale}），" +
+                $"耗时 {thrustDuration:F2}s");
+        }
+
+        // 位移方向即出招朝向，避免"往左冲却面朝右"
+        if (Mathf.Abs(dir.x) > 0.01f)
+            sm.playerController.SetFacingDirection(dir.x > 0f ? 1 : -1);
+    }
+
+    /// <summary>按节点配置的自由度解析瞄准方向</summary>
+    private Vector2 ResolveAimDashDirection()
+    {
+        // 没挂瞄准组件时退化为朝向
+        // 没挂瞄准组件、或明确要求只朝正面 → 用角色朝向
+        if (AimProvider == null || activeNode.aimDashMode == AimDashMode.FacingOnly)
+            return new Vector2(sm.playerController.facingDirection, 0f);
+
+        Vector2 aim = AimProvider.AimDirection;
+        if (aim.sqrMagnitude < 0.0001f)
+            return new Vector2(sm.playerController.facingDirection, 0f);
+
+        switch (activeNode.aimDashMode)
+        {
+            case AimDashMode.Free:
+                return aim.normalized;
+
+            case AimDashMode.EightWay:
+                return SnapDirection(aim, 45f);
+
+            case AimDashMode.FourWay:
+                return SnapDirection(aim, 90f);
+
+            default:
+                return new Vector2(sm.playerController.facingDirection, 0f);
+        }
+    }
+
+    /// <summary>把任意角度吸附到最近的 stepDegrees 倍数</summary>
+    private static Vector2 SnapDirection(Vector2 dir, float stepDegrees)
+    {
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        angle = Mathf.Round(angle / stepDegrees) * stepDegrees;
+
+        return new Vector2(
+            Mathf.Cos(angle * Mathf.Deg2Rad),
+            Mathf.Sin(angle * Mathf.Deg2Rad));
     }
 
     /// <returns>本帧是否由位移接管了速度</returns>

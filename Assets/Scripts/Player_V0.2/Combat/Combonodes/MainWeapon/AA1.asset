@@ -50,6 +50,11 @@ MonoBehaviour:
   projectileScaleMultiplier: 1
   projectileDamageOverride: 0
   recomputeAimPerShot: 1
+  useAimDash: 1
+  aimDashMode: 2
+  aimDashBaseDistance: 2
+  aimDashMomentumScale: 0.3
+  aimDashDuration: 0.15
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0

@@ -33,7 +33,7 @@ public class DeadState : PlayerStateBase
         // 尸体不该继续被打
         sm.playerState?.health.RequestUntargetable(DeathToken);
 
-        sm.anim.Play(PlayerAnimHash.Death);   // TODO: 有死亡动画后换成 Flandre_Death
+        sm.animDriver.SetBase(PlayerAnimHash.Death);   // TODO: 有死亡动画后换成 Flandre_Death
     }
 
     public override void Update()

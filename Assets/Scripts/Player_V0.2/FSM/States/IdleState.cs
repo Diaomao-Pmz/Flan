@@ -18,7 +18,7 @@ public class IdleState : PlayerStateBase
     {
         // 落地静止，保留 Y 轴物理速度（防止下落瞬间微弱回弹Bug）
         sm.rb.linearVelocity = new Vector2(0f, sm.rb.linearVelocity.y);
-        sm.anim.Play(PlayerAnimHash.Idle, 0, 0f);
+        sm.animDriver.SetBase(PlayerAnimHash.Idle, restart: true);
     }
 
     public override void Update()

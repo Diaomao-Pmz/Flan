@@ -25,7 +25,7 @@ public class HitState : PlayerStateBase
 
     public override void Enter()
     {
-        sm.anim.Play(PlayerAnimHash.Hit);
+        sm.animDriver.SetBase(PlayerAnimHash.Hit);
 
         Buffer?.ResetCombo();
 

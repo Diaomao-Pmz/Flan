@@ -60,7 +60,7 @@ public class FlyState : PlayerStateBase
         originalGravity = sm.rb.gravityScale;
         sm.rb.gravityScale = 0f;
         manaAccumulator = 0f;
-        sm.anim.Play(PlayerAnimHash.Fly);
+        sm.animDriver.SetBase(PlayerAnimHash.Fly);
 
         // 跃起进入时保留冲力；常规进入时清零
         if (!isLeaping) sm.rb.linearVelocity = Vector2.zero;

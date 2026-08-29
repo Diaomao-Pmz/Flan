@@ -27,12 +27,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
   chargeTimeLv1: 1
   chargeTimeLv2: 2
-  chargeTimeLv3: 5
-  comboChargeSpeedMultiplier: 3.5
+  chargeTimeLv3: 3.5
+  comboChargeSpeedMultiplier: 1
   chargeCooldown: 0.7
-  chargeEffectLv1: FXL_AA1
-  chargeEffectLv2: FXL_AA2
-  chargeEffectLv3: FXL_AA3
+  chargeEffectLv1: FXL_BB1
+  chargeEffectLv2: FXL_BB2
+  chargeEffectLv3: FXL_BB3
   chargeEffectOffset: {x: 0, y: 0}
   chargeEffectScale: {x: 1, y: 1}
   chargeEffectRotation: 0

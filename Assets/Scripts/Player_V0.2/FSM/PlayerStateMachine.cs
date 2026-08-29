@@ -38,6 +38,13 @@ public class PlayerStateMachine : MonoBehaviour
     public FlyState flyState;
 
     public ComboState comboState;
+    /// <summary>
+    /// 【P3 起不再使用】蓄力已从「状态」解耦成「随身模块」，
+    /// 由 PlayerChargeSystem 接管 —— 状态机不会再切进它。
+    ///
+    /// 字段保留只为不破坏 Inspector 上可能存在的引用。
+    /// 确认没有其他代码引用后可以整个删掉。
+    /// </summary>
     public ChargeState chargeState;
     public HitState hitState;
 
@@ -99,6 +106,18 @@ public class PlayerStateMachine : MonoBehaviour
     /// <summary>上一个状态。用于「从哪来」这类判断</summary>
     public IState previousState { get; private set; }
 
+    /// <summary>蓄力系统。P3 起蓄力由它接管，不再是状态</summary>
+    public PlayerChargeSystem chargeSystem { get; private set; }
+
+    /// <summary>
+    /// 动画调度器 —— 全项目唯一允许调用 Animator.Play 的地方。
+    ///
+    /// 状态卡带不再直接播动画，而是通过它【声明意图】：
+    ///     sm.animDriver.SetBase(PlayerAnimHash.Run);
+    /// 本帧最终播什么由调度器结算（比如蓄力时可能被蓄力姿势覆盖）。
+    /// </summary>
+    public PlayerAnimationDriver animDriver { get; private set; }
+
     private ComboInputBuffer cachedInputBuffer;
     public ComboInputBuffer inputBuffer
     {
@@ -123,6 +142,11 @@ public class PlayerStateMachine : MonoBehaviour
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         cachedInputBuffer = GetComponent<ComboInputBuffer>();
+        chargeSystem = GetComponent<PlayerChargeSystem>();
+        animDriver = GetComponent<PlayerAnimationDriver>();
+
+        if (animDriver == null)
+            Debug.LogError("[PlayerStateMachine] 缺少 PlayerAnimationDriver，所有动画都不会播放！", this);
 
         if (playerState != null)
         {
@@ -246,9 +270,11 @@ public class PlayerStateMachine : MonoBehaviour
     /// </summary>
     private void ClearMomentumIfNeeded()
     {
+        // 滑铲 / 连招期间保留携带动量。
+        // 蓄力不再是状态，所以改问蓄力系统 —— 蓄力中同样保留冲劲。
         bool keeps = currentState == slideState
                   || currentState == comboState
-                  || currentState == chargeState;
+                  || (chargeSystem != null && chargeSystem.IsAnyCharging);
 
         if (!keeps) slideMomentum.Clear();
     }
@@ -312,6 +338,9 @@ public class PlayerStateMachine : MonoBehaviour
 
         // 后摇也一并清掉：挨打已经是惩罚了，不该出来之后还被自己的后摇卡住
         inputBuffer?.ClearHandRecovery();
+
+        // 【P3】蓄力被打断 —— 后果与未蓄满松手相同：什么都不放，连段清零
+        chargeSystem?.CancelAll();
 
         hitState.SetKnockbackForce(knockbackDirection);
         ChangeState(hitState);

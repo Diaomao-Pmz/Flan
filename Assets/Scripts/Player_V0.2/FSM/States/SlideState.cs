@@ -38,7 +38,7 @@ public class SlideState : PlayerStateBase
 
         didStartSlide = true;
 
-        sm.anim.Play(PlayerAnimHash.Slide);
+        sm.animDriver.SetBase(PlayerAnimHash.Slide);
         sm.SetColliderHeight(true);
         if (sm.dashTrail != null) sm.dashTrail.emitting = true;
 
@@ -86,6 +86,10 @@ public class SlideState : PlayerStateBase
     public override void Exit()
     {
         sm.loadout?.NotifyActionExit(ActionType.Slide, !didStartSlide);
+
+        // 【动量池】把这次位移的速度存进去，供蓄力一段的位移距离取用。
+        // 存的是"刚才最快跑到多快"，不是累加 —— 连续冲刺不该把动量叠到天上。
+        sm.GetComponent<PlayerMomentum>()?.Deposit(currentSlideSpeed);
 
         if (!didStartSlide) return;
 

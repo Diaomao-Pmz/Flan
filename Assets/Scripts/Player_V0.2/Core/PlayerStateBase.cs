@@ -56,9 +56,20 @@ public abstract class PlayerStateBase : IState
     protected void ApplyHorizontalMove(float speedMultiplier = 1f)
     {
         float moveDir = sm.playerController.moveInput.x;
-        sm.rb.linearVelocity = new Vector2(
-            moveDir * sm.moveSpeed * speedMultiplier,
-            sm.rb.linearVelocity.y);
+        float speed = sm.moveSpeed * speedMultiplier;
+
+        // 【蓄力时的速度继承】动量充当一个逐渐衰减的速度下限。
+        //
+        // 冲刺后立刻进蓄力 → 起步接近冲刺速度 → 随动量衰减自然滑落到折损速度。
+        // 表现是「带着冲劲进蓄力还能滑一小段」，而不是一进蓄力就急刹车。
+        //
+        // 取 max 而不是相加 —— 它是"你还剩多少冲劲"，不是额外加成。
+        if (IsCharging && Momentum != null)
+        {
+            speed = Mathf.Max(speed, Momentum.GetChargeSpeedFloor());
+        }
+
+        sm.rb.linearVelocity = new Vector2(moveDir * speed, sm.rb.linearVelocity.y);
     }
 
     // ==========================================================
@@ -96,6 +107,40 @@ public abstract class PlayerStateBase : IState
 
     // 缓存，避免每帧 GetComponent
     private ComboInputBuffer cachedBuffer;
+    private Flandre.CombatSystem.PlayerChargeSystem cachedCharge;
+    private Flandre.CombatSystem.PlayerMomentum cachedMomentum;
+
+    protected Flandre.CombatSystem.PlayerChargeSystem ChargeSystem
+    {
+        get
+        {
+            if (cachedCharge == null)
+                cachedCharge = sm.GetComponent<Flandre.CombatSystem.PlayerChargeSystem>();
+            return cachedCharge;
+        }
+    }
+
+    protected Flandre.CombatSystem.PlayerMomentum Momentum
+    {
+        get
+        {
+            if (cachedMomentum == null)
+                cachedMomentum = sm.GetComponent<Flandre.CombatSystem.PlayerMomentum>();
+            return cachedMomentum;
+        }
+    }
+
+    /// <summary>有任意一只手正在蓄力</summary>
+    protected bool IsCharging => ChargeSystem != null && ChargeSystem.IsAnyCharging;
+
+    /// <summary>
+    /// 空中蓄力时禁止方向键移动。
+    ///
+    /// 设计意图：空中蓄力是一次高风险承诺 —— 不能自由飘，
+    /// 想调整位置只能花一次冲刺（Shift 朝鼠标方向冲）。
+    /// 地面蓄力不受此限，仍可减速移动。
+    /// </summary>
+    protected bool IsAirMoveLockedByCharge => IsCharging && !sm.IsGrounded();
 
     /// <summary>
     /// 攻击后摇是否正在锁住移动。
@@ -109,6 +154,32 @@ public abstract class PlayerStateBase : IState
         {
             if (cachedBuffer == null) cachedBuffer = sm.GetComponent<ComboInputBuffer>();
             return cachedBuffer != null && cachedBuffer.IsMovementLockedByRecovery();
+        }
+    }
+
+    /// <summary>
+    /// 空中蓄力时限制下落速度。
+    ///
+    /// 【为什么需要】解耦前 ChargeState 有一句「空中蓄力把角色钉在原地」，
+    /// 那是状态独有的行为，拆成模块后丢了。
+    ///
+    /// 而蓄力一段通常要 1 秒左右，从跳跃最高点落地往往不到 1 秒 ——
+    /// 不限速的话，空中蓄力几乎不可能在落地前完成，
+    /// 玩家会以为"空中根本不能蓄力"。
+    ///
+    /// 用【钳制最大下落速度】而不是每帧乘一个系数：
+    /// 后者的效果会随帧率变化，前者不会。
+    /// </summary>
+    protected void ClampAirChargeFall()
+    {
+        if (!IsAirMoveLockedByCharge || ChargeSystem == null) return;
+
+        float maxFall = ChargeSystem.airChargeMaxFallSpeed;
+        Vector2 v = sm.rb.linearVelocity;
+
+        if (v.y < -maxFall)
+        {
+            sm.rb.linearVelocity = new Vector2(v.x, -maxFall);
         }
     }
 

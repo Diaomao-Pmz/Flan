@@ -99,6 +99,7 @@ public class ComboInputBuffer : MonoBehaviour
     private PlayerController player;
     private PlayerState state;
     private WeaponLoadout weapons;
+    private PlayerChargeSystem chargeSystem;
 
     // 复用列表，避免每帧 new 产生 GC
     private readonly List<ComboNode> candidateBuffer = new List<ComboNode>(16);
@@ -254,14 +255,22 @@ public class ComboInputBuffer : MonoBehaviour
         player = GetComponent<PlayerController>();
         state = GetComponent<PlayerState>();
         weapons = GetComponent<WeaponLoadout>();
+        chargeSystem = GetComponent<PlayerChargeSystem>();
     }
 
     private float ComboWindowTolerance
         => state != null ? state.stats.comboWindowTolerance.Value : 0f;
 
     /// <summary>玩家当前是否仍处于战斗姿态（连招中或蓄力中）</summary>
+    /// <summary>
+    /// 玩家是否仍处于战斗姿态（连招中或任一只手在蓄力）。
+    ///
+    /// 【P3 改动】蓄力不再是一个 State，所以不能再用 currentState 判断，
+    /// 改问蓄力系统"有没有哪只手在蓄"。
+    /// </summary>
     private bool IsInCombatStance
-        => sm.currentState == sm.comboState || sm.currentState == sm.chargeState;
+        => sm.currentState == sm.comboState
+           || (chargeSystem != null && chargeSystem.IsAnyCharging);
 
     /// <summary>当前正在使用的武器（供远程发射器取正确的子弹）</summary>
     public WeaponMoveSet ActiveWeapon { get; private set; }
@@ -406,17 +415,37 @@ public class ComboInputBuffer : MonoBehaviour
             return;
         }
 
-        // 已经在蓄力了就别重复进入
-        if (sm.currentState == sm.chargeState) return;
+        if (chargeSystem == null)
+        {
+            Debug.LogError("[连招] 缺少 PlayerChargeSystem 组件，无法蓄力。", this);
+            return;
+        }
 
-        // 让 ChargeState 知道在蓄哪只手。
-        // 它读的是 LastTriggerCmd，所以必须在切状态之前写好。
-        LastTriggerCmd = cmd;
+        // 这只手已经在蓄了就别重复开始
+        if (chargeSystem.IsCharging(cmd)) return;
 
         hasBufferedInput = false;
 
-        if (verboseLog) Debug.Log($"[连招] {cmd} 长按确认 → 进入蓄力");
-        sm.ChangeState(sm.chargeState);
+        // 【P3 改动】不再 ChangeState —— 蓄力已经不是状态了。
+        // 玩家仍然待在 Idle / Run / Jump 里，只是某只手攥着一个充能物。
+        // 于是跳跃、跑动自然可用，另一只手也能正常打连招。
+        // 【顺序很重要】先算目标等级再清连段。
+        // 目标等级用的是【清零前】的深度，清零之后就取不到了。
+        int target = ChargeTargetLevel;
+        bool afterCombo = IsChargeAfterCombo;
+
+        chargeSystem.BeginCharge(cmd, target, afterCombo);
+
+        // 【规则】蓄力一开始，协助手的连段从第 1 段重新计数。
+        //
+        // 目标等级已经锁进模块里了，所以这里清零不影响这次蓄力 ——
+        // 清的是"接下来另一只手能接第几段"。
+        //
+        // 例：A1 → A2（第2段）→ 长按左键蓄力（锁定 AA2）
+        //     → 此时按右键打出的是 b1，不是 b3
+        ResetCombo();
+
+        if (verboseLog) Debug.Log($"[连招] {cmd} 长按确认 → 开始蓄力（目标 AA{target}）");
     }
 
     /// <summary>
@@ -461,9 +490,39 @@ public class ComboInputBuffer : MonoBehaviour
     /// 所以本方法不再负责出招，只是把预输入缓存清掉 ——
     /// 免得松手后缓存里那条按下指令又跑出来打一发普攻。
     /// </summary>
+    /// <summary>
+    /// 松开攻击键。
+    ///
+    /// 【P3 改动】蓄力的结算搬到这里 —— 原先归 ChargeState.Update 管，
+    /// 但蓄力已经不是状态了，得由输入层来收尾。
+    /// </summary>
     public void OnAttackReleased(InputCmd cmd)
     {
         if (hasBufferedInput && bufferedCmd == cmd) hasBufferedInput = false;
+
+        if (chargeSystem == null || !chargeSystem.IsCharging(cmd)) return;
+
+        ChargeModule module = chargeSystem.GetModule(cmd);
+        int level = module != null ? module.TargetLevel : 0;
+
+        ChargeReleaseResult result = chargeSystem.ReleaseCharge(cmd);
+
+        if (result == ChargeReleaseResult.Fired)
+        {
+            if (!TryReleaseCharge(cmd, level))
+            {
+                // 蓄满了但招式表没配全 —— 已经在 TryReleaseCharge 里打过诊断日志
+                ResetCombo();
+            }
+            return;
+        }
+
+        if (result == ChargeReleaseResult.Aborted)
+        {
+            // 没蓄满就松手：什么都不放，连段清零。
+            // 这是"蓄力是一场赌注"的实现处 —— 不会退而求其次打出低一级的招。
+            ResetCombo();
+        }
     }
 
     // ==================================================
@@ -823,7 +882,14 @@ public class ComboInputBuffer : MonoBehaviour
     private void SetCurrentNode(ComboNode node, InputCmd triggerCmd)
     {
         currentNode = node;
-        comboDepth++;
+
+        // 【规则】蓄力打出后连段重新计数。
+        //
+        // 蓄力招不推进段数，而是把计数归零 ——
+        // 所以 A1→A2→蓄出AA2 之后再长按，是从 AA1 重新开始，
+        // 而不是接着蓄 AA3。想要 AA3 就必须重新打满三段普攻。
+        if (node.isChargeSkill) comboDepth = 0;
+        else comboDepth++;
         comboIdleTimer = 0f;
         LastTriggerCmd = triggerCmd;
 

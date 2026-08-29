@@ -74,6 +74,8 @@ namespace Flandre.CombatSystem
         private PlayerController controller;
         private LoadoutManager loadout;
         private ComboInputBuffer comboBuffer;
+        private PlayerChargeSystem chargeSystem;
+        private PlayerAimProvider aim;
 
         private readonly InputBufferQueue buffer = new InputBufferQueue(4);
 
@@ -85,6 +87,8 @@ namespace Flandre.CombatSystem
             controller = GetComponent<PlayerController>();
             loadout = GetComponent<LoadoutManager>();
             comboBuffer = GetComponent<ComboInputBuffer>();
+            chargeSystem = GetComponent<PlayerChargeSystem>();
+            aim = GetComponent<PlayerAimProvider>();
         }
 
         private void Update()
@@ -165,8 +169,15 @@ namespace Flandre.CombatSystem
         // ==========================================================
 
         /// <summary>玩家当前是否处于战斗姿态（连招中或蓄力架势中）</summary>
+        /// <summary>
+        /// 【P3 改动】战斗姿态只剩「攻击动画中」。
+        ///
+        /// 蓄力不再是一个 State，所以不能再用 currentState 判断 ——
+        /// 而且蓄力期间玩家本来就该能正常跑动跳跃，
+        /// 把它算作"战斗姿态"反而会误伤这些行为。
+        /// </summary>
         private bool IsInCombatStance
-            => sm.currentState == sm.comboState || sm.currentState == sm.chargeState;
+            => sm.currentState == sm.comboState;
 
         /// <summary>方向键有没有按着 —— 突刺与冲刺、蹲下与滑铲的唯一分流依据</summary>
         private bool HasDirection
@@ -206,14 +217,22 @@ namespace Flandre.CombatSystem
         ///
         /// 蓄力中的 Shift 只是单纯位移，【不打断蓄力】。
         /// </summary>
+        /// <summary>有任意一只手在蓄力</summary>
+        private bool IsCharging => chargeSystem != null && chargeSystem.IsAnyCharging;
+
         private DispatchResult TryDashOrThrust()
         {
-            // ---- 蓄力中：纯位移，蓄力继续 ----
-            if (sm.currentState == sm.chargeState)
+            // ---- 空中蓄力：朝鼠标方向冲刺 ----
+            //
+            // 空中蓄力时方向键被锁（见 Jump/FallState），
+            // 想调整位置只能花这一次冲刺 —— 高风险承诺换一次精准位移。
+            if (IsCharging && !sm.IsGrounded())
             {
-                if (verboseLog) Debug.Log("[路由器] 蓄力中 shift → 纯位移，蓄力不中断");
-                return TryDash();
+                return TryChargeAirDash();
             }
+
+            // 【P3 起】不再需要为蓄力单独开分支 ——
+            // 蓄力不是状态了，冲刺只是普通的状态切换，天然不会打断它。
 
             // ---- 攻击动画中：位移 + 打断连段 ----
             if (sm.currentState == sm.comboState)
@@ -248,6 +267,35 @@ namespace Flandre.CombatSystem
         /// 但【连段间隔中】可以自由跳，而且不会中断连段 ——
         /// 「A1 放完 → 跳 → 接 b2」是合法且鼓励的操作。
         /// </summary>
+        /// <summary>
+        /// 空中蓄力时的冲刺：朝【鼠标方向】任意角度冲出去。
+        ///
+        /// 【宝石扩展点】先问宝石要不要接管这次空中行为 ——
+        /// 以后想让某颗宝石把"空中蓄力冲刺"改成别的（瞬移、下砸、留残影…），
+        /// 只需要在那颗宝石里覆写 TryHandleAirCommand，本文件一行不用改。
+        /// </summary>
+        private DispatchResult TryChargeAirDash()
+        {
+            // 扩展点：宝石优先
+            if (loadout != null && loadout.TryHandleAirCommand(InputCmd.Dash))
+            {
+                if (verboseLog) Debug.Log("[路由器] 空中蓄力冲刺已被宝石接管");
+                return DispatchResult.Success;
+            }
+
+            if (!sm.dashSkill.CanExecute()) return DispatchResult.Retry;
+
+            Vector2 dir = (aim != null)
+                ? aim.AimDirection
+                : new Vector2(controller.facingDirection, 0f);
+
+            sm.dashState.SetNextDashDirection(dir);
+            sm.ChangeState(sm.dashState);
+
+            if (verboseLog) Debug.Log($"[路由器] 空中蓄力 → 朝鼠标冲刺 {dir}");
+            return DispatchResult.Success;
+        }
+
         private DispatchResult TryJumpWithCancelCheck()
         {
             if (sm.currentState == sm.comboState)
@@ -256,20 +304,11 @@ namespace Flandre.CombatSystem
                 return DispatchResult.Rejected;
             }
 
-            // 【P2 暂时禁止】蓄力中跳跃
+            // 【P3 起放开】蓄力中可以跳跃。
             //
-            // 说明书 3.6 写了「蓄力期间可以跳跃」，但跳跃 = 切进 JumpState
-            // = ChargeState.Exit = 蓄了半天的力直接没了。
-            //
-            // 要支持它必须先把蓄力从「状态」解耦成「随身模块」，那是 P3 的事。
-            // 在那之前明确拦下并打日志 ——
-            // 让它悄悄清掉玩家的蓄力是更糟的体验：按了个键，力没了，还不知道为什么。
-            if (sm.currentState == sm.chargeState)
-            {
-                if (verboseLog) Debug.Log("[路由器] 蓄力中暂不支持跳跃（等 P3 蓄力解耦）");
-                return DispatchResult.Rejected;
-            }
-
+            // 蓄力已经不是一个 State 了 —— 玩家蓄力时仍然待在 Idle/Run/Fall 里，
+            // 跳跃只是普通的状态切换，不会碰到蓄力模块。
+            // 跳跃高度的折损由 PlayerChargeSystem 贴在 jumpForce 上的修饰器负责。
             return TryJump();
         }
 
@@ -337,11 +376,14 @@ namespace Flandre.CombatSystem
         /// </summary>
         private DispatchResult TryCrouchSlideOrCancel()
         {
-            // ---- 蓄力中：纯位移，蓄力继续 ----
-            if (sm.currentState == sm.chargeState)
+            // ---- 空中蓄力：禁止滑铲 ----
+            //
+            // 空中蓄力期间唯一的位移手段是 Shift 冲刺，
+            // 让 Ctrl 也能位移会削弱"空中蓄力是高风险承诺"这个设计。
+            if (IsCharging && !sm.IsGrounded())
             {
-                if (verboseLog) Debug.Log("[路由器] 蓄力中 ctrl → 纯位移，蓄力不中断");
-                return TryCrouchOrSlide();
+                if (verboseLog) Debug.Log("[路由器] 空中蓄力时禁止滑铲");
+                return DispatchResult.Rejected;
             }
 
             // ---- 攻击动画中 ----

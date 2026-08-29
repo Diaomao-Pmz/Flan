@@ -46,7 +46,7 @@ public class JumpState : PlayerStateBase
 
         didStartJump = true;
 
-        sm.anim.Play("Flandre_Jump_Start");
+        sm.animDriver.SetBase(PlayerAnimHash.JumpStart);
 
         sm.rb.linearVelocity = new Vector2(sm.rb.linearVelocity.x, 0f);
         sm.rb.AddForce(Vector2.up * sm.jumpForce, ForceMode2D.Impulse);
@@ -72,9 +72,9 @@ public class JumpState : PlayerStateBase
         float vy = sm.rb.linearVelocity.y;
 
         // 动画切换是视觉逻辑，留在渲染帧
-        if (vy > 0.5f) sm.anim.Play(PlayerAnimHash.JumpStart);
-        else if (vy >= -0.5f) sm.anim.Play(PlayerAnimHash.JumpApex);
-        else sm.anim.Play(PlayerAnimHash.JumpFall);
+        if (vy > 0.5f) sm.animDriver.SetBase(PlayerAnimHash.JumpStart);
+        else if (vy >= -0.5f) sm.animDriver.SetBase(PlayerAnimHash.JumpApex);
+        else sm.animDriver.SetBase(PlayerAnimHash.JumpFall);
 
         UpdateFacing(sm.playerController.moveInput.x);
 
@@ -94,6 +94,16 @@ public class JumpState : PlayerStateBase
         if (!sm.playerController.isJumpHeld && vy > sm.minJumpVelocity)
         {
             sm.rb.linearVelocity = new Vector2(sm.rb.linearVelocity.x, sm.minJumpVelocity);
+        }
+
+        // 空中蓄力时禁止方向键移动 —— 想调整位置只能花一次冲刺（Shift 朝鼠标方向冲）。
+        // 这让空中蓄力成为一次高风险承诺，而不是可以自由飘着蓄。
+        if (IsAirMoveLockedByCharge)
+        {
+            // 空中蓄力：方向键锁死，但限制下落速度，
+            // 否则蓄力还没蓄满人就落地了
+            ClampAirChargeFall();
+            return;
         }
 
         ApplyHorizontalMove();

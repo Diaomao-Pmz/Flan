@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: BB1
   comboWindow: 0.7
+  recoveryTime: 0.35
   castCondition: 0
   requiredState: 0
   inputSequence: 05000000
@@ -49,6 +50,11 @@ MonoBehaviour:
   projectileScaleMultiplier: 1.5
   projectileDamageOverride: 0
   recomputeAimPerShot: 1
+  useAimDash: 1
+  aimDashMode: 0
+  aimDashBaseDistance: 5
+  aimDashMomentumScale: 0.3
+  aimDashDuration: 0.15
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0

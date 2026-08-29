@@ -59,6 +59,22 @@ namespace Flandre.CombatSystem
         public bool refreshHitList = true;
     }
 
+    /// <summary>蓄力位移的方向自由度</summary>
+    public enum AimDashMode
+    {
+        /// <summary>任意角度，完全跟随瞄准（远程武器用）</summary>
+        Free,
+
+        /// <summary>八向吸附</summary>
+        EightWay,
+
+        /// <summary>四向吸附：上下左右（近战武器用）</summary>
+        FourWay,
+
+        /// <summary>只能朝角色当前面朝方向</summary>
+        FacingOnly,
+    }
+
     /// <summary>本招式允许被谁打断</summary>
     [System.Serializable]
     public class CancelPermission
@@ -260,6 +276,37 @@ public class ComboNode : ScriptableObject
         "勾选 = 连射途中玩家改方向键能改变后续子弹的方向（可微调扫射）\n" +
         "取消 = 整轮连射沿用第一发的方向")]
     public bool recomputeAimPerShot = true;
+
+    // ==========================================================
+    // 蓄力位移（AA1 / BB1 这类"带位移的蓄力攻击"）
+    // ==========================================================
+    [Header("蓄力位移")]
+    [Tooltip(
+        "本招是否带瞄准方向的位移。\n\n" +
+        "AA1 / BB1 勾上 —— 它们的定位是「功能 + 输出」，\n" +
+        "位移本身就是价值的一部分（蓄力中调整身位）。")]
+    public bool useAimDash = false;
+
+    [Tooltip(
+        "位移方向的自由度。\n" +
+        "  远程武器 → Free（任意角度，完全跟鼠标）\n" +
+        "  近战武器 → FourWay（上下左右四向）")]
+    public AimDashMode aimDashMode = AimDashMode.FourWay;
+
+    [Tooltip(
+        "低保距离 —— 站着不动放也能挪这么远。\n" +
+        "保证这招在任何情况下都有基本的调位能力。")]
+    public float aimDashBaseDistance = 2f;
+
+    [Tooltip(
+        "动量加成系数。实际距离 = max(低保, 动量储量 × 本系数)。\n\n" +
+        "填 0 = 关闭动量加成，永远是低保距离。\n" +
+        "填 0.3 = 冲刺后（动量 12）能挪 3.6 格，比站着放远得多 ——\n" +
+        "这是对「保持机动」的奖励，而不是站桩蓄力。")]
+    public float aimDashMomentumScale = 0.3f;
+
+    [Tooltip("位移过程持续多久。太短像瞬移，太长会拖慢出招节奏")]
+    public float aimDashDuration = 0.15f;
 
     [Header("打断能力")]
     [Tooltip(
