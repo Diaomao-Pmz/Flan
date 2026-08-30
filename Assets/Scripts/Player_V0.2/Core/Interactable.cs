@@ -1,8 +1,8 @@
 using UnityEngine;
 
-// ×¢Òâ£ºÕâÀïÊÇ interface£¬²¢ÇÒ²»ĞèÒª¼Ì³Ğ MonoBehaviour
+// æ³¨æ„ï¼šè¿™é‡Œæ˜¯ interfaceï¼Œå¹¶ä¸”ä¸éœ€è¦ç»§æ‰¿ MonoBehaviour
 public interface IInteractable
 {
-    // ËùÓĞÄÜ½»»¥µÄÎïÌå£¬¶¼±ØĞëÊµÏÖÕâ¸ö·½·¨
+    // æ‰€æœ‰èƒ½äº¤äº’çš„ç‰©ä½“ï¼Œéƒ½å¿…é¡»å®ç°è¿™ä¸ªæ–¹æ³•
     void Interact();
 }

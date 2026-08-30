@@ -51,8 +51,18 @@ namespace Flandre.CombatSystem
         [Header("瞄准来源")]
         public AimSource aimSource = AimSource.Auto;
 
-        //[Tooltip("鼠标多久没动就判定为"玩家在用手柄"，回退到八向吸附（秒）")]
-        public float mouseIdleTimeout = 2f;
+        // ==========================================================
+        // 【已删除】mouseIdleTimeout —— "鼠标多久没动就算玩家换手柄了"。
+        //
+        // 它想回答的问题是对的（玩家现在用鼠标还是手柄），但用错了信号：
+        // "鼠标没动"既可能是换了手柄，也可能是瞄好了在等时机 ——
+        // 一个信号区分不了两件事，所以无论超时填多久都必然会误判。
+        // 填 2 秒时子弹两秒后就跑偏，提到 10 秒只是让它更难复现，病没治。
+        //
+        // 现在改问 PlayerController.isUsingGamepad —— 那是记录下来的事实
+        // （谁最后动过就是谁在用），不是靠沉默时长猜的。停着不动时维持
+        // 上一个结论，所以"瞄好了不动"这个常态永远不会被误判。
+        // ==========================================================
 
         [Header("朝向策略")]
         [Tooltip(
@@ -73,9 +83,6 @@ namespace Flandre.CombatSystem
 
         private PlayerController controller;
         private Camera cachedCamera;
-
-        private Vector2 lastScreenPos;
-        private float lastMouseMoveTime = -999f;
 
         private Vector2 cachedAimDirection = Vector2.right;
         private Vector3 cachedAimWorldPoint;
@@ -100,7 +107,8 @@ namespace Flandre.CombatSystem
 
         private void Update()
         {
-            TrackMouseActivity();
+            // 【已删除】TrackMouseActivity —— 鼠标活跃度现在由 PlayerController
+            // 在 PollPointer 里记录（见 isUsingGamepad），本组件不再自己追踪。
             Recalculate();
 
             if (facingPolicy == FacingPolicy.AlwaysAim) ApplyFacing();
@@ -120,6 +128,65 @@ namespace Flandre.CombatSystem
         public bool IsUsingMouse => ResolveEffectiveSource() == AimSource.Mouse;
 
         /// <summary>
+        /// 【不降级的指针方向】只要这台机器上有鼠标，就一定返回鼠标方向。
+        ///
+        /// ==========================================================
+        /// 【为什么需要一条绕开 Auto 的路】
+        ///
+        /// AimDirection 走 Auto 时有一条隐式规则：鼠标 2 秒没动 → 判定玩家换了手柄
+        /// → 改用方向键八向 → 而方向键没按时 ResolveEightWay 回退到【角色朝向】。
+        ///
+        /// 对持续瞄准（射击、激光）这套降级是合理的。但对 AA1/BB1 的位移方向
+        /// 是灾难：蓄力时玩家瞄好了不动本来就是常态，两秒一到就被判成手柄，
+        /// 于是松手那一刻的位移方向变成了"角色正面"——
+        /// 表现出来就是「四向/八向几乎永远朝右」，而且复不复现取决于
+        /// 你刚才动没动鼠标，看起来毫无规律。
+        ///
+        /// 比喻：柜台两秒没人说话就默认改说另一种语言。
+        ///       聊天时还能纠正回来，但如果这时你只说一句话就走，那句必然被听错。
+        ///
+        /// 位移方向是【一次性决策】，没有"下一帧纠正回来"的机会，
+        /// 所以它必须问一个不会自作主张的来源。
+        /// ==========================================================
+        /// </summary>
+        /// <returns>拿到了鼠标方向返回 true；真的没有鼠标（纯手柄）返回 false</returns>
+        public bool TryGetPointerDirection(out Vector2 dir)
+        {
+            dir = Vector2.zero;
+
+            if (!TryGetPointerWorldPoint(out Vector3 world)) return false;
+
+            Vector2 delta = (Vector2)(world - Origin);
+
+            // 鼠标压在角色身上时方向没有意义
+            if (delta.sqrMagnitude < 0.0004f) return false;
+
+            dir = delta.normalized;
+            return true;
+        }
+
+        /// <summary>
+        /// 【不降级的指针落点】鼠标在世界坐标里的位置。
+        ///
+        /// 与 AimWorldPoint 的区别：那个在降级到八向时返回的是
+        /// 「从角色沿方向推 5 格」的假点，只能表达方向、不能表达距离。
+        /// 空中蓄力冲刺要「冲到鼠标那里」，需要真实落点，所以走这条路。
+        /// </summary>
+        public bool TryGetPointerWorldPoint(out Vector3 worldPoint)
+        {
+            worldPoint = Origin;
+
+            if (controller == null || !controller.hasPointerDevice || Cam == null) return false;
+
+            Vector3 screen = controller.screenAimPosition;
+            screen.z = Mathf.Abs(Cam.transform.position.z - Origin.z);
+
+            worldPoint = Cam.ScreenToWorldPoint(screen);
+            worldPoint.z = Origin.z;
+            return true;
+        }
+
+        /// <summary>
         /// 由攻击方在出招瞬间调用：按策略把角色转向瞄准方向。
         /// MovementOnly 策略下是空操作。
         /// </summary>
@@ -133,28 +200,24 @@ namespace Flandre.CombatSystem
         // 内部
         // ==========================================================
 
-        private void TrackMouseActivity()
-        {
-            if (controller == null) return;
-
-            Vector2 screenPos = controller.screenAimPosition;
-
-            if ((screenPos - lastScreenPos).sqrMagnitude > 1f)
-            {
-                lastScreenPos = screenPos;
-                lastMouseMoveTime = Time.unscaledTime;
-            }
-        }
-
+        /// <summary>
+        /// Auto 模式下，这一帧到底按鼠标还是按八向算。
+        ///
+        /// 两道判断，都是【事实】而不是推测：
+        ///   ① 这台机器上有没有鼠标 —— 纯手柄机器只能走八向
+        ///   ② 玩家最后动的是鼠标还是手柄 —— 由 PlayerController 记录
+        ///
+        /// 关键差别是没有任何"超时"：玩家把鼠标停住瞄准时，
+        /// 结论维持在"用鼠标"不变，不会自己漂移到八向去。
+        /// 原先那条隐式降级正是子弹会突然朝角色正面飞的病根（见文档 6.6 同类）。
+        /// </summary>
         private AimSource ResolveEffectiveSource()
         {
             if (aimSource != AimSource.Auto) return aimSource;
 
-            // 鼠标最近动过 → 认为玩家在用鼠标；否则回退八向（手柄）
-            bool mouseRecentlyActive =
-                (Time.unscaledTime - lastMouseMoveTime) < mouseIdleTimeout;
+            if (controller == null || !controller.hasPointerDevice) return AimSource.EightWay;
 
-            return mouseRecentlyActive ? AimSource.Mouse : AimSource.EightWay;
+            return controller.isUsingGamepad ? AimSource.EightWay : AimSource.Mouse;
         }
 
         private void Recalculate()

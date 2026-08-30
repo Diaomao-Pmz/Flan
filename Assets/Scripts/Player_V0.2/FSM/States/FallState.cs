@@ -21,7 +21,7 @@ public class FallState : PlayerStateBase
     {
         sm.animDriver.SetBase(PlayerAnimHash.JumpFall);
 
-        originalGravity = sm.rb.gravityScale;
+        originalGravity = sm.defaultGravityScale;   // 读出厂值，不读当前值（见 PlayerStateMachine.defaultGravityScale）
         hover.OnEnter(originalGravity);
     }
 
@@ -36,7 +36,8 @@ public class FallState : PlayerStateBase
         }
         if (hoverResult == HoverChargeHandler.Result.Hovering) return;
 
-        UpdateFacing(sm.playerController.moveInput.x);
+        // 空中蓄力悬停时连朝向也锁住（同 JumpState）
+        if (!IsAirChargePinned) UpdateFacing(sm.playerController.moveInput.x);
 
         if (sm.IsGrounded())
         {
@@ -48,15 +49,20 @@ public class FallState : PlayerStateBase
     {
         if (hover.IsHovering) return;
 
-        // 空中蓄力时禁止方向键移动 —— 想调整位置只能花一次冲刺（Shift 朝鼠标方向冲）。
-        // 这让空中蓄力成为一次高风险承诺，而不是可以自由飘着蓄。
-        if (IsAirMoveLockedByCharge)
+        // 空中蓄力：钉在原地悬停（详见 PlayerStateBase.PinInAirWhileCharging）。
+        // 下落状态里 y 速度本来就 <= 0，所以这里几乎总是成立 ——
+        // 但仍然走同一个判据，免得两张卡带的规则各写一套、日后走偏。
+        if (IsAirChargePinned)
         {
-            // 空中蓄力：方向键锁死，但限制下落速度，
-            // 否则蓄力还没蓄满人就落地了
-            ClampAirChargeFall();
+            PinInAirWhileCharging();
             return;
         }
+
+        // 蓄力一结束立刻还原重力，否则松手后角色会一直浮到状态切换为止
+        sm.rb.gravityScale = originalGravity;
+
+        // 只有空中起手的蓄力才锁方向键（同 JumpState）
+        if (IsAirChargePinned) return;
 
         ApplyHorizontalMove();
     }

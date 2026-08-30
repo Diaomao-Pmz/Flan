@@ -24,10 +24,30 @@ public class DashState : PlayerStateBase
     /// </summary>
     private Vector2? overrideDirection;
 
+    /// <summary>
+    /// 本次冲刺的指定距离。空中蓄力冲刺用它实现「冲到鼠标落点就停」。
+    ///
+    /// 【为什么固定速度、变时长，而不是固定时长、变速度】
+    /// 速度是冲刺的手感特征 —— 同一个动作忽快忽慢会显得很怪。
+    /// 改时长则表现为「鼠标近就短促一顿，鼠标远就完整冲一段」，
+    /// 位移多远一目了然，而冲刺本身的质感始终一致。
+    /// </summary>
+    private float? overrideDistance;
+
     /// <summary>指定下一次冲刺的方向。必须在 ChangeState(dashState) 之前调用</summary>
     public void SetNextDashDirection(Vector2 dir)
     {
         if (dir.sqrMagnitude > 0.0001f) overrideDirection = dir.normalized;
+    }
+
+    /// <summary>
+    /// 指定下一次冲刺的方向【与距离】。必须在 ChangeState(dashState) 之前调用。
+    /// 距离会被夹在正常冲刺的最大位移之内，所以不可能靠它冲得比平时更远。
+    /// </summary>
+    public void SetNextDash(Vector2 dir, float distance)
+    {
+        SetNextDashDirection(dir);
+        overrideDistance = Mathf.Max(0f, distance);
     }
 
     public DashState(PlayerStateMachine stateMachine) : base(stateMachine) { }
@@ -57,9 +77,18 @@ public class DashState : PlayerStateBase
 
         if (sm.dashTrail != null) sm.dashTrail.emitting = true;
 
-        dashTimer = sm.dashDuration;
-        originalGravity = sm.rb.gravityScale;
+        originalGravity = sm.defaultGravityScale;   // 读出厂值，不读当前值（见 PlayerStateMachine.defaultGravityScale）
         sm.rb.gravityScale = 0f;
+
+        // 冲刺时长：默认走完整的 dashDuration；
+        // 指定了距离就按 距离 / 速度 反推，速度保持不变。
+        float maxDistance = sm.dashSpeed * sm.dashDuration;
+
+        dashTimer = overrideDistance.HasValue
+            ? Mathf.Min(overrideDistance.Value, maxDistance) / Mathf.Max(0.01f, sm.dashSpeed)
+            : sm.dashDuration;
+
+        overrideDistance = null;   // 一次性，用完即清
 
         if (overrideDirection.HasValue)
         {

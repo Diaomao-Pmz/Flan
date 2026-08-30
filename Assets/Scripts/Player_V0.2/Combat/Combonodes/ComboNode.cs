@@ -128,17 +128,14 @@ public class ComboNode : ScriptableObject
     [Range(0, 3)]
     public int chargeLevel = 0;
 
-    [Tooltip(
-        "【已废弃 · P2 起不再读取】\n\n" +
-        "蓄力等级现在由【连段深度】决定：目标等级 = 上次普攻的段数。\n" +
-        "因为「换手蓄力不加段数」要求等级与用哪只手无关，\n" +
-        "而本字段是每招式各配一份，换手时会取到另一把武器的配置，对不上。\n\n" +
-        "字段保留只为不丢失已有资产数据，可以忽略。")]
-    public int chargeStartLevelAfter = 0;
-
-    [System.Obsolete("批次J 起改用武器上的 chargeTimeLv1/2/3 阈值，本字段不再被读取")]
-    [HideInInspector]
-    public float requiredChargeTime = 1.0f;
+    // 【已删除】chargeStartLevelAfter 与 requiredChargeTime。
+    //
+    // 前者：P2 起蓄力等级改由【连段深度】决定（目标等级 = 上次普攻的段数），
+    //       因为「换手蓄力不加段数」要求等级与用哪只手无关，
+    //       而本字段是每招式各配一份，换手时会取到另一把武器的配置，对不上。
+    // 后者：批次J 起改用武器上的 chargeTimeLv1/2/3 阈值。
+    //
+    // 两个字段都已经不再被任何代码读取，留着只会让人以为它们还在生效。
 
     [Header("动画与表现")]
     [Tooltip("直接把动画文件 (Anim Clip) 拖进来。请确保 Animator 里的 State 名与该动画文件名一致")]
@@ -213,6 +210,14 @@ public class ComboNode : ScriptableObject
 
     [Tooltip("特效存活时长。填 0 则使用 PlayerEffectSpawner 上的默认值")]
     public float effectLifetime = 0f;
+
+    [Tooltip(
+        "【降级特效】本招被「强行打出」时改用的特效 key。\n\n" +
+        "强行打出 = 蓄力 CD 还没走完就长按放出来的缩水版 AA1 / BB1。\n" +
+        "它的伤害和位移都正常，唯一能让玩家看出不对劲的就是这个特效 ——\n" +
+        "所以建议配一个明显更弱的版本（更小、更暗、更短）。\n\n" +
+        "留空 = 沉默回退到上面的普通特效，不会报错。")]
+    public string weakenedEffectKey = "";
 
     [Tooltip(
         "勾选 = 特效偏移复用下方判定框的 Hitbox Offset（省一次配置）\n" +
@@ -295,7 +300,10 @@ public class ComboNode : ScriptableObject
 
     [Tooltip(
         "低保距离 —— 站着不动放也能挪这么远。\n" +
-        "保证这招在任何情况下都有基本的调位能力。")]
+        "保证这招在任何情况下都有基本的调位能力。\n\n" +
+        "【填负数 = 朝瞄准的反方向弹开】用来做枪的后坐力。\n" +
+        "此时角色仍然面朝鼠标，只是身体被推开。\n" +
+        "动量加成按绝对值照常生效，方向始终是后退。")]
     public float aimDashBaseDistance = 2f;
 
     [Tooltip(

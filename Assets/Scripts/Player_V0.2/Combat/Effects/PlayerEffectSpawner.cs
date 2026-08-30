@@ -15,7 +15,7 @@ namespace Flandre.CombatSystem
     ///    所以三段普攻可以共用同一个动画剪辑，特效照样不同。
     ///
     /// 2. 蓄力特效 —— 由【蓄力等级事件】驱动
-    ///    订阅 ChargeState.OnChargeLevelChanged，
+    ///    订阅 PlayerChargeSystem.OnChargeLevelChanged，
     ///    升到 1 级换 1 级光效、升到 2 级换 2 级，松手全部收掉。
     ///
     ///    蓄力这条【不能】用动画曲线做：
@@ -75,9 +75,9 @@ namespace Flandre.CombatSystem
 
         private void OnEnable()
         {
-            // ChargeState 在 PlayerStateMachine.Awake 里创建，所以这里可能还没有。
+            // PlayerChargeSystem 是同物体上的组件，Awake 顺序不保证，所以这里可能还没拿到。
             // 用 Start 更稳妥 —— 但 OnEnable/OnDisable 成对更安全，
-            // 因此两边都做判空。
+            // 因此两边都做判空，并用 subscribed 挡住重复订阅。
             TrySubscribe();
         }
 
@@ -130,10 +130,16 @@ namespace Flandre.CombatSystem
                 return;
             }
 
-            string key = !string.IsNullOrEmpty(node.effectKey)
-                ? node.effectKey
-                : defaultAttackEffectKey;
+            // 强行打出的缩水版蓄力换降级特效。
+            // 这一招的伤害和位移都正常，特效是玩家唯一能看出"这发不对劲"的地方。
+            // 没配降级特效就沉默回退到普通的 —— 忘了配不会炸，只是看不出区别。
+            bool weakened = buffer != null && buffer.IsCurrentAttackWeakened;
 
+            string key = weakened && !string.IsNullOrEmpty(node.weakenedEffectKey)
+                ? node.weakenedEffectKey
+                : node.effectKey;
+
+            if (string.IsNullOrEmpty(key)) key = defaultAttackEffectKey;
             if (string.IsNullOrEmpty(key)) return;
 
             float life = node.effectLifetime > 0f ? node.effectLifetime : defaultEffectLifetime;

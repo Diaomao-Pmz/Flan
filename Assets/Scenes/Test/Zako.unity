@@ -1546,6 +1546,10 @@ MonoBehaviour:
     prefab: {fileID: 3587092818806866930, guid: bd17b62f5cb2eb04c885710f7c1f3300, type: 3}
     prewarmCount: 5
     maxSize: 20
+  - key: FX_B1
+    prefab: {fileID: 2819290616138335727, guid: 0eb33d93910293945a023cfeb6b7d396, type: 3}
+    prewarmCount: 5
+    maxSize: 20
   - key: FX_BB1
     prefab: {fileID: 2819290616138335727, guid: 3add2d3ba2c99ac478d6361d61538188, type: 3}
     prewarmCount: 5
@@ -4054,6 +4058,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 9093962893095280566, guid: 300e43444bbcc16479e3e3d0b4668f42, type: 3}
+      propertyPath: verboseLog
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9093962893095280566, guid: 300e43444bbcc16479e3e3d0b4668f42, type: 3}
       propertyPath: jumpMultiplier
       value: 0.7
       objectReference: {fileID: 0}
@@ -4094,7 +4102,7 @@ MonoBehaviour:
   decayPerSecond: 6
   maxStored: 20
   chargeSpeedScale: 0.3
-  verboseLog: 1
+  verboseLog: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -57,7 +57,7 @@ public class FlyState : PlayerStateBase
 
     public override void Enter()
     {
-        originalGravity = sm.rb.gravityScale;
+        originalGravity = sm.defaultGravityScale;   // 读出厂值，不读当前值（见 PlayerStateMachine.defaultGravityScale）
         sm.rb.gravityScale = 0f;
         manaAccumulator = 0f;
         sm.animDriver.SetBase(PlayerAnimHash.Fly);

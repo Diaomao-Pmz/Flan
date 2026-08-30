@@ -17,7 +17,22 @@ public class RunState : PlayerStateBase
     public override void Enter()
     {
         sm.animDriver.SetBase(PlayerAnimHash.Run);
-        sm.jumpCount = 0; // 踩地跑动，刷新跳跃次数
+
+        // ==========================================================
+        // 【把"跳跃次数只能在地面重置"这个不变量写出来】
+        //
+        // 原先是无条件 jumpCount = 0，靠"RunState 应该只在地面进入"
+        // 这个【假设】隐式成立。而假设是会被打破的 ——
+        // OnAttackAnimationEnd 漏查地面时，空中招式演完就会切进这里，
+        // 二段跳于是在半空被还了回来（那个根因已经在状态机那边治了）。
+        //
+        // 比喻：原先是"进了这扇门就发一张新门票"，全靠"这扇门只开在一楼"
+        //       这个默认前提。现在改成进门先看一眼自己在几楼。
+        //
+        // 这一句是【加固】不是治根：即使以后又有别的路径错误地在空中
+        // 切进 RunState，跳跃次数也不会再凭空多出来。
+        // ==========================================================
+        if (sm.IsGrounded()) sm.jumpCount = 0;
     }
 
     public override void Update()

@@ -437,15 +437,15 @@ GameObject:
   - component: {fileID: 4940195033158831774}
   - component: {fileID: 3284984519709453273}
   - component: {fileID: 2380891151920289122}
+  - component: {fileID: 1106490593481419198}
   - component: {fileID: 5078815976658276749}
   - component: {fileID: 3263975999406671726}
   - component: {fileID: 5352971276657534014}
   - component: {fileID: 4392357531177884512}
-  - component: {fileID: 2488737301198913112}
   - component: {fileID: 2565050029841443297}
   - component: {fileID: 2234797130889572064}
-  - component: {fileID: 1106490593481419198}
   - component: {fileID: 1154048815851234950}
+  - component: {fileID: 2488737301198913112}
   - component: {fileID: 5589907462491951021}
   - component: {fileID: 4980152160145220083}
   - component: {fileID: 2820381771816075049}
@@ -614,6 +614,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.28671354, y: 0.57437134}
   m_EdgeRadius: 0.05
+--- !u!114 &1106490593481419198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8274281879285586034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05e8d6e6503d6e1418e22b814817ff7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerSensor
+  groundCheck: {fileID: 2982371523037381420}
+  ceilingCheck: {fileID: 1644571645356048255}
+  hurtboxCore: {fileID: 1815616420572127415}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  drawGizmos: 1
 --- !u!95 &5078815976658276749
 Animator:
   serializedVersion: 7
@@ -648,8 +667,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89a4be74c52287d44bdab1d2dbd14e97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerAnimationDriver
-  overlayLayer: 0
+  overlayOnlyWhenIdle: 0
   overlayWhileCharging: 1
+  overlayLayer: 0
+  verboseLog: 0
 --- !u!114 &5352971276657534014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -845,24 +866,6 @@ MonoBehaviour:
   facingDirection: 1
   attackHoldThreshold: 0.15
   flyTapThreshold: 0.2
---- !u!114 &2488737301198913112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8274281879285586034}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6eebf8195c7d61d4993c52e6b94b92a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerCommandRouter
-  jumpBufferTime: 0.15
-  dashBufferTime: 0.15
-  crouchBufferTime: 0.15
-  useHeldCrouchOnLanding: 1
-  directionThreshold: 0.15
-  verboseLog: 1
 --- !u!114 &2565050029841443297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -933,25 +936,6 @@ MonoBehaviour:
     comboWindow: 0.3
     maxCombo: 1
   isBreakingHitStun: 0
---- !u!114 &1106490593481419198
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8274281879285586034}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05e8d6e6503d6e1418e22b814817ff7f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerSensor
-  groundCheck: {fileID: 2982371523037381420}
-  ceilingCheck: {fileID: 1644571645356048255}
-  hurtboxCore: {fileID: 1815616420572127415}
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  drawGizmos: 1
 --- !u!114 &1154048815851234950
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -969,6 +953,24 @@ MonoBehaviour:
   slideGem: {fileID: 0}
   activeGem: {fileID: 0}
   forbidDuplicateGems: 1
+--- !u!114 &2488737301198913112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8274281879285586034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eebf8195c7d61d4993c52e6b94b92a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerCommandRouter
+  jumpBufferTime: 0.25
+  dashBufferTime: 0.15
+  crouchBufferTime: 0.15
+  useHeldCrouchOnLanding: 1
+  directionThreshold: 0.15
+  verboseLog: 0
 --- !u!114 &5589907462491951021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -987,6 +989,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a1cdab3a0f201784abc39fc4afe6503f, type: 2}
   - {fileID: 11400000, guid: ff93485aa25713048beeb8ee1833ae9b, type: 2}
   bufferLifespan: 0.2
+  maxBufferedHoldTime: 1.5
   allowCancelWindowRecovery: 1
   lockMovementDuringRecovery: 1
   verboseLog: 0

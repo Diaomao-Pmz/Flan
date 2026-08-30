@@ -53,6 +53,46 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public Vector2 screenAimPosition { get; private set; }
 
+    /// <summary>
+    /// 这台机器上到底有没有鼠标。
+    ///
+    /// 【为什么需要它】PlayerAimProvider 的 Auto 模式原本用「鼠标 2 秒没动」
+    /// 来判断玩家是不是换手柄了 —— 但"没动"和"没有"是两回事。
+    /// 蓄力时玩家瞄准不动是常态，于是会被误判成手柄，瞄准方向悄悄
+    /// 从鼠标切成方向键，AA1 的位移方向跟着一起变。
+    ///
+    /// 设备有无是硬件事实，该由本文件（全项目唯一碰 Input System 的地方）回答。
+    /// </summary>
+    public bool hasPointerDevice { get; private set; }
+
+    /// <summary>
+    /// 玩家【现在】用的是手柄还是鼠标。
+    ///
+    /// ==========================================================
+    /// 【为什么由本文件回答，而不是让瞄准组件自己猜】
+    ///
+    /// PlayerAimProvider 的 Auto 模式原先靠「鼠标多久没动」来推断玩家换了手柄。
+    /// 但"没动"有两种完全不同的原因：
+    ///     玩家换手柄了      —— 该切八向
+    ///     玩家瞄好了在等时机 —— 绝对不该切
+    /// 一个信号区分不了两件事，所以必然会误判 —— 而蓄力时把鼠标停住瞄准
+    /// 恰恰是常态，于是子弹会在鼠标静止一段时间后突然改朝角色正面飞，
+    /// 玩家完全不知道发生了什么。
+    ///
+    /// 比喻：柜台"两秒没人说话就默认改说另一种语言"。真正该看的不是沉默多久，
+    ///       而是【最后开口的人说的是哪种语言】。
+    ///
+    /// 现在改成记录事实：谁最后动过，就是谁在用。
+    ///   鼠标动了     → false（用鼠标）
+    ///   手柄推方向了 → true （用手柄）
+    /// 停着不动时维持上一个结论，所以"瞄好了等时机"永远不会被误判。
+    ///
+    /// 这类硬件事实该由本文件回答 —— 它是全项目唯一碰 Input System 的地方，
+    /// 和 hasPointerDevice 是同一条规矩。
+    /// ==========================================================
+    /// </summary>
+    public bool isUsingGamepad { get; private set; }
+
     // ==========================================
     // 持续按压与蓄力状态记录区
     // ==========================================
@@ -62,11 +102,9 @@ public class PlayerController : MonoBehaviour
 
     public bool isMainAttackHeld { get; private set; }
     public float mainAttackHoldTime { get; private set; }
-    public bool isMainChargeConsumed { get; private set; }
 
     public bool isSubAttackHeld { get; private set; }
     public float subAttackHoldTime { get; private set; }
-    public bool isSubChargeConsumed { get; private set; }
 
     [Header("点按 / 长按判定")]
     [Tooltip(
@@ -118,7 +156,16 @@ public class PlayerController : MonoBehaviour
     private void PollPointer()
     {
         var mouse = Mouse.current;
-        if (mouse != null) screenAimPosition = mouse.position.ReadValue();
+        hasPointerDevice = (mouse != null);
+        if (mouse == null) return;
+
+        Vector2 pos = mouse.position.ReadValue();
+
+        // 鼠标真的动了（不是 1 像素的抖动）→ 玩家回到鼠标了。
+        // 阈值与 PlayerAimProvider 里原先那套判活一致。
+        if ((pos - screenAimPosition).sqrMagnitude > 1f) isUsingGamepad = false;
+
+        screenAimPosition = pos;
     }
 
     /// <summary>
@@ -137,6 +184,13 @@ public class PlayerController : MonoBehaviour
     public void OnMove(InputAction.CallbackContext ctx)
     {
         moveInput = ctx.ReadValue<Vector2>();
+
+        // 方向输入来自手柄 → 记下"玩家在用手柄"。
+        //
+        // 【只认手柄，不管键盘】键盘 + 鼠标是同一套操作方式，
+        // 按 a/d 跑动不代表玩家放弃了鼠标瞄准 —— 那正是最常见的玩法。
+        // 只有手柄摇杆才意味着"这个人手上没有鼠标可用"。
+        if (ctx.control != null && ctx.control.device is Gamepad) isUsingGamepad = true;
     }
 
     public void OnJumpPerformed(InputAction.CallbackContext ctx)
@@ -254,8 +308,8 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                // 已判定为长按 → 蓄力的释放由 ChargeState 主导（它才知道蓄到几级），
-                // 这里只清掉预输入缓存，免得松手后又跑出来打一发普攻
+                // 已判定为长按 → 交给连招引擎结算这次蓄力（蓄满就放，没蓄满就血本无归），
+                // 顺带清掉预输入缓存，免得松手后又跑出来打一发普攻
                 inputBuffer.OnAttackReleased(InputCmd.MainAttack);
             }
         }
@@ -306,13 +360,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // 【批次J】蓄力不再「自动放」，因此这两个「已消耗」标记失去了原本的用途。
-    // 保留是为了不破坏可能存在的外部调用，新代码不要再用。
-    [System.Obsolete("批次J 起蓄力改为松手释放，不再需要消耗标记")]
-    public void ConsumeMainCharge() { isMainChargeConsumed = true; }
-
-    [System.Obsolete("批次J 起蓄力改为松手释放，不再需要消耗标记")]
-    public void ConsumeSubCharge() { isSubChargeConsumed = true; }
+    // 【已删除】ConsumeMainCharge / ConsumeSubCharge 与两个 isXxxChargeConsumed 标记。
+    // 它们服务的是批次J 之前「蓄满自动放」的模型：放完要标记一下免得重复放。
+    // 改成「松手才放」之后，松手这个动作本身就是一次性的，不需要额外的消耗标记。
 
     // ==========================================
     // 杂项

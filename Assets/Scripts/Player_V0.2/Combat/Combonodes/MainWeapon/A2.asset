@@ -20,8 +20,6 @@ MonoBehaviour:
   inputSequence: 04000000
   isChargeSkill: 0
   chargeLevel: 0
-  chargeStartLevelAfter: 1
-  requiredChargeTime: 1
   attackClip: {fileID: 7400000, guid: f43126ca2140fc64e8378489c1ea6fc8, type: 2}
   forwardThrust: {x: 8, y: 0}
   thrustDuration: 0.12
@@ -39,6 +37,7 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: FX_A2
   effectLifetime: 0
+  weakenedEffectKey: 
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.288, y: 0.342}
   effectScale: {x: 1.5, y: 1.35}
@@ -50,6 +49,11 @@ MonoBehaviour:
   projectileScaleMultiplier: 1
   projectileDamageOverride: 0
   recomputeAimPerShot: 1
+  useAimDash: 0
+  aimDashMode: 2
+  aimDashBaseDistance: 2
+  aimDashMomentumScale: 0.3
+  aimDashDuration: 0.15
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0

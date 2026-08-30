@@ -51,7 +51,7 @@ public class JumpState : PlayerStateBase
         sm.rb.linearVelocity = new Vector2(sm.rb.linearVelocity.x, 0f);
         sm.rb.AddForce(Vector2.up * sm.jumpForce, ForceMode2D.Impulse);
 
-        originalGravity = sm.rb.gravityScale;
+        originalGravity = sm.defaultGravityScale;   // 读出厂值，不读当前值（见 PlayerStateMachine.defaultGravityScale）
         hover.OnEnter(originalGravity);
     }
 
@@ -76,7 +76,9 @@ public class JumpState : PlayerStateBase
         else if (vy >= -0.5f) sm.animDriver.SetBase(PlayerAnimHash.JumpApex);
         else sm.animDriver.SetBase(PlayerAnimHash.JumpFall);
 
-        UpdateFacing(sm.playerController.moveInput.x);
+        // 空中蓄力悬停时连朝向也锁住 —— 否则「方向键无响应」只兑现了一半：
+        // 人不动，却还能被方向键掰着左右转身，看起来像在抽搐。
+        if (!IsAirChargePinned) UpdateFacing(sm.playerController.moveInput.x);
 
         if (vy <= 0f && sm.IsGrounded())
         {
@@ -89,22 +91,38 @@ public class JumpState : PlayerStateBase
         // 悬停中不写速度，否则会把 HoverChargeHandler 钉住的角色重新推走
         if (hover.IsHovering) return;
 
-        // 变高跳：松开跳跃键就把上升速度削到最低值
+        // 空中蓄力到顶点/下落段：钉在原地悬停。
+        // 想调整位置只能花一次冲刺（Shift 朝鼠标落点冲）——
+        // 这让空中蓄力成为一次高风险承诺，而不是可以自由飘着蓄。
+        //
+        // 【上升段刻意不钉】否则起跳冲量会在生效前被抹掉，角色卡死在起跳点。
+        // 详见 PlayerStateBase.IsAirChargePinned。
+        if (IsAirChargePinned)
+        {
+            PinInAirWhileCharging();
+            return;
+        }
+
+        // 蓄力一结束就立刻把重力还回来。
+        // 【为什么每帧都写】蓄力可能在空中任意一帧结束，而 Exit 要等状态切换才跑 ——
+        // 只在 Exit 还原的话，松手后到落地前这段时间角色会一直浮着。
+        sm.rb.gravityScale = originalGravity;
+
+        // 变高跳：松开跳跃键就把上升速度削到最低值。
+        // 蓄力中也照常生效 —— 跳跃的手感不该因为手上攥着东西就变样。
         float vy = sm.rb.linearVelocity.y;
         if (!sm.playerController.isJumpHeld && vy > sm.minJumpVelocity)
         {
             sm.rb.linearVelocity = new Vector2(sm.rb.linearVelocity.x, sm.minJumpVelocity);
         }
 
-        // 空中蓄力时禁止方向键移动 —— 想调整位置只能花一次冲刺（Shift 朝鼠标方向冲）。
-        // 这让空中蓄力成为一次高风险承诺，而不是可以自由飘着蓄。
-        if (IsAirMoveLockedByCharge)
-        {
-            // 空中蓄力：方向键锁死，但限制下落速度，
-            // 否则蓄力还没蓄满人就落地了
-            ClampAirChargeFall();
-            return;
-        }
+        // 【只有空中起手的蓄力才锁方向键】
+        //
+        // 地面起手蓄力再跳起来时，玩家并没有做出"空中蓄力"那个承诺 ——
+        // 那只是一次普通的折损跳跃，该有正常的空中操控。
+        // 以前用的粗判据（在蓄力 且 在空中）会把这种情况也锁死，
+        // 表现成"蓄力时跳起来只能直上直下"。
+        if (IsAirChargePinned) return;
 
         ApplyHorizontalMove();
     }

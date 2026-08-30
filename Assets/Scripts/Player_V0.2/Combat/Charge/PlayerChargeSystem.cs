@@ -3,59 +3,55 @@ using UnityEngine;
 namespace Flandre.CombatSystem
 {
     /// <summary>
-    /// ¡¾ĞîÁ¦ÏµÍ³¡¿¡ª¡ª ³ÖÓĞÁ½Ö»ÊÖµÄĞîÁ¦Ä£¿é£¬¹ÒÔÚÍæ¼ÒÉíÉÏ¡£
+    /// ã€è“„åŠ›ç³»ç»Ÿã€‘â€”â€” æŒæœ‰ä¸¤åªæ‰‹çš„è“„åŠ›æ¨¡å—ï¼ŒæŒ‚åœ¨ç©å®¶èº«ä¸Šã€‚
     ///
     /// ==========================================================
-    /// ËüÈ¡´úÁËÔ­À´µÄ ChargeState¡£
+    /// å®ƒå–ä»£äº†åŸæ¥çš„ ChargeStateã€‚
     ///
-    /// ĞîÁ¦²»ÔÙÊÇ"Íæ¼Ò´ıÔÚÄ³¸ö×´Ì¬Àï"£¬¶øÊÇ"Ä³Ö»ÊÖÕıß¬×ÅÒ»¸ö³äÄÜÎï"¡£
-    /// ÓÚÊÇĞîÁ¦ÆÚ¼äÍæ¼ÒÈÔÈ»´¦ÓÚ Idle / Run / Jump / Fall / Combo ¡ª¡ª
-    /// ÌøÔ¾ºÍÅÜ¶¯×ÔÈ»¿ÉÓÃ£¬ÁíÒ»Ö»ÊÖÒ²ÄÜÕı³£´òÁ¬ÕĞ¡£
+    /// è“„åŠ›ä¸å†æ˜¯"ç©å®¶å¾…åœ¨æŸä¸ªçŠ¶æ€é‡Œ"ï¼Œè€Œæ˜¯"æŸåªæ‰‹æ­£æ”¥ç€ä¸€ä¸ªå……èƒ½ç‰©"ã€‚
+    /// äºæ˜¯è“„åŠ›æœŸé—´ç©å®¶ä»ç„¶å¤„äº Idle / Run / Jump / Fall / Combo â€”â€”
+    /// è·³è·ƒå’Œè·‘åŠ¨è‡ªç„¶å¯ç”¨ï¼Œå¦ä¸€åªæ‰‹ä¹Ÿèƒ½æ­£å¸¸æ‰“è¿æ‹›ã€‚
     ///
-    /// ¡¾ÒÆ¶¯ÕÛËğÓÃÊôĞÔĞŞÊÎÆ÷£¬²»ÓÃÓ²±àÂë¡¿
-    /// ĞîÁ¦¿ªÊ¼Ê±Íù moveSpeed / jumpForce ÉÏÌùÒ»ÕÅ±ãÀûÌù£¬
-    /// ½áÊøÊ±°´Ç©ÃûËºµô¡£ÕâÑù£º
-    ///   ¢Ù ²»ĞèÒªÔÚÃ¿¸ö×´Ì¬ÀïĞ´ if(ĞîÁ¦ÖĞ) ËÙ¶È¡Á0.2
-    ///   ¢Ú ºÍ±¦Ê¯¡¢buff µÄ¼Ó³É×Ô¶¯µş¼Ó£¬²»»á»¥Ïà¸²¸Ç
-    ///   ¢Û ËºµÄÊ±ºò°´Ç©ÃûËº£¬²»¿ÉÄÜÂ©¼õ
+    /// ã€ç§»åŠ¨æŠ˜æŸç”¨å±æ€§ä¿®é¥°å™¨ï¼Œä¸ç”¨ç¡¬ç¼–ç ã€‘
+    /// è“„åŠ›å¼€å§‹æ—¶å¾€ moveSpeed / jumpForce ä¸Šè´´ä¸€å¼ ä¾¿åˆ©è´´ï¼Œ
+    /// ç»“æŸæ—¶æŒ‰ç­¾åæ’•æ‰ã€‚è¿™æ ·ï¼š
+    ///   â‘  ä¸éœ€è¦åœ¨æ¯ä¸ªçŠ¶æ€é‡Œå†™ if(è“„åŠ›ä¸­) é€Ÿåº¦Ã—0.2
+    ///   â‘¡ å’Œå®çŸ³ã€buff çš„åŠ æˆè‡ªåŠ¨å åŠ ï¼Œä¸ä¼šäº’ç›¸è¦†ç›–
+    ///   â‘¢ æ’•çš„æ—¶å€™æŒ‰ç­¾åæ’•ï¼Œä¸å¯èƒ½æ¼å‡
     /// ==========================================================
     /// </summary>
     public class PlayerChargeSystem : MonoBehaviour
     {
-        [Header("ÒÆ¶¯ÕÛËğ (ĞîÁ¦ÆÚ¼ä)")]
-        [Tooltip("ÒÆËÙ±¶ÂÊ¡£0.2 = Ö»ÓĞÆ½Ê±Á½³É¡£Áô¿ÕÔò¶Á PlayerMovementConfig")]
+        [Header("ç§»åŠ¨æŠ˜æŸ (è“„åŠ›æœŸé—´)")]
+        [Tooltip("ç§»é€Ÿå€ç‡ã€‚0.2 = åªæœ‰å¹³æ—¶ä¸¤æˆã€‚ç•™ç©ºåˆ™è¯» PlayerMovementConfig")]
         public bool overrideMoveMultiplier = false;
         [Range(0f, 1f)] public float moveMultiplierOverride = 0.2f;
 
-        [Tooltip("ÌøÔ¾Á¦¶È±¶ÂÊ¡£0.7 = ÌøµÃ±ÈÆ½Ê±µÍÈı³É")]
+        [Tooltip("è·³è·ƒåŠ›åº¦å€ç‡ã€‚0.7 = è·³å¾—æ¯”å¹³æ—¶ä½ä¸‰æˆ")]
         [Range(0.1f, 1f)]
         public float jumpMultiplier = 0.7f;
 
-        [Header("¿ÕÖĞĞîÁ¦")]
-        [Tooltip(
-            "¿ÕÖĞĞîÁ¦Ê±µÄ×î´óÏÂÂäËÙ¶È¡£\n\n" +
-            "0   = ÍêÈ«ĞüÍ££¨½âñîÇ° ChargeState µÄ¾ÉĞĞÎª£©\n" +
-            "2   = »º½µ£¬»¹ÄÜĞîÒ»»á¶ù\n" +
-            "999 = ¹Ø±Õ£¬Õı³£ÏÂÂä\n\n" +
-            "¡¾ÎªÊ²Ã´ĞèÒªËü¡¿ĞîÁ¦Ò»¶ÎÍ¨³£Òª 1 Ãë×óÓÒ£¬\n" +
-            "¶ø´ÓÌøÔ¾×î¸ßµãÂäµØÍùÍù²»µ½ 1 Ãë ¡ª¡ª\n" +
-            "²»ÏŞÖÆÏÂÂäËÙ¶ÈµÄ»°£¬¿ÕÖĞĞîÁ¦¼¸ºõ²»¿ÉÄÜÔÚÂäµØÇ°Íê³É¡£")]
-        public float airChargeMaxFallSpeed = 2f;
+        // ã€å·²åˆ é™¤ã€‘airChargeMaxFallSpeed â€”â€” ç©ºä¸­è“„åŠ›çš„ã€Œæœ€å¤§ä¸‹è½é€Ÿåº¦ã€ã€‚
+        //
+        // å®ƒåšçš„æ˜¯ã€Œæ¯å¸§æŠŠ y é€Ÿåº¦é’³å›ä¸Šé™ã€ï¼Œä½†é’³ä½è·‘åœ¨ç‰©ç†æ­¥è¿›ã€ä¹‹å‰ã€‘ï¼Œ
+        // æ¯æ­¥éƒ½æœ‰ä¸€å¸§é‡åŠ›ä»åé¢æ¼è¿‡å» â€”â€” æ‰€ä»¥å¡« 0 ä¹Ÿåœä¸ä½ï¼Œåªä¼šç¼“é™ã€‚
+        // ç°åœ¨æ”¹æˆç›´æ¥ gravityScale = 0 æŠŠé‡åŠ›æºå…³æ‰ï¼Œ
+        // è§ PlayerStateBase.PinInAirWhileChargingï¼Œä¸å†éœ€è¦è¿™ä¸ªå‚æ•°ã€‚
 
         [Header("Debug")]
         public bool verboseLog = false;
 
-        // ---- ÊÂ¼ş£¨UI / ÌØĞ§¶©ÔÄ£©----
-        /// <summary>Ä³Ö»ÊÖµÄĞîÁ¦µÈ¼¶±ä»¯ (²ÛÎ», µÈ¼¶)¡£0 = Î´ĞîÂú£¬>0 = ÒÑĞîÂúµÄµÈ¼¶</summary>
+        // ---- äº‹ä»¶ï¼ˆUI / ç‰¹æ•ˆè®¢é˜…ï¼‰----
+        /// <summary>æŸåªæ‰‹çš„è“„åŠ›ç­‰çº§å˜åŒ– (æ§½ä½, ç­‰çº§)ã€‚0 = æœªè“„æ»¡ï¼Œ>0 = å·²è“„æ»¡çš„ç­‰çº§</summary>
         public event System.Action<WeaponSlot, int> OnChargeLevelChanged;
 
-        /// <summary>Ä³Ö»ÊÖµÄĞîÁ¦½ø¶È±ä»¯ (²ÛÎ», 0~1)</summary>
+        /// <summary>æŸåªæ‰‹çš„è“„åŠ›è¿›åº¦å˜åŒ– (æ§½ä½, 0~1)</summary>
         public event System.Action<WeaponSlot, float> OnChargeProgressChanged;
 
-        /// <summary>Ä³Ö»ÊÖ¿ªÊ¼ĞîÁ¦</summary>
+        /// <summary>æŸåªæ‰‹å¼€å§‹è“„åŠ›</summary>
         public event System.Action<WeaponSlot> OnChargeStarted;
 
-        /// <summary>Ä³Ö»ÊÖ½áÊøĞîÁ¦£¨ÎŞÂÛ³É°Ü£©</summary>
+        /// <summary>æŸåªæ‰‹ç»“æŸè“„åŠ›ï¼ˆæ— è®ºæˆè´¥ï¼‰</summary>
         public event System.Action<WeaponSlot> OnChargeEnded;
 
         private readonly ChargeModule[] modules =
@@ -68,6 +64,7 @@ namespace Flandre.CombatSystem
         private PlayerController controller;
         private ComboInputBuffer buffer;
         private WeaponLoadout weapons;
+        private PlayerSensor sensor;
 
         private bool penaltyApplied;
 
@@ -77,12 +74,13 @@ namespace Flandre.CombatSystem
             controller = GetComponent<PlayerController>();
             buffer = GetComponent<ComboInputBuffer>();
             weapons = GetComponent<WeaponLoadout>();
+            sensor = GetComponent<PlayerSensor>();
 
             if (state != null) state.EnsureInitialized();
         }
 
         // ==========================================================
-        // ²éÑ¯
+        // æŸ¥è¯¢
         // ==========================================================
 
         public ChargeModule GetModule(WeaponSlot slot) => modules[(int)slot];
@@ -90,8 +88,63 @@ namespace Flandre.CombatSystem
         public ChargeModule GetModule(InputCmd cmd)
             => WeaponMoveSet.TryCommandToSlot(cmd, out WeaponSlot s) ? modules[(int)s] : null;
 
-        /// <summary>ÓĞÈÎÒâÒ»Ö»ÊÖÔÚĞîÁ¦</summary>
+        /// <summary>æœ‰ä»»æ„ä¸€åªæ‰‹åœ¨è“„åŠ›</summary>
         public bool IsAnyCharging => modules[0].IsCharging || modules[1].IsCharging;
+
+        /// <summary>
+        /// ã€å¼±è“„è¿›è¡Œä¸­ã€‘æœ‰ä»»æ„ä¸€åªæ‰‹æ­£åœ¨è¿›è¡Œä¸€æ¬¡è¢«å®šæ€§ä¸ºã€Œå¼±åŒ–ã€çš„è“„åŠ›ã€‚
+        ///
+        /// ==========================================================
+        /// ç”¨é€”ï¼šå¼±è“„æœŸé—´ç¦æ­¢å¦ä¸€åªæ‰‹æ”»å‡»ï¼ˆè§„åˆ™ä¸€ï¼‰ã€‚
+        ///
+        /// ã€ä¸ºä»€ä¹ˆéœ€è¦è¿™æ¡è§„åˆ™ã€‘è¿æ®µè®¡æ•°å’Œè“„åŠ› CD éƒ½æ˜¯ä¸¤åªæ‰‹å…±ç”¨çš„ï¼Œ
+        /// ä½†ã€Œè¿™ä¸€å‘æ˜¯ä¸æ˜¯å¼±åŒ–ç‰ˆã€æ˜¯åœ¨ã€å„è‡ªèµ·æ‰‹é‚£ä¸€åˆ»ã€‘åˆ†åˆ«å®šæ€§çš„ã€‚
+        /// äºæ˜¯ CD å†…åŒæ—¶é•¿æŒ‰å·¦å³é”®ï¼Œä¸¤åªæ‰‹ä¼šå„è‡ªæ‹¿åˆ°ä¸€å‘å¼±è“„ â€”â€”
+        /// ç©å®¶åªè¦é”™å¼€æ¾æ‰‹ï¼Œå°±èƒ½ç™½æ‹¿ä¸¤å‘ã€‚
+        ///
+        /// æ¯”å–»ï¼šä¸€æ¬¡åªå‘ä¸€é¢—å“‘å¼¹ï¼Œä½†ä¸¤åªæ‰‹åŒæ—¶ä¼¸è¿‡æ¥å„é¢†äº†ä¸€é¢—ã€‚
+        ///       ç°åœ¨æ”¹æˆï¼šå·¦æ‰‹æ”¥ç€å“‘å¼¹æ—¶ï¼Œå³æ‰‹ä¸è®¸å†æ‹¿ä¸œè¥¿ã€‚
+        ///
+        /// ã€ä¸ºä»€ä¹ˆè¦çœ‹ IsCharging è€Œä¸åªçœ‹ IsWeakenedã€‘
+        /// ChargeModule.IsWeakened åœ¨ Stop() é‡Œæ˜¯åˆ»æ„ä¸æ¸…çš„ï¼ˆå®ƒæ˜¯"åˆšç»“æŸé‚£æ¬¡
+        /// è“„åŠ›çš„å±æ€§"ï¼Œè°ƒç”¨æ–¹è¦åœ¨ Release ä¹‹åè¯»ï¼‰ã€‚æ‰€ä»¥å¿…é¡»å ä¸Š"è¿˜åœ¨è“„"ï¼Œ
+        /// å¦åˆ™ä¸€æ¬¡å¼±è“„ç»“æŸåè¿™ä¸ªæ ‡è®°ä¼šä¸€ç›´æŒ‚ç€ï¼ŒæŠŠå¦ä¸€åªæ‰‹æ°¸ä¹…é”æ­»ã€‚
+        /// ==========================================================
+        /// </summary>
+        public bool IsAnyWeakenedCharging
+            => (modules[0].IsCharging && modules[0].IsWeakened)
+            || (modules[1].IsCharging && modules[1].IsWeakened);
+
+        /// <summary>
+        /// æœ‰ä»»æ„ä¸€åªæ‰‹çš„è“„åŠ›æ˜¯ã€åœ¨ç©ºä¸­èµ·æ‰‹ã€‘çš„ â€”â€” ç©ºä¸­æ‚¬åœçš„åˆ¤æ®ã€‚
+        ///
+        /// å–"ä»»æ„ä¸€åª"è€Œä¸æ˜¯"å…¨éƒ¨"ï¼šç©ºä¸­èµ·æ‰‹æ˜¯ç©å®¶ä¸»åŠ¨åšå‡ºçš„é«˜é£é™©æ‰¿è¯ºï¼Œ
+        /// åªè¦æœ‰ä¸€åªæ‰‹åšäº†è¿™ä¸ªæ‰¿è¯ºï¼Œæ‚¬åœè¿™æ¡è§„åˆ™å°±è¯¥ç”Ÿæ•ˆã€‚
+        /// </summary>
+        public bool IsAnyChargeStartedInAir
+            => (modules[0].IsCharging && modules[0].BeganAirborne)
+            || (modules[1].IsCharging && modules[1].BeganAirborne);
+
+        /// <summary>
+        /// ã€ç©ºä¸­è“„åŠ›å§¿æ€ç”Ÿæ•ˆä¸­ã€‘ç©ºä¸­èµ·æ‰‹ ä¸” ç°åœ¨ä»åœ¨ç©ºä¸­ã€‚
+        ///
+        /// ==========================================================
+        /// è¿™æ˜¯"ç©ºä¸­è“„åŠ›"è¿™å¥—ç‰¹æ®Šè§„åˆ™çš„ã€å”¯ä¸€åˆ¤æ®ã€‘ï¼Œæ‰€æœ‰ç›¸å…³è¡Œä¸ºéƒ½é—®å®ƒï¼š
+        ///   Â· è§’è‰²é’‰åœ¨åŸåœ°æ‚¬åœ       ï¼ˆPlayerStateBase.IsAirChargePinnedï¼‰
+        ///   Â· æ–¹å‘é”®ä¸æœå‘é”æ­»       ï¼ˆåŒä¸Šï¼‰
+        ///   Â· Shift å˜æˆ"æŒ‡å“ªå»å“ª"    ï¼ˆPlayerCommandRouter.TryDashOrThrustï¼‰
+        ///
+        /// ã€ä¸ºä»€ä¹ˆå¿…é¡»æ˜¯åŒä¸€ä¸ªåˆ¤æ®ã€‘è¿™ä¸‰ä»¶äº‹åœ¨ç©å®¶çœ¼é‡Œæ˜¯ã€ä¸€ä¸ªå§¿æ€ã€‘çš„ä¸‰ä¸ªä¾§é¢ã€‚
+        /// å„è‡ªå†™å„è‡ªçš„æ¡ä»¶ï¼Œå°±ä¼šå‡ºç°"äººé’‰ä½äº†ä½† Shift è¿˜æ˜¯æ™®é€šå†²åˆº"
+        /// è¿™ç§è‡ªç›¸çŸ›ç›¾çš„ç»„åˆ â€”â€” ç©å®¶æ²¡æ³•ä»è¡¨ç°åæ¨è§„åˆ™ï¼Œåªä¼šè§‰å¾—éšæœºã€‚
+        ///
+        /// ã€ä¸¤ä¸ªæ¡ä»¶ç¼ºä¸€ä¸å¯ã€‘
+        ///   ç©ºä¸­èµ·æ‰‹ â†’ è¿™æ˜¯ä¸€æ¬¡é«˜é£é™©æ‰¿è¯ºï¼Œæ€§è´¨åœ¨èµ·æ‰‹é‚£åˆ»å®šæ­»ï¼Œä¸­é€”ä¸å˜
+        ///   ä»åœ¨ç©ºä¸­ â†’ æ‰¿è¯ºå·²ç»å…‘ç°å®Œï¼ˆè½åœ°äº†ï¼‰å°±è¯¥æ¢å¤å¸¸è§„è§„åˆ™
+        /// ==========================================================
+        /// </summary>
+        public bool IsAirChargeHovering
+            => IsAnyChargeStartedInAir && sensor != null && !sensor.IsGrounded();
 
         public bool IsCharging(InputCmd cmd)
         {
@@ -99,7 +152,7 @@ namespace Flandre.CombatSystem
             return m != null && m.IsCharging;
         }
 
-        /// <summary>×îÏÈ¿ªÊ¼ĞîÁ¦µÄÄÇÖ»ÊÖ£¬¹©¶¯»­Óë¹âĞ§Ê¹ÓÃ¡£¶¼Ã»ĞîÊ±·µ»Ø null</summary>
+        /// <summary>æœ€å…ˆå¼€å§‹è“„åŠ›çš„é‚£åªæ‰‹ï¼Œä¾›åŠ¨ç”»ä¸å…‰æ•ˆä½¿ç”¨ã€‚éƒ½æ²¡è“„æ—¶è¿”å› null</summary>
         public ChargeModule PrimaryChargingModule
         {
             get
@@ -111,11 +164,11 @@ namespace Flandre.CombatSystem
         }
 
         // ==========================================================
-        // ¿ªÊ¼ / ½áÊø
+        // å¼€å§‹ / ç»“æŸ
         // ==========================================================
 
         /// <summary>
-        /// ¿ªÊ¼ĞîÁ¦¡£ÓÉ ComboInputBuffer ÔÚ¡¸³¤°´È·ÈÏ¡¹Ê±µ÷ÓÃ¡£
+        /// å¼€å§‹è“„åŠ›ã€‚ç”± ComboInputBuffer åœ¨ã€Œé•¿æŒ‰ç¡®è®¤ã€æ—¶è°ƒç”¨ã€‚
         /// </summary>
         public void BeginCharge(InputCmd cmd, int targetLevel, bool isAfterCombo)
         {
@@ -123,9 +176,16 @@ namespace Flandre.CombatSystem
             if (m == null || m.IsCharging) return;
 
             WeaponMoveSet weapon = weapons != null ? weapons.GetWeapon(m.Slot) : null;
-            bool ready = weapons == null || weapons.IsChargeReady(m.Slot);
 
-            m.Begin(weapon, targetLevel, isAfterCombo, ready);
+            // ã€å¼ºå¼±å°±åœ¨è¿™ä¸€åˆ»å®šæ€§ã€‘CD æ˜¯å…¨å±€çš„ï¼Œä¸åˆ†å·¦å³æ‰‹ã€‚
+            // ä¹‹åè“„å¤šä¹…ã€ä»€ä¹ˆæ—¶å€™æ¾æ‰‹éƒ½æ”¹å˜ä¸äº†è¿™ä¸€å‘çš„å®šæ€§ â€”â€” è§ ChargeModule.IsWeakenedã€‚
+            bool ready = weapons == null || weapons.IsChargeReady;
+
+            // ã€èµ·æ‰‹ä½ç½®ä¹Ÿåœ¨è¿™ä¸€åˆ»å®šæ€§ã€‘å†³å®šè¿™æ¬¡è“„åŠ›è¦ä¸è¦æŠŠè§’è‰²é’‰åœ¨ç©ºä¸­ã€‚
+            // åŒæ ·æ˜¯"è¿™æ¬¡è“„åŠ›çš„æ€§è´¨"ï¼Œå…¨ç¨‹ä¸å˜ â€”â€” è§ ChargeModule.BeganAirborneã€‚
+            bool airborne = sensor != null && !sensor.IsGrounded();
+
+            m.Begin(weapon, targetLevel, isAfterCombo, ready, airborne);
 
             ApplyPenaltyIfNeeded();
 
@@ -135,14 +195,26 @@ namespace Flandre.CombatSystem
 
             if (verboseLog)
             {
-                Debug.Log(m.IsValid
-                    ? $"[ĞîÁ¦] {m.Slot} ¿ªÊ¼£¬Ä¿±ê AA{m.TargetLevel}£¬ĞèÒª {m.RequiredTime:F2}s"
-                    : $"[ĞîÁ¦] {m.Slot} ¿ªÊ¼£¬µ«ÎŞÎäÆ÷»ò CD ÖĞ£¬Ğî²»³ö¶«Î÷");
+                if (!m.IsValid)
+                {
+                    Debug.Log($"[è“„åŠ›] {m.Slot} è¿™åªæ‰‹æ²¡æœ‰æ­¦å™¨ï¼Œè“„ä¸å‡ºä¸œè¥¿");
+                }
+                else if (m.IsWeakened)
+                {
+                    float left = weapons != null ? weapons.ChargeCooldownRemaining : 0f;
+                    Debug.Log(
+                        $"[è“„åŠ›] {m.Slot} åœ¨ CD å†…èµ·æ‰‹ï¼ˆè¿˜å‰© {left:F2}sï¼‰â†’ æœ¬å‘å®šæ€§ä¸ºå¼±åŒ–ç‰ˆ AA1ï¼Œ" +
+                        "ä¸¾å¤šä¹…éƒ½æ”¹ä¸å›æ¥");
+                }
+                else
+                {
+                    Debug.Log($"[è“„åŠ›] {m.Slot} å¼€å§‹ï¼Œç›®æ ‡ AA{m.TargetLevel}ï¼Œéœ€è¦ {m.RequiredTime:F2}s");
+                }
             }
         }
 
         /// <summary>
-        /// ËÉÊÖ½áËã¡£ÓÉ ComboInputBuffer ÔÚ¹¥»÷¼üËÉ¿ªÊ±µ÷ÓÃ¡£
+        /// æ¾æ‰‹ç»“ç®—ã€‚ç”± ComboInputBuffer åœ¨æ”»å‡»é”®æ¾å¼€æ—¶è°ƒç”¨ã€‚
         /// </summary>
         public ChargeReleaseResult ReleaseCharge(InputCmd cmd)
         {
@@ -157,16 +229,16 @@ namespace Flandre.CombatSystem
             if (verboseLog)
             {
                 Debug.Log(result == ChargeReleaseResult.Fired
-                    ? $"[ĞîÁ¦] {m.Slot} ĞîÂú AA{level}£¬ÊÍ·Å"
-                    : $"[ĞîÁ¦] {m.Slot} Î´ĞîÂú¾ÍËÉÊÖ£¬Á¬¶ÎÇåÁã");
+                    ? $"[è“„åŠ›] {m.Slot} è“„æ»¡ AA{level}ï¼Œé‡Šæ”¾"
+                    : $"[è“„åŠ›] {m.Slot} æœªè“„æ»¡å°±æ¾æ‰‹ï¼Œè¿æ®µæ¸…é›¶");
             }
 
             return result;
         }
 
         /// <summary>
-        /// Ç¿ÖÆÖĞ¶ÏÄ³Ö»ÊÖµÄĞîÁ¦£¨ÊÜ»÷¡¢ËÀÍö¡¢»»ÎäÆ÷£©¡£
-        /// ºó¹ûÓëÎ´ĞîÂúËÉÊÖÏàÍ¬£ºÊ²Ã´¶¼²»·Å¡£
+        /// å¼ºåˆ¶ä¸­æ–­æŸåªæ‰‹çš„è“„åŠ›ï¼ˆå—å‡»ã€æ­»äº¡ã€æ¢æ­¦å™¨ï¼‰ã€‚
+        /// åæœä¸æœªè“„æ»¡æ¾æ‰‹ç›¸åŒï¼šä»€ä¹ˆéƒ½ä¸æ”¾ã€‚
         /// </summary>
         public void CancelCharge(InputCmd cmd)
         {
@@ -176,10 +248,10 @@ namespace Flandre.CombatSystem
             m.Stop();
             FinishModule(m);
 
-            if (verboseLog) Debug.Log($"[ĞîÁ¦] {m.Slot} ±»´ò¶Ï");
+            if (verboseLog) Debug.Log($"[è“„åŠ›] {m.Slot} è¢«æ‰“æ–­");
         }
 
-        /// <summary>ÖĞ¶ÏÁ½Ö»ÊÖµÄĞîÁ¦</summary>
+        /// <summary>ä¸­æ–­ä¸¤åªæ‰‹çš„è“„åŠ›</summary>
         public void CancelAll()
         {
             CancelCharge(InputCmd.MainAttack);
@@ -196,7 +268,7 @@ namespace Flandre.CombatSystem
         }
 
         // ==========================================================
-        // Ã¿Ö¡ÍÆ½ø
+        // æ¯å¸§æ¨è¿›
         // ==========================================================
 
         private void Update()
@@ -215,13 +287,13 @@ namespace Flandre.CombatSystem
                 if (justCharged)
                 {
                     OnChargeLevelChanged?.Invoke(m.Slot, m.TargetLevel);
-                    if (verboseLog) Debug.Log($"[ĞîÁ¦] {m.Slot} ĞîÂú AA{m.TargetLevel}£¬ËÉÊÖ¼´·¢");
+                    if (verboseLog) Debug.Log($"[è“„åŠ›] {m.Slot} è“„æ»¡ AA{m.TargetLevel}ï¼Œæ¾æ‰‹å³å‘");
                 }
             }
         }
 
         // ==========================================================
-        // ÒÆ¶¯ÕÛËğ
+        // ç§»åŠ¨æŠ˜æŸ
         // ==========================================================
 
         private float MoveMultiplier
@@ -236,16 +308,16 @@ namespace Flandre.CombatSystem
         }
 
         /// <summary>
-        /// Ìù±ãÀûÌù£ºĞîÁ¦ÆÚ¼äÒÆËÙÓëÌøÔ¾Á¦´òÕÛ¡£
+        /// è´´ä¾¿åˆ©è´´ï¼šè“„åŠ›æœŸé—´ç§»é€Ÿä¸è·³è·ƒåŠ›æ‰“æŠ˜ã€‚
         ///
-        /// ÓÃÊôĞÔĞŞÊÎÆ÷¶ø²»ÊÇÔÚÃ¿¸ö×´Ì¬ÀïĞ´ if(ĞîÁ¦ÖĞ)£¬ºÃ´¦ÊÇ
-        /// ºÍ±¦Ê¯¡¢buff µÄ¼Ó³É×Ô¶¯µş¼Ó£¬¶øÇÒËºµÄÊ±ºò°´Ç©ÃûËº£¬²»¿ÉÄÜÂ©¼õ¡£
+        /// ç”¨å±æ€§ä¿®é¥°å™¨è€Œä¸æ˜¯åœ¨æ¯ä¸ªçŠ¶æ€é‡Œå†™ if(è“„åŠ›ä¸­)ï¼Œå¥½å¤„æ˜¯
+        /// å’Œå®çŸ³ã€buff çš„åŠ æˆè‡ªåŠ¨å åŠ ï¼Œè€Œä¸”æ’•çš„æ—¶å€™æŒ‰ç­¾åæ’•ï¼Œä¸å¯èƒ½æ¼å‡ã€‚
         /// </summary>
         private void ApplyPenaltyIfNeeded()
         {
             if (penaltyApplied || state == null) return;
 
-            // ±¶ÂÊ×ª³É"¼õÉÙ°Ù·ÖÖ®¶àÉÙ"µÄ¼Ó·¨ĞŞÊÎ
+            // å€ç‡è½¬æˆ"å‡å°‘ç™¾åˆ†ä¹‹å¤šå°‘"çš„åŠ æ³•ä¿®é¥°
             state.stats.moveSpeed.AddModifier(
                 StatModifier.Percent(MoveMultiplier - 1f, this));
 
@@ -258,7 +330,7 @@ namespace Flandre.CombatSystem
         private void ReleasePenaltyIfNeeded()
         {
             if (!penaltyApplied) return;
-            if (IsAnyCharging) return;   // ÁíÒ»Ö»ÊÖ»¹ÔÚĞî£¬ÕÛËğ±£³Ö
+            if (IsAnyCharging) return;   // å¦ä¸€åªæ‰‹è¿˜åœ¨è“„ï¼ŒæŠ˜æŸä¿æŒ
 
             state?.stats.RemoveAllModifiersFrom(this);
             penaltyApplied = false;
@@ -266,7 +338,7 @@ namespace Flandre.CombatSystem
 
         private void OnDisable()
         {
-            // ×é¼ş±»¹ØµôÊ±±ğ°ÑÕÛËğÁôÔÚÊôĞÔÃæ°åÉÏ
+            // ç»„ä»¶è¢«å…³æ‰æ—¶åˆ«æŠŠæŠ˜æŸç•™åœ¨å±æ€§é¢æ¿ä¸Š
             CancelAll();
             ReleasePenaltyIfNeeded();
         }

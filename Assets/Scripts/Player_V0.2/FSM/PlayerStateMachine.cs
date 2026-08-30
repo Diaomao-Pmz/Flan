@@ -38,15 +38,17 @@ public class PlayerStateMachine : MonoBehaviour
     public FlyState flyState;
 
     public ComboState comboState;
-    /// <summary>
-    /// 【P3 起不再使用】蓄力已从「状态」解耦成「随身模块」，
-    /// 由 PlayerChargeSystem 接管 —— 状态机不会再切进它。
-    ///
-    /// 字段保留只为不破坏 Inspector 上可能存在的引用。
-    /// 确认没有其他代码引用后可以整个删掉。
-    /// </summary>
-    public ChargeState chargeState;
+
+    // 【已删除】chargeState —— P3 把蓄力从「状态」解耦成了「随身模块」，
+    // 由 PlayerChargeSystem 接管，状态机从此再没切进去过。
+    // 一个永远不会被 Enter 的状态卡带留在这里，只会让人以为蓄力还走状态机那条路。
+
     public HitState hitState;
+
+    /// <summary>
+    /// 强行打出弱化蓄力后的僵直。禁止一切输入，受击可打断（自然由 HandlePlayerHit 接管）。
+    /// </summary>
+    public ChargeStunState chargeStunState;
 
     // TODO: 阶段性接入 —— 当前按要求维持「0血不死」，故不实例化
     // public DeadState deadState;
@@ -106,6 +108,23 @@ public class PlayerStateMachine : MonoBehaviour
     /// <summary>上一个状态。用于「从哪来」这类判断</summary>
     public IState previousState { get; private set; }
 
+    /// <summary>
+    /// 【重力的唯一真相源】角色本来的 gravityScale，Awake 时记一次，全程只读。
+    ///
+    /// 【为什么必须有它】原先有 7 个地方写 originalGravity = sm.rb.gravityScale ——
+    /// 都是「进来时是多少，出去时还回多少」。这在重力正常时没问题，
+    /// 但只要某个状态在【重力已经被别人置 0】的时候进入，它就会把 0 当成原值存下来，
+    /// 退出时把 0 还回去 —— 重力从此永久消失，角色飘在空中。
+    ///
+    /// 空中蓄力把角色钉住（gravityScale = 0）之后按 Shift 冲刺，踩的就是这条：
+    /// DashState.Enter 存下 0 → Exit 还回 0 → 落不下来了。
+    ///
+    /// 比喻：每个人都「把桌子恢复成我来之前的样子」，
+    ///       但前一个人已经把桌子掀翻了 —— 于是掀翻状态被一路传下去。
+    ///       现在改成所有人都照同一张出厂照片复原。
+    /// </summary>
+    public float defaultGravityScale { get; private set; } = 1f;
+
     /// <summary>蓄力系统。P3 起蓄力由它接管，不再是状态</summary>
     public PlayerChargeSystem chargeSystem { get; private set; }
 
@@ -141,6 +160,10 @@ public class PlayerStateMachine : MonoBehaviour
         sensor = GetComponent<PlayerSensor>();
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+
+        // 趁还没有任何状态跑过，把出厂重力拍下来
+        if (rb != null) defaultGravityScale = rb.gravityScale;
+
         cachedInputBuffer = GetComponent<ComboInputBuffer>();
         chargeSystem = GetComponent<PlayerChargeSystem>();
         animDriver = GetComponent<PlayerAnimationDriver>();
@@ -170,8 +193,8 @@ public class PlayerStateMachine : MonoBehaviour
         flyState = new FlyState(this);
 
         comboState = new ComboState(this);
-        chargeState = new ChargeState(this);
         hitState = new HitState(this);
+        chargeStunState = new ChargeStunState(this);
 
         // TODO: 接入死亡时解除注释
         // deadState = new DeadState(this);
@@ -323,6 +346,42 @@ public class PlayerStateMachine : MonoBehaviour
 
         inputBuffer.StartGracePeriod();
 
+        // 强行打出的弱化蓄力 → 演完直接进僵直，而不是回到待机/跑动。
+        // 判断放在这里（而不是 ComboState.Exit）是有意的：Exit 会在【所有】
+        // 离开攻击的路径上跑，包括被冲刺主动取消 —— 那时状态机正在切去 DashState，
+        // 从 Exit 里再发起一次切换会把冲刺顶掉。
+        // 只有"自然演完"才该吃这个僵直。
+        if (comboState.TryGetPendingStun(out float stunSeconds))
+        {
+            chargeStunState.SetDuration(stunSeconds);
+            ChangeState(chargeStunState);
+            return;
+        }
+
+        // ==========================================================
+        // 【必须先查地面】空中招式演完不能直接回 Idle/Run。
+        //
+        // 原先这里只看方向键：在空中打完一招、手上还按着方向键 →
+        // 切进 RunState → 而 RunState.Enter 里有一句 jumpCount = 0
+        // （注释写的是"踩地跑动，刷新跳跃次数"）→ 二段跳在半空被还回来了。
+        //
+        // 【为什么一直没被发现】RunState.Update 第一件事就是
+        // "不在地面就转 FallState"，所以跑动动画只闪一帧，肉眼看不见。
+        // 但 Enter 已经执行过了，jumpCount 已经被清掉。
+        // 装上 Echo 有了二段跳之后，这个一直存在的 bug 才浮出水面。
+        //
+        // 【同一件事本来有两条出口，另一条是对的】
+        // ComboState.WarnAndExitOnTimeout（动画事件漏配时的兜底超时）写的是
+        // "不在地面就转 FallState，否则 HandleLanding" —— 查了地面。
+        // 两条路待遇不一致，这和文档 6.8 那条（一条失败路径硬 return、
+        // 另一条走回退）是完全同一个形状的毛病。现在对齐。
+        // ==========================================================
+        if (!IsGrounded())
+        {
+            ChangeState(fallState);
+            return;
+        }
+
         if (Mathf.Abs(playerController.moveInput.x) > 0.1f) ChangeState(runState);
         else ChangeState(idleState);
     }
@@ -341,6 +400,13 @@ public class PlayerStateMachine : MonoBehaviour
 
         // 【P3】蓄力被打断 —— 后果与未蓄满松手相同：什么都不放，连段清零
         chargeSystem?.CancelAll();
+
+        // 弱化招演出期间预付、但还没兑现的逃逸冲劲也要丢掉。
+        //
+        // 挨打意味着这次僵直根本不会发生了。不丢的话那股冲劲会一直挂着，
+        // 等【下一次】弱蓄进僵直时白送出去 —— 表现成"我什么都没按，
+        // 人却自己滑出去了"，而且要恰好挨过一次打才复现。
+        chargeStunState?.CancelPendingEscape();
 
         hitState.SetKnockbackForce(knockbackDirection);
         ChangeState(hitState);

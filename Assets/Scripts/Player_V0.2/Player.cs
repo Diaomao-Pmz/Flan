@@ -13,13 +13,13 @@ public class Player : MonoBehaviour
         controller = GetComponent<PlayerController>();
     }
 
-    // µĞÈËÃüÖĞÍæ¼ÒÊ±£¬Í³Ò»µ÷ÓÃÕâ¸ö½Ó¿Ú
+    // æ•Œäººå‘½ä¸­ç©å®¶æ—¶ï¼Œç»Ÿä¸€è°ƒç”¨è¿™ä¸ªæ¥å£
     public void TakeDamage(int damage)
     {
-        // µ÷ÓÃ×´Ì¬»úµÄÊı¾İ¿ÛÑª
+        // è°ƒç”¨çŠ¶æ€æœºçš„æ•°æ®æ‰£è¡€
         ((IDamageable)state).TakeDamage(new DamageInfo(damage, DamageType.Melee, transform.position, null));
 
-        // ¼ì²éÉúÃüÖÜÆÚÂß¼­£¨ÀıÈçÊÇ·ñËÀÍö£©
+        // æ£€æŸ¥ç”Ÿå‘½å‘¨æœŸé€»è¾‘ï¼ˆä¾‹å¦‚æ˜¯å¦æ­»äº¡ï¼‰
         if (state.health.currentHP <= 0)
         {
             Die();
@@ -28,8 +28,8 @@ public class Player : MonoBehaviour
 
     public void Die()
     {
-        Debug.Log("Íæ¼ÒËÀÍö£¡");
-        // ¿ÉÒÔÔÚÕâÀï´¥·¢ËÀÍö¶¯»­£¬»òÕßÍ¨Öª GameManager
+        Debug.Log("ç©å®¶æ­»äº¡ï¼");
+        // å¯ä»¥åœ¨è¿™é‡Œè§¦å‘æ­»äº¡åŠ¨ç”»ï¼Œæˆ–è€…é€šçŸ¥ GameManager
         // controller.anim.SetTrigger("Die");
     }
 }

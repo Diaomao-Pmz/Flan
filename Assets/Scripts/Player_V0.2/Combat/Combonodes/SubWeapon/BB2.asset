@@ -13,14 +13,13 @@ MonoBehaviour:
   m_Name: BB2
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: BB2
-  comboWindow: 0.7
+  comboWindow: 0.5
+  recoveryTime: 0.35
   castCondition: 0
   requiredState: 0
   inputSequence: 05000000
   isChargeSkill: 1
   chargeLevel: 2
-  chargeStartLevelAfter: 0
-  requiredChargeTime: 1
   attackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
   forwardThrust: {x: 0, y: 0}
   thrustDuration: 0.12
@@ -38,6 +37,7 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: FX_BB2
   effectLifetime: 0
+  weakenedEffectKey: 
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.31, y: 0.42}
   effectScale: {x: 0.5, y: 0.386}
@@ -49,6 +49,11 @@ MonoBehaviour:
   projectileScaleMultiplier: 2
   projectileDamageOverride: 0
   recomputeAimPerShot: 1
+  useAimDash: 0
+  aimDashMode: 0
+  aimDashBaseDistance: 2
+  aimDashMomentumScale: 0.3
+  aimDashDuration: 0.15
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0

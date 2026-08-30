@@ -57,6 +57,20 @@ public class ComboState : PlayerStateBase
     /// <summary>本次出招的编号。Exit 时用它核对"我还是不是最新的那一次"</summary>
     private int ownerAttackId;
 
+    /// <summary>
+    /// 本招是不是「强行打出」的缩水版蓄力（CD 没走完就放出来的 AA1 / BB1）。
+    /// 和 ownerCmd 一样必须在 Enter 时拍快照 —— 招式演到一半被位移打断时
+    /// Buffer 会 ResetCombo，Exit 再去问就问不到了。
+    /// </summary>
+    private bool isWeakenedAttack;
+
+    /// <summary>
+    /// 本招用的武器。同样在 Enter 时拍快照 ——
+    /// Exit 里要读它的 CD 配置算后摇，而那时 Buffer.ActiveWeapon
+    /// 可能已经被 ResetCombo 清成 null（位移打断就会）。
+    /// </summary>
+    private WeaponMoveSet ownerWeapon;
+
     // 兜底超时
     private float timeoutLimit;
     private float elapsed;
@@ -69,6 +83,7 @@ public class ComboState : PlayerStateBase
     private PlayerWeaponEmitter weaponEmitter;
     private PlayerAimProvider aimProvider;
     private PlayerMomentum momentum;
+    private WeaponLoadout loadout;
 
     public ComboState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
@@ -87,16 +102,21 @@ public class ComboState : PlayerStateBase
     private PlayerMomentum Momentum
         => momentum != null ? momentum : (momentum = sm.GetComponent<PlayerMomentum>());
 
+    private WeaponLoadout Loadout
+        => loadout != null ? loadout : (loadout = sm.GetComponent<WeaponLoadout>());
+
     public override void Enter()
     {
         isCancelable = false;
-        originalGravity = sm.rb.gravityScale;
+        originalGravity = sm.defaultGravityScale;   // 读出厂值，不读当前值（见 PlayerStateMachine.defaultGravityScale）
         wasAirborneOnEnter = !sm.IsGrounded();
 
         isBodyAdjusting = false;
         activeNode = Buffer.currentNode;
         ownerCmd = Buffer.LastTriggerCmd;
         ownerAttackId = Buffer.GetHandAttackId(ownerCmd);
+        isWeakenedAttack = Buffer.IsCurrentAttackWeakened;
+        ownerWeapon = Buffer.ActiveWeapon;
 
         // 空中连段反重力悬停：把角色钉在空中，防止挥剑时诡异下滑
         if (wasAirborneOnEnter)
@@ -325,10 +345,39 @@ public class ComboState : PlayerStateBase
     {
         Vector2 dir = ResolveAimDashDirection();
 
+        // ==========================================================
+        // 【负数 = 反向位移（后坐力）】
+        //
+        // 旧写法直接 Mathf.Max(baseDistance, momentum * scale)，把负数吃掉了：
+        //   baseDistance = -2、动量 0 → Mathf.Max(-2, 0) = 0 → 完全不位移
+        // 所以枪的后坐力填了负数没反应，而且填多少都一样。
+        //
+        // 病根是把【方向】和【距离】混在同一个数里，然后拿只认大小的 Max 去比。
+        // 现在拆开：符号决定朝前还是朝后，绝对值参与低保与动量的比较。
+        //
+        // 于是 BB1 填 -3 就是「朝鼠标反方向弹开 3 格」，
+        // 动量加成照常按绝对值生效，方向始终是后退。
+        // ==========================================================
+        float signedBase = activeNode.aimDashBaseDistance;
+        float sign = signedBase < 0f ? -1f : 1f;
+
         float momentumValue = Momentum != null ? Momentum.Value : 0f;
         float distance = Mathf.Max(
-            activeNode.aimDashBaseDistance,
-            momentumValue * activeNode.aimDashMomentumScale);
+            Mathf.Abs(signedBase),
+            momentumValue * Mathf.Abs(activeNode.aimDashMomentumScale));
+
+        // 朝向跟【瞄准】走，不跟位移走 —— 打后坐力时角色仍然面朝鼠标，
+        // 只是身体被弹开。若跟着位移方向翻，开一枪人就背过身去了。
+        Vector2 facingRef = dir;
+
+        dir *= sign;
+
+        // 贴着地面往下冲是没有意义的 —— 地面就在那儿，冲不进去
+        if (IsGroundedDownwardDash(dir))
+        {
+            HandleGroundedDownwardDash(facingRef);
+            return;
+        }
 
         thrustDuration = Mathf.Max(0.01f, activeNode.aimDashDuration);
 
@@ -350,37 +399,156 @@ public class ComboState : PlayerStateBase
                 $"耗时 {thrustDuration:F2}s");
         }
 
-        // 位移方向即出招朝向，避免"往左冲却面朝右"
-        if (Mathf.Abs(dir.x) > 0.01f)
-            sm.playerController.SetFacingDirection(dir.x > 0f ? 1 : -1);
+        // 朝向对齐瞄准方向，避免"往左冲却面朝右"。
+        // 正数位移时 facingRef == dir；负数（后坐力）时它仍指向鼠标。
+        if (Mathf.Abs(facingRef.x) > 0.01f)
+            sm.playerController.SetFacingDirection(facingRef.x > 0f ? 1 : -1);
     }
 
-    /// <summary>按节点配置的自由度解析瞄准方向</summary>
+    /// <summary>
+    /// 按节点配置的自由度解析瞄准方向。
+    ///
+    /// 【方向来源刻意绕开 AimProvider.AimDirection】
+    /// 那条路带 Auto 降级（鼠标 2 秒没动就改用方向键，方向键没按又回退到角色朝向），
+    /// 而蓄力时"瞄好了不动"恰恰是常态 —— 于是四向/八向几乎永远吸附到角色正面。
+    /// 位移方向是一次性决策，必须问不会自作主张的来源。
+    /// 详见 PlayerAimProvider.TryGetPointerDirection。
+    /// </summary>
     private Vector2 ResolveAimDashDirection()
     {
-        // 没挂瞄准组件时退化为朝向
-        // 没挂瞄准组件、或明确要求只朝正面 → 用角色朝向
-        if (AimProvider == null || activeNode.aimDashMode == AimDashMode.FacingOnly)
-            return new Vector2(sm.playerController.facingDirection, 0f);
+        Vector2 facing = new Vector2(sm.playerController.facingDirection, 0f);
 
-        Vector2 aim = AimProvider.AimDirection;
-        if (aim.sqrMagnitude < 0.0001f)
-            return new Vector2(sm.playerController.facingDirection, 0f);
+        // 明确要求只朝正面
+        if (activeNode.aimDashMode == AimDashMode.FacingOnly)
+        {
+            LogAimDash("FacingOnly", "面朝方向", Vector2.zero, facing);
+            return facing;
+        }
+
+        // ==========================================================
+        // 【方向来源由武器类型决定，AimDashMode 只管吸附精度】
+        //
+        // 这两件事以前混在一起，所以近战也去读了鼠标 —— 但近战的攻击方向
+        // 本来就不读鼠标，它跟人物朝向和方向键走。方向来源跟着武器的
+        // 交互方式走，吸附精度跟着招式配置走，两个维度各自独立。
+        //
+        //   远程 → 鼠标（BB1 配负数距离就是朝鼠标反方向弹开，做后坐力）
+        //   近战 → 方向键
+        // ==========================================================
+        bool isRanged = ownerWeapon != null && ownerWeapon.IsRanged;
+
+        Vector2 raw;
+        string sourceName;
+
+        if (isRanged)
+        {
+            if (AimProvider == null || !AimProvider.TryGetPointerDirection(out raw))
+            {
+                LogAimDash(activeNode.aimDashMode.ToString(), "远程·拿不到鼠标→面朝方向", Vector2.zero, facing);
+                return facing;
+            }
+            sourceName = "远程·鼠标";
+        }
+        else
+        {
+            raw = sm.playerController.moveInput;
+            sourceName = "近战·方向键";
+
+            // 没按方向键 → 朝当前面朝方向。
+            // 这是最常见的情况（专心蓄力时手指往往已经离开方向键），
+            // 必须有确定的落点，不能让这招时灵时不灵。
+            if (raw.sqrMagnitude < DirectionDeadzone * DirectionDeadzone)
+            {
+                LogAimDash(activeNode.aimDashMode.ToString(), "近战·无方向键→面朝方向", Vector2.zero, facing);
+                return facing;
+            }
+        }
+
+        Vector2 result;
 
         switch (activeNode.aimDashMode)
         {
-            case AimDashMode.Free:
-                return aim.normalized;
-
-            case AimDashMode.EightWay:
-                return SnapDirection(aim, 45f);
-
-            case AimDashMode.FourWay:
-                return SnapDirection(aim, 90f);
-
-            default:
-                return new Vector2(sm.playerController.facingDirection, 0f);
+            case AimDashMode.Free: result = raw.normalized; break;
+            case AimDashMode.EightWay: result = SnapDirection(raw, 45f); break;
+            case AimDashMode.FourWay: result = SnapDirection(raw, 90f); break;
+            default: result = facing; break;
         }
+
+        LogAimDash(activeNode.aimDashMode.ToString(), sourceName, raw, result);
+        return result;
+    }
+
+    /// <summary>方向键按到多大才算「有方向」。与路由器的 directionThreshold 同量级</summary>
+    private const float DirectionDeadzone = 0.1f;
+
+    /// <summary>本次位移是不是「站在地上还要往下冲」</summary>
+    private bool IsGroundedDownwardDash(Vector2 dir)
+        => sm.IsGrounded() && dir.y < GroundedDownwardThreshold;
+
+    /// <summary>
+    /// 【扩展点】贴地向下冲的处理。
+    ///
+    /// 当前实现：本次不位移。招式照常打出（动画、判定、伤害全都正常），
+    /// 只是没有位移分量 —— 因为往地里冲是无效指令，不该因此让整招落空。
+    ///
+    /// 【以后要补的反馈】现在玩家按了向下却什么都没挪，
+    /// 分不清是"这个方向不能冲"还是"我的输入没被识别"。设计上说好的表现是：
+    ///     朝面朝方向挪一点点 + 拖尾朝上
+    /// 也就是把向下的意图转译成一个明确可见的小动作，告诉玩家"收到了，但地面挡着"。
+    ///
+    /// 要补的时候把下面那段注释放开即可，方向已经算好传进来了：
+    ///     thrustVelocity = new Vector2(facingRef.x >= 0f ? 1f : -1f, 0f) * 小速度;
+    ///     thrustDuration = 短时长;
+    ///     然后让拖尾组件朝上播一次
+    /// 本方法之外的任何地方都不用改。
+    /// </summary>
+    private void HandleGroundedDownwardDash(Vector2 facingRef)
+    {
+        thrustVelocity = Vector2.zero;
+        thrustDuration = 0f;
+        thrustTimer = 0f;
+
+        // 朝向仍然对齐瞄准，保持和正常位移一致
+        if (Mathf.Abs(facingRef.x) > 0.01f)
+            sm.playerController.SetFacingDirection(facingRef.x > 0f ? 1 : -1);
+
+        if (Buffer != null && Buffer.verboseLog)
+            Debug.Log("[蓄力位移] 在地面上向下冲 → 本次不位移（招式照常打出）");
+    }
+
+    /// <summary>
+    /// 「贴地向下冲」的判定阈值。
+    ///
+    /// 用 -0.9 而不是 -0.5：四向的正下方是 (0,-1) 会被拦住，
+    /// 而八向的左下 / 右下（y ≈ -0.707）不拦 —— 那两个方向的水平分量是有意义的位移，
+    /// 玩家要的是"往斜下方冲"，贴着地面滑过去完全成立。
+    /// 想连斜下也一并拦掉，把这个值调到 -0.5 左右即可。
+    /// </summary>
+    private const float GroundedDownwardThreshold = -0.9f;
+
+    /// <summary>
+    /// 【诊断】把吸附前后的角度都打出来。
+    ///
+    /// 肉眼分不清「四向吸附」和「自由跟随鼠标」——
+    /// 因为鼠标大致水平时两者结果完全一样，只有把鼠标放在 40° 与 50° 这种
+    /// 跨过吸附分界线的位置才看得出区别。与其反复试，不如让它自己报数。
+    ///
+    /// 判读方法：把鼠标放在角色右上方约 40°，再放到约 50°，各放一次 AA1。
+    ///   FourWay 正常 → 吸附后应分别是 0° 和 90°
+    ///   若两次吸附后都等于原始角度 → 资产上的 Aim Dash Mode 其实是 Free
+    /// </summary>
+    private void LogAimDash(string mode, string source, Vector2 raw, Vector2 snapped)
+    {
+        if (Buffer == null || !Buffer.verboseLog) return;
+
+        float rawAngle = raw.sqrMagnitude > 0.0001f
+            ? Mathf.Atan2(raw.y, raw.x) * Mathf.Rad2Deg
+            : float.NaN;
+        float snappedAngle = Mathf.Atan2(snapped.y, snapped.x) * Mathf.Rad2Deg;
+
+        Debug.Log(
+            $"[蓄力位移·方向] 来源={source}　模式={mode}　" +
+            $"原始角度={rawAngle:F1}°　吸附后={snappedAngle:F1}°");
     }
 
     /// <summary>把任意角度吸附到最近的 stepDegrees 倍数</summary>
@@ -426,10 +594,29 @@ public class ComboState : PlayerStateBase
         // 招式结束 → 这只手开始算后摇。
         // 无论是正常收招、被换手抢拍、还是被打断，都走这一条路，
         // 所以不存在"某种结束方式漏了没开始后摇"的可能。
-        Buffer?.BeginHandRecovery(
-            ownerCmd,
-            activeNode != null ? activeNode.recoveryTime : 0f,
-            ownerAttackId);
+        float recovery = ResolveRecoveryTime();
+        Buffer?.BeginHandRecovery(ownerCmd, recovery, ownerAttackId);
+
+        // 【蓄力 CD 第二步：用真实硬直把终点延长到位】
+        //
+        // 第一步在 OnAttackReleased —— 打出的那一刻先用 delay=0 占位，
+        // 焊死"动画期间另一只手起手蓄力查不到 CD"的时间缝。
+        // 这里补上完整语义：CD 要【接在收招硬直后面】——
+        //     动画 → 收招硬直 → 蓄力 CD → 可以再蓄
+        // 硬直多长只有演完才知道，所以终点必须在 Exit 里定。
+        // StartChargeCooldown 内部取 Max，只延不缩，两步不会互相踩。
+        //
+        // 【普攻不会碰它】这是"打一发普攻垫一下再蓄"绕不过 CD 的原因：
+        // 计时器只被这两处推后，普攻那条路径根本不认识它。
+        if (activeNode != null && activeNode.isChargeSkill
+            && WeaponMoveSet.TryCommandToSlot(ownerCmd, out WeaponSlot ownerSlot))
+        {
+            // 弱化版不加这段延迟：它的后摇会被 ChargeStunState.Enter 直接清掉，
+            // 由僵直全盘接管。CD 与僵直同起同长，一起到期 ——
+            // 否则会多出一小段"能动了但还是只能放弱化版"的夹缝。
+            float cdDelay = isWeakenedAttack ? 0f : recovery;
+            Loadout?.StartChargeCooldown(ownerSlot, activeNode.chargeLevel, cdDelay);
+        }
 
         // 攻击结束必须把碰撞箱还原，否则会带着蹲姿/缩腿姿态离开攻击状态
         if (isBodyAdjusting)
@@ -445,6 +632,42 @@ public class ComboState : PlayerStateBase
 
         sm.rb.gravityScale = originalGravity;
         activeNode = null;
+        ownerWeapon = null;
+        isWeakenedAttack = false;
+    }
+
+    /// <summary>
+    /// 本招的后摇时长 —— 就是节点上配的值，不再做任何加工。
+    ///
+    /// 【强行打出的惩罚已经不在这里了】
+    /// 上一版把弱化版的惩罚做成「把后摇撑到 chargeCooldownLv1」，那是错的：
+    /// 后摇（handBusyUntil）只锁【一只手】，另一只手照常出招；
+    /// 而且它不改变状态，空中掉落时方向键依然生效。
+    /// 现在改由 ChargeStunState 承担，那是个真正管住全身的状态。
+    /// </summary>
+    private float ResolveRecoveryTime()
+        => activeNode != null ? activeNode.recoveryTime : 0f;
+
+    /// <summary>
+    /// 本招演完后是否要接一段僵直（只有强行打出的弱化蓄力才要）。
+    ///
+    /// 【为什么由状态机在动画结束时来问，而不是本状态在 Exit 里自己切】
+    /// Exit 会在所有离开攻击的路径上跑 —— 包括被冲刺/滑铲主动取消。
+    /// 那时状态机正在切去 DashState，若从 Exit 里再发起一次切换，
+    /// 会把玩家刚花掉的那次冲刺顶掉。所以"要不要僵直"只是一个查询，
+    /// 由知道自己是不是"自然演完"的调用方来决定。
+    /// </summary>
+    public bool TryGetPendingStun(out float seconds)
+    {
+        seconds = 0f;
+
+        if (!isWeakenedAttack || ownerWeapon == null) return false;
+
+        // 默认取 Lv1 的 CD —— 僵直与 CD 同长同起，两者一起到期：
+        // 僵直一解除就能正常蓄力，不会出现"能动了但还是只能放弱化版"的夹缝。
+        // 想让僵直独立于 CD，去武器资产上填 Weakened Stun Duration。
+        seconds = ownerWeapon.GetWeakenedStunDuration();
+        return seconds > 0f;
     }
 
     /// <summary>
@@ -473,6 +696,15 @@ public class ComboState : PlayerStateBase
 
         // 走和正常收招一样的流程，保证连招宽恕期照常开始
         Buffer.StartGracePeriod();
+
+        // 兜底超时也算「自然演完」—— 弱化版照样要吃僵直，
+        // 否则漏配一个动画事件就等于免掉了惩罚
+        if (TryGetPendingStun(out float stunSeconds))
+        {
+            sm.chargeStunState.SetDuration(stunSeconds);
+            sm.ChangeState(sm.chargeStunState);
+            return;
+        }
 
         if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
         else HandleLanding();

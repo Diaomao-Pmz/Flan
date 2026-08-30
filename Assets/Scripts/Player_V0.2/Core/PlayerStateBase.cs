@@ -133,14 +133,38 @@ public abstract class PlayerStateBase : IState
     /// <summary>有任意一只手正在蓄力</summary>
     protected bool IsCharging => ChargeSystem != null && ChargeSystem.IsAnyCharging;
 
+    // 【已删除】IsAirMoveLockedByCharge —— 曾经的判据"在蓄力 且 在空中"。
+    // 它把两种完全不同的处境混成了一个条件（见下方 IsAirChargePinned 的说明），
+    // 标了 Obsolete 之后全项目已无任何引用，本次一并删除。
+
     /// <summary>
-    /// 空中蓄力时禁止方向键移动。
+    /// 本帧是否该把角色钉在空中悬停。
     ///
-    /// 设计意图：空中蓄力是一次高风险承诺 —— 不能自由飘，
-    /// 想调整位置只能花一次冲刺（Shift 朝鼠标方向冲）。
-    /// 地面蓄力不受此限，仍可减速移动。
+    /// ==========================================================
+    /// 【判据是"蓄力在哪起手"，不是"现在在空中"、也不是"现在是升是降"】
+    ///
+    /// 这条判据前后错过两次，两次都是同一个病：用一个【每帧都在变的量】
+    /// 去表达一个【这次蓄力的固有性质】。
+    ///
+    /// 错法一："在蓄力 且 在空中"（旧的 IsAirMoveLockedByCharge）。
+    ///   它分不清"空中起手蓄力"（玩家主动做出的高风险承诺，该受限制）和
+    ///   "地面起手蓄力后跳起来"（只是一次普通的折损跳跃，凭什么也被限制）。
+    ///   症状：蓄力时跳起来只能直上直下。
+    ///
+    /// 错法二：再加一个 rb.velocity.y <= 0，想着"上升段放行，免得起跳冲量被抹掉"。
+    ///   冲量问题确实解决了，但这个判据表达的是【这一帧在升还是在降】。
+    ///   症状：地面蓄力起跳 → 上升正常 → 一到顶点就被钉住，跳到一半卡在空中。
+    ///
+    /// 现在换成起手位置（BeganAirborne）：
+    ///   地面起手 → 永不钉。跳跃是完整的折损弧线，起跳-到顶-落下。
+    ///   空中起手 → 全程钉住。这才是「空中蓄力是高风险承诺」，
+    ///              想挪位置只能花一次冲刺。
+    ///
+    /// 起手位置在整段蓄力里是常量，所以不会再出现"某一帧忽然变规则"。
+    /// ==========================================================
     /// </summary>
-    protected bool IsAirMoveLockedByCharge => IsCharging && !sm.IsGrounded();
+    protected bool IsAirChargePinned
+        => ChargeSystem != null && ChargeSystem.IsAirChargeHovering;
 
     /// <summary>
     /// 攻击后摇是否正在锁住移动。
@@ -158,29 +182,36 @@ public abstract class PlayerStateBase : IState
     }
 
     /// <summary>
-    /// 空中蓄力时限制下落速度。
+    /// 【空中蓄力：完全钉在原地】速度清零 + 重力清零。
     ///
-    /// 【为什么需要】解耦前 ChargeState 有一句「空中蓄力把角色钉在原地」，
-    /// 那是状态独有的行为，拆成模块后丢了。
+    /// ==========================================================
+    /// 【为什么不能用「钳制下落速度」做】
     ///
-    /// 而蓄力一段通常要 1 秒左右，从跳跃最高点落地往往不到 1 秒 ——
-    /// 不限速的话，空中蓄力几乎不可能在落地前完成，
-    /// 玩家会以为"空中根本不能蓄力"。
+    /// 上一版是 if (v.y < -maxFall) v.y = -maxFall，把 maxFall 填 0 本该停住，
+    /// 实际却仍在缓降。原因是执行顺序：
     ///
-    /// 用【钳制最大下落速度】而不是每帧乘一个系数：
-    /// 后者的效果会随帧率变化，前者不会。
+    ///     我们的 FixedUpdate 把 v.y 钳成 0
+    ///       → 物理引擎接着步进：先加一帧重力（v.y 变成 -g·dt），再按这个速度位移
+    ///
+    /// 也就是每个物理步都有【一帧的重力】从钳位后面漏过去，
+    /// 积累起来就是肉眼可见的缓降。钳位永远追不上重力，因为它跑在重力前面。
+    ///
+    /// 比喻：每天早上把水桶倒空，但白天一直在滴水 ——
+    ///       倒得再干净，到晚上还是有水。要治得关掉水龙头。
+    ///
+    /// 所以正确做法是【关掉重力源】：gravityScale = 0。
+    /// 这也正是解耦前 ChargeState 里那句「空中蓄力反重力钉在原地」，
+    /// 拆成随身模块时丢掉了，现在补回来。
+    /// ==========================================================
+    ///
+    /// 顺带解决第二个症状：带着水平速度落下时进蓄力，角色会一直朝那个方向匀速飘。
+    /// 因为原先只是「不写速度」，而 2D 刚体没有阻力，不写 = 保持原速。
+    /// 现在明确清零，蓄力起手那一刻就完全静止。
     /// </summary>
-    protected void ClampAirChargeFall()
+    protected void PinInAirWhileCharging()
     {
-        if (!IsAirMoveLockedByCharge || ChargeSystem == null) return;
-
-        float maxFall = ChargeSystem.airChargeMaxFallSpeed;
-        Vector2 v = sm.rb.linearVelocity;
-
-        if (v.y < -maxFall)
-        {
-            sm.rb.linearVelocity = new Vector2(v.x, -maxFall);
-        }
+        sm.rb.gravityScale = 0f;
+        sm.rb.linearVelocity = Vector2.zero;
     }
 
     /// <summary>按水平输入翻转朝向。输入接近 0 时保持原朝向</summary>

@@ -2,15 +2,15 @@ using UnityEngine;
 
 public class PlayerUIManager : MonoBehaviour
 {
-    [Header("UI Ãæ°åÒıÓÃ")]
+    [Header("UI é¢æ¿å¼•ç”¨")]
     public GameObject skillTreePanel;
 
-    [Header("Íæ¼ÒÒıÓÃ")]
-    public PlayerState playerState; // ÓÃÓÚ¼àÌıÑªÁ¿µÈÊı¾İ±ä»¯ÒÔ¸üĞÂUI
+    [Header("ç©å®¶å¼•ç”¨")]
+    public PlayerState playerState; // ç”¨äºç›‘å¬è¡€é‡ç­‰æ•°æ®å˜åŒ–ä»¥æ›´æ–°UI
 
     void Start()
     {
-        // ¶©ÔÄÑªÁ¿±ä»¯ÊÂ¼ş£¨Èç¹ûÖ®ºóĞèÒª¸üĞÂÑªÌõ£©
+        // è®¢é˜…è¡€é‡å˜åŒ–äº‹ä»¶ï¼ˆå¦‚æœä¹‹åéœ€è¦æ›´æ–°è¡€æ¡ï¼‰
         if (playerState != null)
         {
             playerState.health.OnStatChanged += RefreshHealthUI;
@@ -19,7 +19,7 @@ public class PlayerUIManager : MonoBehaviour
 
     void Update()
     {
-        // UI µÄ»½³öºÍ¹Ø±Õ¶ÀÁ¢ÓÚÍæ¼Ò¶¯×÷ Controller Ö®Íâ
+        // UI çš„å”¤å‡ºå’Œå…³é—­ç‹¬ç«‹äºç©å®¶åŠ¨ä½œ Controller ä¹‹å¤–
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (skillTreePanel != null)
@@ -31,13 +31,13 @@ public class PlayerUIManager : MonoBehaviour
 
     private void RefreshHealthUI()
     {
-        // ÔÚÕâÀï¸üĞÂÄãµÄÑªÌõ Image »ò Slider
+        // åœ¨è¿™é‡Œæ›´æ–°ä½ çš„è¡€æ¡ Image æˆ– Slider
         // float healthPercent = (float)playerState.health.currentHP / playerState.health.maxHP;
     }
 
     void OnDestroy()
     {
-        // ±ğÍüÁËÈ¡Ïû¶©ÔÄ£¬·ÀÖ¹ÄÚ´æĞ¹Â©
+        // åˆ«å¿˜äº†å–æ¶ˆè®¢é˜…ï¼Œé˜²æ­¢å†…å­˜æ³„æ¼
         if (playerState != null)
         {
             playerState.health.OnStatChanged -= RefreshHealthUI;

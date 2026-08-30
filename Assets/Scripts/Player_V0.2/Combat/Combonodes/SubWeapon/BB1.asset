@@ -14,14 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: BB1
   comboWindow: 0.7
-  recoveryTime: 0.35
+  recoveryTime: 0.25
   castCondition: 0
   requiredState: 0
   inputSequence: 05000000
   isChargeSkill: 1
   chargeLevel: 1
-  chargeStartLevelAfter: 0
-  requiredChargeTime: 1
   attackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
   forwardThrust: {x: 0, y: 0}
   thrustDuration: 0.12
@@ -39,6 +37,7 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: FX_BB1
   effectLifetime: 0
+  weakenedEffectKey: FX_B1
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.31, y: 0.42}
   effectScale: {x: 0.4, y: 0.235}
@@ -52,7 +51,7 @@ MonoBehaviour:
   recomputeAimPerShot: 1
   useAimDash: 1
   aimDashMode: 0
-  aimDashBaseDistance: 5
+  aimDashBaseDistance: -2
   aimDashMomentumScale: 0.3
   aimDashDuration: 0.15
   breakMask: 0

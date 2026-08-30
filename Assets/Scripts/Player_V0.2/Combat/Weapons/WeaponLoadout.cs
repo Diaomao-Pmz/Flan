@@ -38,12 +38,17 @@ namespace Flandre.CombatSystem
         /// <summary>武器变更时广播。UI 与连招引擎可订阅</summary>
         public event System.Action<WeaponSlot, WeaponMoveSet> OnWeaponChanged;
 
-        /// <summary>某槽蓄力 CD 状态变化时广播 (槽位, 是否就绪)。UI 订阅这个</summary>
-        public event System.Action<WeaponSlot, bool> OnChargeReadyChanged;
+        /// <summary>蓄力 CD 状态变化时广播 (是否就绪)。UI 订阅这个来点亮/熄灭蓄力图标</summary>
+        public event System.Action<bool> OnChargeReadyChanged;
 
-        // ---- 运行时：每槽一份蓄力 CD 结束时刻 ----
-        private readonly float[] chargeCooldownEndTime = new float[2];
-        private readonly bool[] wasChargeReady = { true, true };
+        // ---- 运行时：蓄力 CD 结束时刻 ----
+        //
+        // 【为什么是一份而不是每手一份】
+        // 蓄力招打出后连段计数就清零了，而连段计数本来就是两只手共用的。
+        // CD 只锁一只手的话，换手长按就能立刻绕过去 —— 规则形同虚设。
+        // 所以 CD 跟着「连段」走，是全局的，不是跟着「手」走。
+        private float chargeCooldownEndTime;
+        private bool wasChargeReady = true;
 
         private ComboInputBuffer comboBuffer;
 
@@ -64,19 +69,12 @@ namespace Flandre.CombatSystem
         private void Update()
         {
             // CD 到点时广播一次，供 UI 把图标点亮
-            CheckChargeReadyEdge(WeaponSlot.Main);
-            CheckChargeReadyEdge(WeaponSlot.Sub);
-        }
+            bool ready = IsChargeReady;
 
-        private void CheckChargeReadyEdge(WeaponSlot slot)
-        {
-            int i = (int)slot;
-            bool ready = IsChargeReady(slot);
-
-            if (ready != wasChargeReady[i])
+            if (ready != wasChargeReady)
             {
-                wasChargeReady[i] = ready;
-                OnChargeReadyChanged?.Invoke(slot, ready);
+                wasChargeReady = ready;
+                OnChargeReadyChanged?.Invoke(ready);
             }
         }
 
@@ -107,31 +105,47 @@ namespace Flandre.CombatSystem
         // 蓄力 CD
         // ==========================================================
 
-        /// <summary>该槽的武器现在能不能开始蓄力</summary>
-        public bool IsChargeReady(WeaponSlot slot)
-            => Time.time >= chargeCooldownEndTime[(int)slot];
+        /// <summary>
+        /// 现在能不能打出【正常的】蓄力。
+        /// 注意是全局的，不分左右手 —— 主手打出蓄力后，副手同样要等。
+        /// </summary>
+        public bool IsChargeReady => Time.time >= chargeCooldownEndTime;
 
         /// <summary>剩余 CD 秒数。供 UI 显示</summary>
-        public float GetChargeCooldownRemaining(WeaponSlot slot)
-            => Mathf.Max(0f, chargeCooldownEndTime[(int)slot] - Time.time);
+        public float ChargeCooldownRemaining
+            => Mathf.Max(0f, chargeCooldownEndTime - Time.time);
 
-        /// <summary>打出蓄力攻击后调用，开始本武器的蓄力冷却</summary>
-        public void StartChargeCooldown(WeaponSlot slot)
+        /// <summary>
+        /// 打出蓄力攻击后调用，开始蓄力冷却。
+        /// </summary>
+        /// <param name="slot">打出蓄力的那只手。只用来决定读哪把武器的 CD 配置</param>
+        /// <param name="level">打出的蓄力等级。等级越高 CD 越短</param>
+        /// <param name="delay">
+        /// 延后多少秒才开始倒计时。传收招硬直的时长 ——
+        /// CD 是【接在硬直后面】的一段，不是和硬直并行的。
+        /// 两者并行的话，硬直越长 CD 的实际约束力越弱，调一个会挤压另一个。
+        /// </param>
+        public void StartChargeCooldown(WeaponSlot slot, int level, float delay = 0f)
         {
             WeaponMoveSet w = GetWeapon(slot);
             if (w == null) return;
 
-            chargeCooldownEndTime[(int)slot] = Time.time + w.chargeCooldown;
+            // 【取较晚的那个，不是直接覆盖】
+            // 强行打出的 AA1 会起一个比当前剩余 CD 更长的新 CD，那是对的；
+            // 但反过来不该发生 —— 否则「AA3 的 0.3s CD」会把一个还剩 0.8s 的
+            // 长 CD 缩短，等于打一发弱化招就能洗掉惩罚。
+            float end = Time.time + Mathf.Max(0f, delay) + w.GetChargeCooldown(level);
+            chargeCooldownEndTime = Mathf.Max(chargeCooldownEndTime, end);
 
-            wasChargeReady[(int)slot] = false;
-            OnChargeReadyChanged?.Invoke(slot, false);
+            wasChargeReady = false;
+            OnChargeReadyChanged?.Invoke(false);
         }
 
-        public void ClearChargeCooldown(WeaponSlot slot)
+        public void ClearChargeCooldown()
         {
-            chargeCooldownEndTime[(int)slot] = 0f;
-            wasChargeReady[(int)slot] = true;
-            OnChargeReadyChanged?.Invoke(slot, true);
+            chargeCooldownEndTime = 0f;
+            wasChargeReady = true;
+            OnChargeReadyChanged?.Invoke(true);
         }
 
         // ==========================================================
@@ -162,7 +176,7 @@ namespace Flandre.CombatSystem
             else subWeapon = weapon;
 
             comboBuffer?.ResetCombo();
-            ClearChargeCooldown(slot);
+            ClearChargeCooldown();
 
             OnWeaponChanged?.Invoke(slot, weapon);
 
@@ -177,8 +191,7 @@ namespace Flandre.CombatSystem
             subWeapon = temp;
 
             comboBuffer?.ResetCombo();
-            ClearChargeCooldown(WeaponSlot.Main);
-            ClearChargeCooldown(WeaponSlot.Sub);
+            ClearChargeCooldown();
 
             OnWeaponChanged?.Invoke(WeaponSlot.Main, mainWeapon);
             OnWeaponChanged?.Invoke(WeaponSlot.Sub, subWeapon);

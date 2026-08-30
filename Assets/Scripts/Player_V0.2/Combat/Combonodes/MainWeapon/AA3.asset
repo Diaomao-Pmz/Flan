@@ -14,14 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: AA3
   comboWindow: 0.7
-  recoveryTime: 0.35
+  recoveryTime: 0.1
   castCondition: 0
   requiredState: 0
   inputSequence: 04000000
   isChargeSkill: 1
   chargeLevel: 3
-  chargeStartLevelAfter: 0
-  requiredChargeTime: 1.2
   attackClip: {fileID: 7400000, guid: dbaab0c076895944ab0d335aa1972f53, type: 2}
   forwardThrust: {x: 0, y: 0}
   thrustDuration: 0.12
@@ -39,6 +37,7 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: FX_AA3
   effectLifetime: 0
+  weakenedEffectKey: 
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.43, y: 0.395}
   effectScale: {x: 1.07, y: 1.11}
@@ -50,6 +49,11 @@ MonoBehaviour:
   projectileScaleMultiplier: 1
   projectileDamageOverride: 0
   recomputeAimPerShot: 1
+  useAimDash: 0
+  aimDashMode: 2
+  aimDashBaseDistance: 2
+  aimDashMomentumScale: 0.3
+  aimDashDuration: 0.15
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0

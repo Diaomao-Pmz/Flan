@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: BB3
   comboWindow: 0.7
+  recoveryTime: 0.35
   castCondition: 0
   requiredState: 0
   inputSequence: 05000000
   isChargeSkill: 1
   chargeLevel: 3
-  chargeStartLevelAfter: 0
-  requiredChargeTime: 1
   attackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
   forwardThrust: {x: 0, y: 0}
   thrustDuration: 0.12
   applyThrustInAir: 1
+  lockMovementDuringAttack: 1
   cancelPermission:
     byMainWeapon: 1
     bySubWeapon: 1
@@ -37,10 +37,23 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: FX_BB3
   effectLifetime: 0
+  weakenedEffectKey: 
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.377, y: 0.444}
   effectScale: {x: 0.61, y: 0.66}
   effectRotation: 9.896
+  projectilePoolKeyOverride: 
+  projectileCount: 1
+  projectileInterval: 0.06
+  projectileSpeedMultiplier: 1
+  projectileScaleMultiplier: 1
+  projectileDamageOverride: 0
+  recomputeAimPerShot: 1
+  useAimDash: 0
+  aimDashMode: 0
+  aimDashBaseDistance: 2
+  aimDashMomentumScale: 0.3
+  aimDashDuration: 0.15
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0

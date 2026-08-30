@@ -25,11 +25,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 69468ccf7a353984d8485855672c1ccd, type: 2}
   - {fileID: 11400000, guid: 87f3406d0748dde4b8a8dccb9e2f5e0b, type: 2}
   - {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
-  chargeTimeLv1: 1
+  chargeTimeLv1: 0.85
   chargeTimeLv2: 2
   chargeTimeLv3: 3.5
   comboChargeSpeedMultiplier: 1
-  chargeCooldown: 0.7
+  chargeCooldownLv1: 1.35
+  chargeCooldownLv2: 1
+  chargeCooldownLv3: 0.5
+  weakenedStunDuration: 0
   chargeEffectLv1: FXL_BB1
   chargeEffectLv2: FXL_BB2
   chargeEffectLv3: FXL_BB3
