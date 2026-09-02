@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class BossStunState : IState
 {
@@ -15,24 +15,24 @@ public class BossStunState : IState
 
     public void Enter()
     {
-        Debug.Log("[BossStunState] Boss »¤¶ÜÆÆËé£¬½øÈë»÷·ÉÆÆ·À×´Ì¬£¡");
+        Debug.Log("[BossStunState] Boss æŠ¤ç›¾ç ´ç¢ï¼Œè¿›å…¥å‡»é£ç ´é˜²çŠ¶æ€ï¼");
 
-        // 1. »ñÈ¡Ãæ°åÅäÖÃµÄ»Ö¸´Ê±¼ä
+        // 1. è·å–é¢æ¿é…ç½®çš„æ¢å¤æ—¶é—´
         currentRecoverTime = boss.bossState.bossMechanic.shieldRecoverTime;
         stunTimer = 0f;
 
-        // 2. ²»ÔÙÊ¹ÓÃÊÜÖÊÁ¿Ó°ÏìµÄ AddForce£¬¶øÊÇÖ±½Ó¸³Óè¾ø¶ÔËÙ¶È£¡
+        // 2. ä¸å†ä½¿ç”¨å—è´¨é‡å½±å“çš„ AddForceï¼Œè€Œæ˜¯ç›´æ¥èµ‹äºˆç»å¯¹é€Ÿåº¦ï¼
         if (rb != null)
         {
-            // ¶ÁÈ¡ÎÒÃÇÔÚ BossState ÀïÅäÖÃµÄ»÷·ÉËÙ¶È
+            // è¯»å–æˆ‘ä»¬åœ¨ BossState é‡Œé…ç½®çš„å‡»é£é€Ÿåº¦
             float knockupSpeed = boss.bossState.bossMechanic.stunKnockupSpeed;
             rb.linearVelocity = new Vector2(0f, knockupSpeed);
         }
 
-        // 3. Ç¿ÖÆ´ò¶ÏÕıÔÚ·¢ÉäµÄµ¯Ä»
+        // 3. å¼ºåˆ¶æ‰“æ–­æ­£åœ¨å‘å°„çš„å¼¹å¹•
         if (boss.BulletEmitter != null) boss.BulletEmitter.StopAttack();
 
-        // [TODO ÏÂÒ»²½¼¤»î] ¶©ÔÄÍæ¼ÒµÄÁ¬ÕĞÑÓÊ±ÊÂ¼ş
+        // [TODO ä¸‹ä¸€æ­¥æ¿€æ´»] è®¢é˜…ç©å®¶çš„è¿æ‹›å»¶æ—¶äº‹ä»¶
         // ComboInputBuffer.OnPlayerComboExecuted += ExtendStunTime; 
     }
 
@@ -40,7 +40,7 @@ public class BossStunState : IState
     {
         stunTimer += Time.deltaTime;
 
-        // µ¹¼ÆÊ±½áÊø£¬»Ö¸´»¤¶Ü²¢»Øµ½Õ½¶·×´Ì¬
+        // å€’è®¡æ—¶ç»“æŸï¼Œæ¢å¤æŠ¤ç›¾å¹¶å›åˆ°æˆ˜æ–—çŠ¶æ€
         if (stunTimer >= currentRecoverTime)
         {
             boss.bossState.bossMechanic.RecoverShield();
@@ -55,16 +55,16 @@ public class BossStunState : IState
 
     public void Exit()
     {
-        Debug.Log("[BossStunState] ÆÆ·À½áÊø£¬Boss »¤¶ÜÖØĞÂÉú³É£¡");
-        // [TODO ÏÂÒ»²½¼¤»î] È¡Ïû¶©ÔÄ
+        Debug.Log("[BossStunState] ç ´é˜²ç»“æŸï¼ŒBoss æŠ¤ç›¾é‡æ–°ç”Ÿæˆï¼");
+        // [TODO ä¸‹ä¸€æ­¥æ¿€æ´»] å–æ¶ˆè®¢é˜…
         // ComboInputBuffer.OnPlayerComboExecuted -= ExtendStunTime;
     }
 
-    // Áô¸øÏÂÒ»²½Íæ¼ÒComboµ÷ÓÃµÄ»Øµ÷
+    // ç•™ç»™ä¸‹ä¸€æ­¥ç©å®¶Comboè°ƒç”¨çš„å›è°ƒ
     private void ExtendStunTime()
     {
         float addTime = boss.bossState.bossMechanic.comboExtendDuration;
         currentRecoverTime += addTime;
-        Debug.Log($"[BossStunState] Íæ¼ÒÁ¬ÕĞ×·¼Ó£¡ÆÆ·ÀÊ±¼äÑÓ³¤ {addTime} Ãë£¬µ±Ç°×ÜÊ±³¤: {currentRecoverTime}");
+        Debug.Log($"[BossStunState] ç©å®¶è¿æ‹›è¿½åŠ ï¼ç ´é˜²æ—¶é—´å»¶é•¿ {addTime} ç§’ï¼Œå½“å‰æ€»æ—¶é•¿: {currentRecoverTime}");
     }
 }

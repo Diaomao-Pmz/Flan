@@ -1,35 +1,35 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using Flandre.CombatSystem;
 
 [RequireComponent(typeof(BossState))]
-[RequireComponent(typeof(BAE_Teleporter))] // ¡¾ĞÂÔö¡¿Ç¿ÖÆÒªÇó¹ÒÔØ´«ËÍÆ÷×é¼ş
+[RequireComponent(typeof(BAE_Teleporter))] // ã€æ–°å¢ã€‘å¼ºåˆ¶è¦æ±‚æŒ‚è½½ä¼ é€å™¨ç»„ä»¶
 public class BossController : EntityBase
 {
-    [Header("--- ±íÏÖ²ãÒıÓÃ ---")]
+    [Header("--- è¡¨ç°å±‚å¼•ç”¨ ---")]
     public GameObject shieldVisual;
     public Animator animator { get; private set; }
     [SerializeField] Transform playerTransform;
 
     public BossAIDecider AI { get; private set; }
 
-    // ×´Ì¬¶¨Òå
+    // çŠ¶æ€å®šä¹‰
     public BossActionExecuter CombatState { get; private set; }
     public BossMoveState MoveState { get; private set; }
     public BossStunState StunState { get; private set; }
 
-    // ¸÷×¨Ö°²¿ÃÅµÄÖ´ĞĞÆ÷ÒıÓÃ
+    // å„ä¸“èŒéƒ¨é—¨çš„æ‰§è¡Œå™¨å¼•ç”¨
     public BAE_BulletEmitter BulletEmitter { get; private set; }
-    public BAE_Teleporter Teleporter { get; private set; } // ¡¾ĞÂÔö¡¿´«ËÍ×¨Ö°Ö´ĞĞÆ÷
+    public BAE_Teleporter Teleporter { get; private set; } // ã€æ–°å¢ã€‘ä¼ é€ä¸“èŒæ‰§è¡Œå™¨
     public BossState bossState { get; private set; }
 
-    [Header("--- ÒÆ¶¯·çóİÏµÍ³²ÎÊı ---")]
-    // ×¢Òâ£ºmaintainDistance ÒÑ±»³¹µ×É¾³ı£¬ÓÉ MoveState ¶¯Ì¬Ïò AI Ë÷È¡
-    public float moveSpeed = 3f;              // ÒÆ¶¯ËÙ¶È
-    public float wallCheckDistance = 1.5f;    // ×²Ç½ÉäÏß¼ì²â¾àÀë
-    public LayerMask wallLayer;               // Ç½±Ú/ËÀ½ÇµÄÍ¼²ã
+    [Header("--- ç§»åŠ¨é£ç­ç³»ç»Ÿå‚æ•° ---")]
+    // æ³¨æ„ï¼šmaintainDistance å·²è¢«å½»åº•åˆ é™¤ï¼Œç”± MoveState åŠ¨æ€å‘ AI ç´¢å–
+    public float moveSpeed = 3f;              // ç§»åŠ¨é€Ÿåº¦
+    public float wallCheckDistance = 1.5f;    // æ’å¢™å°„çº¿æ£€æµ‹è·ç¦»
+    public LayerMask wallLayer;               // å¢™å£/æ­»è§’çš„å›¾å±‚
 
     [Header("UI For Testing")]
     public TextMeshProUGUI bossStatusText;
@@ -39,12 +39,12 @@ public class BossController : EntityBase
     public float DistanceToPlayer => Vector2.Distance(transform.position, playerTransform.position);
 
     /// <summary>
-    /// Ö»¶ÁÇé±¨×ÜÏß¡£ËùÓĞÖ´ĞĞÆ÷ÓëÌõ¼ş¶ÔÏó¹²ÓÃÍ¬Ò»·İ£¬±ÜÃâ¸÷×Ô FindObjectOfType¡£
-    /// ÔÚ Start ÖĞ×é×°£¬È·±£¸÷×é¼şµÄ Awake ¶¼ÒÑÅÜÍê¡£
+    /// åªè¯»æƒ…æŠ¥æ€»çº¿ã€‚æ‰€æœ‰æ‰§è¡Œå™¨ä¸æ¡ä»¶å¯¹è±¡å…±ç”¨åŒä¸€ä»½ï¼Œé¿å…å„è‡ª FindObjectOfTypeã€‚
+    /// åœ¨ Start ä¸­ç»„è£…ï¼Œç¡®ä¿å„ç»„ä»¶çš„ Awake éƒ½å·²è·‘å®Œã€‚
     /// </summary>
     public BossContext Context { get; private set; }
 
-    // ¡¾ĞÂÔö¡¿Node ÀàĞÍ ¡ú Ö´ĞĞÆ÷ µÄÓ³Éä±í¡£¼ÓĞÂ¼¼ÄÜ²»ÔÙĞèÒª¸ÄÈÎºÎ·ÖÅÉ´úÂë¡£
+    // ã€æ–°å¢ã€‘Node ç±»å‹ â†’ æ‰§è¡Œå™¨ çš„æ˜ å°„è¡¨ã€‚åŠ æ–°æŠ€èƒ½ä¸å†éœ€è¦æ”¹ä»»ä½•åˆ†æ´¾ä»£ç ã€‚
     private readonly Dictionary<Type, IBossActionExecutor> executors
         = new Dictionary<Type, IBossActionExecutor>();
 
@@ -52,23 +52,23 @@ public class BossController : EntityBase
     {
         base.Awake();
 
-        // Í³Ò»»ñÈ¡¸÷×é¼şÒıÓÃ
+        // ç»Ÿä¸€è·å–å„ç»„ä»¶å¼•ç”¨
         bossState = GetComponent<BossState>();
         animator = GetComponent<Animator>();
         AI = GetComponent<BossAIDecider>();
         BulletEmitter = GetComponent<BAE_BulletEmitter>();
-        Teleporter = GetComponent<BAE_Teleporter>(); // »ñÈ¡´«ËÍÆ÷
+        Teleporter = GetComponent<BAE_Teleporter>(); // è·å–ä¼ é€å™¨
 
         CombatState = new BossActionExecuter(this);
         MoveState = new BossMoveState(this);
-        StunState = new BossStunState(this);   // ¸´ÓÃÊµÀı£¬²»ÔÙÃ¿´ÎÆÆ¶Ü new Ò»¸ö
+        StunState = new BossStunState(this);   // å¤ç”¨å®ä¾‹ï¼Œä¸å†æ¯æ¬¡ç ´ç›¾ new ä¸€ä¸ª
 
         BuildExecutorRegistry();
     }
 
     /// <summary>
-    /// É¨Ãè¹ÒÔÚ×Ô¼ºÉíÉÏµÄËùÓĞÖ´ĞĞÆ÷£¬½¨Á¢¡¸ÈÏÁì¹ØÏµ¡¹¡£
-    /// Ö´ĞĞÆ÷Ö»Òª¹ÒÉÏÀ´¾Í»á±»×Ô¶¯·¢ÏÖ£¬²»ĞèÒªÔÚÕâÀïÖğ¸öµÇ¼Ç¡£
+    /// æ‰«ææŒ‚åœ¨è‡ªå·±èº«ä¸Šçš„æ‰€æœ‰æ‰§è¡Œå™¨ï¼Œå»ºç«‹ã€Œè®¤é¢†å…³ç³»ã€ã€‚
+    /// æ‰§è¡Œå™¨åªè¦æŒ‚ä¸Šæ¥å°±ä¼šè¢«è‡ªåŠ¨å‘ç°ï¼Œä¸éœ€è¦åœ¨è¿™é‡Œé€ä¸ªç™»è®°ã€‚
     /// </summary>
     private void BuildExecutorRegistry()
     {
@@ -80,15 +80,15 @@ public class BossController : EntityBase
 
             if (nodeType == null)
             {
-                Debug.LogError($"[BossController] {executor.GetType().Name} µÄ NodeType Îª¿Õ£¬ÒÑÌø¹ı¡£", this);
+                Debug.LogError($"[BossController] {executor.GetType().Name} çš„ NodeType ä¸ºç©ºï¼Œå·²è·³è¿‡ã€‚", this);
                 continue;
             }
 
             if (executors.ContainsKey(nodeType))
             {
                 Debug.LogError(
-                    $"[BossController] {nodeType.Name} ±»ÖØ¸´ÈÏÁì£º" +
-                    $"{executors[nodeType].GetType().Name} Óë {executor.GetType().Name}¡£ºóÕßÒÑºöÂÔ¡£", this);
+                    $"[BossController] {nodeType.Name} è¢«é‡å¤è®¤é¢†ï¼š" +
+                    $"{executors[nodeType].GetType().Name} ä¸ {executor.GetType().Name}ã€‚åè€…å·²å¿½ç•¥ã€‚", this);
                 continue;
             }
 
@@ -96,14 +96,14 @@ public class BossController : EntityBase
         }
     }
 
-    /// <summary>°´¿¨Æ¬µÄÔËĞĞÊ±ÀàĞÍÕÒµ½¶ÔÓ¦Ö´ĞĞÆ÷¡£ÕÒ²»µ½·µ»Ø null¡£</summary>
+    /// <summary>æŒ‰å¡ç‰‡çš„è¿è¡Œæ—¶ç±»å‹æ‰¾åˆ°å¯¹åº”æ‰§è¡Œå™¨ã€‚æ‰¾ä¸åˆ°è¿”å› nullã€‚</summary>
     public IBossActionExecutor GetExecutorFor(ActionNode node)
     {
         if (node == null) return null;
         return executors.TryGetValue(node.GetType(), out IBossActionExecutor executor) ? executor : null;
     }
 
-    /// <summary>Í¨ÖªËùÓĞÖ´ĞĞÆ÷Á¢¼´ÊÕÌ¯¡£ÆÆ¶Ü¡¢×ª½×¶Î¡¢ËÀÍöÊ±Í³Ò»µ÷ÓÃ¡£</summary>
+    /// <summary>é€šçŸ¥æ‰€æœ‰æ‰§è¡Œå™¨ç«‹å³æ”¶æ‘Šã€‚ç ´ç›¾ã€è½¬é˜¶æ®µã€æ­»äº¡æ—¶ç»Ÿä¸€è°ƒç”¨ã€‚</summary>
     public void CancelAllExecutors()
     {
         foreach (IBossActionExecutor executor in executors.Values)
@@ -114,27 +114,27 @@ public class BossController : EntityBase
 
     void Start()
     {
-        // Í³Ò»³õÊ¼»¯¸÷²¿ÃÅ
+        // ç»Ÿä¸€åˆå§‹åŒ–å„éƒ¨é—¨
         if (BulletEmitter != null) BulletEmitter.Init(playerTransform);
         if (Teleporter != null) Teleporter.Init(playerTransform);
 
-        // ×é×°Ö»¶ÁÇé±¨×ÜÏß
+        // ç»„è£…åªè¯»æƒ…æŠ¥æ€»çº¿
         Context = new BossContext(this, playerTransform);
 
-        // Í³Ò»¶©ÔÄºÚ°åÊÂ¼ş
+        // ç»Ÿä¸€è®¢é˜…é»‘æ¿äº‹ä»¶
         if (bossState != null)
         {
             bossState.bossMechanic.OnShieldBroken += HandleShieldBroken;
             bossState.bossMechanic.OnShieldBroken += HideShieldVisual;
             bossState.bossMechanic.OnShieldRecovered += ShowShieldVisual;
 
-            // ¡¾¹Ø¼üĞŞ¸Ä¡¿½«±»¶¯·À·´´«ËÍÊÂ¼ş£¬Ö±½ÓÎ¯ÍĞ¸ø´«ËÍÆ÷Ö´ĞĞËæ»ú´«ËÍ²ßÂÔ
+            // ã€å…³é”®ä¿®æ”¹ã€‘å°†è¢«åŠ¨é˜²åä¼ é€äº‹ä»¶ï¼Œç›´æ¥å§”æ‰˜ç»™ä¼ é€å™¨æ‰§è¡Œéšæœºä¼ é€ç­–ç•¥
             bossState.bossMechanic.OnTeleportTriggered += TriggerPassiveTeleport;
             bossState.bossMechanic.OnPhase2Triggered += HandlePhase2;
             bossState.health.OnDeath += Die;
         }
 
-        // Boss ¿ªÊ¼Ê±ÏÈ½øÈë·çóİÒÆ¶¯×´Ì¬
+        // Boss å¼€å§‹æ—¶å…ˆè¿›å…¥é£ç­ç§»åŠ¨çŠ¶æ€
         ChangeState(MoveState);
     }
 
@@ -156,7 +156,7 @@ public class BossController : EntityBase
         ChangeState(StunState);
     }
 
-    // --- ÒÔÏÂÎªÊÂ¼şÏìÓ¦µÄ·â×°·½·¨£¨ÎªÁË·½±ã OnDestroy Ê±¸É¾»µØ×¢Ïú£© ---
+    // --- ä»¥ä¸‹ä¸ºäº‹ä»¶å“åº”çš„å°è£…æ–¹æ³•ï¼ˆä¸ºäº†æ–¹ä¾¿ OnDestroy æ—¶å¹²å‡€åœ°æ³¨é”€ï¼‰ ---
 
     private void TriggerPassiveTeleport()
     {
@@ -169,27 +169,27 @@ public class BossController : EntityBase
 
     private void HandlePhase2()
     {
-        Debug.Log("[BossController] ´¥·¢¶ş½×¶Î£¡");
+        Debug.Log("[BossController] è§¦å‘äºŒé˜¶æ®µï¼");
 
-        // ¡¾¸Ä¶¯¡¿²»ÔÙÖ»Í£µ¯Ä»£¬Í¨ÖªËùÓĞÖ´ĞĞÆ÷ÊÕÌ¯
+        // ã€æ”¹åŠ¨ã€‘ä¸å†åªåœå¼¹å¹•ï¼Œé€šçŸ¥æ‰€æœ‰æ‰§è¡Œå™¨æ”¶æ‘Š
         CancelAllExecutors();
 
         if (TryGetComponent(out Rigidbody2D rb)) rb.linearVelocity = Vector2.zero;
 
-        // ¡¾¹Ø¼üĞŞ¸Ä¡¿¶ş½×¶Î×ª³¡´«ËÍµ½ÖĞÑë£¬²»ÔÙĞ´ËÀ×ø±ê£¬Ö±½ÓÎ¯ÍĞ¸ø´«ËÍÆ÷
+        // ã€å…³é”®ä¿®æ”¹ã€‘äºŒé˜¶æ®µè½¬åœºä¼ é€åˆ°ä¸­å¤®ï¼Œä¸å†å†™æ­»åæ ‡ï¼Œç›´æ¥å§”æ‰˜ç»™ä¼ é€å™¨
         if (Teleporter != null) Teleporter.ExecuteTeleport(TeleportTargetType.Center);
 
         if (AI != null) AI.SwitchToPhase2();
 
-        // ¶ş½×¶Î×ª³¡ÊÇÒ»´ÎÇ¿ÖÆÖØÖÃ£ºÁ¢¿ÌÂú¶Ü£¬²¢°Ñ×´Ì¬»ú´ÓÆÆ·ÀÖĞ×§³öÀ´¡£
-        // ²»×öÕâÁ½¼şÊÂµÄ»°£¬CurrentState »áÒ»Ö±Í£ÔÚ BossStunState ÉÏÊıÍêÊ£ÓàµÄÆÆ·ÀÊ±¼ä¡£
+        // äºŒé˜¶æ®µè½¬åœºæ˜¯ä¸€æ¬¡å¼ºåˆ¶é‡ç½®ï¼šç«‹åˆ»æ»¡ç›¾ï¼Œå¹¶æŠŠçŠ¶æ€æœºä»ç ´é˜²ä¸­æ‹½å‡ºæ¥ã€‚
+        // ä¸åšè¿™ä¸¤ä»¶äº‹çš„è¯ï¼ŒCurrentState ä¼šä¸€ç›´åœåœ¨ BossStunState ä¸Šæ•°å®Œå‰©ä½™çš„ç ´é˜²æ—¶é—´ã€‚
         bossState.bossMechanic.RecoverShield();
         ChangeState(MoveState);
     }
 
     protected override void Die()
     {
-        Debug.Log("Boss±»»÷°ÜÁË£¡´¥·¢ËÀÍöÑİ³ö£¡");
+        Debug.Log("Bossè¢«å‡»è´¥äº†ï¼è§¦å‘æ­»äº¡æ¼”å‡ºï¼");
         if (CurrentState != null) CurrentState.Exit();
         CancelAllExecutors();
     }
@@ -212,7 +212,7 @@ public class BossController : EntityBase
     {
         if (bossState != null)
         {
-            // ½«ÉËº¦ÇëÇó×ª·¢¸øºÚ°å (BossState) ´¦Àí
+            // å°†ä¼¤å®³è¯·æ±‚è½¬å‘ç»™é»‘æ¿ (BossState) å¤„ç†
             bossState.bossMechanic.TakeDamage(info.amount, info.type);
         }
     }

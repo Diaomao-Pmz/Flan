@@ -1,29 +1,29 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 public class ShapeFormationController : MonoBehaviour
 {
-    // ¼ÇÂ¼ËùÓĞ×Óµ¯ÒÔ¼°ËüÃÇµÄ×îÖÕÄ¿±ê¾Ö²¿×ø±ê
+    // è®°å½•æ‰€æœ‰å­å¼¹ä»¥åŠå®ƒä»¬çš„æœ€ç»ˆç›®æ ‡å±€éƒ¨åæ ‡
     private List<Transform> bullets = new List<Transform>();
     private List<Vector2> targetLocalPositions = new List<Vector2>();
 
-    private MonoBehaviour attackScriptToEnable; // Õ¹¿ªÍê±ÏºóÒª¼¤»îµÄ½Å±¾ (Èç RotatingFormation)
+    private MonoBehaviour attackScriptToEnable; // å±•å¼€å®Œæ¯•åè¦æ¿€æ´»çš„è„šæœ¬ (å¦‚ RotatingFormation)
 
     public void AddBullet(Transform bullet, Vector2 targetLocalPos)
     {
         bullets.Add(bullet);
         targetLocalPositions.Add(targetLocalPos);
-        // ×Óµ¯Éú³ÉÊ±£¬Ç¿ÖÆ½«ËüÃÇµÄÎ»ÖÃÖØÖÃÔÚ¸¸ÎïÌåÖĞĞÄ (firePoint)
+        // å­å¼¹ç”Ÿæˆæ—¶ï¼Œå¼ºåˆ¶å°†å®ƒä»¬çš„ä½ç½®é‡ç½®åœ¨çˆ¶ç‰©ä½“ä¸­å¿ƒ (firePoint)
         bullet.localPosition = Vector3.zero;
     }
 
-    // Emitter °ÑËùÓĞ×Óµ¯Ìí¼ÓÍêºó£¬µ÷ÓÃÕâ¸ö·½·¨¿ªÊ¼Õ¹¿ª
+    // Emitter æŠŠæ‰€æœ‰å­å¼¹æ·»åŠ å®Œåï¼Œè°ƒç”¨è¿™ä¸ªæ–¹æ³•å¼€å§‹å±•å¼€
     public void StartFormation(float duration, MonoBehaviour scriptToEnable)
     {
         attackScriptToEnable = scriptToEnable;
 
-        // Èç¹ûĞèÒªÕ¹¿ª½Å±¾Æô¶¯£¬ÏÈ°Ñ×îÖÕµÄ¹¥»÷½Å±¾½ûÓÃ
+        // å¦‚æœéœ€è¦å±•å¼€è„šæœ¬å¯åŠ¨ï¼Œå…ˆæŠŠæœ€ç»ˆçš„æ”»å‡»è„šæœ¬ç¦ç”¨
         if (attackScriptToEnable != null) attackScriptToEnable.enabled = false;
 
         StartCoroutine(DoFormation(duration));
@@ -36,30 +36,30 @@ public class ShapeFormationController : MonoBehaviour
         {
             timer += Time.deltaTime;
             float percent = timer / duration;
-            // ¿ÉÒÔ¼ÓÈëÒ»¸ö»º¶¯ÇúÏß£¬±ÈÈç Mathf.SmoothStep£¬ÈÃÕ¹¿ª¸üË³»¬
+            // å¯ä»¥åŠ å…¥ä¸€ä¸ªç¼“åŠ¨æ›²çº¿ï¼Œæ¯”å¦‚ Mathf.SmoothStepï¼Œè®©å±•å¼€æ›´é¡ºæ»‘
             float smoothPercent = Mathf.SmoothStep(0f, 1f, percent);
 
             for (int i = 0; i < bullets.Count; i++)
             {
                 if (bullets[i] != null)
                 {
-                    // Ê¹ÓÃ Lerp ½«×Óµ¯´ÓÖĞĞÄµã»ºÂıÒÆ¶¯µ½Ä¿±êµã
+                    // ä½¿ç”¨ Lerp å°†å­å¼¹ä»ä¸­å¿ƒç‚¹ç¼“æ…¢ç§»åŠ¨åˆ°ç›®æ ‡ç‚¹
                     bullets[i].localPosition = Vector2.Lerp(Vector2.zero, targetLocalPositions[i], smoothPercent);
                 }
             }
             yield return null;
         }
 
-        // Õ¹¿ªÍê±Ï£¬È·±£ËùÓĞ×Óµ¯¾«×¼µ½´ïÄ¿±êÎ»ÖÃ
+        // å±•å¼€å®Œæ¯•ï¼Œç¡®ä¿æ‰€æœ‰å­å¼¹ç²¾å‡†åˆ°è¾¾ç›®æ ‡ä½ç½®
         for (int i = 0; i < bullets.Count; i++)
         {
             if (bullets[i] != null) bullets[i].localPosition = targetLocalPositions[i];
         }
 
-        // ¼¤»îÕæÕıµÄ¹¥»÷Âß¼­£¨ÈÃ·½Õó¿ªÊ¼Ğı×ª¡¢ÈÃÔ²»·É¢¿ª£©
+        // æ¿€æ´»çœŸæ­£çš„æ”»å‡»é€»è¾‘ï¼ˆè®©æ–¹é˜µå¼€å§‹æ—‹è½¬ã€è®©åœ†ç¯æ•£å¼€ï¼‰
         if (attackScriptToEnable != null) attackScriptToEnable.enabled = true;
 
-        // ¹¦³ÉÉíÍË£¬Ïú»Ù×Ô¼º£¬²»ÁôÀ¬»ø
+        // åŠŸæˆèº«é€€ï¼Œé”€æ¯è‡ªå·±ï¼Œä¸ç•™åƒåœ¾
         Destroy(this);
     }
 }

@@ -26,6 +26,10 @@ public class BAE_DashAttacker : MonoBehaviour, IBossActionExecutor
     [Tooltip("撞墙检测射线长度")]
     [SerializeField] private float wallCheckDistance = 1.2f;
 
+    [Header("--- 占位视觉（可选）---")]
+    [Tooltip("挥击阶段的占位方块。可以和 BAE_MeleeAttacker 共用同一个组件。")]
+    [SerializeField] private BossMeleeVisual meleeVisual;
+
     [Header("--- Debug ---")]
     [SerializeField] private bool showHitbox = true;
 
@@ -71,7 +75,8 @@ public class BAE_DashAttacker : MonoBehaviour, IBossActionExecutor
                 contactFilter,
                 animator,
                 dash.activeAnimName,
-                gameObject);
+                gameObject,
+                meleeVisual);
         }
 
         PlayAnim(dash.recoverAnimName);
@@ -79,7 +84,8 @@ public class BAE_DashAttacker : MonoBehaviour, IBossActionExecutor
 
     public void Cancel()
     {
-        runner.Cancel();
+        runner.Cancel();          // 内部会收起 meleeVisual
+        meleeVisual?.Hide();      // 双保险：冲刺阶段被打断时 Run 还没启动
         StopHorizontal(); // 打断时别把冲刺速度留给 MoveState
     }
 

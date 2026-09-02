@@ -17,6 +17,11 @@ public class BAE_MeleeAttacker : MonoBehaviour, IBossActionExecutor
     [Tooltip("是否把触发器（Trigger）也纳入判定。玩家碰撞体若是 Trigger 则必须勾上。")]
     [SerializeField] private bool detectTriggers = true;
 
+    [Header("--- 占位视觉（可选）---")]
+    [Tooltip("近战占位方块。留空则不显示，判定逻辑不受影响。\n" +
+             "以后换成 Animator 驱动的真动画时，把这个槽位留空即可。")]
+    [SerializeField] private BossMeleeVisual meleeVisual;
+
     [Header("--- Debug ---")]
     [SerializeField] private bool showHitbox = true;
 
@@ -53,12 +58,17 @@ public class BAE_MeleeAttacker : MonoBehaviour, IBossActionExecutor
             contactFilter,
             animator,
             melee.activeAnimName,
-            gameObject);
+            gameObject,
+            meleeVisual);
 
         PlayAnim(melee.recoverAnimName);
     }
 
-    public void Cancel() => runner.Cancel();
+    public void Cancel()
+    {
+        runner.Cancel();          // 内部会收起 meleeVisual
+        meleeVisual?.Hide();      // 双保险：Run 未启动时 runner 还没记住 visual
+    }
 
     private void PlayAnim(string stateName)
     {

@@ -1,22 +1,22 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Boss µÄÕ½¶·×´Ì¬¡£
+/// Boss çš„æˆ˜æ–—çŠ¶æ€ã€‚
 ///
-/// ¡¾±¾´Î¸Ä¶¯¡¿Ëü²»ÔÙÈÏÊ¶ÈÎºÎ¾ßÌå¼¼ÄÜ¡£
-/// Ô­ÏÈÕâÀïÊÇÒ»´® if (node is TeleportNode) / if (node is BulletNode) / else µÄ·ÖÖ§Á´£¬
-/// Ã¿¼ÓÒ»ÖÖ¼¼ÄÜ¾ÍÒª»ØÀ´¸ÄÒ»´Î¡£ÏÖÔÚÖ»×öÈı¼şÊÂ£º³é¿¨ ¡ú ²éÖ´ĞĞÆ÷ ¡ú µÈËüÑİÍê¡£
+/// ã€æœ¬æ¬¡æ”¹åŠ¨ã€‘å®ƒä¸å†è®¤è¯†ä»»ä½•å…·ä½“æŠ€èƒ½ã€‚
+/// åŸå…ˆè¿™é‡Œæ˜¯ä¸€ä¸² if (node is TeleportNode) / if (node is BulletNode) / else çš„åˆ†æ”¯é“¾ï¼Œ
+/// æ¯åŠ ä¸€ç§æŠ€èƒ½å°±è¦å›æ¥æ”¹ä¸€æ¬¡ã€‚ç°åœ¨åªåšä¸‰ä»¶äº‹ï¼šæŠ½å¡ â†’ æŸ¥æ‰§è¡Œå™¨ â†’ ç­‰å®ƒæ¼”å®Œã€‚
 ///
-/// ÃüÃûËµÃ÷£º±¾ÀàÊÇ IState£¨Õ½¶·×´Ì¬£©£¬ÕæÕı¸É»îµÄÊÇ¸÷¸ö IBossActionExecutor¡£
-/// ÈôÈÕºóÖØ¹¹£¬½¨Òé¸ÄÃû BossCombatState£¬°Ñ Executor Ò»´ÊÈÃ¸øÖ´ĞĞÆ÷½Ó¿Ú¡£
+/// å‘½åè¯´æ˜ï¼šæœ¬ç±»æ˜¯ IStateï¼ˆæˆ˜æ–—çŠ¶æ€ï¼‰ï¼ŒçœŸæ­£å¹²æ´»çš„æ˜¯å„ä¸ª IBossActionExecutorã€‚
+/// è‹¥æ—¥åé‡æ„ï¼Œå»ºè®®æ”¹å BossCombatStateï¼ŒæŠŠ Executor ä¸€è¯è®©ç»™æ‰§è¡Œå™¨æ¥å£ã€‚
 /// </summary>
 public class BossActionExecuter : IState
 {
     BossController boss;
     Coroutine attackCoroutine;
 
-    // ¼ÇÂ¼µ±Ç°ÕıÔÚÑİ³öµÄÖ´ĞĞÆ÷£¬±»´ò¶ÏÊ±ºÃÍ¨ÖªËüÊÕÌ¯
+    // è®°å½•å½“å‰æ­£åœ¨æ¼”å‡ºçš„æ‰§è¡Œå™¨ï¼Œè¢«æ‰“æ–­æ—¶å¥½é€šçŸ¥å®ƒæ”¶æ‘Š
     IBossActionExecutor activeExecutor;
 
     public BossActionExecuter(BossController bc)
@@ -26,7 +26,7 @@ public class BossActionExecuter : IState
 
     public void Enter()
     {
-        // Ã¿´Î½øÈëÕ½¶·×´Ì¬Ê±£¬È·±£ÎïÀíËÙ¶È¹éÁã£¬×¨ĞÄ³öÕĞ£¨ÊµÏÖ"Éä»÷Ê±²»ÒÆ¶¯"£©
+        // æ¯æ¬¡è¿›å…¥æˆ˜æ–—çŠ¶æ€æ—¶ï¼Œç¡®ä¿ç‰©ç†é€Ÿåº¦å½’é›¶ï¼Œä¸“å¿ƒå‡ºæ‹›ï¼ˆå®ç°"å°„å‡»æ—¶ä¸ç§»åŠ¨"ï¼‰
         Rigidbody2D rb = boss.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -37,8 +37,8 @@ public class BossActionExecuter : IState
     public void Exit()
     {
         // ========================================================
-        // ¡¾ºËĞÄ°²È«±£»¤¡¿£ºBoss ÔÚ³öÕĞÆÚ¼ä±»ÆÆ¶Ü£¨½øÈë StunState£©»ò×ª½×¶ÎÊ±£¬
-        // Ç¿ÖÆÆş¶ÏĞ­³Ì²¢Í¨ÖªÖ´ĞĞÆ÷ÊÕÌ¯£¬·ÀÖ¹"ÔÎÁË»¹ÔÚÉä»÷/¼¤¹â»¹ÔÚÕÕ"µÄ Bug¡£
+        // ã€æ ¸å¿ƒå®‰å…¨ä¿æŠ¤ã€‘ï¼šBoss åœ¨å‡ºæ‹›æœŸé—´è¢«ç ´ç›¾ï¼ˆè¿›å…¥ StunStateï¼‰æˆ–è½¬é˜¶æ®µæ—¶ï¼Œ
+        // å¼ºåˆ¶ææ–­åç¨‹å¹¶é€šçŸ¥æ‰§è¡Œå™¨æ”¶æ‘Šï¼Œé˜²æ­¢"æ™•äº†è¿˜åœ¨å°„å‡»/æ¿€å…‰è¿˜åœ¨ç…§"çš„ Bugã€‚
         // ========================================================
         if (attackCoroutine != null)
         {
@@ -46,8 +46,8 @@ public class BossActionExecuter : IState
             attackCoroutine = null;
         }
 
-        // ¡¾¸Ä¶¯¡¿²»ÔÙĞ´ËÀ BulletEmitter.StopAttack()£¬¸ÄÎªÍ¨Öªµ±Ç°Ö´ĞĞÆ÷¡£
-        // ÕâÑùÒÔºó¼Ó¼¤¹â¡¢³å×²£¬´ò¶ÏÂß¼­²»ĞèÒªÔÙ¸ÄÕâÀï¡£
+        // ã€æ”¹åŠ¨ã€‘ä¸å†å†™æ­» BulletEmitter.StopAttack()ï¼Œæ”¹ä¸ºé€šçŸ¥å½“å‰æ‰§è¡Œå™¨ã€‚
+        // è¿™æ ·ä»¥ååŠ æ¿€å…‰ã€å†²æ’ï¼Œæ‰“æ–­é€»è¾‘ä¸éœ€è¦å†æ”¹è¿™é‡Œã€‚
         if (activeExecutor != null)
         {
             activeExecutor.Cancel();
@@ -62,7 +62,7 @@ public class BossActionExecuter : IState
 
     public void Update()
     {
-        // µ±Âú×ã¹¥»÷Ìõ¼ş£¬ÇÒµ±Ç°Ã»ÓĞÕıÔÚÖ´ĞĞµÄ¹¥»÷Ğ­³ÌÊ±£¬Æô¶¯¹¥»÷
+        // å½“æ»¡è¶³æ”»å‡»æ¡ä»¶ï¼Œä¸”å½“å‰æ²¡æœ‰æ­£åœ¨æ‰§è¡Œçš„æ”»å‡»åç¨‹æ—¶ï¼Œå¯åŠ¨æ”»å‡»
         if (boss.AI.canAttack && attackCoroutine == null)
         {
             attackCoroutine = boss.StartCoroutine(DoCombat());
@@ -71,7 +71,7 @@ public class BossActionExecuter : IState
 
     IEnumerator DoCombat()
     {
-        // 1. ÈÃ AI ³éÃ¤ºĞ£¨³é³öÀ´µÄÊÇ»ùÀà ActionNode£©
+        // 1. è®© AI æŠ½ç›²ç›’ï¼ˆæŠ½å‡ºæ¥çš„æ˜¯åŸºç±» ActionNodeï¼‰
         ActionNode actionNode = boss.AI.SelectSkill();
 
         if (actionNode == null)
@@ -80,15 +80,15 @@ public class BossActionExecuter : IState
             yield break;
         }
 
-        // 2. ²é±íÕÒµ½ÈÏÁìÕâÖÖ¿¨µÄÖ´ĞĞÆ÷¡£´óÄÔµ½´ËÎªÖ¹£¬²»¹ØĞÄËüÊÇÊ²Ã´¼¼ÄÜ¡£
+        // 2. æŸ¥è¡¨æ‰¾åˆ°è®¤é¢†è¿™ç§å¡çš„æ‰§è¡Œå™¨ã€‚å¤§è„‘åˆ°æ­¤ä¸ºæ­¢ï¼Œä¸å…³å¿ƒå®ƒæ˜¯ä»€ä¹ˆæŠ€èƒ½ã€‚
         IBossActionExecutor executor = boss.GetExecutorFor(actionNode);
 
         if (executor == null)
         {
             Debug.LogError(
-                $"[BossActionExecuter] Ã»ÓĞÖ´ĞĞÆ÷ÈÏÁì {actionNode.GetType().Name}" +
-                $"£¨¿¨Æ¬: {actionNode.name}£©¡£Çë¼ì²é¶ÔÓ¦ Executor ÊÇ·ñ¹ÒÔÚ Boss ÉíÉÏ¡£");
-            yield return new WaitForSeconds(1f); // Í£¶ÙÒ»ÏÂ·ÀÖ¹¿Õ×ªË¢ÆÁ
+                $"[BossActionExecuter] æ²¡æœ‰æ‰§è¡Œå™¨è®¤é¢† {actionNode.GetType().Name}" +
+                $"ï¼ˆå¡ç‰‡: {actionNode.name}ï¼‰ã€‚è¯·æ£€æŸ¥å¯¹åº” Executor æ˜¯å¦æŒ‚åœ¨ Boss èº«ä¸Šã€‚");
+            yield return new WaitForSeconds(1f); // åœé¡¿ä¸€ä¸‹é˜²æ­¢ç©ºè½¬åˆ·å±
             Finish();
             yield break;
         }
@@ -101,13 +101,13 @@ public class BossActionExecuter : IState
             boss.bossStatusText.SetText(label);
         }
 
-        // 3. ½»¸øÖ´ĞĞÆ÷ÑİÍê¡£
+        // 3. äº¤ç»™æ‰§è¡Œå™¨æ¼”å®Œã€‚
         //
-        // ¡¾×¢Òâ¡¿ÕâÀïÊÇ yield return executor.Execute(...)£¬¶ø²»ÊÇ
-        // yield return boss.StartCoroutine(executor.Execute(...))¡£
-        // ºóÕß»áÅÉÉú³öÒ»¸ö¶ÀÁ¢µÄ×ÓĞ­³Ì£¬¸¸Ğ­³Ì±» StopCoroutine Ê±×ÓĞ­³Ì**²»»á**±»Á¬´øÍ£Ö¹£¬
-        // ´ò¶ÏÊ±¾Í»á²ĞÁôÒ»¸ö»¹ÔÚÅÜµÄ¶¯×÷¡£Ö±½Ó yield return IEnumerator
-        // Ïàµ±ÓÚ°ÑËüÄÚÁª½ø±¾Ğ­³Ì£¬¸¸Í£×Ó±ØÍ£¡£
+        // ã€æ³¨æ„ã€‘è¿™é‡Œæ˜¯ yield return executor.Execute(...)ï¼Œè€Œä¸æ˜¯
+        // yield return boss.StartCoroutine(executor.Execute(...))ã€‚
+        // åè€…ä¼šæ´¾ç”Ÿå‡ºä¸€ä¸ªç‹¬ç«‹çš„å­åç¨‹ï¼Œçˆ¶åç¨‹è¢« StopCoroutine æ—¶å­åç¨‹**ä¸ä¼š**è¢«è¿å¸¦åœæ­¢ï¼Œ
+        // æ‰“æ–­æ—¶å°±ä¼šæ®‹ç•™ä¸€ä¸ªè¿˜åœ¨è·‘çš„åŠ¨ä½œã€‚ç›´æ¥ yield return IEnumerator
+        // ç›¸å½“äºæŠŠå®ƒå†…è”è¿›æœ¬åç¨‹ï¼Œçˆ¶åœå­å¿…åœã€‚
         activeExecutor = executor;
         yield return executor.Execute(actionNode, boss.Context);
         activeExecutor = null;
@@ -115,7 +115,7 @@ public class BossActionExecuter : IState
         Finish();
     }
 
-    /// <summary>ÊÕÎ²£ºÏÈÇåĞ­³Ì¾ä±úÔÙÇĞ×´Ì¬£¬±ÜÃâ Exit() °Ñ×Ô¼º¸øÍ£ÁË¡£</summary>
+    /// <summary>æ”¶å°¾ï¼šå…ˆæ¸…åç¨‹å¥æŸ„å†åˆ‡çŠ¶æ€ï¼Œé¿å… Exit() æŠŠè‡ªå·±ç»™åœäº†ã€‚</summary>
     private void Finish()
     {
         attackCoroutine = null;

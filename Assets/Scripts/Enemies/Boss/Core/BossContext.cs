@@ -1,22 +1,22 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// Boss µÄÖ»¶ÁÇé±¨×ÜÏß£¨¡¸¹¤ÅÆ¡¹£©¡£
+/// Boss çš„åªè¯»æƒ…æŠ¥æ€»çº¿ï¼ˆã€Œå·¥ç‰Œã€ï¼‰ã€‚
 ///
-/// ¡¾ÎªÊ²Ã´ĞèÒªËü¡¿
-/// Ö´ĞĞÆ÷£¨½üÕ½¡¢¼¤¹â¡¢µ¯Ä»¡¢´«ËÍ£©ºÍÌõ¼ş¶ÔÏó£¨Íæ¼ÒÑªÁ¿µÍ¡¢¾àÀë¹ıÔ¶¡¢±»±ÆÇ½½Ç£©
-/// ¶¼ĞèÒªÍ¬Ò»Åú×ÊÁÏ£ºÍæ¼ÒÔÚÄÄ¡¢Íæ¼ÒÑª¶àÉÙ¡¢Boss ºÚ°åÉÏ¼ÇÁËÊ²Ã´¡£
+/// ã€ä¸ºä»€ä¹ˆéœ€è¦å®ƒã€‘
+/// æ‰§è¡Œå™¨ï¼ˆè¿‘æˆ˜ã€æ¿€å…‰ã€å¼¹å¹•ã€ä¼ é€ï¼‰å’Œæ¡ä»¶å¯¹è±¡ï¼ˆç©å®¶è¡€é‡ä½ã€è·ç¦»è¿‡è¿œã€è¢«é€¼å¢™è§’ï¼‰
+/// éƒ½éœ€è¦åŒä¸€æ‰¹èµ„æ–™ï¼šç©å®¶åœ¨å“ªã€ç©å®¶è¡€å¤šå°‘ã€Boss é»‘æ¿ä¸Šè®°äº†ä»€ä¹ˆã€‚
 ///
-/// Èô²»Í³Ò»¹©¸ø£¬Ö»ÓĞÁ½ÌõÔã¸âµÄÂ·£º
-///  1. ¸øÃ¿¸öĞÂÀà¶¼Ğ´Ò»±é Init(player, bossState, ...)£¬²ÎÊıÁĞ±íÔ½À´Ô½³¤£»
-///  2. ¸÷×Ô FindObjectOfType&lt;PlayerState&gt;() ¡ª¡ª Ã¿´ÎÅĞ¶¨Ò»´ÎÈ«³¡ËÑË÷£¬
-///     ¶øÌõ¼şÏµÍ³Ã¿Ö¡ÒªÅÜºÃ¼¸¸öÌõ¼ş£¬ĞÔÄÜ»á±À¡£
+/// è‹¥ä¸ç»Ÿä¸€ä¾›ç»™ï¼Œåªæœ‰ä¸¤æ¡ç³Ÿç³•çš„è·¯ï¼š
+///  1. ç»™æ¯ä¸ªæ–°ç±»éƒ½å†™ä¸€é Init(player, bossState, ...)ï¼Œå‚æ•°åˆ—è¡¨è¶Šæ¥è¶Šé•¿ï¼›
+///  2. å„è‡ª FindObjectOfType&lt;PlayerState&gt;() â€”â€” æ¯æ¬¡åˆ¤å®šä¸€æ¬¡å…¨åœºæœç´¢ï¼Œ
+///     è€Œæ¡ä»¶ç³»ç»Ÿæ¯å¸§è¦è·‘å¥½å‡ ä¸ªæ¡ä»¶ï¼Œæ€§èƒ½ä¼šå´©ã€‚
 ///
-/// ÓÃ readonly struct + in ´«µİ£¬Áã¶Ñ·ÖÅä£¨Óë DamageInfo Í¬Àí£©¡£
+/// ç”¨ readonly struct + in ä¼ é€’ï¼Œé›¶å †åˆ†é…ï¼ˆä¸ DamageInfo åŒç†ï¼‰ã€‚
 /// </summary>
 public readonly struct BossContext
 {
-    /// <summary>Íæ¼ÒÉíÉÏÊÜ»÷ºËĞÄµÄÎïÌåÃû¡£Ãé×¼µãÓÅÏÈÈ¡Ëü¡£</summary>
+    /// <summary>ç©å®¶èº«ä¸Šå—å‡»æ ¸å¿ƒçš„ç‰©ä½“åã€‚ç„å‡†ç‚¹ä¼˜å…ˆå–å®ƒã€‚</summary>
     public const string HurtboxName = "Hurtbox_Core";
 
     public readonly Transform boss;
@@ -25,7 +25,7 @@ public readonly struct BossContext
     public readonly PlayerState playerState;
     public readonly BossController controller;
 
-    // ¡¾ĞÂÔö¡¿Ãé×¼µãÏà¹Ø¡£ÔÚ¹¹ÔìÊ±½âÎöÒ»´Î²¢»º´æ£¬±ÜÃâÃ¿Ö¡ Find¡£
+    // ã€æ–°å¢ã€‘ç„å‡†ç‚¹ç›¸å…³ã€‚åœ¨æ„é€ æ—¶è§£æä¸€æ¬¡å¹¶ç¼“å­˜ï¼Œé¿å…æ¯å¸§ Findã€‚
     private readonly Transform playerHurtbox;
     private readonly Collider2D playerCollider;
 
@@ -36,7 +36,7 @@ public readonly struct BossContext
         this.bossState = controller != null ? controller.bossState : null;
 
         this.player = player;
-        // Íæ¼ÒµÄÅö×²Ìå³£¹ÒÔÚ×ÓÎïÌåÉÏ£¬ÓÃ InParent ¶µ×¡ÕâÖÖ½á¹¹
+        // ç©å®¶çš„ç¢°æ’ä½“å¸¸æŒ‚åœ¨å­ç‰©ä½“ä¸Šï¼Œç”¨ InParent å…œä½è¿™ç§ç»“æ„
         this.playerState = player != null ? player.GetComponentInParent<PlayerState>() : null;
 
         this.playerHurtbox = FindHurtbox(player);
@@ -47,11 +47,11 @@ public readonly struct BossContext
     {
         if (player == null) return null;
 
-        // ÏÈÕÒÖ±½Ó×ÓÎïÌå
+        // å…ˆæ‰¾ç›´æ¥å­ç‰©ä½“
         Transform direct = player.Find(HurtboxName);
         if (direct != null) return direct;
 
-        // ÔÙÍùÏÂµİ¹éÕÒÒ»²ãÒÔÉÏµÄÇé¿ö
+        // å†å¾€ä¸‹é€’å½’æ‰¾ä¸€å±‚ä»¥ä¸Šçš„æƒ…å†µ
         Transform[] all = player.GetComponentsInChildren<Transform>(true);
         for (int i = 0; i < all.Length; i++)
         {
@@ -61,15 +61,15 @@ public readonly struct BossContext
         return null;
     }
 
-    /// <summary>Çé±¨ÊÇ·ñÍêÕû¿ÉÓÃ¡£Ö´ĞĞÆ÷ºÍÌõ¼şÔÚÊ¹ÓÃÇ°Ó¦ÏÈ¼ì²é¡£</summary>
+    /// <summary>æƒ…æŠ¥æ˜¯å¦å®Œæ•´å¯ç”¨ã€‚æ‰§è¡Œå™¨å’Œæ¡ä»¶åœ¨ä½¿ç”¨å‰åº”å…ˆæ£€æŸ¥ã€‚</summary>
     public bool IsValid => boss != null && player != null && bossState != null;
 
     /// <summary>
-    /// ¡¾Ãé×¼µã¡¿ËùÓĞ¹¥»÷¶¼Ó¦¸ÃÃéÕâÀï£¬¶ø²»ÊÇ player.position¡£
+    /// ã€ç„å‡†ç‚¹ã€‘æ‰€æœ‰æ”»å‡»éƒ½åº”è¯¥ç„è¿™é‡Œï¼Œè€Œä¸æ˜¯ player.positionã€‚
     ///
-    /// Ô­Òò£ºÍæ¼ÒµÄÖáĞÄµãÍ¨³£ÔÚ½Åµ×£¬Ö±½ÓÃé transform.position »áµ¼ÖÂ
-    /// ¼¤¹â¡¢µ¯Ä»È«²¿´òÔÚµØÃæÉÏ¡£ÓÅÏÈÈ¡ Hurtbox_Core£¬
-    /// Ã»ÓĞÔòÍË»ØÅö×²ÌåÖĞĞÄ£¬×î²î²ÅÓÃ½Åµ×¡£
+    /// åŸå› ï¼šç©å®¶çš„è½´å¿ƒç‚¹é€šå¸¸åœ¨è„šåº•ï¼Œç›´æ¥ç„ transform.position ä¼šå¯¼è‡´
+    /// æ¿€å…‰ã€å¼¹å¹•å…¨éƒ¨æ‰“åœ¨åœ°é¢ä¸Šã€‚ä¼˜å…ˆå– Hurtbox_Coreï¼Œ
+    /// æ²¡æœ‰åˆ™é€€å›ç¢°æ’ä½“ä¸­å¿ƒï¼Œæœ€å·®æ‰ç”¨è„šåº•ã€‚
     /// </summary>
     public Vector2 PlayerAimPoint
     {
@@ -81,13 +81,13 @@ public readonly struct BossContext
         }
     }
 
-    /// <summary>ÓëÍæ¼ÒµÄÖ±Ïß¾àÀë¡£Íæ¼Ò²»´æÔÚÊ±·µ»Ø float.MaxValue£¨ÊÓÎª¹»²»×Å£©¡£</summary>
+    /// <summary>ä¸ç©å®¶çš„ç›´çº¿è·ç¦»ã€‚ç©å®¶ä¸å­˜åœ¨æ—¶è¿”å› float.MaxValueï¼ˆè§†ä¸ºå¤Ÿä¸ç€ï¼‰ã€‚</summary>
     public float DistanceToPlayer =>
         (boss != null && player != null)
             ? Vector2.Distance(boss.position, player.position)
             : float.MaxValue;
 
-    /// <summary>Íæ¼ÒÏà¶Ô Boss µÄË®Æ½·½Ïò£ºÓÒÎª +1£¬×óÎª -1¡£ÄÃ²»µ½Íæ¼ÒÊ±·µ»Ø 0¡£</summary>
+    /// <summary>ç©å®¶ç›¸å¯¹ Boss çš„æ°´å¹³æ–¹å‘ï¼šå³ä¸º +1ï¼Œå·¦ä¸º -1ã€‚æ‹¿ä¸åˆ°ç©å®¶æ—¶è¿”å› 0ã€‚</summary>
     public float HorizontalSignToPlayer
     {
         get
@@ -98,7 +98,7 @@ public readonly struct BossContext
         }
     }
 
-    /// <summary>Íæ¼Òµ±Ç°ÑªÁ¿Õ¼±È 0~1¡£ÄÃ²»µ½Íæ¼ÒÊ±·µ»Ø 1£¨ÊÓÎªÂúÑª£¬Ìõ¼şÄ¬ÈÏ²»´¥·¢£©¡£</summary>
+    /// <summary>ç©å®¶å½“å‰è¡€é‡å æ¯” 0~1ã€‚æ‹¿ä¸åˆ°ç©å®¶æ—¶è¿”å› 1ï¼ˆè§†ä¸ºæ»¡è¡€ï¼Œæ¡ä»¶é»˜è®¤ä¸è§¦å‘ï¼‰ã€‚</summary>
     public float PlayerHPRatio
     {
         get
@@ -109,7 +109,7 @@ public readonly struct BossContext
         }
     }
 
-    /// <summary>Boss ×ÔÉíÑªÁ¿Õ¼±È 0~1¡£</summary>
+    /// <summary>Boss è‡ªèº«è¡€é‡å æ¯” 0~1ã€‚</summary>
     public float BossHPRatio
     {
         get

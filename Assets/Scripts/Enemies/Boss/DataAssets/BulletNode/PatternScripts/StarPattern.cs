@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewStarPattern", menuName = "ScriptableObjects/BulletPattern/Star")]
 public class StarPattern : BulletPatternBase
@@ -16,7 +16,7 @@ public class StarPattern : BulletPatternBase
     {
         Vector2[] spawnPositions = new Vector2[starBulletCount];
 
-        //¸ù¾İ¹«Ê½µÃ³öÌØ¶¨½Ç¶ÈÏÂµÄxy×ø±ê
+        //æ ¹æ®å…¬å¼å¾—å‡ºç‰¹å®šè§’åº¦ä¸‹çš„xyåæ ‡
         for (int i = 0; i < starBulletCount; i++)
         {
             float angle = (i / (float)starBulletCount) * 2 * Mathf.PI;
@@ -36,7 +36,7 @@ public class StarPattern : BulletPatternBase
         rot.speed = starBulletSpeed;
         rot.rotationSpeed = Random.Range(0, 2) == 0 ? Random.Range(45f, 120f) : Random.Range(-120f, -45f);
 
-        // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃĞÂµÄÎ»ÔËËã¼ì²é·½ÕóÊÇ·ñĞèÒª¼ÓËÙ
+        // ã€ä¿®æ”¹ã€‘ï¼šä½¿ç”¨æ–°çš„ä½è¿ç®—æ£€æŸ¥æ–¹é˜µæ˜¯å¦éœ€è¦åŠ é€Ÿ
         rot.enableAcceleration = enableAcceleration;
         rot.accelerationRate = accelerationRate;
 

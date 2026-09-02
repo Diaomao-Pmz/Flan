@@ -1,28 +1,28 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class ActionNode : ScriptableObject
 {
-    [Header("--- AI ¾ö²ßºËĞÄÊı¾İ ---")]
-    [Tooltip("¶¯×÷µÄ±êÊ¶Ãû³Æ£¨¿ÉÓÃÓÚÆ¥Åä¶¯»­¡¢¼¼ÄÜÃû³ÆµÈ£©")]
+    [Header("--- AI å†³ç­–æ ¸å¿ƒæ•°æ® ---")]
+    [Tooltip("åŠ¨ä½œçš„æ ‡è¯†åç§°ï¼ˆå¯ç”¨äºåŒ¹é…åŠ¨ç”»ã€æŠ€èƒ½åç§°ç­‰ï¼‰")]
     public string actionName;
 
-    [Tooltip("AI ³é¿¨Ê±µÄÄ¬ÈÏ»ù´¡È¨ÖØ")]
+    [Tooltip("AI æŠ½å¡æ—¶çš„é»˜è®¤åŸºç¡€æƒé‡")]
     public int baseWeight = 100;
 
-    [Tooltip("¸Ã¼¼ÄÜµÄÀäÈ´Ê±¼ä£¨Ãë£©")]
+    [Tooltip("è¯¥æŠ€èƒ½çš„å†·å´æ—¶é—´ï¼ˆç§’ï¼‰")]
     public float cooldown = 0f;
 
-    [Tooltip("ÔÊĞíÊÍ·Å¸Ã¼¼ÄÜµÄ×îĞ¡Íæ¼Ò¾àÀë")]
+    [Tooltip("å…è®¸é‡Šæ”¾è¯¥æŠ€èƒ½çš„æœ€å°ç©å®¶è·ç¦»")]
     public float minCastDistance = 0f;
 
-    [Tooltip("ÔÊĞíÊÍ·Å¸Ã¼¼ÄÜµÄ×î´óÍæ¼Ò¾àÀë")]
+    [Tooltip("å…è®¸é‡Šæ”¾è¯¥æŠ€èƒ½çš„æœ€å¤§ç©å®¶è·ç¦»")]
     public float maxCastDistance = 15f;
 
-    [Header("--- Í¨ÓÃ¶¯»­ÅäÖÃ ---")]
-    [Tooltip("ĞîÁ¦/Ç°Ò¡¶¯»­Ãû")]
+    [Header("--- é€šç”¨åŠ¨ç”»é…ç½® ---")]
+    [Tooltip("è“„åŠ›/å‰æ‘‡åŠ¨ç”»å")]
     public string chargeAnimName;
-    [Tooltip("ÊÍ·Å/³ÖĞø¶¯»­Ãû")]
+    [Tooltip("é‡Šæ”¾/æŒç»­åŠ¨ç”»å")]
     public string activeAnimName;
-    [Tooltip("ÊÕÕĞ/ºóÒ¡¶¯»­Ãû")]
+    [Tooltip("æ”¶æ‹›/åæ‘‡åŠ¨ç”»å")]
     public string recoverAnimName;
 }

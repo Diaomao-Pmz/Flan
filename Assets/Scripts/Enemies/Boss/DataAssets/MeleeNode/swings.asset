@@ -21,9 +21,9 @@ MonoBehaviour:
   activeAnimName: 
   recoverAnimName: 
   swings:
-  - windupTime: 0
+  - windupTime: 1
     hitboxDuration: 0.5
-    recoverTime: 0
+    recoverTime: 0.5
     hitboxOffset: {x: 1.5, y: 0}
     hitboxSize: {x: 1, y: 2}
     damage: 20

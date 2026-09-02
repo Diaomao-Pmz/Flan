@@ -1,20 +1,20 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-// ¶¨Òå´«ËÍµÄÕ½Êõ²ßÂÔ
+// å®šä¹‰ä¼ é€çš„æˆ˜æœ¯ç­–ç•¥
 public enum TeleportTargetType
 {
-    RandomPoint,    // Ëæ»ú´«ËÍµã£¨Ò»½×¶Î·À·´£©
-    BehindPlayer,   // ÈÆ±³ÍµÏ®
-    Center          // »Øµ½³¡µØÖĞÑë£¨¶ş½×¶Î×ª³¡µÈ£©
+    RandomPoint,    // éšæœºä¼ é€ç‚¹ï¼ˆä¸€é˜¶æ®µé˜²åï¼‰
+    BehindPlayer,   // ç»•èƒŒå·è¢­
+    Center          // å›åˆ°åœºåœ°ä¸­å¤®ï¼ˆäºŒé˜¶æ®µè½¬åœºç­‰ï¼‰
 }
 
 [CreateAssetMenu(fileName = "NewTeleportNode", menuName = "ScriptableObjects/TeleportNode")]
 public class TeleportNode : ActionNode
 {
-    [Header("--- ´«ËÍ×¨ÊôÅäÖÃ ---")]
-    [Tooltip("´«ËÍÇ°Ò¡£¨Ãë£©¡£0 ±íÊ¾Ë²·¢¡£")]
+    [Header("--- ä¼ é€ä¸“å±é…ç½® ---")]
+    [Tooltip("ä¼ é€å‰æ‘‡ï¼ˆç§’ï¼‰ã€‚0 è¡¨ç¤ºç¬å‘ã€‚")]
     public float teleportDelay = 0.2f;
 
-    [Tooltip("AI ¾ö¶¨Ê¹ÓÃÄÄÖÖ´«ËÍ²ßÂÔ")]
+    [Tooltip("AI å†³å®šä½¿ç”¨å“ªç§ä¼ é€ç­–ç•¥")]
     public TeleportTargetType targetType = TeleportTargetType.RandomPoint;
 }

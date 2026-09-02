@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewRotationPattern", menuName = "ScriptableObjects/BulletPattern/Rotation")]
 public class RotationPattern : BulletPatternBase
@@ -12,15 +12,15 @@ public class RotationPattern : BulletPatternBase
 
     public override void Spawn(BulletSpawnContext ctx)
     {
-        // ¡¾¶à¹ì»¯¹Ø¼ü¡¿Ğı×ªÀÛ¼ÓÆ÷¸Ä´Ó¹ìµÀÉÏÈ¡¡£
-        // Ô­ÏÈÊÇ Emitter µÄ¹²Ïí×Ö¶Î£¬Á½Ìõ Rotation ¹ìµÀ²¢·¢Ê±»á»¥ÏàÇÀ£¬½Ç¶È»áÂÒÌø¡£
+        // ã€å¤šè½¨åŒ–å…³é”®ã€‘æ—‹è½¬ç´¯åŠ å™¨æ”¹ä»è½¨é“ä¸Šå–ã€‚
+        // åŸå…ˆæ˜¯ Emitter çš„å…±äº«å­—æ®µï¼Œä¸¤æ¡ Rotation è½¨é“å¹¶å‘æ—¶ä¼šäº’ç›¸æŠ¢ï¼Œè§’åº¦ä¼šä¹±è·³ã€‚
         float currentAngle = ctx.activeTrack != null ? ctx.activeTrack.angle : 0f;
 
         Quaternion rotation = Quaternion.Euler(0, 0, currentAngle);
         Vector2 dir = rotation * new Vector2(1, 0);
         GameObject bullet = ctx.host.SpawnProjectile(dir, ctx.firePoint.position, ctx.projectileKey, rotationBulletSpeed);
 
-        // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃĞÂµÄÎ»ÔËËã¼ì²éÊÇ·ñĞèÒª¹ÒÔØ¼ÓËÙÆ÷
+        // ã€ä¿®æ”¹ã€‘ï¼šä½¿ç”¨æ–°çš„ä½è¿ç®—æ£€æŸ¥æ˜¯å¦éœ€è¦æŒ‚è½½åŠ é€Ÿå™¨
         if (enableAccerlation)
         {
             BulletAcceleration acc = bullet.GetComponent<BulletAcceleration>();
@@ -30,7 +30,7 @@ public class RotationPattern : BulletPatternBase
             }
             else
             {
-                Debug.LogWarning($"[Emitter] {bullet.name} È±ÉÙ BulletAcceleration ×é¼ş£¬¼ÓËÙÎ´ÉúĞ§¡£", bullet);
+                Debug.LogWarning($"[Emitter] {bullet.name} ç¼ºå°‘ BulletAcceleration ç»„ä»¶ï¼ŒåŠ é€Ÿæœªç”Ÿæ•ˆã€‚", bullet);
             }
         }
 

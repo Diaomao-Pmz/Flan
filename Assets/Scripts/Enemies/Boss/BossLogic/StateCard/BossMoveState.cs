@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class BossMoveState : IState
 {
     private BossController boss;
     private Rigidbody2D rb;
     private float moveTimer;
-    private float targetMaintainDistance; // ¡¾ĞÂÔö¡¿£º¶¯Ì¬´æ´¢´óÄÔ·¢À´µÄ×îÓÅ¾àÀë
+    private float targetMaintainDistance; // ã€æ–°å¢ã€‘ï¼šåŠ¨æ€å­˜å‚¨å¤§è„‘å‘æ¥çš„æœ€ä¼˜è·ç¦»
 
     public BossMoveState(BossController bc)
     {
@@ -18,10 +18,10 @@ public class BossMoveState : IState
         moveTimer = Random.Range(1f, 2.5f);
         boss.bossState.bossMechanic.isCornered = false;
 
-        // ¡¾ºËĞÄ½»»¥¡¿£ºÏò AI ²ÎÄ±³¤ÇëÇó×î¼Ñ½ÓµĞ¾àÀë
+        // ã€æ ¸å¿ƒäº¤äº’ã€‘ï¼šå‘ AI å‚è°‹é•¿è¯·æ±‚æœ€ä½³æ¥æ•Œè·ç¦»
         targetMaintainDistance = boss.AI.GetOptimalEngagementDistance();
 
-        Debug.Log($"[BossMoveState] ÊÕµ½Ö¸Áî£¬³¢ÊÔ±£³Ö¶¯Ì¬×î¼Ñ¾àÀë: {targetMaintainDistance:F1}¡£ÒÆ¶¯³ÖĞø {moveTimer:F1} Ãë");
+        Debug.Log($"[BossMoveState] æ”¶åˆ°æŒ‡ä»¤ï¼Œå°è¯•ä¿æŒåŠ¨æ€æœ€ä½³è·ç¦»: {targetMaintainDistance:F1}ã€‚ç§»åŠ¨æŒç»­ {moveTimer:F1} ç§’");
     }
 
     public void Update()
@@ -39,7 +39,7 @@ public class BossMoveState : IState
         float distance = Vector2.Distance(playerPos, bossPos);
         float dirX = 0f;
 
-        // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃ¶¯Ì¬»ñÈ¡µÄ targetMaintainDistance Ìæ´úĞ´ËÀµÄ±äÁ¿
+        // ã€ä¿®æ”¹ã€‘ï¼šä½¿ç”¨åŠ¨æ€è·å–çš„ targetMaintainDistance æ›¿ä»£å†™æ­»çš„å˜é‡
         if (distance < targetMaintainDistance - 0.5f)
         {
             dirX = (bossPos.x > playerPos.x) ? 1f : -1f;

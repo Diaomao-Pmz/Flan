@@ -9,6 +9,10 @@ using Flandre.CombatSystem;
 /// 【为什么独立出来】
 /// BAE_MeleeAttacker 和 BAE_DashAttacker 的第二阶段跑的是同一套挥击逻辑。
 /// 抽出来之后，冲刺卡可以直接复用你在近战卡上调好的手感参数。
+///
+/// 【视觉是可选的】
+/// visual 参数可以传 null，逻辑照常运行。删掉整个 BossMeleeVisual 组件
+/// 也不会影响判定 —— 换成 Animator 驱动的真动画时，只需删掉这几个 visual 调用。
 /// </summary>
 public class MeleeSwingRunner
 {
@@ -20,8 +24,17 @@ public class MeleeSwingRunner
     public Vector2 GizmoCenter { get; private set; }
     public Vector2 GizmoSize { get; private set; }
 
+    // 打断时要收起视觉，所以得记住当前用的是哪一个
+    private BossMeleeVisual activeVisual;
+
     /// <summary>
-    /// 按顺序跑完整套挥击。时序：前摇 → 判定窗口 → 后摇。
+    /// 按顺序跑完整套挥击。
+    ///
+    /// 时序（视觉与判定共用同一组 SO 参数）：
+    ///   windupTime      判定未生效｜手出现并逐渐举高
+    ///   hitboxDuration  判定生效  ｜手落回判定框
+    ///   recoverTime     判定结束  ｜手停在原地不动（后摇）
+    ///   → 下一段 / 结束        ｜手消失
     /// </summary>
     public IEnumerator Run(
         List<MeleeSwing> swings,
@@ -31,9 +44,12 @@ public class MeleeSwingRunner
         ContactFilter2D filter,
         Animator animator,
         string defaultActiveAnim,
-        GameObject instigator)
+        GameObject instigator,
+        BossMeleeVisual visual = null)
     {
         if (swings == null || swings.Count == 0) yield break;
+
+        activeVisual = visual;
 
         // 【数据快照】拍下开打瞬间的朝向。
         // 不这么做的话，判定框会在挥击过程中随玩家左右横跳。
@@ -47,23 +63,47 @@ public class MeleeSwingRunner
             // 追踪型连招：每段重新取一次朝向
             if (faceEachSwing) facing = ResolveFacing(ctx, facing);
 
-            if (swing.windupTime > 0f)
+            // --- 前摇：手出现并举高 ---
+            // 有视觉时由它 yield 掉 windupTime，没有时用 WaitForSeconds。
+            // 两条路径耗时相同，判定时序不受视觉存在与否影响。
+            if (visual != null)
+            {
+                yield return visual.Windup(
+                    HitboxCenter(owner, swing, facing),
+                    swing.hitboxSize,
+                    swing.windupTime);
+            }
+            else if (swing.windupTime > 0f)
+            {
                 yield return new WaitForSeconds(swing.windupTime);
+            }
 
             PlayAnim(animator, string.IsNullOrEmpty(swing.swingAnimName)
                 ? defaultActiveAnim
                 : swing.swingAnimName);
 
-            yield return RunHitbox(swing, facing, ctx, owner, filter, instigator);
+            // --- 判定：手落回判定框 ---
+            visual?.Strike(HitboxCenter(owner, swing, facing), swing.hitboxSize);
 
+            yield return RunHitbox(swing, facing, ctx, owner, filter, instigator, visual);
+
+            // --- 后摇：手停在原地不动 ---
+            // 注意这里**不调用 Hide()** —— 砸完了手还压在地上，
+            // 直到后摇走完才抬起来，这段硬直对玩家是可读的输出窗口。
             if (swing.recoverTime > 0f)
                 yield return new WaitForSeconds(swing.recoverTime);
+
+            // 后摇结束才收起
+            visual?.Hide();
         }
+
+        activeVisual = null;
     }
 
     private IEnumerator RunHitbox(
         MeleeSwing swing, float facing, BossContext ctx,
-        Transform owner, ContactFilter2D filter, GameObject instigator)
+        Transform owner, ContactFilter2D filter, GameObject instigator,
+        BossMeleeVisual visual)
     {
         alreadyHit.Clear();
         HitboxActive = true;
@@ -73,11 +113,12 @@ public class MeleeSwingRunner
         do
         {
             // 每帧重算判定框位置，支持边移动边挥砍
-            Vector2 center = (Vector2)owner.position
-                             + new Vector2(swing.hitboxOffset.x * facing, swing.hitboxOffset.y);
+            Vector2 center = HitboxCenter(owner, swing, facing);
 
             GizmoCenter = center;
             GizmoSize = swing.hitboxSize;
+
+            visual?.Follow(center);
 
             Physics2D.OverlapBox(center, swing.hitboxSize, 0f, filter, hitBuffer);
 
@@ -101,10 +142,21 @@ public class MeleeSwingRunner
         HitboxActive = false;
     }
 
+    /// <summary>判定框中心。offset.x 会自动乘朝向，所以 SO 里填正数即可。</summary>
+    private Vector2 HitboxCenter(Transform owner, MeleeSwing swing, float facing)
+    {
+        return (Vector2)owner.position
+               + new Vector2(swing.hitboxOffset.x * facing, swing.hitboxOffset.y);
+    }
+
     public void Cancel()
     {
         alreadyHit.Clear();
         HitboxActive = false;
+
+        // 关键：打断时必须收起方块，否则 Boss 躺下了「手」还压在地上
+        activeVisual?.Hide();
+        activeVisual = null;
     }
 
     private float ResolveFacing(BossContext ctx, float fallback)

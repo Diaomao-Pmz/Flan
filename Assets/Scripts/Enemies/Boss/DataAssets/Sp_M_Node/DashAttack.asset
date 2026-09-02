@@ -21,14 +21,14 @@ MonoBehaviour:
   activeAnimName: 
   recoverAnimName: 
   windupBeforeDash: 0.35
-  dashSpeed: 14
+  dashSpeed: 30
   maxDashDistance: 10
   stopDistance: 1.2
   dashTimeout: 1.2
   stopOnWall: 1
   pauseAfterDash: 0.1
   swings:
-  - windupTime: 0
+  - windupTime: 0.3
     hitboxDuration: 0.5
     recoverTime: 0
     hitboxOffset: {x: 1.5, y: 0}

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewRandomPattern", menuName = "ScriptableObjects/BulletPattern/Random")]
 public class RandomPattern : BulletPatternBase

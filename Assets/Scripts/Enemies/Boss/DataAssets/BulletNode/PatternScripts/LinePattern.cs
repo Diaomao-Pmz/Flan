@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewLinePattern", menuName = "ScriptableObjects/BulletPattern/Line")]
 public class LinePattern : BulletPatternBase
@@ -6,7 +6,7 @@ public class LinePattern : BulletPatternBase
     [Header("--- Line ---")]
     public float lineBulletSpeed = 15f;
     public float lineBulletScale = 1.5f;
-    [Tooltip("ÂäµãYÖáÆ«ÒÆ£ºÃé×¼Íæ¼ÒÈõµãÉÏ·½(+)»òÏÂ·½(-)")]
+    [Tooltip("è½ç‚¹Yè½´åç§»ï¼šç„å‡†ç©å®¶å¼±ç‚¹ä¸Šæ–¹(+)æˆ–ä¸‹æ–¹(-)")]
     public float lineOffsetY = 0f;
 
     public override void Spawn(BulletSpawnContext ctx)
@@ -15,17 +15,17 @@ public class LinePattern : BulletPatternBase
 
         if (ctx.player != null)
         {
-            // 1. »ñÈ¡×î¾«È·µÄÍæ¼ÒÈõµã×ø±ê
+            // 1. è·å–æœ€ç²¾ç¡®çš„ç©å®¶å¼±ç‚¹åæ ‡
             Vector3 targetPos = ctx.playerTargetPosition;
 
-            // 2. ½«ÂäµãÆ«ÒÆ¼ÓÔÚ"×¼ĞÇ"ÉÏ£¡
+            // 2. å°†è½ç‚¹åç§»åŠ åœ¨"å‡†æ˜Ÿ"ä¸Šï¼
             targetPos.y += lineOffsetY;
 
-            // 3. Ç¹¿ÚÒÀÈ»ÔÚÀÏµØ·½£¬µ«Ãé×¼µÄÊÇÆ«ÒÆºóµÄÈõµã
+            // 3. æªå£ä¾ç„¶åœ¨è€åœ°æ–¹ï¼Œä½†ç„å‡†çš„æ˜¯åç§»åçš„å¼±ç‚¹
             dir = (targetPos - ctx.firePoint.position).normalized;
         }
 
-        // Ç¹¿ÚÎ»ÖÃ²»½øĞĞÈÎºÎÆ«ÒÆ£¬ÔÚÔ­µãÉú³É
+        // æªå£ä½ç½®ä¸è¿›è¡Œä»»ä½•åç§»ï¼Œåœ¨åŸç‚¹ç”Ÿæˆ
         Vector3 spawnPos = ctx.firePoint.position;
 
         GameObject bullet = ctx.host.SpawnProjectile(dir, spawnPos, ctx.projectileKey, lineBulletSpeed);

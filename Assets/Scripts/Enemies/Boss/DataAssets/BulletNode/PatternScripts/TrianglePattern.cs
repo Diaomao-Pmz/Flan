@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
 [CreateAssetMenu(fileName = "NewTrianglePattern", menuName = "ScriptableObjects/BulletPattern/Triangle")]
@@ -18,7 +18,7 @@ public class TrianglePattern : BulletPatternBase
     {
         Vector2[] spawnPositions = new Vector2[triangleBulletCount];
 
-        //¸ù¾İ¹«Ê½µÃ³öÌØ¶¨½Ç¶ÈÏÂµÄxy×ø±ê
+        //æ ¹æ®å…¬å¼å¾—å‡ºç‰¹å®šè§’åº¦ä¸‹çš„xyåæ ‡
         for (int i = 0; i < triangleBulletCount; i++)
         {
             float angle = (i / (float)triangleBulletCount) * 2 * Mathf.PI;
@@ -38,7 +38,7 @@ public class TrianglePattern : BulletPatternBase
         rot.speed = triangleBulletSpeed;
         rot.rotationSpeed = Random.Range(0, 2) == 0 ? Random.Range(45f, 120f) : Random.Range(-120f, -45f);
 
-        // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃĞÂµÄÎ»ÔËËã¼ì²é·½ÕóÊÇ·ñĞèÒª¼ÓËÙ
+        // ã€ä¿®æ”¹ã€‘ï¼šä½¿ç”¨æ–°çš„ä½è¿ç®—æ£€æŸ¥æ–¹é˜µæ˜¯å¦éœ€è¦åŠ é€Ÿ
         rot.enableAcceleration = enableAcceleration;
         rot.accelerationRate = accelerationRate;
 
