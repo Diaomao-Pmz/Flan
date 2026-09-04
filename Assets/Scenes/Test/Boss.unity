@@ -1853,13 +1853,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6680cc39a7a00f54999d942263530fc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAIDecider
-  phase1Bullets: []
-  phase1Melees:
-  - {fileID: 11400000, guid: 5c7bf690b46b8784ea9511d88a66c689, type: 2}
+  phase1Bullets:
+  - {fileID: 11400000, guid: cf8b1ddba959cfe448b19b67674964c9, type: 2}
+  phase1Melees: []
   phase1Teleports: []
   phase1SpecialBullets: []
-  phase1SpecialMelees:
-  - {fileID: 11400000, guid: 10674a627498d994cb5d328274c7bd44, type: 2}
+  phase1SpecialMelees: []
   phase2Bullets:
   - {fileID: 11400000, guid: ead5623e896c9ff4ea1be273dfec6c1e, type: 2}
   - {fileID: 11400000, guid: 055ca54815ef2b240b27f449d54fce53, type: 2}

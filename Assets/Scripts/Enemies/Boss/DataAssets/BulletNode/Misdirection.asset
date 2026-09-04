@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64781698c5397314e9a2d0e00cbdb393, type: 3}
+  m_Name: Misdirection
+  m_EditorClassIdentifier: Assembly-CSharp::BulletNode
+  actionName: Misdirection
+  baseWeight: 100
+  cooldown: 0
+  minCastDistance: 0
+  maxCastDistance: 15
+  chargeAnimName: 
+  activeAnimName: 
+  recoverAnimName: 
+  phases:
+  - pattern: {fileID: 11400000, guid: b90ca4d1ad6131e46a56c20c02844e55, type: 2}
+    startDelay: 3
+    duration: 1.5
+    intervalOverride: 0
+    formationDuration: 0
+  - pattern: {fileID: 11400000, guid: 32ffa4e124b001a44a64f1f9eb6f10c1, type: 2}
+    startDelay: 0
+    duration: 3
+    intervalOverride: 0
+    formationDuration: 0
+  AttackName: 
+  formationDuration: 0
+  attackDuration: 3
