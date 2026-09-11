@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64781698c5397314e9a2d0e00cbdb393, type: 3}
-  m_Name: Rotation
+  m_Name: Misdirection 2
   m_EditorClassIdentifier: Assembly-CSharp::BulletNode
-  actionName: Rotation
+  actionName: Misdirection 2
   baseWeight: 100
   cooldown: 0
   minCastDistance: 0
@@ -21,11 +21,21 @@ MonoBehaviour:
   activeAnimName: 
   recoverAnimName: 
   phases:
-  - pattern: {fileID: 11400000, guid: 658e374a5ddaf3841b0edd08d185a203, type: 2}
+  - pattern: {fileID: 11400000, guid: 64295f45e2a0efd41898bcdf373f14dc, type: 2}
     startDelay: 0
-    duration: 6
+    duration: 3
     intervalOverride: 0
     formationDuration: 0
-  AttackName: Rotation
+  - pattern: {fileID: 11400000, guid: cdb3851521f798244bf08e69f490862d, type: 2}
+    startDelay: 0.5
+    duration: 3
+    intervalOverride: 0
+    formationDuration: 0
+  - pattern: {fileID: 11400000, guid: 87f86d386a0ce2d44b758b17cf667f0d, type: 2}
+    startDelay: 0.5
+    duration: 3
+    intervalOverride: 0
+    formationDuration: 0
+  AttackName: 
   formationDuration: 0
   attackDuration: 3

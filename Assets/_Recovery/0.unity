@@ -1115,14 +1115,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 990518335509109006, guid: c843abd2b5e97f9498d49827a390bc98, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1967584408090993740, guid: c843abd2b5e97f9498d49827a390bc98, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3211292476703678399, guid: c843abd2b5e97f9498d49827a390bc98, type: 3}
       propertyPath: m_Name
       value: Player
@@ -1166,10 +1158,6 @@ PrefabInstance:
     - target: {fileID: 8416553905337235819, guid: c843abd2b5e97f9498d49827a390bc98, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8649942814704363581, guid: c843abd2b5e97f9498d49827a390bc98, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1866,8 +1854,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAIDecider
   phase1Bullets:
-  - {fileID: 11400000, guid: 9b8c3930186b5604686a75abe49a0ba6, type: 2}
-  - {fileID: 11400000, guid: 879a8819865c8ca4ca53eb6160e27f84, type: 2}
+  - {fileID: 11400000, guid: cf8b1ddba959cfe448b19b67674964c9, type: 2}
+  - {fileID: 11400000, guid: 044fe26def2f68f4383231c8ba71c388, type: 2}
+  - {fileID: 11400000, guid: fea088638cd467c44bc27aea8b2206a5, type: 2}
   phase1Melees: []
   phase1Teleports: []
   phase1SpecialBullets: []

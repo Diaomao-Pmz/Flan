@@ -14,6 +14,7 @@ public class CircularSectorPattern : BulletPatternBase
     public int sectionCount = 18;
     public float sectorOffsetY = 0f; // 圆环作为整体，依然保留出生点偏移
     public float angleRange = 90f;
+    public float radius = 0;
 
     public override void Spawn(BulletSpawnContext ctx)
     {
@@ -24,13 +25,15 @@ public class CircularSectorPattern : BulletPatternBase
 
         float startAngle = targetAngle - angleRange / 2;
 
-        for (int i = 0; i < sectionCount; i++)
+        for (int i = 0; i <= sectionCount; i++)
         {
             float currentAngle = startAngle + i * angleStep;
             Vector2 dir = new Vector2(Mathf.Cos(currentAngle * Mathf.Deg2Rad), Mathf.Sin(currentAngle * Mathf.Deg2Rad));
-            for(int j = 0; j < sectorBulletPerSection.Length; j++)
+
+            Vector3 adjustedSpawnPos = spawnPos + (Vector3)(radius*dir);
+            for (int j = 0; j < sectorBulletPerSection.Length; j++)
             {
-                ctx.host.SpawnProjectile(dir, spawnPos, ctx.projectileKey, sectorBulletPerSection[j].speed);
+                ctx.host.SpawnProjectile(dir, adjustedSpawnPos, ctx.projectileKey, sectorBulletPerSection[j].speed);
             }
         }
     }

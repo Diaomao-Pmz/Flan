@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5de6f5e350d2b1f45af9613dfc1faf22, type: 3}
-  m_Name: Rotation1
+  m_Name: Rot_TopRight
   m_EditorClassIdentifier: Assembly-CSharp::RotationPattern
-  DefaultInterval: 0.2
-  rotationBulletSpeed: 12
-  initialAngle: 60
-  endAngle: 180
-  rotationDuration: 3
-  enableAccerlation: 1
-  accelerationRate: 5
+  DefaultInterval: 0.15
+  rotationBulletSpeed: 4
+  initialAngle: 90
+  endAngle: -270
+  rotationDuration: 12
+  enableAccerlation: 0
+  accelerationRate: 3
   coef: 0.3

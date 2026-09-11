@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CirclePattern
   DefaultInterval: 2
   circleBulletSpeed: 8
-  circleBulletCount: 18
-  circleOffsetY: 0
+  circleBulletCount: 24
+  circleOffsetY: -0.1

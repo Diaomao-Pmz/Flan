@@ -51,7 +51,7 @@ public class EmitterTrack
         this.interval = Mathf.Max(interval, 0.01f); // 防止 0 间隔导致每帧狂喷
         this.formationDuration = formationDuration;
 
-        angle = 0f;
+        angle = float.NaN;
         delayTimer = 0f;
         shotTimer = 0f;
         elapsed = 0f;
