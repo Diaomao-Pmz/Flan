@@ -11,6 +11,9 @@ using UnityEngine;
 ///
 /// 参数是从旧资产里抄下来的固定值（迁移时旧图案类已改为内嵌类，旧资产无法再被直接读取）。
 /// 旧 Rotation1 图案资产在迁移前已经不存在，Rotation / RR 两张卡用旋转图案的默认值代替，需要手动调。
+///
+/// 第二个菜单「迁移 main 新卡」只处理 main 分支合并进来的 Carnival / SquarePrison 两张卡，
+/// 不会动其他卡（适合已经跑过第一个菜单、并手动调过参数的情况）。
 /// </summary>
 public static class BulletNodeMigration
 {
@@ -76,7 +79,53 @@ public static class BulletNodeMigration
         Debug.Log($"[BulletNodeMigration] 迁移完成：{ok} 张卡。Rotation 与 RR 用的是旋转图案默认值，请手动检查。");
     }
 
+    [MenuItem("Tools/Boss/迁移 main 新卡（Carnival、SquarePrison）")]
+    public static void MigrateMainCards()
+    {
+        if (!EditorUtility.DisplayDialog("迁移 main 新卡",
+                "只覆盖 Carnival、SquarePrison 两张卡的 Phases，其他卡不动。\n\n继续吗？", "迁移", "取消"))
+            return;
+
+        int ok = 0;
+
+        // 嘉年华：四个角各拉一条斜线（C1 / C1 1 / C1 2 / C1 3），第 5 秒补一圈快速环形弹（FastCircle）
+        ok += Write("Carnival",
+            Phase(0f, 10f, CarnivalLine(4.67f, 4.59f, -6.86f, 0f)),     // C1
+            Phase(0f, 10f, CarnivalLine(-4.67f, 4.59f, 6.86f, 0f)),     // C1 1
+            Phase(0f, 10f, CarnivalLine(-4.67f, -4.59f, 6.86f, 0f)),    // C1 2
+            Phase(0f, 10f, CarnivalLine(4.67f, -4.59f, -6.86f, 0f)),    // C1 3
+            Phase(5f, 5f, new CirclePattern { interval = 2f, bulletSpeed = 8f, bulletCount = 18, offsetY = 0f }));   // FastCircle
+
+        // 方形牢笼：四条线围成一个框（SP1 / SP3 / SP4 / SP2），第 5 秒补一发瞄准直线弹（Line1）
+        ok += Write("SquarePrison",
+            Phase(0f, 10f, PrisonLine(-2f, 4.92f, -2f, -5.26f)),        // SP1
+            Phase(0f, 10f, PrisonLine(-6.85f, 3f, 6.58f, 3f)),          // SP3
+            Phase(0f, 10f, PrisonLine(6.58f, -3f, -6.85f, -3f)),        // SP4
+            Phase(0f, 10f, PrisonLine(2f, 4.92f, 2f, -5.26f)),          // SP2
+            Phase(5f, 5f, new LinePattern { interval = 2f, bulletSpeed = 15f, bulletScale = 1.5f, aimOffsetY = 0f }));   // Line1
+
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[BulletNodeMigration] main 新卡迁移完成：{ok} 张卡。");
+    }
+
     // ---------------- 旧资产参数 ----------------
+
+    private static FullScreenLinePattern CarnivalLine(float sx, float sy, float ex, float ey)
+        => FullLine(0.1f, 20, 3f, sx, sy, ex, ey, 3f, 3f);
+
+    private static FullScreenLinePattern PrisonLine(float sx, float sy, float ex, float ey)
+        => FullLine(0.2f, 15, 2f, sx, sy, ex, ey, 2f, 4f);
+
+    private static FullScreenLinePattern FullLine(float spawnInterval, int count, float freeze,
+                                                  float sx, float sy, float ex, float ey,
+                                                  float minSpeed, float maxSpeed)
+        => new FullScreenLinePattern
+        {
+            interval = 15f,   // 旧 DefaultInterval：比段长(10s)更长 → 每段只拉一次线
+            bulletSpawnInterval = spawnInterval, bulletCount = count, freezeTime = freeze,
+            startPosFromCam = new Vector2(sx, sy), endPosFromCam = new Vector2(ex, ey),
+            minSpeed = minSpeed, maxSpeed = maxSpeed
+        };
 
     private static CirclePattern Circle1()
         => new CirclePattern { interval = 2f, bulletSpeed = 8f, bulletCount = 24, offsetY = -0.1f };

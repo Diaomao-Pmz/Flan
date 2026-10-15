@@ -1,0 +1,134 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64781698c5397314e9a2d0e00cbdb393, type: 3}
+  m_Name: Carnival
+  m_EditorClassIdentifier: Assembly-CSharp::BulletNode
+  actionName: 
+  baseWeight: 100
+  cooldown: 0
+  minCastDistance: 0
+  maxCastDistance: 15
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
+  chargeAnimName: 
+  activeAnimName: 
+  recoverAnimName: 
+  phases:
+  - startDelay: 0
+    duration: 10
+    pattern:
+      rid: 3572679775665258501
+  - startDelay: 0
+    duration: 10
+    pattern:
+      rid: 3572679775665258502
+  - startDelay: 0
+    duration: 10
+    pattern:
+      rid: 3572679775665258503
+  - startDelay: 0
+    duration: 10
+    pattern:
+      rid: 3572679775665258504
+  - startDelay: 5
+    duration: 5
+    pattern:
+      rid: 3572679775665258505
+  references:
+    version: 2
+    RefIds:
+    - rid: 3572679775665258501
+      type: {class: FullScreenLinePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 15
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        bulletCount: 20
+        bulletSpawnInterval: 0.1
+        freezeTime: 3
+        startPosFromCam: {x: 4.67, y: 4.59}
+        endPosFromCam: {x: -6.86, y: 0}
+        minSpeed: 3
+        maxSpeed: 3
+    - rid: 3572679775665258502
+      type: {class: FullScreenLinePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 15
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        bulletCount: 20
+        bulletSpawnInterval: 0.1
+        freezeTime: 3
+        startPosFromCam: {x: -4.67, y: 4.59}
+        endPosFromCam: {x: 6.86, y: 0}
+        minSpeed: 3
+        maxSpeed: 3
+    - rid: 3572679775665258503
+      type: {class: FullScreenLinePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 15
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        bulletCount: 20
+        bulletSpawnInterval: 0.1
+        freezeTime: 3
+        startPosFromCam: {x: -4.67, y: -4.59}
+        endPosFromCam: {x: 6.86, y: 0}
+        minSpeed: 3
+        maxSpeed: 3
+    - rid: 3572679775665258504
+      type: {class: FullScreenLinePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 15
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        bulletCount: 20
+        bulletSpawnInterval: 0.1
+        freezeTime: 3
+        startPosFromCam: {x: 4.67, y: -4.59}
+        endPosFromCam: {x: -6.86, y: 0}
+        minSpeed: 3
+        maxSpeed: 3
+    - rid: 3572679775665258505
+      type: {class: CirclePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 2
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        bulletCount: 18
+        offsetY: 0

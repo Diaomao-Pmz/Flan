@@ -1,0 +1,202 @@
+[33mcommit 16159a0fb83f57f1e9e08d5eb3f66d677244cb47[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mV0.2.1[m[33m, [m[1;31morigin/V0.2.1[m[33m)[m
+Author: Diaomao <pmzomo030831@gmail.com>
+Date:   Thu Oct 15 12:59:33 2026 -0700
+
+    V0.2.8
+    
+    111
+
+ Assets/All-Chinese-Character-Set-main.meta         |    8 [32m+[m
+ Assets/All-Chinese-Character-Set-main/.gitignore   |    1 [32m+[m
+ .../3500+symbols.txt                               |    1 [32m+[m
+ .../3500+symbols.txt.meta                          |    7 [32m+[m
+ .../7000+symbols.txt                               |    1 [32m+[m
+ .../7000+symbols.txt.meta                          |    7 [32m+[m
+ Assets/All-Chinese-Character-Set-main/AGENTS.md    |   65 [32m++[m
+ .../All-Chinese-Character-Set-main/AGENTS.md.meta  |    7 [32m+[m
+ Assets/All-Chinese-Character-Set-main/Fonts.meta   |    8 [32m+[m
+ .../Fonts/NotoSansSC-Regular SDF.asset             |  298 [32m++++++[m
+ .../Fonts/NotoSansSC-Regular SDF.asset.meta}       |    2 [32m+[m[31m-[m
+ .../Fonts/NotoSansSC-Regular.otf                   |  Bin [31m0[m -> [32m8482020[m bytes
+ .../Fonts/NotoSansSC-Regular.otf.meta              |   21 [32m+[m
+ Assets/All-Chinese-Character-Set-main/README.md    |   63 [32m++[m
+ .../All-Chinese-Character-Set-main/README.md.meta  |    7 [32m+[m
+ .../All-Chinese-Character-Set-main/all+symbols.txt |    1 [32m+[m
+ .../all+symbols.txt.meta                           |    7 [32m+[m
+ Assets/All-Chinese-Character-Set-main/scripts.meta |    8 [32m+[m
+ .../scripts/build.js                               |   59 [32m++[m
+ .../scripts/build.js.meta                          |    7 [32m+[m
+ .../scripts/merge.js                               |   29 [32m+[m
+ .../scripts/merge.js.meta                          |   11 [32m+[m
+ .../scripts/remove-duplicates.js                   |   38 [32m+[m
+ .../scripts/remove-duplicates.js.meta              |    7 [32m+[m
+ Assets/All-Chinese-Character-Set-main/source.meta  |    8 [32m+[m
+ .../All-Chinese-Character-Set-main/source/3500.txt |    1 [32m+[m
+ .../source/3500.txt.meta                           |    7 [32m+[m
+ .../All-Chinese-Character-Set-main/source/7000.txt |    1 [32m+[m
+ .../source/7000.txt.meta                           |    7 [32m+[m
+ .../All-Chinese-Character-Set-main/source/all.txt  |    2 [32m+[m
+ .../source/all.txt.meta                            |    7 [32m+[m
+ .../source/symbols.txt                             |    5 [32m+[m
+ .../source/symbols.txt.meta                        |    7 [32m+[m
+ .../symbols-fullwidth.txt                          |    1 [32m+[m
+ .../symbols-fullwidth.txt.meta                     |    7 [32m+[m
+ Assets/All-Chinese-Character-Set-main/symbols.txt  |    1 [32m+[m
+ .../symbols.txt.meta                               |    7 [32m+[m
+ Assets/All-Chinese-Character-Set-main/xlsx.meta    |    8 [32m+[m
+ .../All-Chinese-Character-Set-main/xlsx/3500.xlsx  |  Bin [31m0[m -> [32m49365[m bytes
+ .../xlsx/3500.xlsx.meta                            |    7 [32m+[m
+ .../All-Chinese-Character-Set-main/xlsx/7000.xlsx  |  Bin [31m0[m -> [32m86542[m bytes
+ .../xlsx/7000.xlsx.meta                            |    7 [32m+[m
+ Assets/Animations/MyAnimator/Flandre_Fly.anim      |   16 [32m+[m[31m-[m
+ Assets/IA/Prefabs/Player.prefab                    |  597 [32m+++++++++++[m[31m-[m
+ Assets/IA/Prefabs/Player.prefab.meta               |    4 [32m+[m
+ Assets/Scenes/Test/Boss.unity                      |  739 [32m++++++++++++[m[31m--[m
+ Assets/Scripts/Core/Combat/DamageInfo.cs           |   18 [32m+[m[31m-[m
+ .../Enemies/Boss/BossLogic/BossAIDecider.cs        | 1004 [32m+++++++++++++++++[m[31m---[m
+ .../Enemies/Boss/BossLogic/BossController.cs       |   82 [32m+[m[31m-[m
+ Assets/Scripts/Enemies/Boss/BossLogic/BossState.cs |  102 [32m+[m[31m-[m
+ .../Boss/BossLogic/StateCard/BossCombatState.cs    |   44 [32m+[m
+ .../Boss/BossLogic/StateCard/BossMoveState.cs      |  164 [32m+++[m[31m-[m
+ .../Boss/BossLogic/StateCard/BossStunState.cs      |   43 [32m+[m[31m-[m
+ Assets/Scripts/Enemies/Boss/Core/BossContext.cs    |   40 [32m+[m
+ Assets/Scripts/Enemies/Boss/Core/HitboxUtility.cs  |    9 [32m+[m[31m-[m
+ .../Scripts/Enemies/Boss/DataAssets/ActionNode.cs  |   36 [32m+[m
+ .../Scripts/Enemies/Boss/DataAssets/BossRoutine.cs |  225 [32m+++++[m
+ .../Enemies/Boss/DataAssets/BossRoutine.cs.meta    |    2 [32m+[m
+ .../Enemies/Boss/DataAssets/BossRoutine.meta       |    8 [32m+[m
+ .../Boss/DataAssets/BossRoutine/P1_R_R1.asset      |   26 [32m+[m
+ .../Boss/DataAssets/BossRoutine/P1_R_R1.asset.meta |    8 [32m+[m
+ .../Boss/DataAssets/BossRoutine/P1_R_R2.asset      |   26 [32m+[m
+ .../Boss/DataAssets/BossRoutine/P1_R_R2.asset.meta |    8 [32m+[m
+ .../Boss/DataAssets/BossRoutine/P1_X_M1.asset      |   37 [32m+[m
+ .../Boss/DataAssets/BossRoutine/P1_X_M1.asset.meta |    8 [32m+[m
+ .../Scripts/Enemies/Boss/DataAssets/BulletNode.cs  |   49 [32m+[m[31m-[m
+ .../Boss/DataAssets/BulletNode/Circle.asset        |   29 [32m+[m[31m-[m
+ .../Boss/DataAssets/BulletNode/Combo/Flower.asset  |  190 [32m++++[m
+ .../DataAssets/BulletNode/Combo/Flower.asset.meta  |    8 [32m+[m
+ .../DataAssets/BulletNode/Combo/Misdirection.asset |  116 [32m+++[m
+ .../BulletNode/Combo/Misdirection.asset.meta       |    8 [32m+[m
+ .../Boss/DataAssets/BulletNode/Combo/RR.asset      |   80 [32m+[m[31m-[m
+ .../Enemies/Boss/DataAssets/BulletNode/Line.asset  |   30 [32m+[m[31m-[m
+ .../DataAssets/BulletNode/PatternSO/Circular.meta  |    8 [32m+[m
+ .../PatternSO/Circular/CircularSector1.asset       |   22 [32m+[m
+ .../PatternSO/Circular/CircularSector1.asset.meta  |    8 [32m+[m
+ .../PatternSO/Circular/CircularSector2.asset       |   22 [32m+[m
+ .../PatternSO/Circular/CircularSector2.asset.meta  |    8 [32m+[m
+ .../PatternSO/Circular/CircularSector3.asset       |   21 [32m+[m
+ .../PatternSO/Circular/CircularSector3.asset.meta  |    8 [32m+[m
+ .../PatternSO/Circular/CircularSector4.asset       |   21 [32m+[m
+ .../PatternSO/Circular/CircularSector4.asset.meta  |    8 [32m+[m
+ .../BulletNode/PatternScripts/BulletPatternBase.cs |   70 [32m+[m[31m-[m
+ .../BulletNode/PatternScripts/ChaoticPattern.cs    |   28 [32m+[m
+ .../BulletNode/PatternScripts/CirclePattern.cs     |   29 [32m+[m[31m-[m
+ .../PatternScripts/CircularSectorPattern.cs        |   49 [32m+[m
+ .../PatternScripts/FormationPatternBase.cs         |   46 [32m+[m
+ .../PatternScripts/FormationPatternBase.cs.meta    |    2 [32m+[m
+ .../BulletNode/PatternScripts/LinePattern.cs       |   23 [32m+[m[31m-[m
+ .../BulletNode/PatternScripts/RandomPattern.cs     |   14 [32m+[m[31m-[m
+ .../BulletNode/PatternScripts/RotationPattern.cs   |   43 [32m+[m
+ .../BulletNode/PatternScripts/SquarePattern.cs     |   90 [32m+[m[31m-[m
+ .../BulletNode/PatternScripts/StarPattern.cs       |   47 [32m+[m[31m-[m
+ .../BulletNode/PatternScripts/TrianglePattern.cs   |   49 [32m+[m[31m-[m
+ .../Boss/DataAssets/BulletNode/Random.asset        |   27 [32m+[m[31m-[m
+ .../Boss/DataAssets/BulletNode/Rotation.asset      |   27 [32m+[m
+ .../Boss/DataAssets/BulletNode/Square.asset        |   32 [32m+[m[31m-[m
+ .../Enemies/Boss/DataAssets/BulletNode/Star.asset  |   33 [32m+[m[31m-[m
+ .../Boss/DataAssets/BulletNode/Triangle.asset      |   33 [32m+[m[31m-[m
+ .../Enemies/Boss/DataAssets/DashAttackNode.cs      |   21 [32m+[m[31m-[m
+ .../Scripts/Enemies/Boss/DataAssets/LaserNode.cs   |   32 [32m+[m[31m-[m
+ .../Scripts/Enemies/Boss/DataAssets/MeleeNode.cs   |   43 [32m+[m[31m-[m
+ .../MeleeNode/{swings.asset => KnockBack.asset}    |   16 [32m+[m[31m-[m
+ .../{swings.asset.meta => KnockBack.asset.meta}    |    0
+ .../Sp_B_Node/{L1.asset => Laser1.asset}           |   24 [32m+[m[31m-[m
+ .../Sp_B_Node/{L1.asset.meta => Laser1.asset.meta} |    0
+ .../Enemies/Boss/DataAssets/TeleportNode.cs        |   58 [32m+[m[31m-[m
+ .../Boss/DataAssets/TpNode/BehindPlayer.asset      |   14 [32m+[m[31m-[m
+ .../Enemies/Boss/DataAssets/TpNode/Escape.asset    |   33 [32m+[m
+ .../Boss/DataAssets/TpNode/Escape.asset.meta       |    8 [32m+[m
+ Assets/Scripts/Enemies/Boss/Editor.meta            |    8 [32m+[m
+ .../Enemies/Boss/Editor/BulletNodeMigration.cs     |  121 [32m+++[m
+ .../Boss/Editor/BulletNodeMigration.cs.meta        |    2 [32m+[m
+ .../Enemies/Boss/Editor/SubclassSelectorDrawer.cs  |   97 [32m++[m
+ .../Boss/Editor/SubclassSelectorDrawer.cs.meta     |    2 [32m+[m
+ .../Boss/Execution/Bullet/BAE_BulletEmitter.cs     |  153 [32m+[m[31m--[m
+ .../Enemies/Boss/Execution/Bullet/EmitterTrack.cs  |   11 [32m+[m[31m-[m
+ .../Boss/Execution/Melee/BAE_MeleeAttacker.cs      |    6 [32m+[m
+ .../Boss/Execution/Melee/BossMeleeVisual.cs        |  191 [32m++++[m
+ .../Boss/Execution/Melee/MeleeSwingRunner.cs       |   97 [32m+[m[31m-[m
+ .../Execution/Special_Bullet/BAE_LaserAttacker.cs  |  615 [32m++++++[m[31m------[m
+ .../Execution/Special_Melee/BAE_DashAttacker.cs    |   11 [32m+[m[31m-[m
+ .../Enemies/Boss/Execution/Tp/BAE_Teleporter.cs    |  516 [32m+++++++++[m[31m-[m
+ Assets/Scripts/Enemies/Boss/UI/EnemyShieldBar.cs   |   16 [32m+[m
+ Assets/Scripts/Items/Bullets/Enemy_Projectile.cs   |  260 [32m++[m[31m---[m
+ .../Player_V0.2/Combat/Charge/ChargeModule.cs      |  211 [32m++[m[31m--[m
+ .../Combat/Charge/PlayerChargeSystem.cs            |  101 [32m+[m[31m-[m
+ .../Player_V0.2/Combat/Combonodes/ComboNode.cs     |   17 [32m+[m[31m-[m
+ .../Combat/Combonodes/MainWeapon/A2.asset          |    1 [31m-[m
+ .../Combat/Combonodes/MainWeapon/A3.asset          |    1 [31m-[m
+ .../Combat/Combonodes/MainWeapon/AA1.asset         |    1 [31m-[m
+ .../Combat/Combonodes/MainWeapon/AA2.asset         |    1 [31m-[m
+ .../Combat/Combonodes/MainWeapon/AA3.asset         |    1 [31m-[m
+ .../Combat/Combonodes/SubWeapon/B1.asset           |    1 [31m-[m
+ .../Combat/Combonodes/SubWeapon/B3.asset           |    1 [31m-[m
+ .../Combat/Combonodes/SubWeapon/BB1.asset          |    1 [31m-[m
+ .../Combat/Combonodes/SubWeapon/BB2.asset          |    1 [31m-[m
+ .../Combat/Combonodes/SubWeapon/BB3.asset          |    4 [32m+[m[31m-[m
+ .../Combat/Combonodes/Weapons/MainWeapon.asset     |    5 [32m+[m[31m-[m
+ .../Combat/Combonodes/Weapons/SubWeapon.asset      |    7 [32m+[m[31m-[m
+ .../Combat/Effects/PlayerEffectSpawner.cs          |    9 [32m+[m[31m-[m
+ .../Player_V0.2/Combat/Weapons/WeaponLoadout.cs    |   79 [32m+[m[31m-[m
+ .../Player_V0.2/Combat/Weapons/WeaponMoveSet.cs    |   74 [32m+[m[31m-[m
+ .../Player_V0.2/Config/PlayerAttributeConfig.asset |   31 [32m+[m
+ .../Config/PlayerAttributeConfig.asset.meta        |    8 [32m+[m
+ .../Player_V0.2/Config/PlayerAttributeConfig.cs    |  103 [32m++[m
+ .../Config/PlayerAttributeConfig.cs.meta           |    2 [32m+[m
+ .../Player_V0.2/Config/PlayerCombatConfig.asset    |    7 [32m+[m[31m-[m
+ .../Player_V0.2/Config/PlayerCombatConfig.cs       |   13 [32m+[m[31m-[m
+ .../Player_V0.2/Config/PlayerMovementConfig.asset  |   24 [32m+[m[31m-[m
+ .../Player_V0.2/Config/PlayerMovementConfig.cs     |  279 [32m+++[m[31m---[m
+ .../Player_V0.2/Config/PlayerStateConfig.asset     |   22 [32m+[m
+ .../Config/PlayerStateConfig.asset.meta            |    8 [32m+[m
+ .../Player_V0.2/Config/PlayerStateConfig.cs        |   53 [32m++[m
+ .../Player_V0.2/Config/PlayerStateConfig.cs.meta   |    2 [32m+[m
+ .../Scripts/Player_V0.2/Core/Flandre_NameSpace.cs  |    8 [32m+[m[31m-[m
+ Assets/Scripts/Player_V0.2/Core/PlayerStateBase.cs |   30 [32m+[m[31m-[m
+ Assets/Scripts/Player_V0.2/Data/PlayerHealth.cs    |   84 [32m+[m[31m-[m
+ .../Scripts/Player_V0.2/Data/PlayerManaSystem.cs   |   39 [32m+[m[31m-[m
+ Assets/Scripts/Player_V0.2/Data/PlayerState.cs     |  105 [32m+[m[31m-[m
+ Assets/Scripts/Player_V0.2/Data/PlayerStats.cs     |   50 [32m+[m[31m-[m
+ Assets/Scripts/Player_V0.2/FSM/FlightMotor.cs      |  145 [32m+++[m
+ Assets/Scripts/Player_V0.2/FSM/FlightMotor.cs.meta |    2 [32m+[m
+ .../Scripts/Player_V0.2/FSM/HoverChargeHandler.cs  |  118 [31m---[m
+ .../Player_V0.2/FSM/HoverChargeHandler.cs.meta     |    2 [31m-[m
+ .../Player_V0.2/FSM/PassThroughController.cs       |  112 [32m+++[m
+ .../Player_V0.2/FSM/PassThroughController.cs.meta  |    2 [32m+[m
+ .../Scripts/Player_V0.2/FSM/PlayerStateMachine.cs  |  875 [32m++++++++[m[31m---------[m
+ .../Player_V0.2/FSM/States/ChargeStunState.cs      |  572 [31m-----------[m
+ .../Player_V0.2/FSM/States/ChargeStunState.cs.meta |    2 [31m-[m
+ .../Scripts/Player_V0.2/FSM/States/ComboState.cs   |   84 [32m+[m[31m-[m
+ Assets/Scripts/Player_V0.2/FSM/States/DashState.cs |  281 [32m+++[m[31m---[m
+ Assets/Scripts/Player_V0.2/FSM/States/FallState.cs |   45 [32m+[m[31m-[m
+ .../Player_V0.2/FSM/States/FlyCombatState.cs       |  184 [32m++++[m
+ .../Player_V0.2/FSM/States/FlyCombatState.cs.meta  |    2 [32m+[m
+ Assets/Scripts/Player_V0.2/FSM/States/FlyState.cs  |  119 [32m+[m[31m--[m
+ Assets/Scripts/Player_V0.2/FSM/States/HitState.cs  |    4 [32m+[m[31m-[m
+ Assets/Scripts/Player_V0.2/FSM/States/JumpState.cs |   27 [32m+[m[31m-[m
+ .../Scripts/Player_V0.2/FSM/States/SlideState.cs   |  223 [32m+++[m[31m--[m
+ .../Scripts/Player_V0.2/Input/ComboInputBuffer.cs  |  306 [32m+++[m[31m---[m
+ .../Player_V0.2/Input/PlayerCommandRouter.cs       |  282 [32m+++[m[31m---[m
+ .../Scripts/Player_V0.2/Input/PlayerController.cs  |   89 [32m+[m[31m-[m
+ .../Input/PlayerInputConfig.inputactions           |   40 [32m+[m[31m-[m
+ Assets/Scripts/Player_V0.2/Player.zip.meta         |    4 [32m+[m
+ Assets/Sprites/Bullets/touhou_projectiles.png.meta |   14 [32m+[m[31m-[m
+ .../Player/flandre/Fly/flandre_bat_highres.png     |  Bin [31m0[m -> [32m722617[m bytes
+ .../flandre/Fly/flandre_bat_highres.png.meta       |  364 [32m+++++++[m
+ Assets/Sprites/UI/staus_bar_base.png               |  Bin [31m1706[m -> [32m77045[m bytes
+ Assets/Sprites/UI/staus_bar_base.png.meta          |   65 [32m+[m[31m-[m
+ Assets/Sprites/tutorial/church/Black.png.meta      |    6 [32m+[m[31m-[m
+ .../Sprites/tutorial/church/paimon_left_2.png.meta |    6 [32m+[m[31m-[m
+ .../LiberationSans SDF - Fallback.asset            |  146 [32m+[m[31m--[m
+ Assets/TextMesh Pro/Resources/TMP Settings.asset   |    3 [32m+[m[31m-[m
+ 193 files changed, 9543 insertions(+), 3590 deletions(-)

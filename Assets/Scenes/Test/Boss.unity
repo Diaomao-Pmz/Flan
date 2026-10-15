@@ -1954,7 +1954,7 @@ MonoBehaviour:
         maxDistance: 20
         playerAirCondition: 0
       multiplier: 0.1
-  - routine: {fileID: 11400000, guid: 455dc090a38e1844eb18446e0d989982, type: 2}
+  - routine: {fileID: 11400000, guid: 610ca5c0a0e6634409cb3ec319a5d109, type: 2}
     weightModifiers:
     - condition:
         playerSide: 2
@@ -1968,7 +1968,7 @@ MonoBehaviour:
         maxDistance: 20
         playerAirCondition: 0
       multiplier: 3
-  - routine: {fileID: 11400000, guid: 5695b09810ac35b44b444cdbd913d6dd, type: 2}
+  - routine: {fileID: 11400000, guid: 70c23b2c5c450174f88c0d252f5c8f8e, type: 2}
     weightModifiers:
     - condition:
         playerSide: 2
