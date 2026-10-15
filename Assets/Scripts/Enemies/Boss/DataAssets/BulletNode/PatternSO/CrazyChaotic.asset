@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5de6f5e350d2b1f45af9613dfc1faf22, type: 3}
-  m_Name: Rotation1
-  m_EditorClassIdentifier: Assembly-CSharp::RotationPattern
-  DefaultInterval: 0.2
-  rotationBulletSpeed: 12
-  rotationAngleIncrement: 15
-  enableAccerlation: 1
+  m_Script: {fileID: 11500000, guid: 963ed2720f10a034592f80c003c40663, type: 3}
+  m_Name: CrazyChaotic
+  m_EditorClassIdentifier: Assembly-CSharp::ChaoticPattern
+  DefaultInterval: 0.5
+  minSpeed: 3
+  maxSpeed: 6
+  bulletCountPerBurst: 20

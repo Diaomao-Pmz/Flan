@@ -1,7 +1,4 @@
-<<<<<<< Updated upstream
-=======
 ﻿using System;
->>>>>>> Stashed changes
 using UnityEngine;
 
 /// <summary>环形：一圈均匀分布的子弹同时向外飞</summary>

@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Flandre.CombatSystem;
@@ -14,33 +14,26 @@ using Flandre.CombatSystem;
 /// </summary>
 public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
 {
-    [Header("--- Ëæ»úµã´«ËÍ (RandomPoint) ---")]
-    [Tooltip("Ò»½×¶Î×¨ÓÃ´«ËÍµã¡£Óë¶ş½×¶Î»¥²»¹²ÓÃ¡£")]
+    [Header("--- éšæœºç‚¹ä¼ é€ (RandomPoint) ---")]
+    [Tooltip("ä¸€é˜¶æ®µä¸“ç”¨ä¼ é€ç‚¹ã€‚ä¸äºŒé˜¶æ®µäº’ä¸å…±ç”¨ã€‚")]
     [SerializeField] private List<Transform> phase1Points = new List<Transform>();
 
-    [Tooltip("¶ş½×¶Î×¨ÓÃ´«ËÍµã¡£ÓëÒ»½×¶Î»¥²»¹²ÓÃ¡£")]
+    [Tooltip("äºŒé˜¶æ®µä¸“ç”¨ä¼ é€ç‚¹ã€‚ä¸ä¸€é˜¶æ®µäº’ä¸å…±ç”¨ã€‚")]
     [SerializeField] private List<Transform> phase2Points = new List<Transform>();
 
-    [Tooltip("Ğ¡ÓÚ´Ë¾àÀëÊÓÎª¡¸¾ÍÔÚÔ­µØ¡¹£¬»á±»ÅÅ³ı£¬±ÜÃâ´«ÁË¸ö¼ÅÄ¯¡£")]
+    [Tooltip("å°äºæ­¤è·ç¦»è§†ä¸ºã€Œå°±åœ¨åŸåœ°ã€ï¼Œä¼šè¢«æ’é™¤ï¼Œé¿å…ä¼ äº†ä¸ªå¯‚å¯ã€‚")]
     [SerializeField] private float samePointThreshold = 0.1f;
 
-    [Header("--- ÈÆ±³´«ËÍ (BehindPlayer) ---")]
-    [Tooltip("Íæ¼Ò Transform¡£Áô¿ÕÔòÓÉ BossController.Init() ×Ô¶¯×¢Èë¡£")]
+    [Header("--- ç»•èƒŒä¼ é€ (BehindPlayer) ---")]
+    [Tooltip("ç©å®¶ Transformã€‚ç•™ç©ºåˆ™ç”± BossController.Init() è‡ªåŠ¨æ³¨å…¥ã€‚")]
     [SerializeField] private Transform playerTransform;
 
-    [Tooltip("ÂäµãÓëÍæ¼ÒµÄË®Æ½¾àÀë¡£Boss »á³öÏÖÔÚÍæ¼Ò±³ºóÕâÃ´Ô¶µÄµØ·½¡£")]
+    [Tooltip("è½ç‚¹ä¸ç©å®¶çš„æ°´å¹³è·ç¦»ã€‚Boss ä¼šå‡ºç°åœ¨ç©å®¶èƒŒåè¿™ä¹ˆè¿œçš„åœ°æ–¹ã€‚")]
     [SerializeField] private float behindPlayerOffset = 3f;
 
-    [Tooltip("¹´Ñ¡ºóÈÆ±³´«ËÍ»áÍ¬Ê±¶ÔÆëÍæ¼ÒµÄ Y ×ø±ê£»²»¹´Ôò±£³Ö Boss µ±Ç°¸ß¶È¡£")]
+    [Tooltip("å‹¾é€‰åç»•èƒŒä¼ é€ä¼šåŒæ—¶å¯¹é½ç©å®¶çš„ Y åæ ‡ï¼›ä¸å‹¾åˆ™ä¿æŒ Boss å½“å‰é«˜åº¦ã€‚")]
     [SerializeField] private bool matchPlayerHeight = false;
 
-<<<<<<< Updated upstream
-    [Header("--- ÖĞÑë´«ËÍ (Center) ---")]
-    [Tooltip("³¡µØÖĞÑëÃªµã¡£¶ş½×¶Î×ª³¡µÈ³¡ºÏÊ¹ÓÃ¡£")]
-    [SerializeField] private Transform centerPoint;
-
-    // ºÚ°åÒıÓÃ£¬ÓÃÓÚ¶ÁÈ¡µ±Ç°½×¶Î¡£»º´æÒÔ±ÜÃâÃ¿´Î´«ËÍ¶¼ GetComponent¡£
-=======
     [Tooltip("å‹¾é€‰ = åœ¨ã€å‘åŠ¨ä¼ é€é‚£ä¸€åˆ»ã€‘è®°ä¸‹ç©å®¶ä½ç½®ï¼Œå‰æ‘‡ç»“æŸåæŒ‰è¿™ä¸ªä½ç½®ç®—è½ç‚¹ã€‚\n" +
              "ä¸å‹¾ = å‰æ‘‡ç»“æŸæ—¶æ‰è¯»ç©å®¶ä½ç½®ï¼ˆé»˜è®¤ï¼‰ã€‚\n" +
              "ä¸¤ç§æ¨¡å¼éƒ½ä¼šç»è¿‡ä¸‹é¢çš„è½ç‚¹å®‰æ£€")]
@@ -81,7 +74,6 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     [SerializeField] private List<TeleportNode> hitReactions = new List<TeleportNode>();
 
     // é»‘æ¿å¼•ç”¨ï¼Œç”¨äºè¯»å–å½“å‰é˜¶æ®µã€‚ç¼“å­˜ä»¥é¿å…æ¯æ¬¡ä¼ é€éƒ½ GetComponentã€‚
->>>>>>> Stashed changes
     private BossState bossState;
     private BossController controller;
 
@@ -115,7 +107,7 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     private Vector2 gizmoBodySize;
 
     // ==========================================================
-    //  IBossActionExecutor ÊµÏÖ£ºÈÏÁì TeleportNode
+    //  IBossActionExecutor å®ç°ï¼šè®¤é¢† TeleportNode
     public System.Type NodeType => typeof(TeleportNode);
 
     public IEnumerator Execute(ActionNode node, BossContext ctx)
@@ -123,14 +115,10 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         TeleportNode tpNode = node as TeleportNode;
         if (tpNode == null) yield break;
 
-<<<<<<< Updated upstream
-        // ´«ËÍÇ°Ò¡¡£²»ÏëÒªµÄ»°°Ñ×Ê²úÀïµÄ teleportDelay µ÷³É 0¡£
-=======
         // å‘åŠ¨é‚£ä¸€åˆ»çš„ç©å®¶ä½ç½®ï¼ˆåªåœ¨å‹¾äº† snapshotPlayerPosition æ—¶ä½¿ç”¨ï¼‰
         Vector2? snapshot = TakePlayerSnapshot();
 
         // ä¼ é€å‰æ‘‡ã€‚ä¸æƒ³è¦çš„è¯æŠŠèµ„äº§é‡Œçš„ teleportDelay è°ƒæˆ 0ã€‚
->>>>>>> Stashed changes
         if (tpNode.teleportDelay > 0f)
         {
             yield return new WaitForSeconds(tpNode.teleportDelay);
@@ -139,12 +127,6 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         ExecuteTeleport(tpNode.targetType, snapshot);
     }
 
-<<<<<<< Updated upstream
-    /// <summary>´«ËÍÊÇË²Ê±ĞĞÎª£¬Ã»ÓĞĞèÒªÖĞ¶ÏµÄ³ÖĞøÑİ³ö¡£</summary>
-    public void Cancel()
-    {
-        // ÓĞÒâÁô¿Õ¡£ÈôÈÕºó¼ÓÁË´«ËÍ²ĞÓ°/ÌØĞ§Ğ­³Ì£¬ÔÚÕâÀïÍ£µôËü¡£
-=======
     /// <summary>ä¼ é€æœ¬èº«æ˜¯ç¬æ—¶çš„ï¼›éœ€è¦æ”¶æ‘Šçš„æ˜¯è¿˜åœ¨ç­‰å‰æ‘‡çš„å—å‡»ä¼ é€ / ä½ç§»ä¼ é€ã€‚</summary>
     public void Cancel()
     {
@@ -199,14 +181,13 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         if (controller != null && controller.IsStunned) yield break;
 
         ExecuteTeleport(node.targetType, snapshot, intentDistance);
->>>>>>> Stashed changes
     }
 
     //---------------------------------------------------
 
     public void Init(Transform player)
     {
-        // Inspector ÀïÒÑ¾­ÍÏÁË¾ÍÒÔ Inspector Îª×¼£¬·ñÔò½ÓÊÜÍâ²¿×¢Èë
+        // Inspector é‡Œå·²ç»æ‹–äº†å°±ä»¥ Inspector ä¸ºå‡†ï¼Œå¦åˆ™æ¥å—å¤–éƒ¨æ³¨å…¥
         if (playerTransform == null) playerTransform = player;
         bossState = GetComponent<BossState>();
         controller = GetComponent<BossController>();
@@ -221,10 +202,6 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     }
 
     // ==========================================================
-<<<<<<< Updated upstream
-    //  ¾ßÌåÎ»ÒÆÂß¼­
-    public void ExecuteTeleport(TeleportTargetType strategy)
-=======
     //  å—å‡»ä¼ é€
     // ==========================================================
 
@@ -349,7 +326,6 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     /// <param name="playerSnapshot">å‘åŠ¨æ—¶è®°ä¸‹çš„ç©å®¶ä½ç½®ï¼›ä¸º null åˆ™æŒ‰æ­¤åˆ»çš„ç©å®¶ä½ç½®</param>
     /// <param name="intentDistance">Intent Distance è½ç‚¹ç”¨çš„è·ç¦»ï¼›ä¸º null åˆ™é—® AI å½“å‰æ„å›¾çš„ç†æƒ³è·ç¦»</param>
     public void ExecuteTeleport(TeleportTargetType strategy, Vector2? playerSnapshot = null, float? intentDistance = null)
->>>>>>> Stashed changes
     {
         switch (strategy)
         {
@@ -369,10 +345,6 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     }
 
     /// <summary>
-<<<<<<< Updated upstream
-    /// °´µ±Ç°½×¶ÎÑ¡È¡¶ÔÓ¦µÄ´«ËÍµãÁĞ±í£¬Ëæ»úÌôÒ»¸ö²»ÔÚÔ­µØµÄµã¡£
-    /// Ò»½×¶ÎÓë¶ş½×¶ÎµÄµãÎ»»¥²»¹²ÓÃ¡£
-=======
     /// æŒ‰æ„å›¾è·ç¦»è½ç‚¹ï¼šè½åœ¨ç¦»ç©å®¶æ­£å¥½ distance çš„ä½ç½®ï¼ˆæ°´å¹³æ–¹å‘ï¼‰ã€‚
     /// ä¼˜å…ˆ Boss å½“å‰æ‰€åœ¨çš„ä¸€ä¾§ï¼Œè¢«æŒ¡å°±æ¢å¦ä¸€ä¾§ï¼Œä¸¤ä¾§éƒ½ä¸è¡Œè¿™æ¬¡ä¸ä¼ ã€‚
     /// </summary>
@@ -428,7 +400,6 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     /// <summary>
     /// æŒ‰å½“å‰é˜¶æ®µé€‰å–å¯¹åº”çš„ä¼ é€ç‚¹åˆ—è¡¨ï¼ŒéšæœºæŒ‘ä¸€ä¸ªä¸åœ¨åŸåœ°çš„ç‚¹ã€‚
     /// ä¸€é˜¶æ®µä¸äºŒé˜¶æ®µçš„ç‚¹ä½äº’ä¸å…±ç”¨ã€‚
->>>>>>> Stashed changes
     /// </summary>
     private void TeleportToRandomPoint()
     {
@@ -436,11 +407,11 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
 
         if (pool == null || pool.Count == 0)
         {
-            Debug.LogWarning($"[BAE_Teleporter] µ±Ç°½×¶ÎµÄ´«ËÍµãÁĞ±íÎª¿Õ£¬´«ËÍÒÑÌø¹ı¡£", this);
+            Debug.LogWarning($"[BAE_Teleporter] å½“å‰é˜¶æ®µçš„ä¼ é€ç‚¹åˆ—è¡¨ä¸ºç©ºï¼Œä¼ é€å·²è·³è¿‡ã€‚", this);
             return;
         }
 
-        // ÏÈÅÅ³ı¡¸¾ÍÔÚÔ­µØ¡¹ºÍ¿Õ²ÛÎ»£¬ÔÙ´ÓÊ£ÏÂµÄÀïÃæËæ»ú
+        // å…ˆæ’é™¤ã€Œå°±åœ¨åŸåœ°ã€å’Œç©ºæ§½ä½ï¼Œå†ä»å‰©ä¸‹çš„é‡Œé¢éšæœº
         List<Transform> candidates = new List<Transform>(pool.Count);
         for (int i = 0; i < pool.Count; i++)
         {
@@ -450,10 +421,10 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
             candidates.Add(p);
         }
 
-        // È«¶¼±»ÅÅ³ıÁË£¨ÀıÈçÁĞ±íÀïÖ»ÅäÁËÒ»¸öµã£¬¶ø Boss ÕıºÃÕ¾ÔÚÉÏÃæ£©
+        // å…¨éƒ½è¢«æ’é™¤äº†ï¼ˆä¾‹å¦‚åˆ—è¡¨é‡Œåªé…äº†ä¸€ä¸ªç‚¹ï¼Œè€Œ Boss æ­£å¥½ç«™åœ¨ä¸Šé¢ï¼‰
         if (candidates.Count == 0)
         {
-            Debug.LogWarning("[BAE_Teleporter] Ã»ÓĞ¿ÉÓÃµÄÂäµã£¨¿ÉÄÜÖ»ÅäÁËÒ»¸öµãÇÒ Boss ¾ÍÔÚÆäÉÏ£©¡£", this);
+            Debug.LogWarning("[BAE_Teleporter] æ²¡æœ‰å¯ç”¨çš„è½ç‚¹ï¼ˆå¯èƒ½åªé…äº†ä¸€ä¸ªç‚¹ä¸” Boss å°±åœ¨å…¶ä¸Šï¼‰ã€‚", this);
             return;
         }
 
@@ -469,17 +440,12 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     {
         if (playerTransform == null)
         {
-            Debug.LogWarning("[BAE_Teleporter] Î´ÉèÖÃÍæ¼ÒÒıÓÃ£¬ÈÆ±³´«ËÍÒÑÌø¹ı¡£", this);
+            Debug.LogWarning("[BAE_Teleporter] æœªè®¾ç½®ç©å®¶å¼•ç”¨ï¼Œç»•èƒŒä¼ é€å·²è·³è¿‡ã€‚", this);
             return;
         }
 
-<<<<<<< Updated upstream
-        // Íæ¼ÒÔÚ Boss ÓÒ±ß ¡ú ´«µ½Íæ¼Ò¸üÓÒ±ß£»·´Ö®´«µ½¸ü×ó±ß
-        float sign = playerTransform.position.x > transform.position.x ? 1f : -1f;
-=======
         Vector2 playerPos = playerSnapshot ?? (Vector2)playerTransform.position;
         Vector2 from = transform.position;
->>>>>>> Stashed changes
 
         // ç©å®¶åœ¨ Boss å³è¾¹ â†’ ä¼˜å…ˆä¼ åˆ°ç©å®¶æ›´å³è¾¹ï¼›åä¹‹æ›´å·¦è¾¹
         float sign = playerPos.x > from.x ? 1f : -1f;
@@ -614,7 +580,7 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     {
         if (centerPoint == null)
         {
-            Debug.LogWarning("[BAE_Teleporter] Î´ÉèÖÃÖĞÑëÃªµã£¬ÖĞÑë´«ËÍÒÑÌø¹ı¡£", this);
+            Debug.LogWarning("[BAE_Teleporter] æœªè®¾ç½®ä¸­å¤®é”šç‚¹ï¼Œä¸­å¤®ä¼ é€å·²è·³è¿‡ã€‚", this);
             return;
         }
 
@@ -643,7 +609,7 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         }
     }
 
-    /// <summary>¶ÁÈ¡ºÚ°åÅĞ¶Ïµ±Ç°½×¶Î£¬·µ»Ø¶ÔÓ¦µÄµãÎ»ÁĞ±í¡£</summary>
+    /// <summary>è¯»å–é»‘æ¿åˆ¤æ–­å½“å‰é˜¶æ®µï¼Œè¿”å›å¯¹åº”çš„ç‚¹ä½åˆ—è¡¨ã€‚</summary>
     private List<Transform> GetCurrentPhasePoints()
     {
         if (bossState == null) bossState = GetComponent<BossState>();

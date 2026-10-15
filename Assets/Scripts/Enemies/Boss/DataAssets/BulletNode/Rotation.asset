@@ -24,16 +24,6 @@ MonoBehaviour:
   activeAnimName: 
   recoverAnimName: 
   phases:
-<<<<<<< Updated upstream
-  - pattern: {fileID: 11400000, guid: 658e374a5ddaf3841b0edd08d185a203, type: 2}
-    startDelay: 0
-    duration: 4
-    intervalOverride: 0
-    formationDuration: 0
-  AttackName: Rotation
-  formationDuration: 0
-  attackDuration: 3
-=======
   - startDelay: 0
     duration: 6
     pattern:
@@ -55,4 +45,3 @@ MonoBehaviour:
         initialAngle: 0
         endAngle: 360
         rotationDuration: 3
->>>>>>> Stashed changes

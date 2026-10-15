@@ -1,19 +1,19 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 public class EnemyHealthBar : MonoBehaviour
 {
-    [Header("°ó¶¨Ä¿±ê (¶şÑ¡Ò»¼´¿É)")]
-    public EntityBase targetEntity; // Ğ¡¹ÖÍÏ¸øÕâ¸ö
-    public BossState bossState;     // BossÍÏ¸øÕâ¸ö (ÄãĞèÒªÔÚInspectorÀï°ÑBossÍÏ½øÀ´)
+    [Header("ç»‘å®šç›®æ ‡ (äºŒé€‰ä¸€å³å¯)")]
+    public EntityBase targetEntity; // å°æ€ªæ‹–ç»™è¿™ä¸ª
+    public BossState bossState;     // Bossæ‹–ç»™è¿™ä¸ª (ä½ éœ€è¦åœ¨Inspectoré‡ŒæŠŠBossæ‹–è¿›æ¥)
 
-    [Header("UI ×é¼ş")]
+    [Header("UI ç»„ä»¶")]
     public Image fillImage;
     public GameObject rootObject;
 
     private void OnEnable()
     {
-        // ÖÇÄÜ¶©ÔÄ£ºÓĞ Boss ¾ÍÌı Boss µÄ£¬·ñÔòÌıĞ¡¹ÖµÄ
+        // æ™ºèƒ½è®¢é˜…ï¼šæœ‰ Boss å°±å¬ Boss çš„ï¼Œå¦åˆ™å¬å°æ€ªçš„
         if (bossState != null) bossState.health.OnStatChanged += Refresh;
         else if (targetEntity != null) targetEntity.OnStatChanged += Refresh;
     }
@@ -33,7 +33,7 @@ public class EnemyHealthBar : MonoBehaviour
     {
         if (fillImage == null) return;
 
-        // ÖÇÄÜ¶ÁÈ¡£º¶ÁÈ¡ÕæÕı·¢Éú±ä»¯µÄÑªÁ¿Êı¾İ
+        // æ™ºèƒ½è¯»å–ï¼šè¯»å–çœŸæ­£å‘ç”Ÿå˜åŒ–çš„è¡€é‡æ•°æ®
         if (bossState != null)
         {
             fillImage.fillAmount = (float)bossState.health.currentHP / bossState.health.maxHP;

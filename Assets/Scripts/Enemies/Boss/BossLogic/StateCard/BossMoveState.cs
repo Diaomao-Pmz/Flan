@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
 /// Boss ç§»åŠ¨çŠ¶æ€ â€”â€”ã€å…ˆæƒ³å¥½ä¸‹ä¸€æ‹›ï¼Œå†æŒ‰è¿™ä¸€æ‹›å»ç«™ä½ã€‘ã€‚
@@ -26,10 +26,6 @@ public class BossMoveState : IState
 {
     private BossController boss;
     private Rigidbody2D rb;
-<<<<<<< Updated upstream
-    private float moveTimer;
-    private float targetMaintainDistance; // ¡¾ĞÂÔö¡¿£º¶¯Ì¬´æ´¢´óÄÔ·¢À´µÄ×îÓÅ¾àÀë
-=======
 
     private float elapsed;          // æœ¬æ¬¡ç§»åŠ¨å·²ç»è¿‡äº†å¤šä¹…
     private float repositionTime;   // æœ¬æ¬¡è‡³å°‘è¦ç§»åŠ¨å¤šä¹…ï¼ˆä¸å‹¾ç«‹å³å‡ºæ‰‹æ—¶ç”Ÿæ•ˆï¼‰
@@ -37,7 +33,6 @@ public class BossMoveState : IState
     private bool teleportedThisPhase; // æœ¬ç§»åŠ¨é˜¶æ®µå·²ç»ä¼ é€è¿‡ï¼ˆæœ€å¤šä¸€æ¬¡ï¼‰
     private bool corneredAsked;       // æœ¬ç§»åŠ¨é˜¶æ®µæ’å¢™æ—¶å·²ç»é—®è¿‡ä½ç§»å¡æ± ï¼ˆåªæ·ä¸€æ¬¡éª°ï¼Œé¿å…æ¯å¸§é‡æ·ï¼‰
     private string teleportLabel;     // æ­£åœ¨å‰æ‘‡çš„ä½ç§»ä¼ é€ï¼Œä¾›ç§»åŠ¨æ„å›¾æ–‡å­—æ˜¾ç¤º
->>>>>>> Stashed changes
 
     public BossMoveState(BossController bc)
     {
@@ -50,16 +45,9 @@ public class BossMoveState : IState
         boss.bossState.bossMechanic.isCornered = false;
         BeginPhase();
 
-<<<<<<< Updated upstream
-        // ¡¾ºËĞÄ½»»¥¡¿£ºÏò AI ²ÎÄ±³¤ÇëÇó×î¼Ñ½ÓµĞ¾àÀë
-        targetMaintainDistance = boss.AI.GetOptimalEngagementDistance();
-
-        Debug.Log($"[BossMoveState] ÊÕµ½Ö¸Áî£¬³¢ÊÔ±£³Ö¶¯Ì¬×î¼Ñ¾àÀë: {targetMaintainDistance:F1}¡£ÒÆ¶¯³ÖĞø {moveTimer:F1} Ãë");
-=======
         boss.AI.PlanIntent();
         RefreshStatusText();
         TryMovementTeleport(false);
->>>>>>> Stashed changes
     }
 
     public void Update()
@@ -116,12 +104,7 @@ public class BossMoveState : IState
         float target = boss.AI.GetOptimalEngagementDistance();
         float dirX = 0f;
 
-<<<<<<< Updated upstream
-        // ¡¾ĞŞ¸Ä¡¿£ºÊ¹ÓÃ¶¯Ì¬»ñÈ¡µÄ targetMaintainDistance Ìæ´úĞ´ËÀµÄ±äÁ¿
-        if (distance < targetMaintainDistance - 0.5f)
-=======
         if (distance < target - 0.5f)
->>>>>>> Stashed changes
         {
             dirX = (bossPos.x > playerPos.x) ? 1f : -1f;   // å¤ªè¿‘ï¼šè¿œç¦»ç©å®¶
         }

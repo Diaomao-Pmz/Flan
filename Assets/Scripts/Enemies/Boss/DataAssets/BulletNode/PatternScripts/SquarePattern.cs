@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
-using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
-=======
 ﻿using System;
 using UnityEngine;
->>>>>>> Stashed changes
 
 /// <summary>方阵：四条边均匀排布子弹</summary>
 [Serializable, BulletPatternInfo("方阵 Square")]

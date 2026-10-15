@@ -1,31 +1,27 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
-// 1. È·±£ÕâÀïµÄÃû×ÖºÍÄãµÄÎÄ¼şÃû EnemyShieldBar.cs Ò»×Ö²»²î£¡
+// 1. ç¡®ä¿è¿™é‡Œçš„åå­—å’Œä½ çš„æ–‡ä»¶å EnemyShieldBar.cs ä¸€å­—ä¸å·®ï¼
 public class EnemyShieldBar : MonoBehaviour
 {
     public BossState bossState;
     public Image shieldFillImage;
 
-<<<<<<< Updated upstream
-    // 2. Å×Æú Start£¬¸ÄÓÃ OnEnable¡£Ö»ÒªÕâ¸ö UI ÁÁ×Å£¬Ëü¾ÍÒ»¶¨ÄÜ¼àÌıµ½£¡
-=======
     [Tooltip("ç ´ç›¾æœŸé—´ï¼ŒæŠ¤ç›¾æ¡æ˜¾ç¤ºå›ç›¾è¿›åº¦ï¼ˆä» 0 æ…¢æ…¢æ¶¨å›æ»¡ï¼‰ã€‚å…³æ‰åˆ™ç ´ç›¾æœŸé—´ä¿æŒç©ºæ¡")]
     public bool showRecoverProgress = true;
 
     // 2. æŠ›å¼ƒ Startï¼Œæ”¹ç”¨ OnEnableã€‚åªè¦è¿™ä¸ª UI äº®ç€ï¼Œå®ƒå°±ä¸€å®šèƒ½ç›‘å¬åˆ°ï¼
->>>>>>> Stashed changes
     void OnEnable()
     {
         if (bossState != null)
         {
-            // ¶©ÔÄ»¤¶Ü×¨ÊôµÄË¢ĞÂ¹ã²¥
+            // è®¢é˜…æŠ¤ç›¾ä¸“å±çš„åˆ·æ–°å¹¿æ’­
             bossState.bossMechanic.OnShieldStatChanged += RefreshShieldUI;
             RefreshShieldUI();
         }
     }
 
-    // 3. Ñø³ÉºÃÏ°¹ß£ºUI Òş²Ø»òÏú»ÙÊ±£¬Á¢¿ÌÈ¡Ïû¼àÌı£¬·ÀÖ¹±¨´í
+    // 3. å…»æˆå¥½ä¹ æƒ¯ï¼šUI éšè—æˆ–é”€æ¯æ—¶ï¼Œç«‹åˆ»å–æ¶ˆç›‘å¬ï¼Œé˜²æ­¢æŠ¥é”™
     void OnDisable()
     {
         if (bossState != null)
@@ -45,10 +41,10 @@ public class EnemyShieldBar : MonoBehaviour
 
     private void RefreshShieldUI()
     {
-        // ·À´ôÉè¼Æ£ºÈç¹ûÍ¼Æ¬¶ªÁË£¬Ö±½Ó return£¬²»ÈÃÓÎÏ·±ÀÀ£
+        // é˜²å‘†è®¾è®¡ï¼šå¦‚æœå›¾ç‰‡ä¸¢äº†ï¼Œç›´æ¥ returnï¼Œä¸è®©æ¸¸æˆå´©æºƒ
         if (bossState == null || shieldFillImage == null) return;
 
-        // ¼ÆËã°Ù·Ö±È²¢¸üĞÂ½ø¶ÈÌõ (ÄãµÄÕâ¾ä´úÂëĞ´µÃ·Ç³£±ê×¼£¡)
+        // è®¡ç®—ç™¾åˆ†æ¯”å¹¶æ›´æ–°è¿›åº¦æ¡ (ä½ çš„è¿™å¥ä»£ç å†™å¾—éå¸¸æ ‡å‡†ï¼)
         float percent = (float)bossState.bossMechanic.shieldCurrentHP / bossState.bossMechanic.shieldMaxHP;
         shieldFillImage.fillAmount = percent;
     }

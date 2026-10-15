@@ -1,7 +1,4 @@
-<<<<<<< Updated upstream
-=======
 ﻿using System;
->>>>>>> Stashed changes
 using UnityEngine;
 
 /// <summary>随机：每次朝随机方向发一颗</summary>

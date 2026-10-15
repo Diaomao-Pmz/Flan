@@ -1,7 +1,4 @@
-<<<<<<< Updated upstream
-=======
 using System;
->>>>>>> Stashed changes
 using UnityEngine;
 
 /// <summary>

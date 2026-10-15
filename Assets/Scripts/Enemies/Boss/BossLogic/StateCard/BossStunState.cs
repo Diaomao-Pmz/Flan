@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
 /// ç ´ç›¾çœ©æ™•ã€‚
@@ -22,27 +22,6 @@ public class BossStunState : IState
 
     public void Enter()
     {
-<<<<<<< Updated upstream
-        Debug.Log("[BossStunState] Boss »¤¶ÜÆÆËé£¬½øÈë»÷·ÉÆÆ·À×´Ì¬£¡");
-
-        // 1. »ñÈ¡Ãæ°åÅäÖÃµÄ»Ö¸´Ê±¼ä
-        currentRecoverTime = boss.bossState.bossMechanic.shieldRecoverTime;
-        stunTimer = 0f;
-
-        // 2. ²»ÔÙÊ¹ÓÃÊÜÖÊÁ¿Ó°ÏìµÄ AddForce£¬¶øÊÇÖ±½Ó¸³Óè¾ø¶ÔËÙ¶È£¡
-        if (rb != null)
-        {
-            // ¶ÁÈ¡ÎÒÃÇÔÚ BossState ÀïÅäÖÃµÄ»÷·ÉËÙ¶È
-            float knockupSpeed = boss.bossState.bossMechanic.stunKnockupSpeed;
-            rb.linearVelocity = new Vector2(0f, knockupSpeed);
-        }
-
-        // 3. Ç¿ÖÆ´ò¶ÏÕýÔÚ·¢ÉäµÄµ¯Ä»
-        if (boss.BulletEmitter != null) boss.BulletEmitter.StopAttack();
-
-        // [TODO ÏÂÒ»²½¼¤»î] ¶©ÔÄÍæ¼ÒµÄÁ¬ÕÐÑÓÊ±ÊÂ¼þ
-        // ComboInputBuffer.OnPlayerComboExecuted += ExtendStunTime; 
-=======
         BossMechanic mech = boss.bossState.bossMechanic;
 
         stunDuration = mech.stunDuration;
@@ -58,19 +37,13 @@ public class BossStunState : IState
 
         // å¼ºåˆ¶æ‰“æ–­æ­£åœ¨å‘å°„çš„å¼¹å¹•
         if (boss.BulletEmitter != null) boss.BulletEmitter.StopAttack();
->>>>>>> Stashed changes
     }
 
     public void Update()
     {
         stunTimer += Time.deltaTime;
 
-<<<<<<< Updated upstream
-        // µ¹¼ÆÊ±½áÊø£¬»Ö¸´»¤¶Ü²¢»Øµ½Õ½¶·×´Ì¬
-        if (stunTimer >= currentRecoverTime)
-=======
         if (stunTimer >= stunDuration)
->>>>>>> Stashed changes
         {
             boss.ChangeState(boss.MoveState);
         }
@@ -83,23 +56,7 @@ public class BossStunState : IState
 
     public void Exit()
     {
-<<<<<<< Updated upstream
-        Debug.Log("[BossStunState] ÆÆ·À½áÊø£¬Boss »¤¶ÜÖØÐÂÉú³É£¡");
-        // [TODO ÏÂÒ»²½¼¤»î] È¡Ïû¶©ÔÄ
-        // ComboInputBuffer.OnPlayerComboExecuted -= ExtendStunTime;
-    }
-
-    // Áô¸øÏÂÒ»²½Íæ¼ÒComboµ÷ÓÃµÄ»Øµ÷
-    private void ExtendStunTime()
-    {
-        float addTime = boss.bossState.bossMechanic.comboExtendDuration;
-        currentRecoverTime += addTime;
-        Debug.Log($"[BossStunState] Íæ¼ÒÁ¬ÕÐ×·¼Ó£¡ÆÆ·ÀÊ±¼äÑÓ³¤ {addTime} Ãë£¬µ±Ç°×ÜÊ±³¤: {currentRecoverTime}");
-    }
-}
-=======
         Debug.Log("[BossStunState] çœ©æ™•ç»“æŸ" +
                   (boss.bossState.bossMechanic.isShieldBroken ? "ï¼Œè¿›å…¥è¿‘æˆ˜ä¸ºä¸»é˜¶æ®µ" : ""));
     }
 }
->>>>>>> Stashed changes

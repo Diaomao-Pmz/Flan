@@ -24,17 +24,10 @@ MonoBehaviour:
   activeAnimName: 
   recoverAnimName: 
   swings:
-<<<<<<< Updated upstream:Assets/Scripts/Enemies/Boss/DataAssets/MeleeNode/swings.asset
-  - windupTime: 0
-    hitboxDuration: 0.5
-    recoverTime: 0
-    hitboxOffset: {x: 1.5, y: 0}
-=======
   - windupTime: 0.5
     hitboxDuration: 0.5
     recoverTime: 0.2
     hitboxOffset: {x: 1, y: 0}
->>>>>>> Stashed changes:Assets/Scripts/Enemies/Boss/DataAssets/MeleeNode/KnockBack.asset
     hitboxSize: {x: 1, y: 2}
     damage: 20
     swingAnimName: 
