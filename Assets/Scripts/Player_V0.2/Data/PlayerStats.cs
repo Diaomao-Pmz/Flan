@@ -13,6 +13,10 @@ namespace Flandre.CombatSystem
     ///   被 GemActionProcessor 每次跳跃都覆写一遍（Echo 写 2，Relay 写 1）。
     ///   换宝石时前一颗写的值不会还原 —— 典型的「只装不卸」。
     ///   现在改成便利贴，Echo 贴 +1，卸下自动撕掉。
+    ///
+    /// 【资源属性】最大 HP/MP、回蓝速度、飞行耗蓝
+    ///   基础值来自 PlayerStateConfig，成长加成由 PlayerState.SetAttributeLevel 贴上来。
+    ///   PlayerHealth 的 maxHP/maxMP 直接读这里，所以加成一贴，上限立刻变。
     /// </summary>
     [System.Serializable]
     public class PlayerStats
@@ -30,6 +34,19 @@ namespace Flandre.CombatSystem
         [Tooltip("最大跳跃次数。Echo 宝石往这里贴 +1")]
         public ModifiableStat maxJumps = new ModifiableStat(1f);
 
+        [Header("资源属性")]
+        [Tooltip("最大生命值。基础值来自 PlayerStateConfig.maxHP")]
+        public ModifiableStat maxHP = new ModifiableStat(100f);
+
+        [Tooltip("最大魔力值。基础值来自 PlayerStateConfig.maxMP")]
+        public ModifiableStat maxMP = new ModifiableStat(100f);
+
+        [Tooltip("每秒自然回蓝。基础值来自 PlayerStateConfig.mpRegenPerSecond")]
+        public ModifiableStat mpRegenPerSecond = new ModifiableStat(10f);
+
+        [Tooltip("飞行每秒耗蓝。基础值来自 PlayerStateConfig.flyManaCostPerSecond")]
+        public ModifiableStat flyManaCostPerSecond = new ModifiableStat(10f);
+
         [Header("战斗属性")]
         [Tooltip("冷却缩减，0.15 表示所有 CD 减少 15%")]
         public ModifiableStat cooldownReduction = new ModifiableStat(0f);
@@ -42,7 +59,7 @@ namespace Flandre.CombatSystem
 
         private bool isInitialized = false;
 
-        public void Init(PlayerMovementConfig moveConfig)
+        public void Init(PlayerMovementConfig moveConfig, PlayerStateConfig stateConfig = null)
         {
             if (isInitialized) return;
 
@@ -54,7 +71,34 @@ namespace Flandre.CombatSystem
                 maxJumps.SetBaseValue(moveConfig.maxJumps);
             }
 
+            if (stateConfig != null)
+            {
+                maxHP.SetBaseValue(stateConfig.maxHP);
+                maxMP.SetBaseValue(stateConfig.maxMP);
+                mpRegenPerSecond.SetBaseValue(stateConfig.mpRegenPerSecond);
+                flyManaCostPerSecond.SetBaseValue(stateConfig.flyManaCostPerSecond);
+            }
+
             isInitialized = true;
+        }
+
+        /// <summary>按属性枚举取对应的那面墙。成长系统用它来定位要贴到哪里</summary>
+        public ModifiableStat Get(PlayerAttribute attribute)
+        {
+            switch (attribute)
+            {
+                case PlayerAttribute.MaxHP: return maxHP;
+                case PlayerAttribute.MaxMP: return maxMP;
+                case PlayerAttribute.MpRegenPerSecond: return mpRegenPerSecond;
+                case PlayerAttribute.FlyManaCostPerSecond: return flyManaCostPerSecond;
+                case PlayerAttribute.MoveSpeed: return moveSpeed;
+                case PlayerAttribute.JumpForce: return jumpForce;
+                case PlayerAttribute.DashSpeed: return dashSpeed;
+                case PlayerAttribute.MaxJumps: return maxJumps;
+                case PlayerAttribute.CooldownReduction: return cooldownReduction;
+                case PlayerAttribute.DamageMultiplier: return damageMultiplier;
+                default: return null;
+            }
         }
 
         /// <summary>
@@ -68,6 +112,10 @@ namespace Flandre.CombatSystem
             n += jumpForce.RemoveAllFromSource(source);
             n += dashSpeed.RemoveAllFromSource(source);
             n += maxJumps.RemoveAllFromSource(source);
+            n += maxHP.RemoveAllFromSource(source);
+            n += maxMP.RemoveAllFromSource(source);
+            n += mpRegenPerSecond.RemoveAllFromSource(source);
+            n += flyManaCostPerSecond.RemoveAllFromSource(source);
             n += cooldownReduction.RemoveAllFromSource(source);
             n += comboWindowTolerance.RemoveAllFromSource(source);
             n += damageMultiplier.RemoveAllFromSource(source);

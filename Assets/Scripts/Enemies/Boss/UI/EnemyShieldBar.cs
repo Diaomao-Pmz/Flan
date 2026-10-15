@@ -7,7 +7,14 @@ public class EnemyShieldBar : MonoBehaviour
     public BossState bossState;
     public Image shieldFillImage;
 
+<<<<<<< Updated upstream
     // 2. ���� Start������ OnEnable��ֻҪ��� UI ���ţ�����һ���ܼ�������
+=======
+    [Tooltip("破盾期间，护盾条显示回盾进度（从 0 慢慢涨回满）。关掉则破盾期间保持空条")]
+    public bool showRecoverProgress = true;
+
+    // 2. 抛弃 Start，改用 OnEnable。只要这个 UI 亮着，它就一定能监听到！
+>>>>>>> Stashed changes
     void OnEnable()
     {
         if (bossState != null)
@@ -25,6 +32,15 @@ public class EnemyShieldBar : MonoBehaviour
         {
             bossState.bossMechanic.OnShieldStatChanged -= RefreshShieldUI;
         }
+    }
+
+    // 破盾期间回盾进度每帧都在变，事件驱动覆盖不到，所以这段时间逐帧刷新
+    void Update()
+    {
+        if (!showRecoverProgress || bossState == null || shieldFillImage == null) return;
+        if (!bossState.bossMechanic.isShieldBroken) return;
+
+        shieldFillImage.fillAmount = bossState.bossMechanic.ShieldRecoverProgress;
     }
 
     private void RefreshShieldUI()

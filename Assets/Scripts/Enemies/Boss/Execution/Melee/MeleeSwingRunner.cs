@@ -20,6 +20,15 @@ public class MeleeSwingRunner
     public Vector2 GizmoCenter { get; private set; }
     public Vector2 GizmoSize { get; private set; }
 
+<<<<<<< Updated upstream
+=======
+    // 打断时要收起视觉，所以得记住当前用的是哪一个
+    private BossMeleeVisual activeVisual;
+
+    // 本次挥击所属的招式 —— 读它的击退配置
+    private ActionNode knockbackNode;
+
+>>>>>>> Stashed changes
     /// <summary>
     /// 按顺序跑完整套挥击。时序：前摇 → 判定窗口 → 后摇。
     /// </summary>
@@ -31,10 +40,24 @@ public class MeleeSwingRunner
         ContactFilter2D filter,
         Animator animator,
         string defaultActiveAnim,
+<<<<<<< Updated upstream
         GameObject instigator)
     {
         if (swings == null || swings.Count == 0) yield break;
 
+=======
+        GameObject instigator,
+        BossMeleeVisual visual = null,
+        ActionNode sourceNode = null)
+    {
+        if (swings == null || swings.Count == 0) yield break;
+
+        // 招式自带击退（ActionNode 上配置），整套挥击共用
+        knockbackNode = sourceNode;
+
+        activeVisual = visual;
+
+>>>>>>> Stashed changes
         // 【数据快照】拍下开打瞬间的朝向。
         // 不这么做的话，判定框会在挥击过程中随玩家左右横跳。
         float facing = ResolveFacing(ctx, 1f);
@@ -47,14 +70,34 @@ public class MeleeSwingRunner
             // 追踪型连招：每段重新取一次朝向
             if (faceEachSwing) facing = ResolveFacing(ctx, facing);
 
+<<<<<<< Updated upstream
             if (swing.windupTime > 0f)
+=======
+            // --- 前摇：手出现并举高 ---
+            // 有视觉时由它 yield 掉 windupTime，没有时用 WaitForSeconds。
+            // 两条路径耗时相同，判定时序不受视觉存在与否影响。
+            if (visual != null)
+            {
+                yield return visual.Windup(
+                    HitboxAnchor(owner, swing, facing),
+                    swing.hitboxSize,
+                    swing.windupTime);
+            }
+            else if (swing.windupTime > 0f)
+            {
+>>>>>>> Stashed changes
                 yield return new WaitForSeconds(swing.windupTime);
 
             PlayAnim(animator, string.IsNullOrEmpty(swing.swingAnimName)
                 ? defaultActiveAnim
                 : swing.swingAnimName);
 
+<<<<<<< Updated upstream
             yield return RunHitbox(swing, facing, ctx, owner, filter, instigator);
+=======
+            // --- 判定：手落回判定框 ---
+            visual?.Strike(HitboxAnchor(owner, swing, facing), swing.hitboxSize);
+>>>>>>> Stashed changes
 
             if (swing.recoverTime > 0f)
                 yield return new WaitForSeconds(swing.recoverTime);
@@ -79,7 +122,23 @@ public class MeleeSwingRunner
             GizmoCenter = center;
             GizmoSize = swing.hitboxSize;
 
+<<<<<<< Updated upstream
             Physics2D.OverlapBox(center, swing.hitboxSize, 0f, filter, hitBuffer);
+=======
+            visual?.Follow(HitboxAnchor(owner, swing, facing));
+
+            if (ctx.MeleeHitsPlayerBody)
+            {
+                // 直接拿判定框和玩家身体碰撞箱比重叠，不依赖图层设置
+                hitBuffer.Clear();
+                if (BoxOverlapsBounds(center, swing.hitboxSize, ctx.playerBodyCollider.bounds))
+                    hitBuffer.Add(ctx.playerBodyCollider);
+            }
+            else
+            {
+                Physics2D.OverlapBox(center, swing.hitboxSize, 0f, filter, hitBuffer);
+            }
+>>>>>>> Stashed changes
 
             HitboxUtility.ApplyDamage(
                 hitBuffer,
@@ -88,7 +147,9 @@ public class MeleeSwingRunner
                 DamageType.Melee,
                 owner.position,       // 来源坐标，受击方据此算击退方向
                 instigator,
-                ctx.controller);
+                ctx.controller,
+                knockbackNode != null && knockbackNode.overrideKnockback,
+                knockbackNode != null ? knockbackNode.knockbackForce : Vector2.zero);
 
             // 策划填 0 表示瞬间判定，只跑一次
             if (swing.hitboxDuration <= 0f) break;
@@ -101,6 +162,34 @@ public class MeleeSwingRunner
         HitboxActive = false;
     }
 
+<<<<<<< Updated upstream
+=======
+    /// <summary>
+    /// 判定框的【底边中点】（锚点）。offset 以 Boss 脚底（底部中心轴心）为基准，
+    /// offset.x 会自动乘朝向，所以 SO 里填正数即可；offset.y 填 0 = 判定框贴地。
+    /// 占位视觉（BossMeleeVisual，轴心同为底部中心）直接摆在这个点上。
+    /// </summary>
+    private Vector2 HitboxAnchor(Transform owner, MeleeSwing swing, float facing)
+    {
+        return (Vector2)owner.position
+               + new Vector2(swing.hitboxOffset.x * facing, swing.hitboxOffset.y);
+    }
+
+    /// <summary>判定框的几何中心 = 锚点往上半个框高。物理检测和 Gizmos 用它</summary>
+    private Vector2 HitboxCenter(Transform owner, MeleeSwing swing, float facing)
+    {
+        return HitboxAnchor(owner, swing, facing) + new Vector2(0f, swing.hitboxSize.y * 0.5f);
+    }
+
+    /// <summary>轴对齐的判定框与一个碰撞箱范围是否重叠</summary>
+    private static bool BoxOverlapsBounds(Vector2 center, Vector2 size, Bounds target)
+    {
+        Vector2 half = size * 0.5f;
+        return center.x - half.x < target.max.x && center.x + half.x > target.min.x
+            && center.y - half.y < target.max.y && center.y + half.y > target.min.y;
+    }
+
+>>>>>>> Stashed changes
     public void Cancel()
     {
         alreadyHit.Clear();
@@ -110,7 +199,11 @@ public class MeleeSwingRunner
     private float ResolveFacing(BossContext ctx, float fallback)
     {
         float sign = ctx.HorizontalSignToPlayer;
-        return sign != 0f ? sign : fallback;
+        float facing = sign != 0f ? sign : fallback;
+
+        // 记下这一刀的朝向，供套路判断"玩家是否绕到背后"
+        if (ctx.controller != null) ctx.controller.RecordAttackFacing(facing);
+        return facing;
     }
 
     private void PlayAnim(Animator animator, string stateName)

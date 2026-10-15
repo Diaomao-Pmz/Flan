@@ -71,7 +71,13 @@ public class BAE_DashAttacker : MonoBehaviour, IBossActionExecutor
                 contactFilter,
                 animator,
                 dash.activeAnimName,
+<<<<<<< Updated upstream
                 gameObject);
+=======
+                gameObject,
+                meleeVisual,
+                dash);
+>>>>>>> Stashed changes
         }
 
         PlayAnim(dash.recoverAnimName);
@@ -95,6 +101,9 @@ public class BAE_DashAttacker : MonoBehaviour, IBossActionExecutor
         float dirX = ctx.HorizontalSignToPlayer;
         if (dirX == 0f) dirX = 1f;
 
+        // 记下突进方向，供套路判断"玩家是否绕到背后"
+        if (ctx.controller != null) ctx.controller.RecordAttackFacing(dirX);
+
         LayerMask walls = ResolveWallLayer(ctx);
 
         Vector2 startPos = transform.position;
@@ -103,7 +112,7 @@ public class BAE_DashAttacker : MonoBehaviour, IBossActionExecutor
         while (true)
         {
             // 终止条件 1：够近了
-            if (ctx.DistanceToPlayer <= dash.stopDistance) break;
+            if (ctx.DistanceToPlayer <= dash.EffectiveStopDistance) break;
 
             // 终止条件 2：冲够了
             if (Vector2.Distance(startPos, transform.position) >= dash.maxDashDistance) break;

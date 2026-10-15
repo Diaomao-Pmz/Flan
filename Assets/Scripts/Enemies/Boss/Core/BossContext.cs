@@ -29,6 +29,15 @@ public readonly struct BossContext
     private readonly Transform playerHurtbox;
     private readonly Collider2D playerCollider;
 
+    // 玩家状态机：读"在不在地上 / 在不在飞"，供套路条件使用
+    private readonly PlayerStateMachine playerSM;
+
+    /// <summary>
+    /// 玩家的身体碰撞箱（根节点上的 BoxCollider2D，PlayerSensor 用的那个，蹲下会被压扁）。
+    /// Boss 近战在 PlayerCombatConfig.meleeHitsBodyCollider 勾选时打它。
+    /// </summary>
+    public readonly Collider2D playerBodyCollider;
+
     public BossContext(BossController controller, Transform player)
     {
         this.controller = controller;
@@ -41,6 +50,37 @@ public readonly struct BossContext
 
         this.playerHurtbox = FindHurtbox(player);
         this.playerCollider = player != null ? player.GetComponentInChildren<Collider2D>() : null;
+        this.playerSM = playerState != null ? playerState.GetComponent<PlayerStateMachine>() : null;
+        this.playerBodyCollider = playerState != null ? playerState.GetComponent<BoxCollider2D>() : null;
+    }
+
+    /// <summary>Boss 近战是否改打玩家身体碰撞箱（读 PlayerCombatConfig 的开关；读不到时按默认"是"）</summary>
+    public bool MeleeHitsPlayerBody
+        => playerBodyCollider != null
+           && (playerState == null || playerState.combatConfig == null || playerState.combatConfig.meleeHitsBodyCollider);
+
+    /// <summary>玩家站在地上（找不到玩家状态机时按"在地上"算）</summary>
+    public bool IsPlayerGrounded => playerSM == null || playerSM.IsGrounded();
+
+    /// <summary>玩家正在飞行（巡航或飞行战斗）</summary>
+    public bool IsPlayerFlying => playerSM != null && playerSM.IsFlying;
+
+    /// <summary>
+    /// 玩家绕到了 Boss 背后：玩家此刻站在 Boss 上一次近战 / 突进出手方向的反侧。
+    /// Boss 还没出过近战 / 突进（没有朝向记录）时返回 false。
+    /// 玩家几乎与 Boss 重叠时也算"不在背后"，避免左右抖动。
+    /// </summary>
+    public bool IsPlayerBehindBoss
+    {
+        get
+        {
+            if (controller == null) return false;
+            float facing = controller.LastAttackFacing;
+            if (facing == 0f) return false;
+
+            float side = HorizontalSignToPlayer;
+            return side != 0f && side != facing;
+        }
     }
 
     private static Transform FindHurtbox(Transform player)

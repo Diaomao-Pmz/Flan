@@ -37,7 +37,6 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: FX_BB2
   effectLifetime: 0
-  weakenedEffectKey: 
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.31, y: 0.42}
   effectScale: {x: 0.5, y: 0.386}

@@ -17,15 +17,29 @@ MonoBehaviour:
   cooldown: 0
   minCastDistance: 0
   maxCastDistance: 15
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
   phases:
-  - pattern: {fileID: 11400000, guid: 407278899315c23468eccdd59ded9646, type: 2}
-    startDelay: 0
-    duration: 5
-    intervalOverride: 0
-    formationDuration: 0
-  AttackName: Line
-  formationDuration: 0
-  attackDuration: 3
+  - startDelay: 0
+    duration: 3
+    pattern:
+      rid: 3572679684999610452
+  references:
+    version: 2
+    RefIds:
+    - rid: 3572679684999610452
+      type: {class: LinePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 2
+        bulletSpeed: 15
+        bulletScale: 1.5
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        aimOffsetY: 0

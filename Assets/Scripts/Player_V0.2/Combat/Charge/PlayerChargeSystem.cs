@@ -22,14 +22,9 @@ namespace Flandre.CombatSystem
     /// </summary>
     public class PlayerChargeSystem : MonoBehaviour
     {
-        [Header("移动折损 (蓄力期间)")]
-        [Tooltip("移速倍率。0.2 = 只有平时两成。留空则读 PlayerMovementConfig")]
-        public bool overrideMoveMultiplier = false;
-        [Range(0f, 1f)] public float moveMultiplierOverride = 0.2f;
-
-        [Tooltip("跳跃力度倍率。0.7 = 跳得比平时低三成")]
-        [Range(0.1f, 1f)]
-        public float jumpMultiplier = 0.7f;
+        // 【参数搬家】蓄力的移动折损（开关、移速倍率、跳跃倍率）统一放在 PlayerMovementConfig 的 Charge Settings。
+        // 原先本组件上还有一份「覆盖移速倍率」和「跳跃倍率」—— 同一条规则两个来源，
+        // 改了 config 却被组件上的覆盖值顶掉，所以删掉，只留 config 一处。
 
         // 【已删除】airChargeMaxFallSpeed —— 空中蓄力的「最大下落速度」。
         //
@@ -42,7 +37,7 @@ namespace Flandre.CombatSystem
         public bool verboseLog = false;
 
         // ---- 事件（UI / 特效订阅）----
-        /// <summary>某只手的蓄力等级变化 (槽位, 等级)。0 = 未蓄满，>0 = 已蓄满的等级</summary>
+        /// <summary>某只手的蓄力等级变化 (槽位, 等级)。0 = 还没到 1 级 / 已结束，>0 = 当前达到的等级（每升一级广播一次）</summary>
         public event System.Action<WeaponSlot, int> OnChargeLevelChanged;
 
         /// <summary>某只手的蓄力进度变化 (槽位, 0~1)</summary>
@@ -90,30 +85,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>有任意一只手在蓄力</summary>
         public bool IsAnyCharging => modules[0].IsCharging || modules[1].IsCharging;
-
-        /// <summary>
-        /// 【弱蓄进行中】有任意一只手正在进行一次被定性为「弱化」的蓄力。
-        ///
-        /// ==========================================================
-        /// 用途：弱蓄期间禁止另一只手攻击（规则一）。
-        ///
-        /// 【为什么需要这条规则】连段计数和蓄力 CD 都是两只手共用的，
-        /// 但「这一发是不是弱化版」是在【各自起手那一刻】分别定性的。
-        /// 于是 CD 内同时长按左右键，两只手会各自拿到一发弱蓄 ——
-        /// 玩家只要错开松手，就能白拿两发。
-        ///
-        /// 比喻：一次只发一颗哑弹，但两只手同时伸过来各领了一颗。
-        ///       现在改成：左手攥着哑弹时，右手不许再拿东西。
-        ///
-        /// 【为什么要看 IsCharging 而不只看 IsWeakened】
-        /// ChargeModule.IsWeakened 在 Stop() 里是刻意不清的（它是"刚结束那次
-        /// 蓄力的属性"，调用方要在 Release 之后读）。所以必须叠上"还在蓄"，
-        /// 否则一次弱蓄结束后这个标记会一直挂着，把另一只手永久锁死。
-        /// ==========================================================
-        /// </summary>
-        public bool IsAnyWeakenedCharging
-            => (modules[0].IsCharging && modules[0].IsWeakened)
-            || (modules[1].IsCharging && modules[1].IsWeakened);
 
         /// <summary>
         /// 有任意一只手的蓄力是【在空中起手】的 —— 空中悬停的判据。
@@ -169,23 +140,22 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 开始蓄力。由 ComboInputBuffer 在「长按确认」时调用。
+        /// 按住越久等级越高（见 ChargeModule）。
         /// </summary>
-        public void BeginCharge(InputCmd cmd, int targetLevel, bool isAfterCombo)
+        /// <param name="startLevel">起步等级：原地起手 0，第 N 段普攻后为 N</param>
+        /// <param name="minHold">普攻后起手时的保险锁时长（刚打完那一招的 chargeMinHoldAfter）</param>
+        public void BeginCharge(InputCmd cmd, int startLevel, float minHold, bool isAfterCombo)
         {
             ChargeModule m = GetModule(cmd);
             if (m == null || m.IsCharging) return;
 
             WeaponMoveSet weapon = weapons != null ? weapons.GetWeapon(m.Slot) : null;
 
-            // 【强弱就在这一刻定性】CD 是全局的，不分左右手。
-            // 之后蓄多久、什么时候松手都改变不了这一发的定性 —— 见 ChargeModule.IsWeakened。
-            bool ready = weapons == null || weapons.IsChargeReady;
-
-            // 【起手位置也在这一刻定性】决定这次蓄力要不要把角色钉在空中。
+            // 【起手位置在这一刻定性】决定这次蓄力要不要把角色钉在空中。
             // 同样是"这次蓄力的性质"，全程不变 —— 见 ChargeModule.BeganAirborne。
             bool airborne = sensor != null && !sensor.IsGrounded();
 
-            m.Begin(weapon, targetLevel, isAfterCombo, ready, airborne);
+            m.Begin(weapon, startLevel, minHold, isAfterCombo, airborne);
 
             ApplyPenaltyIfNeeded();
 
@@ -195,21 +165,11 @@ namespace Flandre.CombatSystem
 
             if (verboseLog)
             {
-                if (!m.IsValid)
-                {
-                    Debug.Log($"[蓄力] {m.Slot} 这只手没有武器，蓄不出东西");
-                }
-                else if (m.IsWeakened)
-                {
-                    float left = weapons != null ? weapons.ChargeCooldownRemaining : 0f;
-                    Debug.Log(
-                        $"[蓄力] {m.Slot} 在 CD 内起手（还剩 {left:F2}s）→ 本发定性为弱化版 AA1，" +
-                        "举多久都改不回来");
-                }
-                else
-                {
-                    Debug.Log($"[蓄力] {m.Slot} 开始，目标 AA{m.TargetLevel}，需要 {m.RequiredTime:F2}s");
-                }
+                Debug.Log(!m.IsValid
+                    ? $"[蓄力] {m.Slot} 这只手没有武器，蓄不出东西"
+                    : m.StartLevel > 0
+                        ? $"[蓄力] {m.Slot} 普攻后起手，从 {m.StartLevel} 级起步，按住满 {minHold:F2}s 解锁"
+                        : $"[蓄力] {m.Slot} 原地起手，从 0 级开始");
             }
         }
 
@@ -221,7 +181,7 @@ namespace Flandre.CombatSystem
             ChargeModule m = GetModule(cmd);
             if (m == null || !m.IsCharging) return ChargeReleaseResult.NotCharging;
 
-            int level = m.TargetLevel;
+            int level = m.CurrentLevel;
             ChargeReleaseResult result = m.Release();
 
             FinishModule(m);
@@ -229,8 +189,8 @@ namespace Flandre.CombatSystem
             if (verboseLog)
             {
                 Debug.Log(result == ChargeReleaseResult.Fired
-                    ? $"[蓄力] {m.Slot} 蓄满 AA{level}，释放"
-                    : $"[蓄力] {m.Slot} 未蓄满就松手，连段清零");
+                    ? $"[蓄力] {m.Slot} 松手，打出 {level} 级"
+                    : $"[蓄力] {m.Slot} 还没到 1 级就松手，连段清零");
             }
 
             return result;
@@ -280,14 +240,14 @@ namespace Flandre.CombatSystem
                 ChargeModule m = modules[i];
                 if (!m.IsCharging) continue;
 
-                bool justCharged = m.Tick(dt);
+                bool leveledUp = m.Tick(dt);
 
                 OnChargeProgressChanged?.Invoke(m.Slot, m.Progress);
 
-                if (justCharged)
+                if (leveledUp)
                 {
-                    OnChargeLevelChanged?.Invoke(m.Slot, m.TargetLevel);
-                    if (verboseLog) Debug.Log($"[蓄力] {m.Slot} 蓄满 AA{m.TargetLevel}，松手即发");
+                    OnChargeLevelChanged?.Invoke(m.Slot, m.CurrentLevel);
+                    if (verboseLog) Debug.Log($"[蓄力] {m.Slot} 升到 {m.CurrentLevel} 级，松手即发");
                 }
             }
         }
@@ -296,16 +256,10 @@ namespace Flandre.CombatSystem
         // 移动折损
         // ==========================================================
 
-        private float MoveMultiplier
-        {
-            get
-            {
-                if (overrideMoveMultiplier) return moveMultiplierOverride;
+        private PlayerMovementConfig MoveCfg => state != null ? state.movementConfig : null;
 
-                var cfg = state != null ? state.movementConfig : null;
-                return cfg != null ? cfg.chargeMoveSpeedMultiplier : 0.2f;
-            }
-        }
+        private float MoveMultiplier => MoveCfg != null ? MoveCfg.chargeMoveSpeedMultiplier : 0.2f;
+        private float JumpMultiplier => MoveCfg != null ? MoveCfg.chargeJumpForceMultiplier : 0.7f;
 
         /// <summary>
         /// 贴便利贴：蓄力期间移速与跳跃力打折。
@@ -317,12 +271,15 @@ namespace Flandre.CombatSystem
         {
             if (penaltyApplied || state == null) return;
 
+            // 开关关闭（默认）→ 蓄力时正常跑跳，不贴折损便利贴。倍率参数原样保留
+            if (state.movementConfig != null && !state.movementConfig.chargeSlowsMovement) return;
+
             // 倍率转成"减少百分之多少"的加法修饰
             state.stats.moveSpeed.AddModifier(
                 StatModifier.Percent(MoveMultiplier - 1f, this));
 
             state.stats.jumpForce.AddModifier(
-                StatModifier.Percent(jumpMultiplier - 1f, this));
+                StatModifier.Percent(JumpMultiplier - 1f, this));
 
             penaltyApplied = true;
         }

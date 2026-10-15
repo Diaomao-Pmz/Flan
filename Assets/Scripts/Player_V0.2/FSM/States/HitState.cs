@@ -31,7 +31,9 @@ public class HitState : PlayerStateBase
 
         hitStunTimer = sm.hitStunDuration;
 
-        Vector2 finalKnockback = sm.hitKnockbackForce;
+        // 招式自带击退优先，没有就用 PlayerCombatConfig 的默认值
+        Vector2? overrideForce = sm.playerState != null ? sm.playerState.PendingKnockbackOverride : null;
+        Vector2 finalKnockback = overrideForce ?? sm.hitKnockbackForce;
 
         // 防 Mathf.Sign(0) 永远向右弹的 Bug
         if (Mathf.Abs(hitDirection.x) > 0.01f)

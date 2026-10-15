@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64781698c5397314e9a2d0e00cbdb393, type: 3}
+  m_Name: Misdirection
+  m_EditorClassIdentifier: Assembly-CSharp::BulletNode
+  actionName: Misdirection
+  baseWeight: 100
+  cooldown: 0
+  minCastDistance: 0
+  maxCastDistance: 15
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
+  chargeAnimName: 
+  activeAnimName: 
+  recoverAnimName: 
+  phases:
+  - startDelay: 0
+    duration: 1.5
+    pattern:
+      rid: 3572679684999610442
+  - startDelay: 1
+    duration: 1.5
+    pattern:
+      rid: 3572679684999610443
+  - startDelay: 2
+    duration: 1.5
+    pattern:
+      rid: 3572679684999610444
+  - startDelay: 3
+    duration: 1.5
+    pattern:
+      rid: 3572679684999610445
+  references:
+    version: 2
+    RefIds:
+    - rid: 3572679684999610442
+      type: {class: CircularSectorPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.5
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        sectionCount: 11
+        angleRange: 180
+        radius: 0
+        offsetY: 0
+        layerSpeeds:
+        - 2.5
+        - 2.25
+        - 2
+    - rid: 3572679684999610443
+      type: {class: CircularSectorPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 1
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        sectionCount: 14
+        angleRange: 180
+        radius: 3
+        offsetY: 0
+        layerSpeeds:
+        - 2.5
+        - 2
+    - rid: 3572679684999610444
+      type: {class: CircularSectorPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 1
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        sectionCount: 7
+        angleRange: 90
+        radius: -2
+        offsetY: 0
+        layerSpeeds:
+        - 4
+    - rid: 3572679684999610445
+      type: {class: CircularSectorPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 3
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        sectionCount: 4
+        angleRange: 45
+        radius: -3
+        offsetY: 0
+        layerSpeeds:
+        - 2

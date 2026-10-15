@@ -35,45 +35,9 @@ public class ComboInputBuffer : MonoBehaviour
     /// <summary>最近一次出招是由哪个键触发的。ComboState 用它认领后摇该记在哪只手上</summary>
     public InputCmd LastTriggerCmd { get; private set; } = InputCmd.MainAttack;
 
-    /// <summary>
-    /// 本次出招是不是「强行打出」的缩水版蓄力（CD 没走完就长按放出来的）。
-    ///
-    /// 和 LastTriggerCmd 一样，它是【本次出招的属性】而不是持久状态：
-    /// 蓄力释放时置位，任何普通招式打出时清零。
-    ///
-    /// 消费方要在 Enter 时【拍快照】而不是全程去问 —— 因为招式演到一半时
-    /// 连段可能被位移打断而 ResetCombo，那时再问就问不到了。
-    /// ComboState 对 activeNode / ownerCmd 用的是同一个套路。
-    /// </summary>
-    public bool IsCurrentAttackWeakened => isCurrentAttackWeakened;
-
-    private bool isCurrentAttackWeakened;
-
-    /// <summary>
-    /// 【P2 重写】蓄力的目标等级 —— 由【连段深度】决定，不再看上一招的配置字段。
-    ///
-    /// 规则：
-    ///     蓄力目标等级 = 上次普攻的段数（封顶 3）
-    ///     蓄力起始等级 = 目标等级 - 1
-    /// 一次蓄力只升一级，蓄满即封顶。
-    ///
-    /// | 上次普攻打到 | 起始 | 目标 |
-    /// |---|---|---|
-    /// | 没打过（原地起手） | 0 | AA1 |
-    /// | 第 1 段 | 0 | AA1 |
-    /// | 第 2 段 | 1 | AA2 |
-    /// | 第 3 段 | 2 | AA3 |
-    ///
-    /// 【为什么用连段深度而不是节点上的字段】
-    /// 因为「换手蓄力不加段数」这条规则要求等级与用哪只手无关 ——
-    /// 只跟"打到第几段"有关。连段深度本来就是全局的，
-    /// 而节点字段是每招式各配一份，换手时会取到另一把武器的配置，对不上。
-    /// </summary>
-    public int ChargeTargetLevel
-        => Mathf.Clamp(Mathf.Max(1, comboDepth), 1, WeaponMoveSet.MaxChargeLevel);
-
-    /// <summary>蓄力起始等级 = 目标 - 1</summary>
-    public int ChargeStartLevel => ChargeTargetLevel - 1;
+    // 【已删除】IsCurrentAttackWeakened / ChargeTargetLevel / ChargeStartLevel
+    // 连放惩罚（弱化版蓄力）与「连段深度决定蓄力等级」两套机制已整体移除：
+    // 蓄力现在按住越久等级越高，从 AA1 一路升到 AA3，见 ChargeModule。
 
     /// <summary>本次蓄力是否接在普攻后面（用于判断要不要吃蓄力加速）</summary>
     public bool IsChargeAfterCombo => comboDepth > 0;
@@ -265,6 +229,30 @@ public class ComboInputBuffer : MonoBehaviour
     public bool IsMovementLockedByRecovery()
         => lockMovementDuringRecovery && IsAnyHandBusy();
 
+    // ==================================================
+    // 【蓄力准备窗口】攻击键已判定为长按，但人还在攻击动画 / 后摇里、蓄力还没真正放开手脚
+    //
+    // 规则：窗口内地面可以移动，移速乘 PlayerMovementConfig.preChargeMoveSpeedMultiplier。
+    // 不按住攻击键时，「攻击时不能走动」的规则完全不变。
+    //
+    // 比喻：挥刀、收刀时本该站定；但如果你已经攥紧准备蓄力，收刀时可以拖着步子挪。
+    // ==================================================
+
+    /// <summary>
+    /// 本次蓄力是在攻击动画 / 后摇里开始的（换手情况：A1 后马上按住右键，右手立刻开蓄，人还在 A1 里）。
+    /// 蓄力开始那一刻记下，窗口一过或蓄力结束就清 —— 这样蓄力中途另一只手再出招，仍按普通攻击规则锁移动。
+    /// </summary>
+    private bool chargeBeganInsideAttack;
+
+    /// <summary>有手正在"按住准备蓄力"：长按已判定、在等后摇结束，或蓄力是在攻击里开始的</summary>
+    public bool IsHoldingForCharge
+        => pendingHold[0] || pendingHold[1]
+           || (chargeBeganInsideAttack && chargeSystem != null && chargeSystem.IsAnyCharging);
+
+    /// <summary>处于蓄力准备窗口：按住准备蓄力，且人还在攻击动画或后摇里</summary>
+    public bool IsInPreChargeWindow
+        => IsHoldingForCharge && (sm.currentState == sm.comboState || IsAnyHandBusy());
+
     /// <summary>清空两只手的后摇。受击、死亡、切场景时用</summary>
     public void ClearHandRecovery()
     {
@@ -295,6 +283,7 @@ public class ComboInputBuffer : MonoBehaviour
     /// </summary>
     private bool IsInCombatStance
         => sm.currentState == sm.comboState
+           || sm.currentState == sm.flyCombatState   // 飞行攻击期间别让超时把当前招式清掉
            || (chargeSystem != null && chargeSystem.IsAnyCharging);
 
     /// <summary>当前正在使用的武器（供远程发射器取正确的子弹）</summary>
@@ -302,6 +291,14 @@ public class ComboInputBuffer : MonoBehaviour
 
     void Update()
     {
+        // ---- 0. 蓄力准备窗口收尾：攻击动画和后摇都走完了，或蓄力已经结束 ----
+        if (chargeBeganInsideAttack)
+        {
+            bool stillInAttack = sm.currentState == sm.comboState || IsAnyHandBusy();
+            bool stillCharging = chargeSystem != null && chargeSystem.IsAnyCharging;
+            if (!stillInAttack || !stillCharging) chargeBeganInsideAttack = false;
+        }
+
         // ---- 1. 预输入缓存倒计时 ----
         // ==================================================
         // 【预输入窗口锚定在"闸门打开"，不是"按下"】
@@ -363,6 +360,12 @@ public class ComboInputBuffer : MonoBehaviour
         //
         // 只在闸门开着时才重试 —— 后摇没结束时重试多少次结果都一样，
         // 每帧撞门只会刷出几十条日志。
+        //
+        // 【飞行中不兑现】起飞前一瞬按下的普攻如果留在缓存里，
+        // 会在空中被兑现成地面连招 → 切进 ComboState → 飞行被打断。
+        // 飞行攻击走的是 OnAttackPressedInFlight，不经过这个缓存。
+        if (sm.IsFlying) hasBufferedInput = false;
+
         if (hasBufferedInput
             && sm.currentState != sm.comboState
             && IsHandReady(bufferedCmd))
@@ -485,23 +488,24 @@ public class ComboInputBuffer : MonoBehaviour
         // 【P3 改动】不再 ChangeState —— 蓄力已经不是状态了。
         // 玩家仍然待在 Idle / Run / Jump 里，只是某只手攥着一个充能物。
         // 于是跳跃、跑动自然可用，另一只手也能正常打连招。
-        // 【顺序很重要】先算目标等级再清连段。
-        // 目标等级用的是【清零前】的深度，清零之后就取不到了。
-        int target = ChargeTargetLevel;
+        // 【顺序】先读连段信息再清连段，清零之后就读不到了：
+        //   起步等级 = 刚打到第几段（A1 后 1、A2 后 2、A3 后 3；原地起手 0）
+        //   保险锁   = 刚打完那一招的 chargeMinHoldAfter（按住不满就松手 = 什么都不放）
         bool afterCombo = IsChargeAfterCombo;
+        int startLevel = Mathf.Clamp(comboDepth, 0, WeaponMoveSet.MaxChargeLevel);
+        float minHold = (startLevel > 0 && currentNode != null) ? currentNode.chargeMinHoldAfter : 0f;
 
-        chargeSystem.BeginCharge(cmd, target, afterCombo);
+        // 换手蓄力时人可能还在攻击动画 / 后摇里 —— 记下来，让蓄力准备窗口把这段也算进去
+        chargeBeganInsideAttack = sm.currentState == sm.comboState || IsAnyHandBusy();
+
+        chargeSystem.BeginCharge(cmd, startLevel, minHold, afterCombo);
 
         // 【规则】蓄力一开始，协助手的连段从第 1 段重新计数。
-        //
-        // 目标等级已经锁进模块里了，所以这里清零不影响这次蓄力 ——
-        // 清的是"接下来另一只手能接第几段"。
-        //
-        // 例：A1 → A2（第2段）→ 长按左键蓄力（锁定 AA2）
-        //     → 此时按右键打出的是 b1，不是 b3
+        // 例：A1 → A2（第2段）→ 长按左键蓄力 → 此时按右键打出的是 b1，不是 b3
         ResetCombo();
 
-        if (verboseLog) Debug.Log($"[连招] {cmd} 长按确认 → 开始蓄力（目标 AA{target}）");
+        if (verboseLog)
+            Debug.Log($"[连招] {cmd} 长按确认 → 开始蓄力（起步 {startLevel} 级，保险锁 {minHold:F2}s）");
     }
 
     /// <summary>
@@ -535,57 +539,10 @@ public class ComboInputBuffer : MonoBehaviour
     private bool AcceptsAttackInput(InputCmd cmd)
     {
         if (cmd != InputCmd.MainAttack && cmd != InputCmd.SubAttack) return false;
-        if (sm.currentState == sm.flyState) return false;
+
+        // 飞行中的攻击走 OnAttackPressedInFlight，地面的点按/长按/蓄力一律不收
+        if (sm.IsFlying) return false;
         if (sm.currentState == sm.hitState) return false;
-
-        // 强行打出弱化蓄力后的僵直（大rt）：禁止一切输入。
-        if (sm.currentState == sm.chargeStunState) return false;
-
-        // ==================================================
-        // 【规则一】弱蓄进行中 → 另一只手不能攻击。
-        //
-        // CD 内同时长按左右键，两只手会【各自】拿到一发弱化蓄力
-        // （强弱是在各自起手那一刻分别定性的），玩家错开松手就能白拿两发。
-        // 这里在源头堵住：一次只允许有一只手攥着哑弹。
-        //
-        // 本手不受此限 —— 正在弱蓄的那只手要能正常松手结算，
-        // 而结算走的是 OnAttackReleased，根本不经过本方法。
-        // 之所以还是显式排除，是为了让规则读起来就是"不许换手"。
-        // ==================================================
-        if (chargeSystem != null
-            && chargeSystem.IsAnyWeakenedCharging
-            && !chargeSystem.IsCharging(cmd))
-        {
-            if (verboseLog)
-                Debug.Log($"[连招] 另一只手正在弱化蓄力，{cmd} 被丢弃（弱蓄期间不可换手攻击）");
-            return false;
-        }
-
-        // ==================================================
-        // 【规则二】弱化蓄力已打出、动画还在演 → 两只手都不能攻击。
-        //
-        // 这条才是真正把大rt 焊死的一条。规则一堵不住它：
-        //
-        //   大rt 的触发点在 OnAttackAnimationEnd —— 只有招式【自然演完】才会进。
-        //   而攻击动画期间另一只手本来是完全自由的（那就是"换手抢拍"）。
-        //   于是在弱化 AA1 的动画里用右手插一发进来，AA1 的动画被新招覆盖，
-        //   它的结束事件永远不会触发 —— 那份大rt 凭空消失。
-        //
-        // 比喻：罚站的计时必须从判罚那一刻算起。要是从"走到墙角"才算，
-        //       那半路被人叫走就等于没罚。
-        //
-        // 所以禁止的起点是【弱化招打出的那一刻】，不是【进入大rt 那一刻】。
-        // 位移不受影响：动画期间照常能按冲刺/滑铲兑换预付逃逸，
-        // 那条路走的是 PlayerCommandRouter，不经过本方法。
-        // ==================================================
-        if (sm.currentState == sm.comboState
-            && sm.comboState != null
-            && sm.comboState.TryGetPendingStun(out _))
-        {
-            if (verboseLog)
-                Debug.Log($"[连招] 弱化蓄力演出中，{cmd} 被丢弃（大rt 已开始计，禁止一切攻击）");
-            return false;
-        }
 
         return true;
     }
@@ -596,10 +553,10 @@ public class ComboInputBuffer : MonoBehaviour
     /// 【P3 改动】结算搬到了这里。原先归 ChargeState.Update 管，
     /// 但蓄力已经不是状态了，得由输入层来收尾。
     ///
-    /// 松手有且只有三种后果（说明书 3.4）：
-    ///   蓄满   → Fired    → 打出对应等级的招式
-    ///   没蓄满 → Aborted  → 什么都不放，连段清零（不会退而求其次打低一级的招）
-    ///   没在蓄 → NotCharging → 只清预输入缓存，免得松手后又跑出来打一发普攻
+    /// 松手有且只有三种后果：
+    ///   蓄到 1 级以上 → Fired    → 打出当前达到的最高等级的招式
+    ///   还没到 1 级   → Aborted  → 什么都不放，连段清零
+    ///   没在蓄        → NotCharging → 只清预输入缓存，免得松手后又跑出来打一发普攻
     /// </summary>
     public void OnAttackReleased(InputCmd cmd)
     {
@@ -608,71 +565,102 @@ public class ComboInputBuffer : MonoBehaviour
         if (chargeSystem == null || !chargeSystem.IsCharging(cmd)) return;
 
         ChargeModule module = chargeSystem.GetModule(cmd);
-        int level = module != null ? module.TargetLevel : 0;
 
-        // 【强弱在起手那一刻就定了性】这里只是把结论取出来，不重新判定。
-        // 必须在 ReleaseCharge 之前读 —— Stop() 虽然刻意没清这个标记，
-        // 但依赖"别人没清"是脆的。
-        bool weakened = module != null && module.IsWeakened;
+        // 必须在 ReleaseCharge 之前读（虽然 Stop() 刻意不清等级，但依赖"别人没清"是脆的）
+        int level = module != null ? module.CurrentLevel : 0;
 
         ChargeReleaseResult result = chargeSystem.ReleaseCharge(cmd);
 
         if (result == ChargeReleaseResult.Fired)
         {
-            // 等级在 ChargeModule.Begin 里就已经压到 1 了，这里取到的就是最终值
-            int firedLevel = level;
-
-            // 必须在 TryReleaseCharge【之前】置好 —— 它内部会
-            // SetCurrentNode → ChangeState → ComboState.Enter，
-            // 而 Enter 那一刻就要读这个标记去决定后摇和特效。
-            isCurrentAttackWeakened = weakened;
-
-            if (!TryReleaseCharge(cmd, firedLevel))
+            if (!TryReleaseCharge(cmd, level))
             {
-                // 蓄满了但招式表没配全 —— 已经在 TryReleaseCharge 里打过诊断日志
-                isCurrentAttackWeakened = false;
+                // 蓄到了但招式表没配全 —— 已经在 TryReleaseCharge 里打过诊断日志
                 ResetCombo();
                 return;
             }
 
-            // ==================================================
-            // 【先占位，再延长】CD 分两步启动。
-            //
-            // 完整的 CD 要从收招硬直结束那一刻起算，而硬直多长要等招式
-            // 演完才知道 —— 那部分在 ComboState.Exit 里补（Max 只延不缩）。
-            //
-            // 但如果【只】在 Exit 启动，就留下一个时间缝：
-            // 蓄力招的动画还在演时，另一只手是自由的，可以开始蓄力 ——
-            // 那一刻 CD 还没启动，IsChargeReady 还是 true，
-            // 这次蓄力就被定性成了【正常版】。
-            //
-            // 症状就是「交替长按左右键无限复读 AA1/BB1」：
-            // 每一发都在上一发的动画期间起手，永远踩不进 CD。
-            //
-            // 所以在打出的这一刻先用 delay=0 占住位，把缝焊死；
-            // Exit 再用真实硬直把终点延长到位。
-            // ==================================================
-            if (weapons != null
-                && WeaponMoveSet.TryCommandToSlot(cmd, out WeaponSlot slot))
-            {
-                weapons.StartChargeCooldown(slot, firedLevel, 0f);
-            }
-
-            if (verboseLog)
-            {
-                Debug.Log(weakened
-                    ? $"[蓄力] 打出弱化版 AA{firedLevel}（起手时在 CD 内，已定性）"
-                    : $"[蓄力] 正常打出 AA{firedLevel}");
-            }
+            if (verboseLog) Debug.Log($"[蓄力] 打出 AA{level}");
             return;
         }
 
         if (result == ChargeReleaseResult.Aborted)
         {
-            // 没蓄满就松手：什么都不放，连段清零。
-            // 这是"蓄力是一场赌注"的实现处 —— 不会退而求其次打出低一级的招。
+            // 还没到 1 级就松手：什么都不放，连段清零（"蓄力是一场赌注"的实现处）
             ResetCombo();
         }
+    }
+
+    // ==================================================
+    // 飞行攻击
+    // ==================================================
+
+    /// <summary>
+    /// 飞行中按下攻击键。由 PlayerController 在【按下那一刻】调用。
+    ///
+    /// 飞行中没有蓄力，所以不需要 0.15 秒的点按/长按判定 —— 按下立刻出招。
+    /// 具体打哪一招、何时打由 FlyCombatState 负责，这里只负责"把人送进交战模式"。
+    /// </summary>
+    /// <returns>true = 已作为飞行攻击处理，调用方不要再走地面的点按/长按流程</returns>
+    public bool OnAttackPressedInFlight(InputCmd cmd)
+    {
+        if (cmd != InputCmd.MainAttack && cmd != InputCmd.SubAttack) return false;
+        if (!sm.IsFlying) return false;
+
+        sm.flyCombatState.QueueAttack(cmd);
+
+        // 已经在交战模式里 → 排上队就行，演完当前这招自然轮到它
+        if (sm.currentState == sm.flyState) sm.ChangeState(sm.flyCombatState);
+
+        return true;
+    }
+
+    /// <summary>
+    /// 飞行攻击出手：把这只手武器上配的「飞行攻击」登记为当前招式。
+    ///
+    /// 【为什么必须登记】判定框（PlayerHitDetection.TriggerAttackHitbox）和
+    /// 子弹（PlayerWeaponEmitter.SpawnProjectile）都由动画事件触发，
+    /// 它们读的是 currentNode / ActiveWeapon。不登记的话动画照演，但打不到人。
+    ///
+    /// 【和 SetCurrentNode 的区别】
+    ///   · 不推进连段（comboDepth 保持 0）—— 飞行攻击不计入地面连段
+    ///   · 不锁手（不调 MarkHandBusy）—— 出招节奏由 FlyCombatState 按动画长度管，
+    ///     锁了反而要等一个永远不会来的 BeginHandRecovery
+    /// </summary>
+    /// <returns>本次出的招；武器或招式没配时返回 null</returns>
+    public ComboNode BeginFlyAttack(InputCmd cmd)
+    {
+        WeaponMoveSet weapon = weapons != null ? weapons.GetWeaponForCommand(cmd) : null;
+        ComboNode node = weapon != null ? weapon.flyAttack : null;
+
+        if (node == null)
+        {
+            Debug.LogWarning(
+                weapon == null
+                    ? $"[飞行攻击] {cmd} 没有装备武器，无法出招。"
+                    : $"[飞行攻击] 武器「{weapon.displayName}」没有配置 Fly Attack，无法出招。" +
+                      "请在武器资产的「飞行攻击」栏位拖入对应招式（主武器 A1 / 副武器 B1）。",
+                this);
+            return null;
+        }
+
+        hasBufferedInput = false;
+        pendingHold[HandIndex(cmd)] = false;
+
+        currentNode = node;
+        comboDepth = 0;
+        comboIdleTimer = 0f;
+        LastTriggerCmd = cmd;
+        ActiveWeapon = weapon;
+
+        if (verboseLog) Debug.Log($"[飞行攻击] {node.nodeName}（{weapon.displayName}）");
+        return node;
+    }
+
+    /// <summary>离开飞行战斗时调用：清掉登记的招式，落地后连段从第 1 段开始</summary>
+    public void EndFlyAttack()
+    {
+        ResetCombo();
     }
 
     // ==================================================
@@ -1047,20 +1035,9 @@ public class ComboInputBuffer : MonoBehaviour
     {
         currentNode = node;
 
-        // 【规则】蓄力打出后连段重新计数。
-        //
-        // 蓄力招不推进段数，而是把计数归零 ——
-        // 所以 A1→A2→蓄出AA2 之后再长按，是从 AA1 重新开始，
-        // 而不是接着蓄 AA3。想要 AA3 就必须重新打满三段普攻。
+        // 【规则】蓄力招不推进段数，而是把连段计数归零 —— 打完蓄力招后普攻从第 1 段重新开始。
         if (node.isChargeSkill) comboDepth = 0;
-        else
-        {
-            comboDepth++;
-
-            // 普通招式一定不是缩水蓄力。放在这里清，是因为蓄力那条路
-            // 会在 TryReleaseCharge 之前先置位，不能被后面覆盖掉。
-            isCurrentAttackWeakened = false;
-        }
+        else comboDepth++;
         comboIdleTimer = 0f;
         LastTriggerCmd = triggerCmd;
 
@@ -1099,7 +1076,6 @@ public class ComboInputBuffer : MonoBehaviour
         comboIdleTimer = 0f;
         hasBufferedInput = false;
         ActiveWeapon = null;
-        isCurrentAttackWeakened = false;
     }
 
     /// <summary>当前招式能否被位移动作打断。供 PlayerCommandRouter 查询</summary>

@@ -1,0 +1,190 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64781698c5397314e9a2d0e00cbdb393, type: 3}
+  m_Name: Flower
+  m_EditorClassIdentifier: Assembly-CSharp::BulletNode
+  actionName: Flower
+  baseWeight: 100
+  cooldown: 5
+  minCastDistance: 0
+  maxCastDistance: 15
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
+  chargeAnimName: 
+  activeAnimName: 
+  recoverAnimName: 
+  phases:
+  - startDelay: 0
+    duration: 12
+    pattern:
+      rid: 3572679684999610453
+  - startDelay: 0
+    duration: 12
+    pattern:
+      rid: 3572679684999610454
+  - startDelay: 0
+    duration: 12
+    pattern:
+      rid: 3572679684999610455
+  - startDelay: 0
+    duration: 12
+    pattern:
+      rid: 3572679684999610456
+  - startDelay: 0
+    duration: 12
+    pattern:
+      rid: 3572679684999610457
+  - startDelay: 0
+    duration: 12
+    pattern:
+      rid: 3572679684999610458
+  - startDelay: 0
+    duration: 12
+    pattern:
+      rid: 3572679684999610459
+  - startDelay: 0
+    duration: 12
+    pattern:
+      rid: 3572679684999610460
+  - startDelay: 2
+    duration: 10
+    pattern:
+      rid: 3572679684999610461
+  references:
+    version: 2
+    RefIds:
+    - rid: 3572679684999610453
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.15
+        bulletSpeed: 4
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 3
+        accelerationCoef: 0.3
+        initialAngle: 90
+        endAngle: 450
+        rotationDuration: 12
+    - rid: 3572679684999610454
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.15
+        bulletSpeed: 4
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 3
+        accelerationCoef: 0.3
+        initialAngle: 90
+        endAngle: -270
+        rotationDuration: 12
+    - rid: 3572679684999610455
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.15
+        bulletSpeed: 4
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 3
+        accelerationCoef: 0.3
+        initialAngle: -90
+        endAngle: -450
+        rotationDuration: 12
+    - rid: 3572679684999610456
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.15
+        bulletSpeed: 4
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 3
+        accelerationCoef: 0.3
+        initialAngle: -90
+        endAngle: 270
+        rotationDuration: 12
+    - rid: 3572679684999610457
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.15
+        bulletSpeed: 4
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 3
+        accelerationCoef: 0.3
+        initialAngle: 180
+        endAngle: 540
+        rotationDuration: 12
+    - rid: 3572679684999610458
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.15
+        bulletSpeed: 4
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 3
+        accelerationCoef: 0.3
+        initialAngle: 180
+        endAngle: -180
+        rotationDuration: 12
+    - rid: 3572679684999610459
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.15
+        bulletSpeed: 4
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 3
+        accelerationCoef: 0.3
+        initialAngle: 0
+        endAngle: -360
+        rotationDuration: 12
+    - rid: 3572679684999610460
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.15
+        bulletSpeed: 4
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 3
+        accelerationCoef: 0.3
+        initialAngle: 0
+        endAngle: 360
+        rotationDuration: 12
+    - rid: 3572679684999610461
+      type: {class: CirclePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 2
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        bulletCount: 24
+        offsetY: -0.1

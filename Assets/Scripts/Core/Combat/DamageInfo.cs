@@ -127,11 +127,25 @@ namespace Flandre.CombatSystem
         /// </summary>
         public readonly float reactionParam;
 
+        /// <summary>
+        /// 【招式自带击退】true = 受击方改用下面的 knockbackForce，而不是自己默认的击飞力度。
+        /// false（默认）= 受击方按自己的规矩来（玩家读 PlayerCombatConfig.hitKnockbackForce）。
+        /// </summary>
+        public readonly bool overrideKnockback;
+
+        /// <summary>
+        /// 击退力度：x = 水平（正数 = 远离攻击来源），y = 竖直（正数 = 向上）。
+        /// 仅在 overrideKnockback 为 true 时生效。
+        /// </summary>
+        public readonly Vector2 knockbackForce;
+
         public DamageInfo(int amount, DamageType type, Vector2 sourcePosition,
                           GameObject instigator = null,
                           ActionCategory breakMask = ActionCategory.None,
                           HitReaction reaction = HitReaction.None,
-                          float reactionParam = 0f)
+                          float reactionParam = 0f,
+                          bool overrideKnockback = false,
+                          Vector2 knockbackForce = default)
         {
             this.amount = amount;
             this.type = type;
@@ -140,6 +154,8 @@ namespace Flandre.CombatSystem
             this.breakMask = breakMask;
             this.reaction = reaction;
             this.reactionParam = reactionParam;
+            this.overrideKnockback = overrideKnockback;
+            this.knockbackForce = knockbackForce;
         }
 
         /// <summary>本次攻击能否打断指定类别的动作</summary>

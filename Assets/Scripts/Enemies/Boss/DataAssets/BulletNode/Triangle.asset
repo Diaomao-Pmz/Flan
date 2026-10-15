@@ -17,15 +17,34 @@ MonoBehaviour:
   cooldown: 0
   minCastDistance: 0
   maxCastDistance: 15
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
   phases:
-  - pattern: {fileID: 11400000, guid: 18ad97e92fe400f40870913396f155b5, type: 2}
-    startDelay: 0
+  - startDelay: 0
     duration: 5
-    intervalOverride: 0
-    formationDuration: 0.5
-  AttackName: Triangle
-  formationDuration: 0.5
-  attackDuration: 3
+    pattern:
+      rid: 3572679684999610462
+  references:
+    version: 2
+    RefIds:
+    - rid: 3572679684999610462
+      type: {class: TrianglePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 3
+        bulletSpeed: 5
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 1
+        accelerationRate: 1
+        accelerationCoef: 1
+        offsetY: 0
+        formationDuration: 0.5
+        spinSpeedRange: {x: 45, y: 120}
+        bulletCount: 6
+        rMin: 2
+        rMax: 4

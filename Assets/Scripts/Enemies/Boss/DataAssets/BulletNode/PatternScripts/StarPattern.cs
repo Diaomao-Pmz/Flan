@@ -1,30 +1,40 @@
+<<<<<<< Updated upstream
+=======
+﻿using System;
+>>>>>>> Stashed changes
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewStarPattern", menuName = "ScriptableObjects/BulletPattern/Star")]
-public class StarPattern : BulletPatternBase
+/// <summary>星形：子弹沿五角星轮廓排布</summary>
+[Serializable, BulletPatternInfo("星形 Star")]
+public class StarPattern : FormationPatternBase
 {
-    [Header("--- Star ---")]
-    public int starBulletCount = 10;
-    public float starBulletSpeed = 5f;
-    public float star_rmin = 2;
-    public float star_rmax = 4;
-    public float starOffsetY = 0f;
-    public bool enableAcceleration = true;
-    public float accelerationRate = 1f;
+    [Header("--- 星形专属 ---")]
+    [Tooltip("一共几颗子弹")]
+    [Min(1)]
+    public int bulletCount = 10;
 
-    public override void Spawn(BulletSpawnContext ctx)
+    [Tooltip("内半径（凹点）")]
+    public float rMin = 2f;
+
+    [Tooltip("外半径（星尖）")]
+    public float rMax = 4f;
+
+    protected override Vector2[] BuildShape()
     {
+<<<<<<< Updated upstream
         Vector2[] spawnPositions = new Vector2[starBulletCount];
 
         //���ݹ�ʽ�ó��ض��Ƕ��µ�xy����
         for (int i = 0; i < starBulletCount; i++)
+=======
+        Vector2[] points = new Vector2[bulletCount];
+        for (int i = 0; i < bulletCount; i++)
+>>>>>>> Stashed changes
         {
-            float angle = (i / (float)starBulletCount) * 2 * Mathf.PI;
-
-            Vector2 xycood = MathHelper.N_StarEquation(5, angle, star_rmin, star_rmax);
-
-            spawnPositions[i] = xycood;
+            float angle = (i / (float)bulletCount) * 2f * Mathf.PI;
+            points[i] = MathHelper.N_StarEquation(5, angle, rMin, rMax);
         }
+<<<<<<< Updated upstream
 
         Vector3 parentSpawnPos = ctx.firePoint.position + new Vector3(0, starOffsetY, 0);
 
@@ -41,5 +51,8 @@ public class StarPattern : BulletPatternBase
         rot.accelerationRate = accelerationRate;
 
         formationCtrl.StartFormation(ctx.activeTrack.formationDuration, rot);
+=======
+        return points;
+>>>>>>> Stashed changes
     }
 }

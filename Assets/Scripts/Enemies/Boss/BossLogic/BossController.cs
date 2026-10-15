@@ -25,14 +25,35 @@ public class BossController : EntityBase
     public BAE_Teleporter Teleporter { get; private set; } // ������������רְִ����
     public BossState bossState { get; private set; }
 
+<<<<<<< Updated upstream
     [Header("--- �ƶ�����ϵͳ���� ---")]
     // ע�⣺maintainDistance �ѱ�����ɾ������ MoveState ��̬�� AI ��ȡ
     public float moveSpeed = 3f;              // �ƶ��ٶ�
     public float wallCheckDistance = 1.5f;    // ײǽ���߼�����
     public LayerMask wallLayer;               // ǽ��/���ǵ�ͼ��
+=======
+    [Header("--- 移动风筝系统参数 ---")]
+    // 注意：maintainDistance 已被彻底删除，由 MoveState 动态向 AI 索取
+    // 移动速度已搬到 BossAIDecider 的 Ranged / Melee Tempo（每个姿态一套，另有二阶段倍率）
+    public float wallCheckDistance = 1.5f;    // 撞墙射线检测距离
+    public LayerMask wallLayer;               // 墙壁/死角的图层
+>>>>>>> Stashed changes
 
     [Header("UI For Testing")]
     public TextMeshProUGUI bossStatusText;
+
+    [Tooltip("显示 Boss 当前的移动意图（靠近 / 后退 / 到位 / 传送中 / 出招中）")]
+    public TextMeshProUGUI movementStatusText;
+
+    private string shownMovementStatus;
+
+    /// <summary>刷新移动意图文字。内容没变就不重写，避免每帧重建文字网格</summary>
+    public void SetMovementStatus(string text)
+    {
+        if (movementStatusText == null || text == shownMovementStatus) return;
+        shownMovementStatus = text;
+        movementStatusText.SetText(text);
+    }
 
     public IState CurrentState { get; private set; }
     public Transform PlayerTransform => playerTransform;
@@ -127,9 +148,15 @@ public class BossController : EntityBase
             bossState.bossMechanic.OnShieldBroken += HandleShieldBroken;
             bossState.bossMechanic.OnShieldBroken += HideShieldVisual;
             bossState.bossMechanic.OnShieldRecovered += ShowShieldVisual;
+            bossState.bossMechanic.OnShieldRecovered += HandleShieldRecovered;
 
+<<<<<<< Updated upstream
             // ���ؼ��޸ġ����������������¼���ֱ��ί�и�������ִ��������Ͳ���
             bossState.bossMechanic.OnTeleportTriggered += TriggerPassiveTeleport;
+=======
+            // 挨打 → 交给传送器判断要不要受击传送（概率、冷却、姿态都由 TeleportNode 配置）
+            bossState.bossMechanic.OnHitTaken += HandleHitTaken;
+>>>>>>> Stashed changes
             bossState.bossMechanic.OnPhase2Triggered += HandlePhase2;
             bossState.health.OnDeath += Die;
         }
@@ -153,15 +180,61 @@ public class BossController : EntityBase
 
     private void HandleShieldBroken()
     {
+        // 姿态切到近战：远程姿态下预约的意图（比如想拉远放弹幕）作废
+        if (AI != null) AI.OnCombatModeChanged();
         ChangeState(StunState);
     }
 
+<<<<<<< Updated upstream
     // --- ����Ϊ�¼���Ӧ�ķ�װ������Ϊ�˷��� OnDestroy ʱ�ɾ���ע���� ---
-
-    private void TriggerPassiveTeleport()
+=======
+    /// <summary>
+    /// 护盾恢复 → 回到远程为主阶段。
+    /// 正在放的那一招放完再说，不强行打断；下一次抽卡自然按远程姿态来。
+    /// </summary>
+    private void HandleShieldRecovered()
     {
-        if (Teleporter != null)
-            Teleporter.ExecuteTeleport(TeleportTargetType.RandomPoint);
+        if (AI != null) AI.OnCombatModeChanged();
+    }
+
+    // --- 以下为事件响应的封装方法（为了方便 OnDestroy 时干净地注销） ---
+>>>>>>> Stashed changes
+
+    private void HandleHitTaken(DamageType type, BossCombatMode modeAtHit)
+    {
+        if (Teleporter != null) Teleporter.OnBossHit(type, modeAtHit);
+    }
+
+    /// <summary>
+    /// 上一次近战 / 突进出手的朝向：+1 = 朝右，-1 = 朝左，0 = 还没出过手。
+    /// Boss 没有常驻朝向（每招出手时临时转向玩家），所以靠这个记住"刚才打的是哪边"，
+    /// 用来判断玩家是不是绕到了背后（套路候补招式的条件）。
+    /// </summary>
+    public float LastAttackFacing { get; private set; }
+
+    /// <summary>执行器出手时登记朝向</summary>
+    public void RecordAttackFacing(float sign)
+    {
+        if (sign != 0f) LastAttackFacing = Mathf.Sign(sign);
+    }
+
+    /// <summary>当前是否处于破盾眩晕中</summary>
+    public bool IsStunned => CurrentState == StunState;
+
+    /// <summary>
+    /// 紧急收招：掐掉正在放的招、作废套路，回到移动状态。
+    /// 给"勾了 Interrupt Action 的受击传送"这类外部打断使用。
+    /// 眩晕中不处理（眩晕有自己的时长，不能被打断提前结束）。
+    /// </summary>
+    public void InterruptCurrentAction(string reason)
+    {
+        if (IsStunned) return;
+
+        // 意图（单招 / 套路 / 兜底卡）全部作废，回到移动状态后重新定
+        if (AI != null) AI.ClearIntent(reason);
+
+        // CombatState.Exit 会停掉出招协程并通知执行器收摊
+        if (CurrentState == CombatState) ChangeState(MoveState);
     }
 
     private void HideShieldVisual() { if (shieldVisual != null) shieldVisual.SetActive(false); }
@@ -201,8 +274,9 @@ public class BossController : EntityBase
             bossState.bossMechanic.OnShieldBroken -= HandleShieldBroken;
             bossState.bossMechanic.OnShieldBroken -= HideShieldVisual;
             bossState.bossMechanic.OnShieldRecovered -= ShowShieldVisual;
+            bossState.bossMechanic.OnShieldRecovered -= HandleShieldRecovered;
 
-            bossState.bossMechanic.OnTeleportTriggered -= TriggerPassiveTeleport;
+            bossState.bossMechanic.OnHitTaken -= HandleHitTaken;
             bossState.bossMechanic.OnPhase2Triggered -= HandlePhase2;
             bossState.health.OnDeath -= Die;
         }

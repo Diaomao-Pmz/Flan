@@ -27,7 +27,9 @@ public static class HitboxUtility
         DamageType type,
         Vector2 sourcePosition,
         GameObject instigator,
-        object selfToSkip)
+        object selfToSkip,
+        bool overrideKnockback = false,
+        Vector2 knockbackForce = default)
     {
         if (hits == null) return 0;
 
@@ -51,7 +53,10 @@ public static class HitboxUtility
             // 防自伤：Boss 自己也实现了 IDamageable
             if (selfToSkip != null && ReferenceEquals(target, selfToSkip)) continue;
 
-            target.TakeDamage(new DamageInfo(damage, type, sourcePosition, instigator));
+            target.TakeDamage(new DamageInfo(
+                damage, type, sourcePosition, instigator,
+                overrideKnockback: overrideKnockback,
+                knockbackForce: knockbackForce));
             count++;
         }
 

@@ -37,12 +37,10 @@ namespace Flandre.CombatSystem
         Crouch,
 
         /// <summary>
-        /// Q 键【点按】。
+        /// 飞行键（左 Alt）【按下】。
         ///
-        /// 注意 fly 键有两路语义，各走各的通道：
-        ///   长按 → isFlyHeld 布尔，供 Jump/Fall 的悬停蓄力读取
-        ///   点按 → 本指令，供「打出 AAn 后跃起进飞行」的衍生使用
-        /// 两者不冲突：点按不够长，不会触发悬停蓄力。
+        /// 是一个开关：没在飞 → 起飞；正在飞 → 解除飞行，自然下落。
+        /// 裁决在 PlayerCommandRouter.TryToggleFly。
         /// </summary>
         Fly
     }

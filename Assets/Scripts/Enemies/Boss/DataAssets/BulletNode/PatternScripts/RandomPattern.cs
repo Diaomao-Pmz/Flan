@@ -1,14 +1,16 @@
+<<<<<<< Updated upstream
+=======
+﻿using System;
+>>>>>>> Stashed changes
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewRandomPattern", menuName = "ScriptableObjects/BulletPattern/Random")]
+/// <summary>随机：每次朝随机方向发一颗</summary>
+[Serializable, BulletPatternInfo("随机 Random")]
 public class RandomPattern : BulletPatternBase
 {
-    [Header("--- Random ---")]
-    public float randomBulletSpeed = 10f;
-
     public override void Spawn(BulletSpawnContext ctx)
     {
-        Vector2 dir = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
-        ctx.host.SpawnProjectile(dir, ctx.firePoint.position, ctx.projectileKey, randomBulletSpeed);
+        Vector2 dir = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
+        ctx.host.SpawnBullet(this, dir, ctx.firePoint.position);
     }
 }

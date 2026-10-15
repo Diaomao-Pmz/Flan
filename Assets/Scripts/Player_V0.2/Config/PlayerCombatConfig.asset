@@ -12,10 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 794e3ccad49db7748ada08fd193b3d00, type: 3}
   m_Name: PlayerCombatConfig
   m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerCombatConfig
-  hitStunDuration: 0.8
+  hitStunDuration: 0.2
   hitKnockbackForce: {x: 1.5, y: 8}
   blinkInterval: 0.15
-  maxHP: 100
-  maxMP: 100
-  invulnerableDuration: 0.35
+  invulnerableAlpha: 0.2
+  invulnerableDuration: 0.7
   projectileSpeed: 12

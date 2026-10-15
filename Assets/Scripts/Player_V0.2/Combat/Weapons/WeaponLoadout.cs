@@ -38,17 +38,8 @@ namespace Flandre.CombatSystem
         /// <summary>武器变更时广播。UI 与连招引擎可订阅</summary>
         public event System.Action<WeaponSlot, WeaponMoveSet> OnWeaponChanged;
 
-        /// <summary>蓄力 CD 状态变化时广播 (是否就绪)。UI 订阅这个来点亮/熄灭蓄力图标</summary>
-        public event System.Action<bool> OnChargeReadyChanged;
-
-        // ---- 运行时：蓄力 CD 结束时刻 ----
-        //
-        // 【为什么是一份而不是每手一份】
-        // 蓄力招打出后连段计数就清零了，而连段计数本来就是两只手共用的。
-        // CD 只锁一只手的话，换手长按就能立刻绕过去 —— 规则形同虚设。
-        // 所以 CD 跟着「连段」走，是全局的，不是跟着「手」走。
-        private float chargeCooldownEndTime;
-        private bool wasChargeReady = true;
+        // 【已删除】蓄力 CD（OnChargeReadyChanged / IsChargeReady / StartChargeCooldown …）
+        // 连放惩罚移除后蓄力不再有冷却，打完一发马上能再蓄。
 
         private ComboInputBuffer comboBuffer;
 
@@ -63,18 +54,6 @@ namespace Flandre.CombatSystem
             {
                 Debug.LogWarning(
                     "[武器中枢] 主副武器都为空。连招引擎会回退到 ComboInputBuffer 上的 rootNodes 旧配置。", this);
-            }
-        }
-
-        private void Update()
-        {
-            // CD 到点时广播一次，供 UI 把图标点亮
-            bool ready = IsChargeReady;
-
-            if (ready != wasChargeReady)
-            {
-                wasChargeReady = ready;
-                OnChargeReadyChanged?.Invoke(ready);
             }
         }
 
@@ -102,62 +81,14 @@ namespace Flandre.CombatSystem
         public bool HasAnyWeapon => mainWeapon != null || subWeapon != null;
 
         // ==========================================================
-        // 蓄力 CD
-        // ==========================================================
-
-        /// <summary>
-        /// 现在能不能打出【正常的】蓄力。
-        /// 注意是全局的，不分左右手 —— 主手打出蓄力后，副手同样要等。
-        /// </summary>
-        public bool IsChargeReady => Time.time >= chargeCooldownEndTime;
-
-        /// <summary>剩余 CD 秒数。供 UI 显示</summary>
-        public float ChargeCooldownRemaining
-            => Mathf.Max(0f, chargeCooldownEndTime - Time.time);
-
-        /// <summary>
-        /// 打出蓄力攻击后调用，开始蓄力冷却。
-        /// </summary>
-        /// <param name="slot">打出蓄力的那只手。只用来决定读哪把武器的 CD 配置</param>
-        /// <param name="level">打出的蓄力等级。等级越高 CD 越短</param>
-        /// <param name="delay">
-        /// 延后多少秒才开始倒计时。传收招硬直的时长 ——
-        /// CD 是【接在硬直后面】的一段，不是和硬直并行的。
-        /// 两者并行的话，硬直越长 CD 的实际约束力越弱，调一个会挤压另一个。
-        /// </param>
-        public void StartChargeCooldown(WeaponSlot slot, int level, float delay = 0f)
-        {
-            WeaponMoveSet w = GetWeapon(slot);
-            if (w == null) return;
-
-            // 【取较晚的那个，不是直接覆盖】
-            // 强行打出的 AA1 会起一个比当前剩余 CD 更长的新 CD，那是对的；
-            // 但反过来不该发生 —— 否则「AA3 的 0.3s CD」会把一个还剩 0.8s 的
-            // 长 CD 缩短，等于打一发弱化招就能洗掉惩罚。
-            float end = Time.time + Mathf.Max(0f, delay) + w.GetChargeCooldown(level);
-            chargeCooldownEndTime = Mathf.Max(chargeCooldownEndTime, end);
-
-            wasChargeReady = false;
-            OnChargeReadyChanged?.Invoke(false);
-        }
-
-        public void ClearChargeCooldown()
-        {
-            chargeCooldownEndTime = 0f;
-            wasChargeReady = true;
-            OnChargeReadyChanged?.Invoke(true);
-        }
-
-        // ==========================================================
         // 装备
         // ==========================================================
 
         /// <summary>
         /// 换武器。传 null 表示卸空该槽。
         ///
-        /// 换武器时会重置当前连招与该槽的蓄力 CD ——
-        /// 否则会出现「上一段是旧武器打的，接续却从新武器的表里找」这种不一致状态，
-        /// 以及新武器莫名其妙继承了上一把冷却的怪现象。
+        /// 换武器时会重置当前连招 ——
+        /// 否则会出现「上一段是旧武器打的，接续却从新武器的表里找」这种不一致状态。
         /// </summary>
         public void SetWeapon(WeaponSlot slot, WeaponMoveSet weapon)
         {
@@ -176,7 +107,6 @@ namespace Flandre.CombatSystem
             else subWeapon = weapon;
 
             comboBuffer?.ResetCombo();
-            ClearChargeCooldown();
 
             OnWeaponChanged?.Invoke(slot, weapon);
 
@@ -191,7 +121,6 @@ namespace Flandre.CombatSystem
             subWeapon = temp;
 
             comboBuffer?.ResetCombo();
-            ClearChargeCooldown();
 
             OnWeaponChanged?.Invoke(WeaponSlot.Main, mainWeapon);
             OnWeaponChanged?.Invoke(WeaponSlot.Sub, subWeapon);

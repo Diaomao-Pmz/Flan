@@ -193,6 +193,7 @@ public class PlayerController : MonoBehaviour
         if (ctx.control != null && ctx.control.device is Gamepad) isUsingGamepad = true;
     }
 
+    /// <summary>跳跃键（Space）。飞行中按无效（路由器会拒绝）</summary>
     public void OnJumpPerformed(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
@@ -230,33 +231,23 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    [Header("Fly 键设置")]
-    [Tooltip("按住不超过这个时长就松手，算作「点按」，会触发 fly 衍生")]
-    public float flyTapThreshold = 0.2f;
-
-    private float flyPressTime;
-
     /// <summary>
-    /// 飞行键。有两路语义，各走各的通道：
-    ///   长按 → isFlyHeld 布尔，供 Jump/Fall 的悬停蓄力读取
-    ///   点按 → InputCmd.Fly 脉冲，供「打出 AAn 后跃起进飞行」的衍生使用
-    ///
-    /// 脉冲在【松手时】才发 —— 因为按下的那一刻还分不清是点按还是长按。
-    /// 这是"同一个键两种用法"必然要付的代价：点按的响应会晚一个抬手的时间。
+    /// 飞行键（左 Alt）。【按下即发】一次 InputCmd.Fly —— 它是个开关：
+    ///   没在飞（地面、起跳中、下落中都算）→ 起飞
+    ///   正在飞                           → 解除飞行，自然下落
+    /// 裁决在 PlayerCommandRouter.TryToggleFly（蓝量、攻击/后摇闸门都在那里）。
+    /// isFlyHeld 只是如实记录按键状态，目前没有逻辑依赖它。
     /// </summary>
     public void OnFlyPerformed(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
         {
             isFlyHeld = true;
-            flyPressTime = Time.time;
+            commandRouter.OnCommand(InputCmd.Fly);
         }
         else if (ctx.canceled)
         {
             isFlyHeld = false;
-
-            bool wasTap = (Time.time - flyPressTime) <= flyTapThreshold;
-            if (wasTap) commandRouter.OnCommand(InputCmd.Fly);
         }
     }
 
@@ -287,6 +278,10 @@ public class PlayerController : MonoBehaviour
     /// 新规则把那一发普攻删掉了，用这段判定延迟来分离两种意图。
     ///
     /// 代价是普攻有 0.15 秒输入延迟，这是同一个键承担两种用法必然要付的账。
+    ///
+    /// 【飞行中例外】飞行时没有蓄力，也就不需要区分点按和长按 ——
+    /// 按下立刻出招（按住连发由 FlyCombatState 读 isXxxAttackHeld 实现）。
+    /// 这次按压直接标记为"已判定"，松手时不会再补发一次点按普攻。
     /// </summary>
     public void OnMainAttackPerformed(InputAction.CallbackContext ctx)
     {
@@ -295,6 +290,9 @@ public class PlayerController : MonoBehaviour
             isMainAttackHeld = true;
             mainAttackHoldTime = 0f;
             mainHoldResolved = false;
+
+            if (inputBuffer != null && inputBuffer.OnAttackPressedInFlight(InputCmd.MainAttack))
+                mainHoldResolved = true;
         }
         else if (ctx.canceled)
         {
@@ -322,6 +320,10 @@ public class PlayerController : MonoBehaviour
             isSubAttackHeld = true;
             subAttackHoldTime = 0f;
             subHoldResolved = false;
+
+            // 飞行中：按下立刻出招（同主手）
+            if (inputBuffer != null && inputBuffer.OnAttackPressedInFlight(InputCmd.SubAttack))
+                subHoldResolved = true;
         }
         else if (ctx.canceled)
         {
@@ -377,12 +379,59 @@ public class PlayerController : MonoBehaviour
         else if (dir == -1) transform.rotation = Quaternion.Euler(0, 180, 0);
     }
 
+    // ==========================================
+    // 角色透明度（无敌半透明 + 受击闪烁）
+    // ==========================================
+    //
+    // 【唯一写入者】sprite 的 alpha 只在 LateUpdate 里写一次。
+    // 闪烁协程不再直接改颜色，只拨一个"现在该不该隐身"的开关；
+    // 无敌半透明也不由各个无敌来源各自去改 —— 每帧看一眼无敌计数器就够了。
+    //
+    // 比喻：以前是两个人轮流往同一块屏幕上写字，谁后写谁赢；
+    //       现在是两个人只递纸条，由一个人统一决定屏幕显示什么。
+    // 这样以后新增任何无敌来源（技能、宝石…），外观都会自动跟上。
+
+    /// <summary>闪烁的"隐身"那一拍</summary>
+    private bool isBlinkHidden;
+
+    private float InvulnerableAlpha
+    {
+        get
+        {
+            var ps = stateMachine != null ? stateMachine.playerState : null;
+            return ps != null && ps.combatConfig != null ? ps.combatConfig.invulnerableAlpha : 0.8f;
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (sr == null) return;
+
+        var ps = stateMachine != null ? stateMachine.playerState : null;
+        bool invulnerable = ps != null && ps.health.isUntargetable;
+
+        // 闪烁的隐身拍优先；否则无敌 → 半透明，不无敌 → 不透明
+        float alpha = isBlinkHidden ? 0f : (invulnerable ? InvulnerableAlpha : 1f);
+
+        if (!Mathf.Approximately(sr.color.a, alpha))
+        {
+            Color c = sr.color;
+            c.a = alpha;
+            sr.color = c;
+        }
+    }
+
     public void StartBlink(float duration, float interval)
     {
         if (blinkCoroutine != null) StopCoroutine(blinkCoroutine);
+        isBlinkHidden = false;   // 上一轮可能停在隐身拍上
         blinkCoroutine = StartCoroutine(BlinkRoutine(duration, interval));
     }
 
+    /// <summary>
+    /// 受击闪烁：在"隐身"与"正常"之间来回切。
+    /// "正常"那一拍显示多透明由 LateUpdate 决定 —— 受击期间是无敌的，所以是半透明。
+    /// </summary>
     private System.Collections.IEnumerator BlinkRoutine(float duration, float interval)
     {
         float elapsed = 0f;
@@ -390,14 +439,16 @@ public class PlayerController : MonoBehaviour
 
         while (elapsed < duration)
         {
-            sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0f);
+            isBlinkHidden = true;
             yield return new WaitForSeconds(interval);
             elapsed += interval;
 
-            sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 1f);
+            isBlinkHidden = false;
             yield return new WaitForSeconds(interval);
             elapsed += interval;
         }
-        sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 1f);
+
+        isBlinkHidden = false;
+        blinkCoroutine = null;
     }
 }

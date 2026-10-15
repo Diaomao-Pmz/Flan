@@ -19,7 +19,7 @@ public class EmitterTrack
 {
     public BulletPatternBase pattern;
 
-    /// <summary>发射间隔（秒）。由 phase 覆盖值或 Emitter 的形态默认值决定。</summary>
+    /// <summary>发射间隔（秒）。取自图案的通用设置。</summary>
     public float interval;
 
     /// <summary>本轨持续时长（秒）。小于等于 0 表示不限时，直到 StopAttack。</summary>
@@ -27,9 +27,6 @@ public class EmitterTrack
 
     /// <summary>相对组合开始的延迟（秒）。全填 0 = 并发；递增 = 序列。</summary>
     public float startDelay;
-
-    /// <summary>阵型托管时长，透传给 ShapeFormationController。</summary>
-    public float formationDuration;
 
     /// <summary>本轨独立的旋转累加器，仅 Rotation 形态使用。</summary>
     public float angle;
@@ -42,14 +39,12 @@ public class EmitterTrack
     private bool started;
 
     /// <summary>复用前重置。所有字段都要覆盖，绝不把脏数据带进下一次组合。</summary>
-    public void Setup(BulletPatternBase pattern, float startDelay, float duration,
-                      float interval, float formationDuration)
+    public void Setup(BulletPatternBase pattern, float startDelay, float duration)
     {
         this.pattern = pattern;
         this.startDelay = startDelay;
         this.duration = duration;
-        this.interval = Mathf.Max(interval, 0.01f); // 防止 0 间隔导致每帧狂喷
-        this.formationDuration = formationDuration;
+        this.interval = Mathf.Max(pattern != null ? pattern.interval : 0.5f, 0.01f); // 防止 0 间隔导致每帧狂喷
 
         angle = 0f;
         delayTimer = 0f;

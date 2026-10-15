@@ -16,6 +16,9 @@ public class DashState : PlayerStateBase
     /// <summary>常规冲刺是否真的启动了（被宝石接管时为 false）</summary>
     private bool didStartDash;
 
+    /// <summary>正在进行常规冲刺（被宝石接管时为 false）。供穿身开关查询，需配合"当前状态是本状态"使用</summary>
+    public bool IsDashing => didStartDash;
+
     /// <summary>
     /// 本次冲刺的指定方向。由路由器在切状态【之前】写入，用一次就清。
     ///
@@ -136,4 +139,4 @@ public class DashState : PlayerStateBase
         if (sm.dashTrail != null) sm.dashTrail.emitting = false;
         sm.rb.gravityScale = originalGravity;
     }
-}
+}

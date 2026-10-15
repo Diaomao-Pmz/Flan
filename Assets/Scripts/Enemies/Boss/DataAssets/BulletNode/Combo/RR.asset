@@ -14,28 +14,70 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BulletNode
   actionName: RR
   baseWeight: 100
-  cooldown: 0
+  cooldown: 5
   minCastDistance: 0
-  maxCastDistance: 15
+  maxCastDistance: 20
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
   phases:
-  - pattern: {fileID: 11400000, guid: 658e374a5ddaf3841b0edd08d185a203, type: 2}
-    startDelay: 0
-    duration: 7
-    intervalOverride: 0
-    formationDuration: 0
-  - pattern: {fileID: 11400000, guid: 4c0c26da1864ac0498f60121fd38a591, type: 2}
-    startDelay: 1
-    duration: 6
-    intervalOverride: 0
-    formationDuration: 0
-  - pattern: {fileID: 11400000, guid: 407278899315c23468eccdd59ded9646, type: 2}
-    startDelay: 2
+  - startDelay: 0
     duration: 5
-    intervalOverride: 0
-    formationDuration: 0
-  AttackName: 
-  formationDuration: 0
-  attackDuration: 3
+    pattern:
+      rid: 3572679684999610449
+  - startDelay: 0.8
+    duration: 4.3
+    pattern:
+      rid: 3572679684999610450
+  - startDelay: 1.5
+    duration: 3.5
+    pattern:
+      rid: 3572679684999610451
+  references:
+    version: 2
+    RefIds:
+    - rid: 3572679684999610449
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.5
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        initialAngle: 0
+        endAngle: 360
+        rotationDuration: 3
+    - rid: 3572679684999610450
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.5
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        initialAngle: 0
+        endAngle: 360
+        rotationDuration: 3
+    - rid: 3572679684999610451
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.5
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        initialAngle: 0
+        endAngle: 360
+        rotationDuration: 3

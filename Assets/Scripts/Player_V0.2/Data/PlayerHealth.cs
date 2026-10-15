@@ -23,11 +23,30 @@ namespace Flandre.CombatSystem
     [System.Serializable]
     public class PlayerHealth
     {
-        [Header("Health & Mana Settings")]
-        public int maxHP = 100;
+        [Header("Health & Mana (运行时)")]
         public int currentHP = 100;
-        public int maxMP = 100;
         public int currentMP = 100;
+
+        // ==========================================================
+        // 【最大值不再存在这里】改为实时读 PlayerStats 上的 maxHP / maxMP。
+        //
+        // 原因：技能树要能加最大血量。如果这里存一份数字，
+        // 加成就得记得"同步过来"，忘了就是血条上限不变 —— 典型的两份真相。
+        // 现在只有一份真相（Stats），这里只是一个读取窗口。
+        //
+        // 名字保持 maxHP / maxMP 不变，所以 HUDBars、StatusCardUI 等读取方一行都不用改。
+        // ==========================================================
+        private PlayerStats stats;
+
+        /// <summary>最大生命值 = 出厂值（PlayerStateConfig）+ 成长加成</summary>
+        public int maxHP => stats != null ? Mathf.Max(1, stats.maxHP.IntValue) : 100;
+
+        /// <summary>最大魔力值 = 出厂值（PlayerStateConfig）+ 成长加成</summary>
+        public int maxMP => stats != null ? Mathf.Max(0, stats.maxMP.IntValue) : 100;
+
+        // 上一次的最大值，用来算"上限涨了多少"
+        private int lastMaxHP;
+        private int lastMaxMP;
         [Tooltip("受击后的无敌保护期总长")]
         public float invulnerableDuration = 0.35f;
 
@@ -65,17 +84,32 @@ namespace Flandre.CombatSystem
         // public event System.Action OnPlayerDeath;
         // ==========================================================
 
-        public void Init(PlayerCombatConfig config = null)
+        public void Init(PlayerCombatConfig config, PlayerStats playerStats)
         {
             if (config != null)
             {
-                maxHP = config.maxHP;
-                maxMP = config.maxMP;
                 invulnerableDuration = config.invulnerableDuration;
+            }
+
+            // 订阅最大值变化：先退订再订阅，防止重复 Init 时订两次
+            if (stats != null)
+            {
+                stats.maxHP.OnValueChanged -= HandleMaxHPChanged;
+                stats.maxMP.OnValueChanged -= HandleMaxMPChanged;
+            }
+
+            stats = playerStats;
+
+            if (stats != null)
+            {
+                stats.maxHP.OnValueChanged += HandleMaxHPChanged;
+                stats.maxMP.OnValueChanged += HandleMaxMPChanged;
             }
 
             currentHP = maxHP;
             currentMP = maxMP;
+            lastMaxHP = maxHP;
+            lastMaxMP = maxMP;
 
             untargetableSources.Clear();
             isUntargetableDisplay = false;
@@ -206,6 +240,38 @@ namespace Flandre.CombatSystem
         }
 
         // ==========================================
+        // 最大值变化（技能树加成生效时）
+        // ==========================================
+
+        /// <summary>
+        /// 上限变化时修正当前值：
+        ///   上限提高 → 当前值同步加上提高的那部分（升级立刻能感受到，而不是一条空槽）
+        ///   上限降低 → 当前值夹到新上限以内
+        /// 最后广播 OnStatChanged，血条/蓝条自动刷新。
+        /// </summary>
+        private void HandleMaxHPChanged(float _)
+        {
+            int now = maxHP;
+            int delta = now - lastMaxHP;
+            lastMaxHP = now;
+
+            if (delta > 0) currentHP += delta;
+            currentHP = Mathf.Clamp(currentHP, 0, now);
+            OnStatChanged?.Invoke();
+        }
+
+        private void HandleMaxMPChanged(float _)
+        {
+            int now = maxMP;
+            int delta = now - lastMaxMP;
+            lastMaxMP = now;
+
+            if (delta > 0) currentMP += delta;
+            currentMP = Mathf.Clamp(currentMP, 0, now);
+            OnStatChanged?.Invoke();
+        }
+
+        // ==========================================
         // 资源增减
         // ==========================================
 
@@ -249,5 +315,11 @@ namespace Flandre.CombatSystem
 
         /// <summary>旧布尔接口 SetUntargetable 的兼容签名</summary>
         public static readonly object Legacy = new object();
+
+        /// <summary>滑铲全程无敌</summary>
+        public static readonly object Slide = new object();
+
+        /// <summary>飞行中按 Ctrl 解除飞行后的无敌下坠</summary>
+        public static readonly object FlightDrop = new object();
     }
 }

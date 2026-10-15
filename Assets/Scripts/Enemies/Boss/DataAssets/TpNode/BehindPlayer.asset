@@ -16,9 +16,19 @@ MonoBehaviour:
   baseWeight: 100
   cooldown: 0
   minCastDistance: 0
-  maxCastDistance: 15
+  maxCastDistance: 0
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
-  teleportDelay: 0.2
+  teleportDelay: 0.5
   targetType: 1
+  reactToHit: 0
+  reactMode: 1
+  reactDamageType: 0
+  baseChance: 0.3
+  chanceGainPerHit: 0.2
+  chanceResetAfter: 2
+  interruptAction: 0

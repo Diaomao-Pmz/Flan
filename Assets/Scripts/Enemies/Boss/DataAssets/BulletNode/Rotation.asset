@@ -17,10 +17,14 @@ MonoBehaviour:
   cooldown: 0
   minCastDistance: 0
   maxCastDistance: 15
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
   phases:
+<<<<<<< Updated upstream
   - pattern: {fileID: 11400000, guid: 658e374a5ddaf3841b0edd08d185a203, type: 2}
     startDelay: 0
     duration: 4
@@ -29,3 +33,26 @@ MonoBehaviour:
   AttackName: Rotation
   formationDuration: 0
   attackDuration: 3
+=======
+  - startDelay: 0
+    duration: 6
+    pattern:
+      rid: 3572679684999610440
+  references:
+    version: 2
+    RefIds:
+    - rid: 3572679684999610440
+      type: {class: RotationPattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 0.5
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        initialAngle: 0
+        endAngle: 360
+        rotationDuration: 3
+>>>>>>> Stashed changes

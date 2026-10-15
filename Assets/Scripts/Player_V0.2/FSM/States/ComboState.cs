@@ -58,16 +58,8 @@ public class ComboState : PlayerStateBase
     private int ownerAttackId;
 
     /// <summary>
-    /// 本招是不是「强行打出」的缩水版蓄力（CD 没走完就放出来的 AA1 / BB1）。
-    /// 和 ownerCmd 一样必须在 Enter 时拍快照 —— 招式演到一半被位移打断时
-    /// Buffer 会 ResetCombo，Exit 再去问就问不到了。
-    /// </summary>
-    private bool isWeakenedAttack;
-
-    /// <summary>
-    /// 本招用的武器。同样在 Enter 时拍快照 ——
-    /// Exit 里要读它的 CD 配置算后摇，而那时 Buffer.ActiveWeapon
-    /// 可能已经被 ResetCombo 清成 null（位移打断就会）。
+    /// 本招用的武器。在 Enter 时拍快照 ——
+    /// 招式演到一半被位移打断时 Buffer 会 ResetCombo，ActiveWeapon 会被清成 null。
     /// </summary>
     private WeaponMoveSet ownerWeapon;
 
@@ -83,7 +75,6 @@ public class ComboState : PlayerStateBase
     private PlayerWeaponEmitter weaponEmitter;
     private PlayerAimProvider aimProvider;
     private PlayerMomentum momentum;
-    private WeaponLoadout loadout;
 
     public ComboState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
@@ -102,8 +93,6 @@ public class ComboState : PlayerStateBase
     private PlayerMomentum Momentum
         => momentum != null ? momentum : (momentum = sm.GetComponent<PlayerMomentum>());
 
-    private WeaponLoadout Loadout
-        => loadout != null ? loadout : (loadout = sm.GetComponent<WeaponLoadout>());
 
     public override void Enter()
     {
@@ -115,7 +104,6 @@ public class ComboState : PlayerStateBase
         activeNode = Buffer.currentNode;
         ownerCmd = Buffer.LastTriggerCmd;
         ownerAttackId = Buffer.GetHandAttackId(ownerCmd);
-        isWeakenedAttack = Buffer.IsCurrentAttackWeakened;
         ownerWeapon = Buffer.ActiveWeapon;
 
         // 空中连段反重力悬停：把角色钉在空中，防止挥剑时诡异下滑
@@ -220,7 +208,10 @@ public class ComboState : PlayerStateBase
         {
             if (activeNode == null || activeNode.lockMovementDuringAttack)
             {
-                sm.rb.linearVelocity = new Vector2(0f, sm.rb.linearVelocity.y);
+                // 【蓄力准备窗口】已经按住攻击键准备蓄力 → 可以拖着步子挪（衰减在 ApplyHorizontalMove 里）。
+                // 攻击动画照常播、朝向不变，所以能边收招边后撤。
+                if (Buffer != null && Buffer.IsInPreChargeWindow) ApplyHorizontalMove();
+                else sm.rb.linearVelocity = new Vector2(0f, sm.rb.linearVelocity.y);
             }
             return;
         }
@@ -597,27 +588,6 @@ public class ComboState : PlayerStateBase
         float recovery = ResolveRecoveryTime();
         Buffer?.BeginHandRecovery(ownerCmd, recovery, ownerAttackId);
 
-        // 【蓄力 CD 第二步：用真实硬直把终点延长到位】
-        //
-        // 第一步在 OnAttackReleased —— 打出的那一刻先用 delay=0 占位，
-        // 焊死"动画期间另一只手起手蓄力查不到 CD"的时间缝。
-        // 这里补上完整语义：CD 要【接在收招硬直后面】——
-        //     动画 → 收招硬直 → 蓄力 CD → 可以再蓄
-        // 硬直多长只有演完才知道，所以终点必须在 Exit 里定。
-        // StartChargeCooldown 内部取 Max，只延不缩，两步不会互相踩。
-        //
-        // 【普攻不会碰它】这是"打一发普攻垫一下再蓄"绕不过 CD 的原因：
-        // 计时器只被这两处推后，普攻那条路径根本不认识它。
-        if (activeNode != null && activeNode.isChargeSkill
-            && WeaponMoveSet.TryCommandToSlot(ownerCmd, out WeaponSlot ownerSlot))
-        {
-            // 弱化版不加这段延迟：它的后摇会被 ChargeStunState.Enter 直接清掉，
-            // 由僵直全盘接管。CD 与僵直同起同长，一起到期 ——
-            // 否则会多出一小段"能动了但还是只能放弱化版"的夹缝。
-            float cdDelay = isWeakenedAttack ? 0f : recovery;
-            Loadout?.StartChargeCooldown(ownerSlot, activeNode.chargeLevel, cdDelay);
-        }
-
         // 攻击结束必须把碰撞箱还原，否则会带着蹲姿/缩腿姿态离开攻击状态
         if (isBodyAdjusting)
         {
@@ -633,42 +603,13 @@ public class ComboState : PlayerStateBase
         sm.rb.gravityScale = originalGravity;
         activeNode = null;
         ownerWeapon = null;
-        isWeakenedAttack = false;
     }
 
-    /// <summary>
-    /// 本招的后摇时长 —— 就是节点上配的值，不再做任何加工。
-    ///
-    /// 【强行打出的惩罚已经不在这里了】
-    /// 上一版把弱化版的惩罚做成「把后摇撑到 chargeCooldownLv1」，那是错的：
-    /// 后摇（handBusyUntil）只锁【一只手】，另一只手照常出招；
-    /// 而且它不改变状态，空中掉落时方向键依然生效。
-    /// 现在改由 ChargeStunState 承担，那是个真正管住全身的状态。
-    /// </summary>
+    /// <summary>本招的后摇时长 —— 就是节点上配的值，不再做任何加工</summary>
     private float ResolveRecoveryTime()
         => activeNode != null ? activeNode.recoveryTime : 0f;
 
-    /// <summary>
-    /// 本招演完后是否要接一段僵直（只有强行打出的弱化蓄力才要）。
-    ///
-    /// 【为什么由状态机在动画结束时来问，而不是本状态在 Exit 里自己切】
-    /// Exit 会在所有离开攻击的路径上跑 —— 包括被冲刺/滑铲主动取消。
-    /// 那时状态机正在切去 DashState，若从 Exit 里再发起一次切换，
-    /// 会把玩家刚花掉的那次冲刺顶掉。所以"要不要僵直"只是一个查询，
-    /// 由知道自己是不是"自然演完"的调用方来决定。
-    /// </summary>
-    public bool TryGetPendingStun(out float seconds)
-    {
-        seconds = 0f;
-
-        if (!isWeakenedAttack || ownerWeapon == null) return false;
-
-        // 默认取 Lv1 的 CD —— 僵直与 CD 同长同起，两者一起到期：
-        // 僵直一解除就能正常蓄力，不会出现"能动了但还是只能放弱化版"的夹缝。
-        // 想让僵直独立于 CD，去武器资产上填 Weakened Stun Duration。
-        seconds = ownerWeapon.GetWeakenedStunDuration();
-        return seconds > 0f;
-    }
+    // 【已删除】TryGetPendingStun —— 弱化蓄力打完后的大僵直（ChargeStunState）已随连放惩罚一并移除。
 
     /// <summary>
     /// 超时未收到 OnAttackAnimationEnd。
@@ -696,15 +637,6 @@ public class ComboState : PlayerStateBase
 
         // 走和正常收招一样的流程，保证连招宽恕期照常开始
         Buffer.StartGracePeriod();
-
-        // 兜底超时也算「自然演完」—— 弱化版照样要吃僵直，
-        // 否则漏配一个动画事件就等于免掉了惩罚
-        if (TryGetPendingStun(out float stunSeconds))
-        {
-            sm.chargeStunState.SetDuration(stunSeconds);
-            sm.ChangeState(sm.chargeStunState);
-            return;
-        }
 
         if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
         else HandleLanding();

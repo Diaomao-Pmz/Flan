@@ -17,15 +17,30 @@ MonoBehaviour:
   cooldown: 0
   minCastDistance: 0
   maxCastDistance: 15
+  preferredDistance: -1
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
   chargeAnimName: 
   activeAnimName: 
   recoverAnimName: 
   phases:
-  - pattern: {fileID: 11400000, guid: 32ffa4e124b001a44a64f1f9eb6f10c1, type: 2}
-    startDelay: 0
+  - startDelay: 0
     duration: 4
-    intervalOverride: 0
-    formationDuration: 0
-  AttackName: Circle
-  formationDuration: 0
-  attackDuration: 3
+    pattern:
+      rid: 3572679684999610446
+  references:
+    version: 2
+    RefIds:
+    - rid: 3572679684999610446
+      type: {class: CirclePattern, ns: , asm: Assembly-CSharp}
+      data:
+        interval: 2
+        bulletSpeed: 8
+        bulletScale: 0
+        lifetime: 0
+        projectileKey: 
+        enableAcceleration: 0
+        accelerationRate: 1
+        accelerationCoef: 1
+        bulletCount: 24
+        offsetY: -0.1

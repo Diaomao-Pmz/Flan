@@ -37,7 +37,6 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: FX_AA3
   effectLifetime: 0
-  weakenedEffectKey: 
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.43, y: 0.395}
   effectScale: {x: 1.07, y: 1.11}

@@ -18,31 +18,29 @@ namespace Flandre.CombatSystem
     ///
     /// 【回蓝口径】按你的设定，回蓝量与【招式配置的伤害】成正比，
     /// 而不是敌人实际掉的血 —— 这样敌人有护甲/减伤时玩家的资源循环不会崩。
+    ///
+    /// 【参数搬家】回蓝相关的数值原先挂在本组件的 Inspector 上，
+    /// 现在统一放进 PlayerStateConfig（资源类出厂值），本组件只负责"怎么算"。
+    /// 每秒回蓝读的是 PlayerStats.mpRegenPerSecond —— 它可以被技能树加成。
     /// </summary>
     public class PlayerManaSystem : MonoBehaviour
     {
-        [Header("命中回蓝")]
-        [Tooltip("每点招式伤害回多少 MP。0.2 表示 10 伤害的招回 2 点")]
-        public float mpPerDamage = 0.2f;
-
-        [Tooltip("单次命中最多回多少 MP。防止高伤大招一下回满")]
-        public int maxMpPerHit = 10;
-
-        [Tooltip("远程子弹命中是否也回蓝")]
-        public bool gainFromProjectiles = true;
-
-        [Header("自然恢复")]
-        [Tooltip("每秒自然回复多少 MP。填 0 关闭")]
-        public float regenPerSecond = 2f;
-
-        [Tooltip("飞行等消耗 MP 的行为结束后，隔多久才开始自然恢复")]
-        public float regenDelayAfterSpend = 1.0f;
-
         [Header("Debug")]
         public bool verboseLog = false;
 
         private PlayerState state;
         private PlayerHitDetection hitDetection;
+
+        // ---- 数值读取窗口（出厂值在 PlayerStateConfig）----
+        private PlayerStateConfig Cfg => state != null ? state.stateConfig : null;
+
+        private float MpPerDamage => Cfg != null ? Cfg.mpPerDamage : 0.2f;
+        private int MaxMpPerHit => Cfg != null ? Cfg.maxMpPerHit : 10;
+        private bool GainFromProjectiles => Cfg == null || Cfg.gainMpFromProjectiles;
+        private float RegenDelayAfterSpend => Cfg != null ? Cfg.mpRegenDelayAfterSpend : 1f;
+
+        /// <summary>每秒回蓝 = 出厂值 + 成长加成</summary>
+        private float RegenPerSecond => state != null ? state.stats.mpRegenPerSecond.Value : 0f;
 
         // 小数部分累计器：MP 是整数，不攒着的话每帧的零头会被丢掉
         private float mpAccumulator;
@@ -93,7 +91,7 @@ namespace Flandre.CombatSystem
         /// </summary>
         public void OnProjectileHit(int moveDamage)
         {
-            if (!gainFromProjectiles) return;
+            if (!GainFromProjectiles) return;
             GainFromDamage(moveDamage);
         }
 
@@ -102,7 +100,7 @@ namespace Flandre.CombatSystem
             if (state == null || moveDamage <= 0) return;
 
             int gain = Mathf.Clamp(
-                Mathf.RoundToInt(moveDamage * mpPerDamage), 0, maxMpPerHit);
+                Mathf.RoundToInt(moveDamage * MpPerDamage), 0, MaxMpPerHit);
 
             if (gain <= 0) return;
 
@@ -130,7 +128,7 @@ namespace Flandre.CombatSystem
 
             if (now < lastSeenMp)
             {
-                regenBlockedUntil = Time.time + regenDelayAfterSpend;
+                regenBlockedUntil = Time.time + RegenDelayAfterSpend;
                 mpAccumulator = 0f;
             }
 
@@ -139,6 +137,7 @@ namespace Flandre.CombatSystem
 
         private void TickRegen()
         {
+            float regenPerSecond = RegenPerSecond;
             if (state == null || regenPerSecond <= 0f) return;
             if (Time.time < regenBlockedUntil) return;
             if (state.health.currentMP >= state.health.maxMP) return;

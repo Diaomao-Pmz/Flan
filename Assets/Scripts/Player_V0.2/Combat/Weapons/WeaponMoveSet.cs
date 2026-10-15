@@ -49,6 +49,13 @@ namespace Flandre.CombatSystem
             "蓄力招 AA1/AA2/AA3 也放这里，靠节点自己的 chargeLevel 区分等级。")]
         public List<ComboNode> followUps = new List<ComboNode>();
 
+        [Header("飞行攻击 (飞行中按本武器键)")]
+        [Tooltip(
+            "飞行中只会出这一招：按下立刻出，按住连发，没有连段、没有蓄力。\n" +
+            "出招间隔 = 这一招的动画长度；节点上的 Recovery Time 在飞行中不生效。\n" +
+            "主武器填 A1，副武器填 B1。留空则飞行中这只手无法攻击。")]
+        public ComboNode flyAttack;
+
         // ==========================================================
         // 蓄力等级
         // ==========================================================
@@ -59,7 +66,8 @@ namespace Flandre.CombatSystem
         [Tooltip("按住多久达到 AA2")]
         public float chargeTimeLv2 = 0.9f;
 
-        [Tooltip("按住多久达到 AA3。到此封顶，玩家可以无限期继续举着")]
+        [Tooltip("按住多久达到 AA3。到此封顶，玩家可以无限期继续举着。\n" +
+                 "按住过程中逐级升：到 Lv1 阈值是 AA1，到 Lv2 阈值是 AA2……松手打出当前达到的最高级")]
         public float chargeTimeLv3 = 1.5f;
 
         [Tooltip(
@@ -69,68 +77,8 @@ namespace Flandre.CombatSystem
             "只作用于「打完普攻接着蓄力」的情况，原地起手不享受。")]
         public float comboChargeSpeedMultiplier = 1f;
 
-        // ==========================================================
-        // 蓄力 CD —— 按打出的等级递减
-        // ==========================================================
-        [Header("蓄力 CD (秒 · 按打出的等级递减)")]
-        [Tooltip(
-            "打出 AA1 / BB1 之后，多少秒内再蓄力会被判为「强行打出」。\n\n" +
-            "⚠️【全局，不分左右手】主手打出蓄力后，副手同样要等这段时间。\n\n" +
-            "AA1 是白嫖来的 —— 不需要任何前置普攻，原地长按就有，\n" +
-            "所以罚得最重。这是三档里唯一真正需要压住的一档。")]
-        public float chargeCooldownLv1 = 1.0f;
-
-        [Tooltip("打出 AA2 / BB2 之后的蓄力间隔。需要先打两段普攻才能拿到，罚得轻一些")]
-        public float chargeCooldownLv2 = 0.5f;
-
-        [Tooltip(
-            "打出 AA3 / BB3 之后的蓄力间隔。\n" +
-            "必须在实战中打满三段普攻才能拿到，代价已经付过了，所以罚得最轻。")]
-        public float chargeCooldownLv3 = 0.3f;
-
-        [Tooltip(
-            "【强行打出后的僵直时长】弱化版蓄力打完，玩家被锁住多少秒不能做任何事。\n\n" +
-            "填 0（默认）= 沿用 Charge Cooldown Lv1，也就是和 CD 同长同起、一起到期。\n" +
-            "这是刻意的默认值：僵直一解除就正好能正常蓄力，中间没有\n" +
-            "「能动了但还是只能放弱化版」的夹缝，规则自己闭合。\n\n" +
-            "⚠️ 填了别的值就打破了这个闭合，注意两种后果：\n" +
-            "  比 CD 短 → 僵直结束后还有一段时间只能放弱化版（惩罚被拉长成两段）\n" +
-            "  比 CD 长 → CD 在僵直里就走完了，CD 这个参数等于失效\n" +
-            "只在你确实想要这种错位时才填。")]
-        [Min(0f)]
-        public float weakenedStunDuration = 0f;
-
-        /// <summary>
-        /// 强行打出后的僵直时长。填 0 时沿用 Lv1 的 CD，两者同长同起、一起到期。
-        /// </summary>
-        public float GetWeakenedStunDuration()
-            => weakenedStunDuration > 0f ? weakenedStunDuration : GetChargeCooldown(1);
-
-        /// <summary>
-        /// 打出第 level 级蓄力之后，要隔多久才不算「强行打出」。
-        ///
-        /// 【为什么按等级递减】
-        /// CD 在这里不是单纯的发射频率闸，而是【对连段的奖励】：
-        /// 等级越高说明玩家在实战里打满了越多段普攻，那份代价已经付过了，
-        /// 所以放得越松。这样 CD 和「蓄力等级由连段深度决定」指向同一个方向，
-        /// 而不是各管各地限速两次。
-        ///
-        /// 【全局，不分手】蓄力招打出后连段计数就清零了，而连段计数是两只手共用的。
-        /// CD 若只锁一只手，换手长按就能立刻绕过去。所以 CD 跟着「连段」走，不跟着「手」走。
-        ///
-        /// 【它同时是强行打出的后摇时长】强行打出的一定是 AA1/BB1，
-        /// 其后摇就取 chargeCooldownLv1 —— 后摇与新 CD 同时到期，
-        /// 玩家不可能连续强行打出两发。
-        /// </summary>
-        public float GetChargeCooldown(int level)
-        {
-            switch (level)
-            {
-                case 2: return chargeCooldownLv2;
-                case 3: return chargeCooldownLv3;
-                default: return chargeCooldownLv1;   // 含 level<=1 与异常值
-            }
-        }
+        // 【已删除】蓄力 CD（chargeCooldownLv1~3）与弱化僵直时长（weakenedStunDuration）
+        // 连放惩罚已整体移除，蓄力不再有冷却。
 
         // ==========================================================
         // 蓄力特效

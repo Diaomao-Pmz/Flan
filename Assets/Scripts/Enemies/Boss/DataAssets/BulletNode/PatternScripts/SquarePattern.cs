@@ -1,81 +1,37 @@
+<<<<<<< Updated upstream
 using UnityEngine;
 using static UnityEngine.RuleTile.TilingRuleOutput;
+=======
+﻿using System;
+using UnityEngine;
+>>>>>>> Stashed changes
 
-[CreateAssetMenu(fileName = "NewSquarePattern", menuName = "ScriptableObjects/BulletPattern/Square")]
-public class SquarePattern : BulletPatternBase
+/// <summary>方阵：四条边均匀排布子弹</summary>
+[Serializable, BulletPatternInfo("方阵 Square")]
+public class SquarePattern : FormationPatternBase
 {
-    [Header("--- Square ---")]
-    public float squareBulletSpeed = 5f;
-    public int squareBulletsPerSide = 5;
-    public float squareSize = 3f;
-    public float squareOffsetY = 0f; // 方阵作为整体，依然保留出生点偏移
-    public bool enableAcceleration = true;
-    public float accelerationRate = 1f;
-    public float formationDuration = 0.5f;
+    [Header("--- 方阵专属 ---")]
+    [Tooltip("每条边几颗子弹")]
+    [Min(1)]
+    public int bulletsPerSide = 5;
 
-    public override void Spawn(BulletSpawnContext ctx)
+    [Tooltip("方阵边长")]
+    public float size = 3f;
+
+    protected override Vector2[] BuildShape()
     {
-        Vector3 spawnPos = ctx.firePoint.position + new Vector3(0, squareOffsetY, 0);
-
-        GameObject squareParent = new GameObject("BossSquareFormation");
-        squareParent.transform.position = spawnPos;
-
-        FormationCore core = squareParent.AddComponent<FormationCore>();
-
-        RotatingFormation rot = squareParent.AddComponent<RotatingFormation>();
-        float directionX = (ctx.player != null && ctx.player.position.x - ctx.host.transform.position.x >= 0) ? 1f : -1f;
-        rot.direction = new Vector2(directionX, 0);
-        rot.speed = squareBulletSpeed;
-        rot.rotationSpeed = Random.Range(0, 2) == 0 ? Random.Range(45f, 120f) : Random.Range(-120f, -45f);
-
-        // 【修改】：使用新的位运算检查方阵是否需要加速
-        rot.enableAcceleration = enableAcceleration;
-        rot.accelerationRate = accelerationRate;
-
-        ShapeFormationController formationCtrl = squareParent.AddComponent<ShapeFormationController>();
-
-        float halfSize = squareSize / 2f;
-        Vector2[] corners = {
-            new Vector2(halfSize, halfSize),
-            new Vector2(-halfSize, halfSize),
-            new Vector2(-halfSize, -halfSize),
-            new Vector2(halfSize, -halfSize)
-        };
+        float h = size / 2f;
+        Vector2[] corners = { new Vector2(h, h), new Vector2(-h, h), new Vector2(-h, -h), new Vector2(h, -h) };
+        Vector2[] points = new Vector2[bulletsPerSide * 4];
 
         for (int edge = 0; edge < 4; edge++)
         {
-            Vector2 startPoint = corners[edge];
-            Vector2 endPoint = corners[(edge + 1) % 4];
-
-            for (int i = 0; i < squareBulletsPerSide; i++)
+            for (int i = 0; i < bulletsPerSide; i++)
             {
-                float t = (float)i / squareBulletsPerSide;
-                Vector2 localPos = Vector2.Lerp(startPoint, endPoint, t);
-
-                // 1. 从对象池获取子弹
-                GameObject bullet = ObjectPoolManager.Instance.Get(ctx.projectileKey);
-                if (bullet == null) continue;
-
-                // 2. 认贼作父，摆好阵型
-                bullet.transform.SetParent(squareParent.transform);
-                bullet.transform.localPosition = localPos;
-                core.Register(bullet.transform);
-
-                // 3. 调整朝向
-                float rotAngle = Mathf.Atan2(localPos.y, localPos.x) * Mathf.Rad2Deg;
-                bullet.transform.rotation = Quaternion.Euler(0, 0, rotAngle);
-
-                // 4. 开启阵型接管模式
-                Enemy_Projectile p = bullet.GetComponent<Enemy_Projectile>();
-                if (p != null)
-                {
-                    p.isControlledByFormation = true;
-                }
-
-                formationCtrl.AddBullet(bullet.transform, localPos);
+                float t = (float)i / bulletsPerSide;
+                points[edge * bulletsPerSide + i] = Vector2.Lerp(corners[edge], corners[(edge + 1) % 4], t);
             }
         }
-        // 5. 注册到阵型控制器
-        formationCtrl.StartFormation(ctx.activeTrack.formationDuration, rot);
+        return points;
     }
 }

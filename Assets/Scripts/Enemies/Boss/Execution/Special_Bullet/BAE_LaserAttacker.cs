@@ -5,7 +5,8 @@ using Flandre.CombatSystem;
 using Unity.VisualScripting;
 
 /// <summary>
-/// Boss 激光执行器。认领 LaserNode。固定方向式：预警瞬间锁定角度，之后不再跟踪。
+/// Boss 激光执行器。认领 LaserNode。
+/// 方向默认在预警开始瞬间锁定；LaserNode 的追踪时间可以让预警线 / 光束先追玩家一段时间再锁定。
 ///
 /// 【绘制方式：缩放拉伸，而非 Tiled 平铺】
 /// 激光贴图的颜色沿光束长度方向是均匀的（只在宽度方向有渐变），所以拉伸是无损的。
@@ -73,8 +74,8 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
 
         Vector2 origin = OriginPos;
 
-        // 【数据快照】预警开始的瞬间就把角度定死，之后不再跟踪玩家。
-        // 这正是「可躲」的来源：玩家有 telegraphTime 秒离开这条线。
+        // 预警开始时先对准玩家一次。
+        // 追踪时间为 0 时这就是最终方向 —— 「可躲」的来源：玩家有 telegraphTime 秒离开这条线。
         Vector2 direction = ResolveDirection(ctx, origin, laser.aimAngleOffset);
 
         SpriteRenderer beamRenderer = ObjectPoolManager.Instance.Get("Laser").GetComponent<SpriteRenderer>();
@@ -88,6 +89,10 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
         float elapsed = 0f;
         while (elapsed < laser.telegraphTime)
         {
+            // 追踪期内：预警线跟着玩家转；过了追踪期：方向锁定，玩家开始读招闪避
+            if (elapsed < laser.telegraphTrackTime)
+                direction = TrackDirection(direction, ctx, laser);
+
             DrawBeam(beamRenderer, OriginPos, direction, laser, true);
             elapsed += Time.deltaTime;
             yield return null;
@@ -101,6 +106,10 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
 
         while (elapsed < laser.fireTime)
         {
+            // 开火追踪：光束继续朝玩家扫，判定框用同一个方向，所以会跟着一起转
+            if (elapsed < laser.fireTrackTime)
+                direction = TrackDirection(direction, ctx, laser);
+
             float length = DrawBeam(beamRenderer, OriginPos, direction, laser, false);
 
             tickTimer += Time.deltaTime;
@@ -154,7 +163,9 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
             DamageType.Ranged,
             origin,
             gameObject,
-            ctx.controller);
+            ctx.controller,
+            laser.overrideKnockback,
+            laser.knockbackForce);
     }
 
     // ==========================================================
@@ -242,11 +253,15 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
     private void HideBeam()
     {
         beamActive = false;
-        foreach(GameObject beam in currentActiveLasers)
+
+        // 先全部回收，再清空列表。
+        // 原写法在 foreach 里边遍历边 Remove，激光放到一半被打断时会抛 InvalidOperationException。
+        for (int i = 0; i < currentActiveLasers.Count; i++)
         {
-            currentActiveLasers.Remove(beam);
-            ObjectPoolManager.Instance.Recycle(beam);
+            if (currentActiveLasers[i] != null)
+                ObjectPoolManager.Instance.Recycle(currentActiveLasers[i]);
         }
+        currentActiveLasers.Clear();
     }
 
     // ==========================================================
@@ -254,6 +269,20 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
     // ==========================================================
 
     private Vector2 OriginPos => laserOrigin != null ? (Vector2)laserOrigin.position : (Vector2)transform.position;
+
+    /// <summary>
+    /// 追踪一帧：把当前方向转向"此刻对准玩家的方向"。
+    /// trackTurnSpeed 为 0 时直接对准；否则每秒最多转这么多度。
+    /// </summary>
+    private Vector2 TrackDirection(Vector2 current, BossContext ctx, LaserNode laser)
+    {
+        Vector2 target = ResolveDirection(ctx, OriginPos, laser.aimAngleOffset);
+        if (laser.trackTurnSpeed <= 0f) return target;
+
+        float maxRadians = laser.trackTurnSpeed * Mathf.Deg2Rad * Time.deltaTime;
+        Vector3 turned = Vector3.RotateTowards(current, target, maxRadians, 0f);
+        return ((Vector2)turned).normalized;
+    }
 
     private Vector2 ResolveDirection(BossContext ctx, Vector2 origin, float angleOffset)
     {
@@ -290,4 +319,4 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
         Gizmos.DrawWireCube(Vector3.zero, gizmoSize);
         Gizmos.matrix = old;
     }
-}
+}

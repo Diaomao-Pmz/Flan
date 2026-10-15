@@ -37,7 +37,6 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: 
   effectLifetime: 0
-  weakenedEffectKey: 
   useHitboxOffsetForEffect: 1
   effectOffset: {x: 0, y: 0}
   effectScale: {x: 1, y: 1}

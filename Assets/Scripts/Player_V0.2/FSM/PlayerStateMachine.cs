@@ -11,7 +11,7 @@ using UnityEngine;
 ///   IsGrounded / CanStand / SetColliderHeight  → PlayerSensor
 ///   groundCheck / ceilingCheck / hurtboxCore / groundLayer / 碰撞体备份 → PlayerSensor
 ///   SpawnProjectile / projectilePrefab / firePoint → PlayerWeaponEmitter
-///   Jump 与 Fall 重复的悬停蓄力逻辑 → HoverChargeHandler
+///   （飞行重做后，悬停蓄力 HoverChargeHandler 已删除；飞行引擎见 FlightMotor）
 ///
 /// 演进过程：452 行（初始） → 约 300 行（批次A/B/C） → 现在约 230 行
 ///
@@ -37,6 +37,22 @@ public class PlayerStateMachine : MonoBehaviour
     public SlideState slideState;
     public FlyState flyState;
 
+    /// <summary>飞行中出招（边飞边打）。与 flyState 共用 flightMotor</summary>
+    public FlyCombatState flyCombatState;
+
+    /// <summary>
+    /// 【飞行引擎】FlyState 与 FlyCombatState 共用：关重力、八方向移动、按秒扣蓝。
+    /// 放在状态机上而不是某张卡带里，是为了两种飞行模式来回切换时"发动机不熄火"。
+    /// </summary>
+    public FlightMotor flightMotor { get; private set; }
+
+    /// <summary>冲刺 / 滑铲穿过敌人的开关（每个物理帧由本类驱动）</summary>
+    public PassThroughController passThrough { get; private set; }
+
+    /// <summary>当前是否在飞（巡航或交战都算）</summary>
+    public bool IsFlying => currentState != null
+                            && (currentState == flyState || currentState == flyCombatState);
+
     public ComboState comboState;
 
     // 【已删除】chargeState —— P3 把蓄力从「状态」解耦成了「随身模块」，
@@ -45,10 +61,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     public HitState hitState;
 
-    /// <summary>
-    /// 强行打出弱化蓄力后的僵直。禁止一切输入，受击可打断（自然由 HandlePlayerHit 接管）。
-    /// </summary>
-    public ChargeStunState chargeStunState;
+    // 【已删除】chargeStunState —— 弱化蓄力打完后的大僵直，已随连放惩罚一并移除。
 
     // TODO: 阶段性接入 —— 当前按要求维持「0血不死」，故不实例化
     // public DeadState deadState;
@@ -80,9 +93,7 @@ public class PlayerStateMachine : MonoBehaviour
     public float slideDeceleration => MoveCfg.slideDeceleration;
     public float crouchSpeedMultiplier => MoveCfg.slideToCrouchSpeedMultiplier;
     public float crouchMoveSpeedMultiplier => MoveCfg.crouchMoveSpeedMultiplier;
-    public float hoverChargeTime => MoveCfg.hoverChargeTime;
-    public float flyManaCostPerSecond => MoveCfg.flyManaCostPerSecond;
-    public float flyCancelJumpForce => MoveCfg.flyCancelJumpForce;
+    public float flyManaCostPerSecond => playerState.stats.flyManaCostPerSecond.Value;   // 基础值来自 PlayerStateConfig，可被成长加成
     public float flySpeed => MoveCfg.flySpeed;
 
     public float hitStunDuration => CombatCfg.hitStunDuration;
@@ -191,10 +202,12 @@ public class PlayerStateMachine : MonoBehaviour
         crouchState = new CrouchState(this);
         slideState = new SlideState(this);
         flyState = new FlyState(this);
+        flyCombatState = new FlyCombatState(this);
+        flightMotor = new FlightMotor(this);
+        passThrough = new PassThroughController(rb, GetComponent<BoxCollider2D>());
 
         comboState = new ComboState(this);
         hitState = new HitState(this);
-        chargeStunState = new ChargeStunState(this);
 
         // TODO: 接入死亡时解除注释
         // deadState = new DeadState(this);
@@ -232,8 +245,35 @@ public class PlayerStateMachine : MonoBehaviour
 
     void FixedUpdate()
     {
+        // 先决定这一帧要不要穿过敌人，再让状态推动刚体
+        if (passThrough != null)
+        {
+            LayerMask layers = MoveCfg != null ? MoveCfg.passThroughLayers : (LayerMask)0;
+            passThrough.FixedTick(WantsPassThrough(), layers, Time.fixedDeltaTime);
+        }
+
         // 接口已就位，下一批开始把速度写入迁移进来
         currentState?.FixedUpdate();
+    }
+
+    /// <summary>
+    /// 此刻是否在做"可以穿过敌人"的动作：地面/空中冲刺、飞行八向冲刺、地面滑铲。
+    /// 与无敌（无法选中）无关。
+    /// </summary>
+    private bool WantsPassThrough()
+    {
+        PlayerMovementConfig cfg = MoveCfg;
+        if (cfg == null) return false;
+
+        if (cfg.dashPassThrough)
+        {
+            if (currentState == dashState && dashState.IsDashing) return true;
+            if (IsFlying && flightMotor != null && flightMotor.IsDashing) return true;
+        }
+
+        if (cfg.slidePassThrough && currentState == slideState && slideState.IsSliding) return true;
+
+        return false;
     }
 
     /// <summary>
@@ -346,18 +386,6 @@ public class PlayerStateMachine : MonoBehaviour
 
         inputBuffer.StartGracePeriod();
 
-        // 强行打出的弱化蓄力 → 演完直接进僵直，而不是回到待机/跑动。
-        // 判断放在这里（而不是 ComboState.Exit）是有意的：Exit 会在【所有】
-        // 离开攻击的路径上跑，包括被冲刺主动取消 —— 那时状态机正在切去 DashState，
-        // 从 Exit 里再发起一次切换会把冲刺顶掉。
-        // 只有"自然演完"才该吃这个僵直。
-        if (comboState.TryGetPendingStun(out float stunSeconds))
-        {
-            chargeStunState.SetDuration(stunSeconds);
-            ChangeState(chargeStunState);
-            return;
-        }
-
         // ==========================================================
         // 【必须先查地面】空中招式演完不能直接回 Idle/Run。
         //
@@ -401,13 +429,6 @@ public class PlayerStateMachine : MonoBehaviour
         // 【P3】蓄力被打断 —— 后果与未蓄满松手相同：什么都不放，连段清零
         chargeSystem?.CancelAll();
 
-        // 弱化招演出期间预付、但还没兑现的逃逸冲劲也要丢掉。
-        //
-        // 挨打意味着这次僵直根本不会发生了。不丢的话那股冲劲会一直挂着，
-        // 等【下一次】弱蓄进僵直时白送出去 —— 表现成"我什么都没按，
-        // 人却自己滑出去了"，而且要恰好挨过一次打才复现。
-        chargeStunState?.CancelPendingEscape();
-
         hitState.SetKnockbackForce(knockbackDirection);
         ChangeState(hitState);
         playerController.StartBlink(playerState.health.invulnerableDuration, blinkInterval);
@@ -424,4 +445,4 @@ public class PlayerStateMachine : MonoBehaviour
             // playerState.health.OnPlayerDeath -= HandlePlayerDeath;
         }
     }
-}
+}

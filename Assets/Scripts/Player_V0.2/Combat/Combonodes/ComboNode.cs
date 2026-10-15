@@ -107,6 +107,15 @@ public class ComboNode : ScriptableObject
         "蓄力招按等级填，等级越高锁越久。")]
     public float recoveryTime = 0.35f;
 
+    [Tooltip(
+        "【普攻后蓄力最短时长】（秒）—— 只对普通攻击生效，蓄力招填了也不用。\n\n" +
+        "打完本招接长按蓄力时，蓄力直接从「本段对应的等级」起步（第 1 段 → AA1，第 2 段 → AA2…），\n" +
+        "但必须按住满这么久才解锁；不满就松手 = 什么都不放。\n\n" +
+        "从进入蓄力姿态那一刻（长按判定成立时）开始计。\n" +
+        "这段时间同时也计入升级进度，不是先等完再开始攒。")]
+    [Min(0f)]
+    public float chargeMinHoldAfter = 0.5f;
+
     [Header("触发限制条件 (Trigger Requirements)")]
     public CastCondition castCondition = CastCondition.Anywhere;
     public RequiredState requiredState = RequiredState.Any;
@@ -211,13 +220,7 @@ public class ComboNode : ScriptableObject
     [Tooltip("特效存活时长。填 0 则使用 PlayerEffectSpawner 上的默认值")]
     public float effectLifetime = 0f;
 
-    [Tooltip(
-        "【降级特效】本招被「强行打出」时改用的特效 key。\n\n" +
-        "强行打出 = 蓄力 CD 还没走完就长按放出来的缩水版 AA1 / BB1。\n" +
-        "它的伤害和位移都正常，唯一能让玩家看出不对劲的就是这个特效 ——\n" +
-        "所以建议配一个明显更弱的版本（更小、更暗、更短）。\n\n" +
-        "留空 = 沉默回退到上面的普通特效，不会报错。")]
-    public string weakenedEffectKey = "";
+    // 【已删除】weakenedEffectKey —— 弱化版蓄力的降级特效，已随连放惩罚一并移除。
 
     [Tooltip(
         "勾选 = 特效偏移复用下方判定框的 Hitbox Offset（省一次配置）\n" +

@@ -8,6 +8,9 @@ using Flandre.CombatSystem;
 ///
 /// 这样玩家在滑铲途中出招时，连招/蓄力状态可以接手这股冲劲继续滑 ——
 /// 而滑铲的减速逻辑仍然只有这一份，没有被复制到别的状态里去。
+///
+/// 【滑铲无敌】正常滑铲（没被宝石接管）全程无敌，离开本状态即解除。
+/// 开关在 PlayerMovementConfig.slideInvulnerable。蹲下不无敌。
 /// </summary>
 public class SlideState : PlayerStateBase
 {
@@ -15,6 +18,9 @@ public class SlideState : PlayerStateBase
     private float slideDirection;
     private bool isFirstHit;
     private bool didStartSlide;
+
+    /// <summary>正在进行常规滑铲（被宝石接管时为 false）。供穿身开关查询，需配合"当前状态是本状态"使用</summary>
+    public bool IsSliding => didStartSlide;
 
     public SlideState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
@@ -37,6 +43,10 @@ public class SlideState : PlayerStateBase
         }
 
         didStartSlide = true;
+
+        var cfg = sm.playerState != null ? sm.playerState.movementConfig : null;
+        if (cfg == null || cfg.slideInvulnerable)
+            sm.playerState?.health.RequestUntargetable(InvulnerableTokens.Slide);
 
         sm.animDriver.SetBase(PlayerAnimHash.Slide);
         sm.SetColliderHeight(true);
@@ -93,6 +103,9 @@ public class SlideState : PlayerStateBase
 
         if (!didStartSlide) return;
 
+        // 没申请过时释放也是安全的（引用计数里本来就没有这把钥匙）
+        sm.playerState?.health.ReleaseUntargetable(InvulnerableTokens.Slide);
+
         sm.slideSkill.StartCooldownIfFirstHit(isFirstHit);
         if (sm.dashTrail != null) sm.dashTrail.emitting = false;
 
@@ -102,4 +115,4 @@ public class SlideState : PlayerStateBase
         // 是否保留由 PlayerStateMachine.ChangeState 按目标状态统一裁决。
         // 切去连招/蓄力时保留，切去别的地方自动清空。
     }
-}
+}

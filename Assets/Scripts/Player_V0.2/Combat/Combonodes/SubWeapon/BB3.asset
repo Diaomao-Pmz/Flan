@@ -15,6 +15,7 @@ MonoBehaviour:
   nodeName: BB3
   comboWindow: 0.7
   recoveryTime: 0.35
+  chargeMinHoldAfter: 0.5
   castCondition: 0
   requiredState: 0
   inputSequence: 05000000
@@ -37,7 +38,6 @@ MonoBehaviour:
   knockbackForce: 0
   effectKey: FX_BB3
   effectLifetime: 0
-  weakenedEffectKey: 
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.377, y: 0.444}
   effectScale: {x: 0.61, y: 0.66}
@@ -46,7 +46,7 @@ MonoBehaviour:
   projectileCount: 1
   projectileInterval: 0.06
   projectileSpeedMultiplier: 1
-  projectileScaleMultiplier: 1
+  projectileScaleMultiplier: 3
   projectileDamageOverride: 0
   recomputeAimPerShot: 1
   useAimDash: 0

@@ -64,9 +64,21 @@ public abstract class PlayerStateBase : IState
         // 表现是「带着冲劲进蓄力还能滑一小段」，而不是一进蓄力就急刹车。
         //
         // 取 max 而不是相加 —— 它是"你还剩多少冲劲"，不是额外加成。
-        if (IsCharging && Momentum != null)
+        //
+        // 它是配合"蓄力减速"的补偿，所以只在 chargeSlowsMovement 打开时生效；
+        // 不减速时再套它，蓄力反而会比平时跑得快。
+        var moveCfg = sm.playerState != null ? sm.playerState.movementConfig : null;
+        bool chargeSlows = moveCfg != null && moveCfg.chargeSlowsMovement;
+
+        if (chargeSlows && IsCharging && Momentum != null)
         {
             speed = Mathf.Max(speed, Momentum.GetChargeSpeedFloor());
+        }
+
+        // 【蓄力准备窗口】按住攻击键准备蓄力、人还在攻击动画/后摇里 → 地面移速打折
+        if (IsInPreChargeWindow && sm.IsGrounded())
+        {
+            speed *= moveCfg != null ? moveCfg.preChargeMoveSpeedMultiplier : 0.5f;
         }
 
         sm.rb.linearVelocity = new Vector2(moveDir * speed, sm.rb.linearVelocity.y);
@@ -172,12 +184,26 @@ public abstract class PlayerStateBase : IState
     /// 放在基类是因为地面移动相关的卡带（Idle / Run）都要查它，
     /// 以后如果蹲行、滑铲也要遵守同一条规则，直接用就行。
     /// </summary>
+    /// <summary>处于蓄力准备窗口（见 ComboInputBuffer.IsInPreChargeWindow）</summary>
+    protected bool IsInPreChargeWindow
+    {
+        get
+        {
+            if (cachedBuffer == null) cachedBuffer = sm.GetComponent<ComboInputBuffer>();
+            return cachedBuffer != null && cachedBuffer.IsInPreChargeWindow;
+        }
+    }
+
     protected bool IsMovementLockedByAttack
     {
         get
         {
             if (cachedBuffer == null) cachedBuffer = sm.GetComponent<ComboInputBuffer>();
-            return cachedBuffer != null && cachedBuffer.IsMovementLockedByRecovery();
+            // 蓄力准备窗口内放行移动（移速在 ApplyHorizontalMove 里打折）。
+            // 只放行"走"：跳跃、起飞在后摇里仍然被路由器挡住，后摇的代价不会被跳掉。
+            return cachedBuffer != null
+                && cachedBuffer.IsMovementLockedByRecovery()
+                && !cachedBuffer.IsInPreChargeWindow;
         }
     }
 

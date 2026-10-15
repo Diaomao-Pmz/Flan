@@ -130,14 +130,7 @@ namespace Flandre.CombatSystem
                 return;
             }
 
-            // 强行打出的缩水版蓄力换降级特效。
-            // 这一招的伤害和位移都正常，特效是玩家唯一能看出"这发不对劲"的地方。
-            // 没配降级特效就沉默回退到普通的 —— 忘了配不会炸，只是看不出区别。
-            bool weakened = buffer != null && buffer.IsCurrentAttackWeakened;
-
-            string key = weakened && !string.IsNullOrEmpty(node.weakenedEffectKey)
-                ? node.weakenedEffectKey
-                : node.effectKey;
+            string key = node.effectKey;
 
             if (string.IsNullOrEmpty(key)) key = defaultAttackEffectKey;
             if (string.IsNullOrEmpty(key)) return;

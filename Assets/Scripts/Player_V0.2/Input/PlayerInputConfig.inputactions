@@ -52,15 +52,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Fly",
-                    "type": "Button",
-                    "id": "2bade85c-904f-44ad-9e59-6db212afd7ce",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Move",
                     "type": "Value",
                     "id": "b9791fc7-3baa-4181-ad40-206db4eb63dc",
@@ -68,6 +59,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Fly",
+                    "type": "Button",
+                    "id": "de9895ef-14f7-4e9b-b772-ca827628829d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -112,17 +112,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "SubAttack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "f4bc73c1-7634-4dfb-b283-7f82c68c3fe4",
-                    "path": "<Keyboard>/c",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Fly",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -189,6 +178,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "CrouchOrSlide",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5ad5a974-fda5-4229-ba54-91e851d9d172",
+                    "path": "<Keyboard>/leftAlt",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fly",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

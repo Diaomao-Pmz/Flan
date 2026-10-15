@@ -1,32 +1,42 @@
+<<<<<<< Updated upstream
 using UnityEngine;
 using static UnityEngine.RuleTile.TilingRuleOutput;
+=======
+﻿using System;
+using UnityEngine;
+>>>>>>> Stashed changes
 
-[CreateAssetMenu(fileName = "NewTrianglePattern", menuName = "ScriptableObjects/BulletPattern/Triangle")]
-public class TrianglePattern : BulletPatternBase
+/// <summary>三角：子弹沿三角形轮廓排布</summary>
+[Serializable, BulletPatternInfo("三角 Triangle")]
+public class TrianglePattern : FormationPatternBase
 {
-    [Header("--- Triangle ---")]
-    public int triangleBulletCount = 10;
-    public float triangleBulletSpeed = 5f;
-    public float tri_rmin = 2;
-    public float tri_rmax = 4;
-    public float triangleOffsetY = 0f;
-    public bool enableAcceleration = true;
-    public float accelerationRate = 1f;
-    public float formationDuration = 0.5f;
+    [Header("--- 三角专属 ---")]
+    [Tooltip("一共几颗子弹")]
+    [Min(1)]
+    public int bulletCount = 10;
 
-    public override void Spawn(BulletSpawnContext ctx)
+    [Tooltip("内半径")]
+    public float rMin = 2f;
+
+    [Tooltip("外半径")]
+    public float rMax = 4f;
+
+    protected override Vector2[] BuildShape()
     {
+<<<<<<< Updated upstream
         Vector2[] spawnPositions = new Vector2[triangleBulletCount];
 
         //���ݹ�ʽ�ó��ض��Ƕ��µ�xy����
         for (int i = 0; i < triangleBulletCount; i++)
+=======
+        Vector2[] points = new Vector2[bulletCount];
+        for (int i = 0; i < bulletCount; i++)
+>>>>>>> Stashed changes
         {
-            float angle = (i / (float)triangleBulletCount) * 2 * Mathf.PI;
-
-            Vector2 xycood = MathHelper.N_PolygonAngleEquation(3, angle, tri_rmin, tri_rmax);
-
-            spawnPositions[i] = xycood;
+            float angle = (i / (float)bulletCount) * 2f * Mathf.PI;
+            points[i] = MathHelper.N_PolygonAngleEquation(3, angle, rMin, rMax);
         }
+<<<<<<< Updated upstream
 
         Vector3 parentSpawnPos = ctx.firePoint.position + new Vector3(0, triangleOffsetY, 0);
 
@@ -43,5 +53,8 @@ public class TrianglePattern : BulletPatternBase
         rot.accelerationRate = accelerationRate;
 
         formationCtrl.StartFormation(ctx.activeTrack.formationDuration, rot);
+=======
+        return points;
+>>>>>>> Stashed changes
     }
 }

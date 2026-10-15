@@ -37,10 +37,25 @@ public class BAE_BulletEmitter : MonoBehaviour, IBossActionExecutor
 
     /// <summary>
     /// 当前正在执行的轨道。仅在 ExecutePattern 调用期间有效。
-    /// 各 Spawn 方法通过它读取 formationDuration / angle / 是否加速，
+    /// 图案通过它读取 angle / interval（旋转弹幕用），
     /// 避免给十几个方法逐个加参数。ExecutePattern 是同步的，不存在轨道交错。
     /// </summary>
     private EmitterTrack activeTrack;
+
+    // 当前弹幕招式的击退配置。StartCombo 每次只跑一张卡（会先清空旧轨道），所以一份就够
+    private bool currentOverrideKnockback;
+    private Vector2 currentKnockbackForce;
+
+    /// <summary>
+    /// 给刚出膛的子弹写上当前招式的击退配置。
+    /// 所有生成子弹的地方都要调它（SpawnBullet / CreateFormationParent 内部已调用）。
+    /// </summary>
+    public void StampKnockback(GameObject bullet)
+    {
+        if (bullet == null) return;
+        Enemy_Projectile p = bullet.GetComponent<Enemy_Projectile>();
+        if (p != null) p.SetKnockback(currentOverrideKnockback, currentKnockbackForce);
+    }
 
     //实现IBOOSACTIONEXECUTOR
     public System.Type NodeType => typeof(BulletNode);
@@ -94,47 +109,50 @@ public class BAE_BulletEmitter : MonoBehaviour, IBossActionExecutor
     {
         ClearTracks();
 
-        if (node.HasPhases)
+        currentOverrideKnockback = node.overrideKnockback;
+        currentKnockbackForce = node.knockbackForce;
+
+        int added = 0;
+        if (node.phases != null)
         {
-            int added = 0;
             for (int i = 0; i < node.phases.Count; i++)
             {
                 BulletPhase phase = node.phases[i];
                 if (phase == null) continue;
 
-                float interval = phase.intervalOverride > 0f
-                    ? phase.intervalOverride
-                    : phase.pattern.DefaultInterval;
+                if (phase.pattern == null)
+                {
+                    Debug.LogWarning($"[Emitter] 卡片 {node.name} 第 {i} 段没有选弹幕类型，已跳过。", this);
+                    continue;
+                }
 
-                AddTrack(phase.pattern, phase.startDelay, phase.duration, interval, phase.formationDuration);
+                AddTrack(phase.pattern, phase.startDelay, phase.duration);
                 added++;
             }
+        }
 
-            if (added == 0)
-            {
-                Debug.LogError($"[Emitter] 卡片 {node.name} 的 phases 里全是空槽位！", this);
-                return false;
-            }
-            return true;
+        if (added == 0)
+        {
+            Debug.LogError($"[Emitter] 卡片 {node.name} 没有任何可用的弹幕段（Phases 为空或都没选类型）！", this);
+            return false;
         }
         return true;
     }
 
     /// <summary>取一条空闲轨道复用，没有就新建。避免每次组合都产生 GC。</summary>
-    private void AddTrack(BulletPatternBase pattern, float startDelay, float duration,
-                          float interval, float formationDuration)
+    private void AddTrack(BulletPatternBase pattern, float startDelay, float duration)
     {
         for (int i = 0; i < tracks.Count; i++)
         {
             if (tracks[i].IsFinished)
             {
-                tracks[i].Setup(pattern, startDelay, duration, interval, formationDuration);
+                tracks[i].Setup(pattern, startDelay, duration);
                 return;
             }
         }
 
         EmitterTrack track = new EmitterTrack();
-        track.Setup(pattern, startDelay, duration, interval, formationDuration);
+        track.Setup(pattern, startDelay, duration);
         tracks.Add(track);
     }
 
@@ -152,73 +170,67 @@ public class BAE_BulletEmitter : MonoBehaviour, IBossActionExecutor
     private void ExecutePattern(BulletPatternBase pattern)
     {
         BulletSpawnContext ctx = new BulletSpawnContext();
-        ctx.SetUp(firePoint, playerTransform, GetPlayerTargetPosition(), projectileKey, activeTrack, this);
+        ctx.SetUp(firePoint, playerTransform, GetPlayerTargetPosition(), ResolveKey(pattern), activeTrack, this);
         pattern.Spawn(ctx);
     }
 
-    /// <summary>当前轨道的阵型托管时长。</summary>
-    private float CurrentFormationDuration => activeTrack != null ? activeTrack.formationDuration : 0f;
+    /// <summary>这个图案用哪种子弹：图案上填了 key 就用它，否则用发射器的默认子弹</summary>
+    private string ResolveKey(BulletPatternBase pattern)
+        => pattern != null && !string.IsNullOrEmpty(pattern.projectileKey) ? pattern.projectileKey : projectileKey;
 
-    // 【新增】：智能获取玩家身上的 Hurtbox 坐标
+    /// <summary>
+    /// 远程瞄准点：与激光统一，走 BossContext.PlayerAimPoint（递归查找 Hurtbox_Core，
+    /// 找不到时退回玩家碰撞体中心）。以后改瞄准规则只改 BossContext 一处。
+    /// </summary>
     private Vector3 GetPlayerTargetPosition()
     {
         if (playerTransform == null) return firePoint.position;
 
-        // 尝试寻找之前你在 PlayerStateMachine 里定义的 "Hurtbox_Core"
-        Transform hurtbox = playerTransform.Find("Hurtbox_Core");
-        if (hurtbox != null)
-        {
-            return hurtbox.position;
-        }
+        if (bossController == null) bossController = GetComponent<BossController>();
+        if (bossController != null && bossController.Context.player != null)
+            return bossController.Context.PlayerAimPoint;
 
-        // 如果名字没对上，作为防呆设计，获取碰撞体中心点而不是脚底
-        Collider2D col = playerTransform.GetComponent<Collider2D>();
-        if (col != null)
-        {
-            return col.bounds.center;
-        }
-
-        // 最差情况，返回脚底
-        return playerTransform.position;
+        // 兜底：Context 还没组装好（理论上不会发生）
+        Collider2D col = playerTransform.GetComponentInChildren<Collider2D>();
+        return col != null ? col.bounds.center : playerTransform.position;
     }
 
-    /// <summary>
-    /// 创建一个搭载shape formation controller的父对象，返回其shape formation controller组件
-    /// </summary>
-    /// <param name="bulletPositions">子弹位置</param>
-    /// <param name="parentName">父对象名字</param>
-    /// <returns></returns>
-    public ShapeFormationController CreateFormationParent(Vector2[] bulletPositions, string parentName, Vector3 spawnPos)
-    {
-        //创建父物体
-        GameObject Parent = new GameObject(parentName);
-        Parent.transform.position = spawnPos;
+    private BossController bossController;
 
-        FormationCore core = Parent.AddComponent<FormationCore>();
-        ShapeFormationController formationCtrl = Parent.AddComponent<ShapeFormationController>();
+    /// <summary>
+    /// 创建一个阵型父物体：从对象池取子弹挂在它下面，交给 ShapeFormationController 展开。
+    /// 子弹的外观、大小、存活时间、击退按图案的通用设置套用；移动由阵型负责。
+    /// </summary>
+    public ShapeFormationController CreateFormationParent(BulletPatternBase pattern, Vector2[] bulletPositions,
+                                                          string parentName, Vector3 spawnPos)
+    {
+        GameObject parent = new GameObject(parentName);
+        parent.transform.position = spawnPos;
+
+        FormationCore core = parent.AddComponent<FormationCore>();
+        ShapeFormationController formationCtrl = parent.AddComponent<ShapeFormationController>();
+        string key = ResolveKey(pattern);
 
         for (int i = 0; i < bulletPositions.Length; i++)
         {
             Vector2 localPos = bulletPositions[i];
 
-            // 1. 从对象池获取子弹
-            GameObject bullet = ObjectPoolManager.Instance.Get(projectileKey);
+            GameObject bullet = ObjectPoolManager.Instance != null ? ObjectPoolManager.Instance.Get(key) : null;
             if (bullet == null) continue;
 
-            // 2. 认贼作父，摆好阵型
-            bullet.transform.SetParent(Parent.transform);
+            bullet.transform.SetParent(parent.transform);
             core.Register(bullet.transform);
 
-            // 3. 调整朝向
             float rotAngle = Mathf.Atan2(localPos.y, localPos.x) * Mathf.Rad2Deg;
             bullet.transform.rotation = Quaternion.Euler(0, 0, rotAngle);
 
-            // 4. 开启阵型接管模式
             Enemy_Projectile p = bullet.GetComponent<Enemy_Projectile>();
             if (p != null)
             {
                 p.isControlledByFormation = true;
+                ApplyCommon(p, pattern);
             }
+            StampKnockback(bullet);
 
             formationCtrl.AddBullet(bullet.transform, localPos);
         }
@@ -226,19 +238,42 @@ public class BAE_BulletEmitter : MonoBehaviour, IBossActionExecutor
         return formationCtrl;
     }
 
-    public GameObject SpawnProjectile(Vector2 dir, Vector3 spawnPos, string objectPoolKey, float speedOverride)
+    /// <summary>
+    /// 生成一颗独立飞行的子弹，并套用图案的通用设置（外观、速度、大小、存活时间、加速、击退）。
+    /// </summary>
+    /// <param name="speedOverride">不填 = 用图案的子弹速度；扇形多层、混沌随机速度时传入</param>
+    public GameObject SpawnBullet(BulletPatternBase pattern, Vector2 dir, Vector3 spawnPos, float? speedOverride = null)
     {
-        //对象池调用
-        GameObject bullet = ObjectPoolManager.Instance?.Get(objectPoolKey);
+        GameObject bullet = ObjectPoolManager.Instance != null ? ObjectPoolManager.Instance.Get(ResolveKey(pattern)) : null;
         if (bullet == null) return null;
+
         bullet.transform.position = spawnPos;
-        Enemy_Projectile projScript = bullet.GetComponent<Enemy_Projectile>();
-        if (projScript != null)
+
+        Enemy_Projectile proj = bullet.GetComponent<Enemy_Projectile>();
+        if (proj != null)
         {
-            projScript.Setup(dir);
-            projScript.speed = speedOverride;
+            proj.Setup(dir);
+            proj.speed = speedOverride ?? pattern.bulletSpeed;
+            ApplyCommon(proj, pattern);
+
+            // 加速要在速度写好之后配置（加速器会拍下当前速度作为基准）
+            if (pattern.enableAcceleration)
+            {
+                BulletAcceleration acc = bullet.GetComponent<BulletAcceleration>();
+                if (acc != null) acc.Configure(pattern.accelerationRate, pattern.accelerationCoef);
+                else Debug.LogWarning($"[Emitter] {bullet.name} 缺少 BulletAcceleration 组件，加速未生效。", bullet);
+            }
         }
+
+        StampKnockback(bullet);
         return bullet;
+    }
+
+    /// <summary>大小、存活时间（单颗子弹和阵型子弹共用）</summary>
+    private static void ApplyCommon(Enemy_Projectile proj, BulletPatternBase pattern)
+    {
+        if (pattern.bulletScale > 0f) proj.SetScale(pattern.bulletScale);
+        proj.SetLifetime(pattern.lifetime);
     }
 }
 

@@ -26,7 +26,18 @@ public class BossActionExecuter : IState
 
     public void Enter()
     {
+<<<<<<< Updated upstream
         // ÿ�ν���ս��״̬ʱ��ȷ�������ٶȹ��㣬ר�ĳ��У�ʵ��"���ʱ���ƶ�"��
+=======
+        // 防御：上一次 DoCombat 若没 yield 就直接结束（SelectSkill 返回 null），
+        // StartCoroutine 返回后句柄会被赋成一个已结束的协程，导致这里永远以为"还在出招"
+        attackCoroutine = null;
+        activeExecutor = null;
+
+        boss.SetMovementStatus("[移动] 出招中");
+
+        // 每次进入战斗状态时，确保物理速度归零，专心出招（实现"射击时不移动"）
+>>>>>>> Stashed changes
         Rigidbody2D rb = boss.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -62,16 +73,28 @@ public class BossActionExecuter : IState
 
     public void Update()
     {
+<<<<<<< Updated upstream
         // �����㹥���������ҵ�ǰû������ִ�еĹ���Э��ʱ����������
         if (boss.AI.canAttack && attackCoroutine == null)
         {
             attackCoroutine = boss.StartCoroutine(DoCombat());
         }
+=======
+        if (attackCoroutine != null) return;
+
+        // 进入战斗状态时意图已经就位（MoveState 判断过射程），直接出招。
+        // SelectSkill 出手前还会再校验一次，不通过就返回 null → 回移动状态重新定意图。
+        attackCoroutine = boss.StartCoroutine(DoCombat());
+>>>>>>> Stashed changes
     }
 
     IEnumerator DoCombat()
     {
+<<<<<<< Updated upstream
         // 1. �� AI ��ä�У���������ǻ��� ActionNode��
+=======
+        // 1. 兑现 AI 在移动阶段定好的意图（抽出来的是基类 ActionNode）
+>>>>>>> Stashed changes
         ActionNode actionNode = boss.AI.SelectSkill();
 
         if (actionNode == null)
@@ -80,7 +103,21 @@ public class BossActionExecuter : IState
             yield break;
         }
 
+<<<<<<< Updated upstream
         // 2. ����ҵ��������ֿ���ִ���������Ե���Ϊֹ������������ʲô���ܡ�
+=======
+        // 套路步骤的"出招前停顿"（单招为 0）。停顿期间被破盾等打断时，Exit 会掐掉本协程
+        float delay = boss.AI.NextActionDelay;
+        if (delay > 0f)
+        {
+            yield return new WaitForSeconds(delay);
+
+            // 停顿期间玩家可能绕到背后 / 起飞了：按此刻情况重新检查这一步的候补招式
+            actionNode = boss.AI.RefreshStepChoice(actionNode);
+        }
+
+        // 2. 查表找到认领这种卡的执行器。大脑到此为止，不关心它是什么技能。
+>>>>>>> Stashed changes
         IBossActionExecutor executor = boss.GetExecutorFor(actionNode);
 
         if (executor == null)
@@ -98,6 +135,8 @@ public class BossActionExecuter : IState
             string label = string.IsNullOrEmpty(actionNode.actionName)
                 ? actionNode.name
                 : actionNode.actionName;
+            if (!string.IsNullOrEmpty(boss.AI.LastPickRoutineName))
+                label = $"[{boss.AI.LastPickRoutineName}] {label}";
             boss.bossStatusText.SetText(label);
         }
 
@@ -120,6 +159,11 @@ public class BossActionExecuter : IState
     {
         attackCoroutine = null;
         activeExecutor = null;
+
+        // 套路的下一步可以马上接 → 留在战斗状态，下一帧 Update 直接出下一招。
+        // 不这么做的话，每一步之间都会先回移动状态走一段，套路就连不起来了。
+        if (boss.AI.HasImmediateFollowUp) return;
+
         boss.ChangeState(boss.MoveState);
     }
 }

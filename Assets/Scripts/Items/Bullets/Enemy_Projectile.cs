@@ -5,6 +5,7 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
 {
     [Header("子弹属性")]
     public float speed = 5f;
+    [Tooltip("（未使用）存活时间改由弹幕图案的通用设置在出膛时写入，见 SetLifetime")]
     public float lifeTime = 3f;
     public int damage = 15;
     [Tooltip("超出屏幕多远才回收。单位是「屏幕比例」：0.5 表示上下左右各外扩半个屏幕，" +
@@ -19,6 +20,17 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
     private Rigidbody2D rb;
 
     public bool isControlledByFormation = false;
+
+    // 【招式自带击退】由发射它的 Boss 招式在出膛时写入（见 BAE_BulletEmitter.StampKnockback），回收时清空
+    private bool overrideKnockback;
+    private Vector2 knockbackForce;
+
+    /// <summary>写入本发子弹的击退配置。发射器在子弹出膛时调用</summary>
+    public void SetKnockback(bool overrideKnockback, Vector2 knockbackForce)
+    {
+        this.overrideKnockback = overrideKnockback;
+        this.knockbackForce = knockbackForce;
+    }
     public bool isEnemyProjectile = false; // 在怪物的预制体面板里把这个勾上
 
     // 出厂快照。原先 OnDespawn 里硬编码 new Vector3(0.5f, 0.5f, 1)，
@@ -31,6 +43,23 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
         rb = GetComponent<Rigidbody2D>();
         originalScale = transform.localScale;
         originalSpeed = speed;
+    }
+
+    // 出膛时由弹幕图案写入的存活时间。0 = 不限时（只在飞出屏幕时回收）
+    private float activeLifetime;
+    private float aliveTimer;
+
+    /// <summary>设置本发子弹的存活时间（秒）。0 = 不限时。发射器在出膛时调用</summary>
+    public void SetLifetime(float seconds)
+    {
+        activeLifetime = Mathf.Max(0f, seconds);
+        aliveTimer = 0f;
+    }
+
+    /// <summary>设置本发子弹的缩放。回收时自动还原为预制体大小</summary>
+    public void SetScale(float scale)
+    {
+        transform.localScale = new Vector3(scale, scale, originalScale.z);
     }
 
     public void Setup(Vector2 direction)
@@ -50,6 +79,17 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
 
     private void Update()
     {
+        // 存活时间到了就回收（0 = 不限时）
+        if (activeLifetime > 0f)
+        {
+            aliveTimer += Time.deltaTime;
+            if (aliveTimer >= activeLifetime)
+            {
+                ObjectPoolManager.Instance?.Recycle(gameObject);
+                return;
+            }
+        }
+
         // 相机边界由 ScreenBounds 每帧统一计算一次，这里只做 4 次浮点比较。
         // margin 的语义（屏幕比例）保持不变，Inspector 数值无需调整。
         if (ScreenBounds.IsOutside(transform.position, margin))
@@ -77,7 +117,9 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
             damage,
             DamageType.Ranged,
             transform.position,
-            gameObject));
+            gameObject,
+            overrideKnockback: overrideKnockback,
+            knockbackForce: knockbackForce));
 
         // 注意：这里保持原有行为 —— 命中后子弹继续飞（穿透弹）。
         // 若想改成命中即回收，在此处调 ObjectPoolManager.Instance?.Recycle(gameObject);
@@ -92,6 +134,10 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
     {
         // 回收进池子时，把状态重置为标准子弹
         isControlledByFormation = false;
+        activeLifetime = 0f;
+        aliveTimer = 0f;
+        overrideKnockback = false;
+        knockbackForce = Vector2.zero;
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
 
@@ -104,4 +150,4 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
         // 脱离父节点交由 ObjectPoolManager.Recycle 统一处理，这里不再重复 SetParent。
         // 加速器现在常驻预制体、自行实现 IPoolable，由 ObjectPoolManager 在回收时统一调用它的 OnDespawn，无需本类插手。
     }
-}
+}

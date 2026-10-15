@@ -53,7 +53,13 @@ public class BAE_MeleeAttacker : MonoBehaviour, IBossActionExecutor
             contactFilter,
             animator,
             melee.activeAnimName,
+<<<<<<< Updated upstream
             gameObject);
+=======
+            gameObject,
+            meleeVisual,
+            melee);
+>>>>>>> Stashed changes
 
         PlayAnim(melee.recoverAnimName);
     }
