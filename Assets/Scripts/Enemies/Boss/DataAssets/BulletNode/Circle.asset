@@ -27,11 +27,11 @@ MonoBehaviour:
   - startDelay: 0
     duration: 4
     pattern:
-      rid: 3572679684999610446
+      rid: 2323104603905720395
   references:
     version: 2
     RefIds:
-    - rid: 3572679684999610446
+    - rid: 2323104603905720395
       type: {class: CirclePattern, ns: , asm: Assembly-CSharp}
       data:
         interval: 2
@@ -42,5 +42,15 @@ MonoBehaviour:
         enableAcceleration: 0
         accelerationRate: 1
         accelerationCoef: 1
-        bulletCount: 24
-        offsetY: -0.1
+        SineWave: 1
+        SinAmp:
+          min: 50
+          max: 50
+        SinFreq:
+          min: 0.5
+          max: 0.5
+        SinPhase:
+          min: 0
+          max: 0
+        bulletCount: 18
+        offsetY: 0

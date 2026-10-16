@@ -42,3 +42,13 @@ MonoBehaviour:
         enableAcceleration: 0
         accelerationRate: 1
         accelerationCoef: 1
+        SineWave: 1
+        SinAmp:
+          min: 30
+          max: 80
+        SinFreq:
+          min: 1
+          max: 2
+        SinPhase:
+          min: 0
+          max: 0

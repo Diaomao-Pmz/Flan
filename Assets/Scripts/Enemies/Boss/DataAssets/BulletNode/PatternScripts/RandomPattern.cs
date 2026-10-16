@@ -8,6 +8,7 @@ public class RandomPattern : BulletPatternBase
     public override void Spawn(BulletSpawnContext ctx)
     {
         Vector2 dir = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-        ctx.host.SpawnBullet(this, dir, ctx.firePoint.position);
+        GameObject bullet = ctx.host.SpawnBullet(this, dir, ctx.firePoint.position);
+        AddComponents(bullet);
     }
 }

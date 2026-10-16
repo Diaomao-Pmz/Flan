@@ -1928,10 +1928,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6680cc39a7a00f54999d942263530fc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAIDecider
-  phase1Bullets:
-  - phaseTag: 0
-    action: {fileID: 11400000, guid: d485a8c5c66f61b44aaee9689391ed95, type: 2}
-    weightModifiers: []
+  phase1Bullets: []
   phase1Melees: []
   phase1SpecialBullets: []
   phase1SpecialMelees: []

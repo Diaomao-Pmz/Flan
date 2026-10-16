@@ -21,7 +21,8 @@ public class CirclePattern : BulletPatternBase
         for (int i = 0; i < bulletCount; i++)
         {
             float a = i * angleStep * Mathf.Deg2Rad;
-            ctx.host.SpawnBullet(this, new Vector2(Mathf.Cos(a), Mathf.Sin(a)), spawnPos);
+            GameObject bullet = ctx.host.SpawnBullet(this, new Vector2(Mathf.Cos(a), Mathf.Sin(a)), spawnPos);
+            AddComponents(bullet);
         }
     }
 }

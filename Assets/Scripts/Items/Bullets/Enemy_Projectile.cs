@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Items.Bullets.BulletComponents;
 using Flandre.CombatSystem;
+using UnityEngine;
 
 public class Enemy_Projectile : MonoBehaviour, IPoolable
 {
@@ -17,6 +18,7 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
     public LayerMask destroyLayer;
 
     private Vector2 moveDirection;
+    public Vector2 MoveDirection => moveDirection;
     private Rigidbody2D rb;
 
     public bool isControlledByFormation = false;
@@ -68,6 +70,36 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
         float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0, 0, angle);
     }
+
+    #region rotation
+    /// <summary>
+    /// 在当前方向基础上旋转 angle 度（正值逆时针）。
+    /// </summary>
+    public void Rotate(float angle)
+    {
+        moveDirection = (Vector2)(Quaternion.Euler(0f, 0f, angle) * moveDirection);
+        ApplyFacing();
+    }
+
+    /// <summary>
+    /// 瞬间把方向设为绝对角度 angle 度（0 = 向右，90 = 向上）。
+    /// 保留原方向的长度，避免意外改变速度。
+    /// </summary>
+    public void SetRotation(float angle)
+    {
+        float magnitude = moveDirection.sqrMagnitude > 0f ? moveDirection.magnitude : 1f;
+        float rad = angle * Mathf.Deg2Rad;
+        moveDirection = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * magnitude;
+        ApplyFacing();
+    }
+
+    // 让贴图朝向与 moveDirection 保持一致
+    private void ApplyFacing()
+    {
+        float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+    }
+    #endregion
 
     void FixedUpdate()
     {
@@ -149,5 +181,10 @@ public class Enemy_Projectile : MonoBehaviour, IPoolable
 
         // 脱离父节点交由 ObjectPoolManager.Recycle 统一处理，这里不再重复 SetParent。
         // 加速器现在常驻预制体、自行实现 IPoolable，由 ObjectPoolManager 在回收时统一调用它的 OnDespawn，无需本类插手。
+        IBulletComponent[] components = GetComponents<IBulletComponent>();
+        foreach (IBulletComponent component in components)
+        {
+            component.OnDespawn();
+        }
     }
 }

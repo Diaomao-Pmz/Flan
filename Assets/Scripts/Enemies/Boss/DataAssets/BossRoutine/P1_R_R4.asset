@@ -24,3 +24,11 @@ MonoBehaviour:
     delayBefore: 0
     whenOutOfRange: 0
     variants: []
+  - action: {fileID: 11400000, guid: 055ca54815ef2b240b27f449d54fce53, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    variants: []
+  - action: {fileID: 11400000, guid: 52fa0d58ed410084084fc64411e616ce, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    variants: []

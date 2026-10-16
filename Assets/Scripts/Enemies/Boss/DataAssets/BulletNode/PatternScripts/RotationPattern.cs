@@ -24,7 +24,8 @@ public class RotationPattern : BulletPatternBase
         float currentAngle = float.IsNaN(track.angle) ? initialAngle : track.angle;
 
         Vector2 dir = Quaternion.Euler(0f, 0f, currentAngle) * Vector2.right;
-        ctx.host.SpawnBullet(this, dir, ctx.firePoint.position);
+        GameObject bullet = ctx.host.SpawnBullet(this, dir, ctx.firePoint.position);
+        AddComponents(bullet);
 
         // ---- 下一发的角度 ----
         float totalAngle = endAngle - initialAngle;

@@ -21,6 +21,7 @@ public class LinePattern : BulletPatternBase
             if (delta.sqrMagnitude > 0.0001f) dir = delta.normalized;
         }
 
-        ctx.host.SpawnBullet(this, dir, spawnPos);
+        GameObject bullet = ctx.host.SpawnBullet(this, dir, spawnPos);
+        AddComponents(bullet);
     }
 }

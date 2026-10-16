@@ -71,6 +71,7 @@ public class FullScreenLinePattern : BulletPatternBase
             float speed = UnityEngine.Random.Range(minSpeed, maxSpeed);
 
             GameObject obj = host.SpawnBullet(this, dir, pos, speed);
+            AddComponents(obj);
             Enemy_Projectile proj = obj != null ? obj.GetComponent<Enemy_Projectile>() : null;
             if (proj != null)
             {

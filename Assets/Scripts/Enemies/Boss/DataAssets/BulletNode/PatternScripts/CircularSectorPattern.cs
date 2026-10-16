@@ -38,12 +38,16 @@ public class CircularSectorPattern : BulletPatternBase
 
             if (layerSpeeds == null || layerSpeeds.Length == 0)
             {
-                ctx.host.SpawnBullet(this, dir, pos);
+                GameObject bullet = ctx.host.SpawnBullet(this, dir, pos);
+                AddComponents(bullet);
                 continue;
             }
 
             for (int j = 0; j < layerSpeeds.Length; j++)
-                ctx.host.SpawnBullet(this, dir, pos, layerSpeeds[j]);
+            {
+                GameObject bullet = ctx.host.SpawnBullet(this, dir, pos, layerSpeeds[j]);
+                AddComponents(bullet);
+            }
         }
     }
 }

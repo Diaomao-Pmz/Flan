@@ -22,7 +22,8 @@ public class ChaoticPattern : BulletPatternBase
         {
             float speed = UnityEngine.Random.Range(minSpeed, maxSpeed);
             Vector2 dir = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-            ctx.host.SpawnBullet(this, dir, ctx.firePoint.position, speed);
+            GameObject bullet = ctx.host.SpawnBullet(this, dir, ctx.firePoint.position, speed);
+            AddComponents(bullet);
         }
     }
 }

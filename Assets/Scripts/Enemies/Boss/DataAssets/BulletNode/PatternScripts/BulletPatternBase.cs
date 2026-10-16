@@ -1,6 +1,12 @@
 using System;
 using UnityEngine;
 
+[Serializable]
+public struct FloatRange
+{
+    public float min, max;
+    public float Random() => UnityEngine.Random.Range(min, max);
+}
 /// <summary>
 /// 【弹幕图案】的基类 —— 现在直接内嵌在 BulletNode 的每一段（Phase）里，不再是独立的资产。
 ///
@@ -49,8 +55,36 @@ public abstract class BulletPatternBase
              "只对单颗子弹有效，阵型类不使用")]
     public float accelerationCoef = 1f;
 
+    [Tooltip("是否正弦运动")]
+    public bool SineWave;
+    public FloatRange SinAmp;
+    public FloatRange SinFreq;
+    public FloatRange SinPhase;
+
     /// <summary>执行一次本图案：生成子弹 / 阵型</summary>
     public abstract void Spawn(BulletSpawnContext ctx);
+
+    public virtual void AddComponents(GameObject bullet)
+    {
+        if (SineWave)
+        {
+            BulletSineWave bsw = AddBulletComponent<BulletSineWave>(bullet);
+            bsw.amplitude = SinAmp.Random();
+            bsw.frequency = SinFreq.Random();
+            bsw.phase = SinPhase.Random();
+        }
+    }
+
+    private T AddBulletComponent<T>(GameObject bullet) where T : UnityEngine.Behaviour
+    {
+        T comp = bullet.GetComponent<T>();
+        if (comp != null)
+        {
+            comp.enabled = true;
+            return comp;
+        }
+        return bullet.AddComponent<T>();
+    }
 }
 
 /// <summary>
