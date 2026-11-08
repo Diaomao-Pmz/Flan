@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ShapeFormationController : MonoBehaviour
 {
     // 记录所有子弹以及它们的最终目标局部坐标
-    private List<Transform> bullets = new List<Transform>();
+    public List<Transform> bullets { get; private set; } = new List<Transform>();
     private List<Vector2> targetLocalPositions = new List<Vector2>();
 
     private MonoBehaviour attackScriptToEnable; // 展开完毕后要激活的脚本 (如 RotatingFormation)

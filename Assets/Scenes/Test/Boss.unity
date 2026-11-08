@@ -1951,34 +1951,20 @@ MonoBehaviour:
         maxDistance: 20
         playerAirCondition: 0
       multiplier: 0.1
-  - routine: {fileID: 11400000, guid: 610ca5c0a0e6634409cb3ec319a5d109, type: 2}
+  - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
     weightModifiers:
     - condition:
         playerSide: 2
         minDistance: 0
-        maxDistance: 3
-        playerAirCondition: 0
-      multiplier: 0.1
-    - condition:
-        playerSide: 0
-        minDistance: 3
-        maxDistance: 20
+        maxDistance: 2
         playerAirCondition: 0
       multiplier: 3
-  - routine: {fileID: 11400000, guid: 70c23b2c5c450174f88c0d252f5c8f8e, type: 2}
-    weightModifiers:
-    - condition:
-        playerSide: 2
-        minDistance: 0
-        maxDistance: 3
-        playerAirCondition: 0
-      multiplier: 0.1
     - condition:
         playerSide: 0
-        minDistance: 3
+        minDistance: 2
         maxDistance: 20
         playerAirCondition: 0
-      multiplier: 3
+      multiplier: 0.1
   phase2Routines: []
   singleInterleaveChance: 0.2
   phase1Movement:

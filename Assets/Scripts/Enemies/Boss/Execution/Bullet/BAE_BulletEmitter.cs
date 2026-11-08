@@ -202,7 +202,7 @@ public class BAE_BulletEmitter : MonoBehaviour, IBossActionExecutor
     /// 子弹的外观、大小、存活时间、击退按图案的通用设置套用；移动由阵型负责。
     /// </summary>
     public ShapeFormationController CreateFormationParent(BulletPatternBase pattern, Vector2[] bulletPositions,
-                                                          string parentName, Vector3 spawnPos)
+                                                          string parentName, Vector3 spawnPos, bool isControlledByFormation = true)
     {
         GameObject parent = new GameObject(parentName);
         parent.transform.position = spawnPos;
@@ -227,7 +227,9 @@ public class BAE_BulletEmitter : MonoBehaviour, IBossActionExecutor
             Enemy_Projectile p = bullet.GetComponent<Enemy_Projectile>();
             if (p != null)
             {
-                p.isControlledByFormation = true;
+                //暂时给一个随机的旋转角度
+                p.Setup(Random.insideUnitCircle.normalized);
+                p.isControlledByFormation = isControlledByFormation;
                 ApplyCommon(p, pattern);
             }
             StampKnockback(bullet);

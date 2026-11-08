@@ -42,8 +42,19 @@ MonoBehaviour:
         enableAcceleration: 1
         accelerationRate: 1
         accelerationCoef: 1
+        SineWave: 1
+        SinAmp:
+          min: 10
+          max: 20
+        SinFreq:
+          min: 2
+          max: 3
+        SinPhase:
+          min: 0
+          max: 0
         offsetY: 0
         formationDuration: 0.5
+        isControlledByFormation: 0
         spinSpeedRange: {x: 45, y: 120}
         bulletsPerSide: 3
         size: 3

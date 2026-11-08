@@ -17,6 +17,8 @@ public abstract class FormationPatternBase : BulletPatternBase
     [Min(0f)]
     public float formationDuration = 0.5f;
 
+    public bool isControlledByFormation = true;
+
     [Tooltip("阵型自转速度范围（度/秒），每次随机取一个值、随机正反方向")]
     public Vector2 spinSpeedRange = new Vector2(45f, 120f);
 
@@ -26,7 +28,13 @@ public abstract class FormationPatternBase : BulletPatternBase
     public override void Spawn(BulletSpawnContext ctx)
     {
         Vector3 spawnPos = ctx.firePoint.position + new Vector3(0f, offsetY, 0f);
-        ShapeFormationController ctrl = ctx.host.CreateFormationParent(this, BuildShape(), GetType().Name, spawnPos);
+        ShapeFormationController ctrl = ctx.host.CreateFormationParent(this, BuildShape(), GetType().Name, spawnPos, isControlledByFormation);
+
+        //根据设置加上组件
+        foreach(Transform bulletTransform in ctrl.bullets)
+        {
+            AddComponents(bulletTransform.gameObject);
+        }
 
         RotatingFormation rot = ctrl.gameObject.AddComponent<RotatingFormation>();
         float directionX = ctx.playerTargetPosition.x - ctx.host.transform.position.x >= 0f ? 1f : -1f;
