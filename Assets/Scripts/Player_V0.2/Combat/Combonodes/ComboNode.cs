@@ -96,25 +96,56 @@ public class ComboNode : ScriptableObject
     [Header("节点基础属性")]
     public string nodeName = "XXX";
 
-    [Tooltip("本招打完后，玩家有多久时间可以接下一招。超时则连招断档回到起手")]
+    [Tooltip(
+        "本招【总时长走完之后】，玩家还有多久可以接下一招。超时则段数归零。\n" +
+        "总时长 = 前摇 + 攻击 + 后摇（见下方「三段时长」）。")]
     public float comboWindow = 0.5f;
 
+    // ==========================================================
+    // 【实验：平a/蓄力重做】三段时长：前摇 / 攻击 / 后摇
+    //
+    // 默认（-1）全部从动画读：
+    //   前摇 = 动画开始 → 第一个 TriggerAttackHitbox / SpawnProjectile 事件
+    //   攻击 = 该事件 → 动画事件 MarkAttackEnd（"攻击结束"时间戳）
+    //   后摇 = MarkAttackEnd → 动画播完
+    // 填 >= 0 的数就以填的为准，不用回动画里拖事件，方便调手感。
+    //
+    // 规则（R1）：
+    //   前摇：可被移动取消（本招作废、连段归零）
+    //   攻击：不能移动；到点判定 / 连射一律收掉
+    //   后摇：可被移动取消（连段保留），但这只手要等后摇走完才能再出招
+    // 这只手被锁的时间 = 三段之和。原先"动画播完再加一段 Recovery Time"已取消。
+    // ==========================================================
+    [Header("三段时长 (秒 · 填 -1 = 跟动画事件走)")]
     [Tooltip(
-        "后摇时长（秒）—— 打出本招后，【同一只手】要等这么久才能再出招。\n\n" +
-        "换手不受影响，这正是「换手可以抢拍」的实现基础。\n\n" +
-        "刻意用参数而不是读动画长度：动画后期会替换，\n" +
-        "参数化才不会每换一次美术就要重调手感。\n" +
-        "蓄力招按等级填，等级越高锁越久。")]
+        "前摇时长：出招到出刀/出弹。\n" +
+        "-1 = 用动画里第一个 TriggerAttackHitbox / SpawnProjectile 事件的时间。\n" +
+        "填了数字后，出刀/出弹/特效会按这个时间触发（动画画面不会跟着变，差太多会对不上）。")]
+    public float windupOverride = -1f;
+
+    [Tooltip(
+        "攻击时长：出刀/出弹之后，判定持续多久。期间不能移动，到点判定和连射一律收掉。\n" +
+        "-1 = 到动画事件 MarkAttackEnd 为止；动画里没打这个事件时，按判定窗口 / 连射时长推算。\n" +
+        "注意：判定框自己的 Hitbox Duration 比这里短的话，判定会先结束，但「不能移动」仍持续到本段结束。")]
+    public float activeOverride = -1f;
+
+    [Tooltip(
+        "后摇时长：攻击段结束之后还要多久这一招才算完。\n" +
+        "-1 = MarkAttackEnd 到动画播完的剩余时间。\n" +
+        "后摇里可以移动 / 换手 / 冲刺；但同一只手要等后摇走完才能再出招。\n" +
+        "填得比动画剩余时间长 = 动画播完后这只手还要再等；填得短 = 动画会被提前收掉。")]
+    public float recoveryOverride = -1f;
+
+    [Tooltip("【已停用】旧的「动画播完后再加一段后摇」。已并入上面的三段时长，不再被读取。")]
+    [HideInInspector]
     public float recoveryTime = 0.35f;
 
     [Tooltip(
-        "【普攻后蓄力最短时长】（秒）—— 只对普通攻击生效，蓄力招填了也不用。\n\n" +
-        "打完本招接长按蓄力时，蓄力直接从「本段对应的等级」起步（第 1 段 → AA1，第 2 段 → AA2…），\n" +
-        "但必须按住满这么久才解锁；不满就松手 = 什么都不放。\n\n" +
-        "从进入蓄力姿态那一刻（长按判定成立时）开始计。\n" +
-        "这段时间同时也计入升级进度，不是先等完再开始攒。")]
+        "【已停用 · 实验：平a/蓄力重做】\n\n" +
+        "蓄力起步时间改为全局统一参数：ComboInputBuffer.chargeStartHoldTime（默认 0.3s），\n" +
+        "平a后接蓄力、原地起手都一样。本字段不再被读取，留着只是为了不丢已序列化的数据。")]
     [Min(0f)]
-    public float chargeMinHoldAfter = 0.5f;
+    public float chargeMinHoldAfter = 0.3f;
 
     [Header("触发限制条件 (Trigger Requirements)")]
     public CastCondition castCondition = CastCondition.Anywhere;
@@ -440,6 +471,32 @@ public class ComboNode : ScriptableObject
         // 有多段判定时取第一段的偏移，否则用旧版单段参数
         if (HasMultipleWindows && hitboxWindows[0] != null) return hitboxWindows[0].offset;
         return hitboxOffset;
+    }
+
+    /// <summary>
+    /// 在 Inspector 里右键组件标题 → 「打印三段时长」：
+    /// 把本招最终生效的 前摇 / 攻击 / 后摇 打到 Console，并说明每一段是从动画读的还是手填的。
+    /// </summary>
+    [ContextMenu("打印三段时长")]
+    private void PrintPhaseTimings()
+    {
+        AttackTimelineData.ResolvePhases(this, out float windup, out float active, out float recovery, out _);
+        AttackTimelineData data = AttackTimelineData.Get(attackClip);
+
+        string clipInfo = attackClip != null ? $"{attackClip.name}（{attackClip.length:F3}s）" : "未指定动画";
+        string windupSrc = windupOverride >= 0f ? "手填"
+            : (data.firstStrikeTime >= 0f ? "动画事件" : "动画里没有出刀/出弹事件 → 0");
+        string activeSrc = activeOverride >= 0f ? "手填"
+            : (data.attackEndTime >= 0f ? "动画事件 MarkAttackEnd"
+                : (data.firstStrikeTime >= 0f ? "没有 MarkAttackEnd → 按判定窗口/连射推算" : "没有任何事件 → 整招都算攻击"));
+        string recoverySrc = recoveryOverride >= 0f ? "手填" : "动画剩余时间";
+
+        Debug.Log(
+            $"[连招节点] 「{nodeName}」 动画 {clipInfo}\n" +
+            $"  前摇 {windup:F3}s（{windupSrc}）\n" +
+            $"  攻击 {active:F3}s（{activeSrc}）\n" +
+            $"  后摇 {recovery:F3}s（{recoverySrc}）\n" +
+            $"  总时长 {windup + active + recovery:F3}s，之后还有 {comboWindow:F2}s 连段窗口", this);
     }
 
     /// <summary>本招是否为蓄力招（且等级配置有效）</summary>

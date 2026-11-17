@@ -16,12 +16,14 @@ MonoBehaviour:
   maxJumps: 1
   jumpForce: 13
   minJumpVelocity: 2
-  dashSpeed: 12
-  dashDuration: 0.2
+  dashSpeed: 6
+  dashDistance: 1.2
+  dashCooldown: 1
   slideStartSpeedMultiplier: 1.2
-  slideDeceleration: 8
+  slideDistance: 3.04
   slideToCrouchSpeedMultiplier: 0.3
   slideInvulnerable: 1
+  slideCooldown: 2
   passThroughLayers:
     serializedVersion: 2
     m_Bits: 65536
@@ -29,12 +31,14 @@ MonoBehaviour:
   slidePassThrough: 1
   crouchMoveSpeedMultiplier: 0.35
   crouchColliderHeightMultiplier: 0.6
-  flySpeed: 5
+  flySpeed: 8
   flightDropInvulnerable: 1
-  chargeSlowsMovement: 1
-  chargeMoveSpeedMultiplier: 0.8
-  chargeJumpForceMultiplier: 0.8
-  preChargeMoveSpeedMultiplier: 0.35
+  flightUsesNormalActionParams: 1
+  flyDashSpeed: 6
+  flyDashDistance: 1.2
+  flyDashCooldown: 1
+  flySlideCooldown: 2
+  flySlideUntargetableDuration: 0.5
   groundCheckBoxSize: {x: 0.5, y: 0.2}
   groundCheckDistance: 0.1
   ceilingCheckBoxSize: {x: 0.4, y: 0.1}

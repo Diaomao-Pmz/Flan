@@ -23,6 +23,11 @@ namespace Flandre.CombatSystem
         [Tooltip("基础跑动速度。注意：这只是「基础值」，最终生效值请读 PlayerStats.moveSpeed.Value")]
         public float moveSpeed = 6f;
 
+        [Header("Fly Settings (按 Alt 起飞，再按一次解除；飞行中 Shift 八向冲刺，Ctrl 短暂不可选中)")]
+        // 飞行耗蓝已搬到 PlayerStateConfig（资源类数值统一放那里）
+        [Tooltip("飞行时的八方向移动速度")]
+        public float flySpeed = 5f;
+
         [Header("Jump Settings")]
         [Tooltip("基础最大跳跃次数。目前仍会被 GemActionProcessor 在运行时覆写，阶段2 修复")]
         public int maxJumps = 1;
@@ -30,19 +35,90 @@ namespace Flandre.CombatSystem
         [Tooltip("松开跳跃键时，向上速度被削减到的值（实现「按多久跳多高」）")]
         public float minJumpVelocity = 2f;
 
-        [Header("Dash Settings")]
-        public float dashSpeed = 12f;
-        public float dashDuration = 0.2f;
+        [Tooltip(
+            "空中按 Ctrl 之后的下落加速倍率（普通状态）。\n" +
+            "1 = 不加速，和平常下落一样；2 = 下落速度是平常的两倍。\n" +
+            "实现方式是这段下落期间把重力乘以本倍率，落地 / 离开下落即恢复。")]
+        [Min(0f)]
+        public float ctrlDropSpeedMultiplier = 1f;
 
-        [Header("Slide Settings")]
+        // ==========================================================
+        // 冲刺 / 滑铲的参数口径：【速度 + 距离】是给定的，时长由它们反推
+        //
+        //   冲刺时长 = dashDistance / 冲刺速度
+        //   滑铲减速度 = (初速² - 末速²) / (2 × slideDistance)
+        //
+        // 速度会被宝石 / buff 修改（读 PlayerStats.dashSpeed），所以时长是运行时算的：
+        // 速度变快 → 同样的距离用时更短。
+        // 距离是"不被挡住时能走多远"；撞墙时只是时间照走、位置不动。
+        // ==========================================================
+        [Header("Dash Settings (地面 / 空中 · 八方向)")]
+        [Tooltip("冲刺速度的基础值。最终生效值读 PlayerStats.dashSpeed.Value")]
+        public float dashSpeed = 12f;
+
+        [Tooltip("冲刺距离。冲刺时长 = 距离 / 速度（原先是直接填时长 Dash Duration）")]
+        [Min(0.01f)]
+        public float dashDistance = 2.4f;
+
+        [Tooltip(
+            "冲刺冷却（秒）。会吃 PlayerStats 的冷却缩减。\n" +
+            "【注意】填在这里的值会覆盖 PlayerStateMachine 上 Dash Skill 的 Total CD；\n" +
+            "连段数、连按间隔、派生窗口仍在 PlayerStateMachine 上配。")]
+        [Min(0f)]
+        public float dashCooldown = 1f;
+
+        [Header("Slide Settings (地面滑铲)")]
         [Tooltip("滑铲初速度 = moveSpeed * 本倍率")]
         public float slideStartSpeedMultiplier = 1.2f;
-        [Tooltip("滑铲减速率，数值越大减速越快")]
-        public float slideDeceleration = 8f;
+
+        [Tooltip(
+            "滑铲距离：从初速度匀减速到「转入蹲下的速度」一共滑多远。\n" +
+            "减速度由它反推（原先是直接填减速率 Slide Deceleration）。")]
+        [Min(0.01f)]
+        public float slideDistance = 3.04f;
+
         [Tooltip("滑铲速度衰减到 moveSpeed * 本倍率 时，自动转入蹲下")]
         public float slideToCrouchSpeedMultiplier = 0.3f;
+
         [Tooltip("滑铲全程无敌（蹲下不无敌）")]
         public bool slideInvulnerable = true;
+
+        [Tooltip(
+            "滑铲冷却（秒）。会吃 PlayerStats 的冷却缩减。\n" +
+            "【注意】填在这里的值会覆盖 PlayerStateMachine 上 Slide Skill 的 Total CD。")]
+        [Min(0f)]
+        public float slideCooldown = 2f;
+
+        [Header("Air Slide (普通状态在空中按 Ctrl：收掉上升速度往下落)")]
+        [Tooltip("空中按 Ctrl 之后的下落全程无敌（落地即解除）。原先是「飞行中 Ctrl 解除飞行」的效果，字段名沿用")]
+        public bool flightDropInvulnerable = true;
+
+        [Header("Flight Dash / Slide (飞行中的 Shift / Ctrl)")]
+        [Tooltip(
+            "勾上（默认）= 飞行中的冲刺 / Ctrl 直接用上面普通状态的参数（速度、距离、冷却），下面四项不生效。\n" +
+            "取消勾选 = 两种状态的参数分开，飞行中用下面这四项。")]
+        public bool flightUsesNormalActionParams = true;
+
+        [Tooltip("【仅在取消勾选上面那项时生效】飞行冲刺速度的基础值。宝石 / buff 对冲刺速度的加成按比例套用")]
+        public float flyDashSpeed = 12f;
+
+        [Tooltip("【仅在取消勾选时生效】飞行冲刺距离")]
+        [Min(0.01f)]
+        public float flyDashDistance = 2.4f;
+
+        [Tooltip("【仅在取消勾选时生效】飞行冲刺冷却（秒）")]
+        [Min(0f)]
+        public float flyDashCooldown = 1f;
+
+        [Tooltip("【仅在取消勾选时生效】飞行中按 Ctrl 的冷却（秒）。勾选时用 Slide Cooldown")]
+        [Min(0f)]
+        public float flySlideCooldown = 2f;
+
+        [Tooltip(
+            "飞行中按 Ctrl：变为不可选中状态持续这么多秒（人继续飞，不会掉下去）。\n" +
+            "这一项只有飞行状态有，不受上面的勾选框影响。")]
+        [Min(0f)]
+        public float flySlideUntargetableDuration = 0.5f;
 
         [Header("Pass Through (冲刺 / 滑铲穿过敌人，与无敌无关)")]
         [Tooltip("冲刺 / 滑铲期间可以穿过的图层。勾上 Boss、敌人【本体】所在的层。\n" +
@@ -60,40 +136,8 @@ namespace Flandre.CombatSystem
         [Tooltip("蹲下时碰撞体高度压缩比例（原先在 SetColliderHeight 里硬编码为 0.6）")]
         public float crouchColliderHeightMultiplier = 0.6f;
 
-        [Header("Fly Settings (按 Alt 起飞，再按一次解除；飞行中 Shift 八向冲刺，Ctrl 下坠)")]
-        // 飞行耗蓝已搬到 PlayerStateConfig（资源类数值统一放那里）
-        [Tooltip("飞行时的八方向移动速度")]
-        public float flySpeed = 5f;
-        [Tooltip("飞行中按 Ctrl 解除飞行后，下落全程无敌（落地即解除）")]
-        public bool flightDropInvulnerable = true;
-
-        [Header("Charge Settings")]
-        [Tooltip(
-            "蓄力时是否给移动打折（移速、跳跃力分别乘下面两个倍率）。\n\n" +
-            "默认关闭：蓄力时正常跑跳。关闭时两个倍率参数保留不动，\n" +
-            "以后想恢复折损，或给 boss 的减速 debuff 参考数值，直接打开即可。\n" +
-            "「冲刺后接蓄力的速度继承」是配合折损的补偿，也跟着本开关一起开关。")]
-        public bool chargeSlowsMovement = false;
-
-        [Tooltip(
-            "蓄力期间的移动速度倍率。\n" +
-            "0.2 = 只有平时的两成，1 = 蓄力不影响移动速度。\n" +
-            "原先硬编码在 ChargeState 里，现在挪出来方便调手感。")]
-        public float chargeMoveSpeedMultiplier = 0.2f;
-
-        [Tooltip(
-            "蓄力期间的跳跃力度倍率（同样只在 Charge Slows Movement 打开时生效）。\n" +
-            "0.7 = 跳得比平时低三成，1 = 蓄力不影响跳跃。")]
-        [Range(0.1f, 1f)]
-        public float chargeJumpForceMultiplier = 0.7f;
-
-        [Tooltip(
-            "【蓄力准备窗口】的地面移速倍率。\n\n" +
-            "窗口 = 攻击键已判定为长按（按住满 0.15 秒），但人还在攻击动画 / 后摇里、蓄力还没真正开始。\n" +
-            "这段时间本来按「攻击时不能走动」锁住，现在允许以 移速 × 本倍率 移动。\n" +
-            "0 = 仍然不能动，1 = 不打折。不按住攻击键时攻击照常锁移动。")]
-        [Range(0f, 1f)]
-        public float preChargeMoveSpeedMultiplier = 0.5f;
+        // 【已搬走】Charge Settings（蓄力时的移速 / 跳跃折损、蓄力准备窗口移速）
+        // 已挪到 PlayerCombatConfig，数值原样带过去了。
 
         // 【已删除】弱化蓄力僵直的逃逸冲劲参数（escapeDash* / escapeSlide*），已随连放惩罚一并移除。
 
@@ -107,4 +151,4 @@ namespace Flandre.CombatSystem
         [Tooltip("头顶检测射线距离，原 CanStand() 中硬编码 0.1")]
         public float ceilingCheckDistance = 0.1f;
     }
-}
+}

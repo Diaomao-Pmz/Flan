@@ -14,7 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: A2
   comboWindow: 0.7
-  recoveryTime: 0.3
+  windupOverride: 0.2
+  activeOverride: -1
+  recoveryOverride: 0.2
+  recoveryTime: 0.1
+  chargeMinHoldAfter: 0.3
   castCondition: 0
   requiredState: 0
   inputSequence: 04000000

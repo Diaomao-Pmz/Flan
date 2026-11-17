@@ -58,8 +58,13 @@ namespace Flandre.CombatSystem
             if (direction.sqrMagnitude < 0.0001f) return;
 
             dashDirection = direction.normalized;
-            dashTimer = sm.dashDuration;
+            dashTimer = sm.dashDuration;   // = 距离 / 速度；飞行参数分离时读的是飞行那一套
             SetTrail(true);
+
+            // 冲刺动画（目前借用滑铲动画，见 PlayerAnimHash.Dash）。
+            // 只在巡航时换：交战中正在演攻击动画，不去盖它
+            if (sm.currentState == sm.flyState)
+                sm.animDriver?.SetBase(PlayerAnimHash.Dash, restart: true);
         }
 
         private void SetTrail(bool on)
@@ -132,7 +137,13 @@ namespace Flandre.CombatSystem
             {
                 sm.rb.linearVelocity = dashDirection * sm.dashSpeed;
                 dashTimer -= Time.fixedDeltaTime;
-                if (dashTimer <= 0f) SetTrail(false);
+                if (dashTimer <= 0f)
+                {
+                    SetTrail(false);
+
+                    // 冲刺结束：巡航中换回飞行动画（交战中由下一招的攻击动画接手）
+                    if (sm.currentState == sm.flyState) sm.animDriver?.SetBase(PlayerAnimHash.Fly);
+                }
                 return;
             }
 

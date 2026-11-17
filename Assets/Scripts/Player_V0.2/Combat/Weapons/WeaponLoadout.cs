@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Flandre.CombatSystem
@@ -22,6 +23,16 @@ namespace Flandre.CombatSystem
     /// 换武器时 CD 会一并重置 —— 新武器不该继承上一把的冷却。
     /// ==========================================================
     /// </summary>
+    /// <summary>【实验 R5】双蓄力的判定方式</summary>
+    public enum DualChargeMode
+    {
+        /// <summary>B（默认）：第一发松手立刻打出；窗口内第二发也松手 → 撤掉第一发，换成强化招</summary>
+        B_ReplaceFirst,
+
+        /// <summary>A：另一只手也在有效蓄力时，第一发先挂起（最多等一个窗口），等第二发松手</summary>
+        A_HoldFirst,
+    }
+
     public class WeaponLoadout : MonoBehaviour
     {
         [Header("武器插槽")]
@@ -34,6 +45,46 @@ namespace Flandre.CombatSystem
         [Header("设置")]
         [Tooltip("是否允许主副装同一把武器资产")]
         public bool allowSameWeaponBothSlots = true;
+
+        // ==========================================================
+        // 【实验：平a/蓄力重做 · R5】双蓄力强化招
+        // ==========================================================
+        [Header("双蓄力强化招 (实验)")]
+        [Tooltip(
+            "配方表：近/远 + 等级 的组合（无序）→ 强化招。\n" +
+            "留空 = 没有任何强化招，双手先后松手一律按两发单蓄力处理。")]
+        public List<DualChargeRecipe> dualChargeRecipes = new List<DualChargeRecipe>();
+
+        [Tooltip(
+            "判定方式。\n" +
+            "B（默认）：第一发松手立刻打出；窗口内第二发也松手 → 撤掉第一发（动画/判定/子弹/特效全停）换成强化招。\n" +
+            "A：另一只手也在有效蓄力时，第一发先挂起，最多等一个窗口。")]
+        public DualChargeMode dualChargeMode = DualChargeMode.B_ReplaceFirst;
+
+        [Tooltip("两只手先后松手相隔多久以内算「一起打出」（秒）")]
+        [Min(0f)]
+        public float dualChargeWindow = 0.2f;
+
+        /// <summary>
+        /// 按两只手各自的蓄力等级查双蓄配方。查不到返回 null。
+        /// 组合只看「武器类型 + 等级」，与先后顺序、主副手无关。
+        /// </summary>
+        public DualChargeRecipe FindDualRecipe(int mainLevel, int subLevel)
+        {
+            if (mainWeapon == null || subWeapon == null) return null;
+            if (mainLevel <= 0 || subLevel <= 0) return null;
+            if (dualChargeRecipes == null) return null;
+
+            for (int i = 0; i < dualChargeRecipes.Count; i++)
+            {
+                DualChargeRecipe r = dualChargeRecipes[i];
+                if (r == null) continue;
+
+                if (r.Matches(mainWeapon.weaponType, mainLevel, subWeapon.weaponType, subLevel))
+                    return r;
+            }
+            return null;
+        }
 
         /// <summary>武器变更时广播。UI 与连招引擎可订阅</summary>
         public event System.Action<WeaponSlot, WeaponMoveSet> OnWeaponChanged;

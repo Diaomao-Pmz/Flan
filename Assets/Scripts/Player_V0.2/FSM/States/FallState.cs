@@ -17,6 +17,28 @@ public class FallState : PlayerStateBase
     private bool pendingInvulnerableDrop;
     private bool isInvulnerableDrop;
 
+    // 【2026-11-16】空中按 Ctrl 的下落（空中滑铲）：无论有没有无敌，落地都切进蹲下姿态
+    private bool pendingCtrlDrop;
+    private bool isCtrlDrop;
+
+    /// <summary>当前这次下落是空中按 Ctrl 触发的（落地会切进蹲下）</summary>
+    public bool IsCtrlDrop => isCtrlDrop;
+
+    /// <summary>
+    /// 让【下一次】进入下落变成"空中 Ctrl 下落"。必须在 ChangeState(fallState) 之前调用，用一次就清。
+    /// </summary>
+    /// <param name="invulnerable">
+    /// 这次下落是否无敌。由路由器按滑铲冷却决定：冷却好了 = 无敌（并消耗冷却），没好 = 普通下落。
+    /// PlayerMovementConfig 里关掉无敌下落时，传 true 也不无敌。
+    /// </param>
+    public void PrepareCtrlDrop(bool invulnerable)
+    {
+        pendingCtrlDrop = true;
+
+        if (invulnerable) PrepareInvulnerableDrop();
+        else pendingInvulnerableDrop = false;
+    }
+
     /// <summary>
     /// 让【下一次】进入下落时变成无敌下坠。必须在 ChangeState(fallState) 之前调用，用一次就清。
     /// PlayerMovementConfig 里关掉「飞行下坠无敌」时不生效。
@@ -38,6 +60,9 @@ public class FallState : PlayerStateBase
         isInvulnerableDrop = pendingInvulnerableDrop;
         pendingInvulnerableDrop = false;
 
+        isCtrlDrop = pendingCtrlDrop;
+        pendingCtrlDrop = false;
+
         if (isInvulnerableDrop)
             sm.playerState?.health.RequestUntargetable(InvulnerableTokens.FlightDrop);
     }
@@ -49,7 +74,9 @@ public class FallState : PlayerStateBase
 
         if (sm.IsGrounded())
         {
-            HandleLanding();
+            // 空中 Ctrl 下落：落地切进蹲下姿态（没按着 Ctrl 的话 CrouchState 下一帧自己站起来）
+            if (isCtrlDrop) sm.ChangeState(sm.crouchState);
+            else HandleLanding();
         }
     }
 
@@ -64,8 +91,16 @@ public class FallState : PlayerStateBase
             return;
         }
 
+        // 空中 Ctrl 下落：重力乘以配置的倍率（默认 1 = 不加速）
+        float dropMultiplier = 1f;
+        if (isCtrlDrop)
+        {
+            var cfg = sm.playerState != null ? sm.playerState.movementConfig : null;
+            if (cfg != null) dropMultiplier = Mathf.Max(0f, cfg.ctrlDropSpeedMultiplier);
+        }
+
         // 蓄力一结束立刻还原重力，否则松手后角色会一直浮到状态切换为止
-        sm.rb.gravityScale = originalGravity;
+        sm.rb.gravityScale = originalGravity * dropMultiplier;
 
         // 只有空中起手的蓄力才锁方向键（同 JumpState）
         if (IsAirChargePinned) return;
@@ -76,6 +111,8 @@ public class FallState : PlayerStateBase
     public override void Exit()
     {
         sm.rb.gravityScale = originalGravity;
+
+        isCtrlDrop = false;
 
         if (isInvulnerableDrop)
         {

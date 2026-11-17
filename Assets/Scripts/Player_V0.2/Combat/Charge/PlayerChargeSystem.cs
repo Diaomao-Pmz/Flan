@@ -49,6 +49,9 @@ namespace Flandre.CombatSystem
         /// <summary>某只手结束蓄力（无论成败）</summary>
         public event System.Action<WeaponSlot> OnChargeEnded;
 
+        /// <summary>【实验 R4】某只手的等级锁定状态变化 (槽位, 是否锁定)。Z = 主手，X = 副手</summary>
+        public event System.Action<WeaponSlot, bool> OnChargeLockChanged;
+
         private readonly ChargeModule[] modules =
         {
             new ChargeModule(WeaponSlot.Main),
@@ -115,7 +118,21 @@ namespace Flandre.CombatSystem
         /// ==========================================================
         /// </summary>
         public bool IsAirChargeHovering
-            => IsAnyChargeStartedInAir && sensor != null && !sensor.IsGrounded();
+            => enableAirChargeHover && IsAnyChargeStartedInAir && sensor != null && !sensor.IsGrounded();
+
+        // ==========================================================
+        // 【实验改动 2026-11-16】空中起手蓄力的"悬停姿态"整套关掉。
+        //
+        // 默认 false：空中开始蓄力不打断任何物理逻辑 ——
+        //   · 不钉在空中（重力、惯性、跳跃弧线照常）
+        //   · 方向键与朝向不锁
+        //   · Shift 是普通冲刺（不再是"指哪去哪"），Ctrl 的空中规则也恢复常规
+        // 上面三件事共用 IsAirChargeHovering 这一个判据，所以关这一处就全关了。
+        // 想临时找回旧行为，在 Inspector 里勾上本开关即可。
+        // ==========================================================
+        [Header("空中蓄力悬停 (已停用)")]
+        [Tooltip("勾上 = 恢复旧行为：空中起手蓄力时钉在空中、锁方向键、Shift 变成朝鼠标冲刺。默认关闭。")]
+        public bool enableAirChargeHover = false;
 
         public bool IsCharging(InputCmd cmd)
         {
@@ -134,6 +151,37 @@ namespace Flandre.CombatSystem
             }
         }
 
+        /// <summary>这只手正在蓄力，且已过起步时间（松手能打出东西）</summary>
+        public bool IsValidCharging(InputCmd cmd)
+        {
+            var m = GetModule(cmd);
+            return m != null && m.IsCharging && m.IsCharged;
+        }
+
+        /// <summary>某只手的蓄力上限变化 (槽位, 新上限 1~3)</summary>
+        public event System.Action<WeaponSlot, int> OnChargeCapChanged;
+
+        /// <summary>
+        /// 【实验】把某只手的蓄力上限提高一级（鼠标前侧键 = 主手，后侧键 = 副手）。
+        /// 3 级之后再按回到 1 级；可以连按。只在该手蓄力中有效。
+        /// 等级会沿 1→2→3→1 升到上限后停住。
+        /// </summary>
+        public void RaiseLevelCap(InputCmd cmd)
+        {
+            ChargeModule m = GetModule(cmd);
+            if (m == null || !m.IsCharging || !m.IsValid) return;
+
+            int cap = m.RaiseCap();
+            OnChargeCapChanged?.Invoke(m.Slot, cap);
+            OnChargeLockChanged?.Invoke(m.Slot, m.IsLevelLocked);
+
+            if (verboseLog)
+                Debug.Log($"[蓄力] {m.Slot} 上限 → {cap} 级（当前 {m.CurrentLevel} 级，起步 {m.StartLevel} 级）");
+        }
+
+        /// <summary>旧名字，保留给 PlayerController 调用。现在的含义是"上限 +1"，见 RaiseLevelCap</summary>
+        public void ToggleLevelLock(InputCmd cmd) => RaiseLevelCap(cmd);
+
         // ==========================================================
         // 开始 / 结束
         // ==========================================================
@@ -142,8 +190,8 @@ namespace Flandre.CombatSystem
         /// 开始蓄力。由 ComboInputBuffer 在「长按确认」时调用。
         /// 按住越久等级越高（见 ChargeModule）。
         /// </summary>
-        /// <param name="startLevel">起步等级：原地起手 0，第 N 段普攻后为 N</param>
-        /// <param name="minHold">普攻后起手时的保险锁时长（刚打完那一招的 chargeMinHoldAfter）</param>
+        /// <param name="startLevel">起步等级：连段为 0 时 1，第 N 段普攻后为 N</param>
+        /// <param name="minHold">起步时间（ComboInputBuffer.chargeStartHoldTime，默认 0.3s）</param>
         public void BeginCharge(InputCmd cmd, int startLevel, float minHold, bool isAfterCombo)
         {
             ChargeModule m = GetModule(cmd);
@@ -163,13 +211,15 @@ namespace Flandre.CombatSystem
             OnChargeLevelChanged?.Invoke(m.Slot, 0);
             OnChargeProgressChanged?.Invoke(m.Slot, 0f);
 
+            // 平a后接蓄力一开始就是锁定的 —— 告诉 UI
+            if (m.IsLevelLocked) OnChargeLockChanged?.Invoke(m.Slot, true);
+
             if (verboseLog)
             {
                 Debug.Log(!m.IsValid
                     ? $"[蓄力] {m.Slot} 这只手没有武器，蓄不出东西"
-                    : m.StartLevel > 0
-                        ? $"[蓄力] {m.Slot} 普攻后起手，从 {m.StartLevel} 级起步，按住满 {minHold:F2}s 解锁"
-                        : $"[蓄力] {m.Slot} 原地起手，从 0 级开始");
+                    : $"[蓄力] {m.Slot} 起手，从 {m.StartLevel} 级起步，按住满 {minHold:F2}s 生效" +
+                      $"，上限 {m.CapLevel} 级（按侧键 +1）");
             }
         }
 
@@ -190,7 +240,7 @@ namespace Flandre.CombatSystem
             {
                 Debug.Log(result == ChargeReleaseResult.Fired
                     ? $"[蓄力] {m.Slot} 松手，打出 {level} 级"
-                    : $"[蓄力] {m.Slot} 还没到 1 级就松手，连段清零");
+                    : $"[蓄力] {m.Slot} 还没过起步时间就松手，什么都不放");
             }
 
             return result;
@@ -220,6 +270,7 @@ namespace Flandre.CombatSystem
 
         private void FinishModule(ChargeModule m)
         {
+            OnChargeLockChanged?.Invoke(m.Slot, false);
             OnChargeLevelChanged?.Invoke(m.Slot, 0);
             OnChargeProgressChanged?.Invoke(m.Slot, 0f);
             OnChargeEnded?.Invoke(m.Slot);
@@ -240,14 +291,14 @@ namespace Flandre.CombatSystem
                 ChargeModule m = modules[i];
                 if (!m.IsCharging) continue;
 
-                bool leveledUp = m.Tick(dt);
+                bool levelChanged = m.Tick(dt);
 
                 OnChargeProgressChanged?.Invoke(m.Slot, m.Progress);
 
-                if (leveledUp)
+                if (levelChanged)
                 {
                     OnChargeLevelChanged?.Invoke(m.Slot, m.CurrentLevel);
-                    if (verboseLog) Debug.Log($"[蓄力] {m.Slot} 升到 {m.CurrentLevel} 级，松手即发");
+                    if (verboseLog) Debug.Log($"[蓄力] {m.Slot} 现在 {m.CurrentLevel} 级，松手即发");
                 }
             }
         }
@@ -258,8 +309,11 @@ namespace Flandre.CombatSystem
 
         private PlayerMovementConfig MoveCfg => state != null ? state.movementConfig : null;
 
-        private float MoveMultiplier => MoveCfg != null ? MoveCfg.chargeMoveSpeedMultiplier : 0.2f;
-        private float JumpMultiplier => MoveCfg != null ? MoveCfg.chargeJumpForceMultiplier : 0.7f;
+        // 蓄力折损参数已从 PlayerMovementConfig 搬到 PlayerCombatConfig
+        private PlayerCombatConfig CombatCfg => state != null ? state.combatConfig : null;
+
+        private float MoveMultiplier => CombatCfg != null ? CombatCfg.chargeMoveSpeedMultiplier : 0.2f;
+        private float JumpMultiplier => CombatCfg != null ? CombatCfg.chargeJumpForceMultiplier : 0.7f;
 
         /// <summary>
         /// 贴便利贴：蓄力期间移速与跳跃力打折。
@@ -272,7 +326,7 @@ namespace Flandre.CombatSystem
             if (penaltyApplied || state == null) return;
 
             // 开关关闭（默认）→ 蓄力时正常跑跳，不贴折损便利贴。倍率参数原样保留
-            if (state.movementConfig != null && !state.movementConfig.chargeSlowsMovement) return;
+            if (state.combatConfig != null && !state.combatConfig.chargeSlowsMovement) return;
 
             // 倍率转成"减少百分之多少"的加法修饰
             state.stats.moveSpeed.AddModifier(

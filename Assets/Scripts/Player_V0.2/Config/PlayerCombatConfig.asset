@@ -17,4 +17,8 @@ MonoBehaviour:
   blinkInterval: 0.15
   invulnerableAlpha: 0.2
   invulnerableDuration: 0.7
+  chargeSlowsMovement: 1
+  chargeMoveSpeedMultiplier: 0.8
+  chargeJumpForceMultiplier: 0.8
+  preChargeMoveSpeedMultiplier: 0.35
   projectileSpeed: 12

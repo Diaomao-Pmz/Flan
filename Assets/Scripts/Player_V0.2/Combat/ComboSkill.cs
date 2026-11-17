@@ -120,8 +120,21 @@ public class ComboSkill
 
     public void BindStats(PlayerStats playerStats) => stats = playerStats;
 
+    // ==========================================================
+    // 【2026-11-16】冷却的基础值可以由外部提供（PlayerMovementConfig 上的 Dash / Slide Cooldown）。
+    // 绑了来源之后，上面的 totalCD 不再被读取；没绑则照旧用 totalCD。
+    // 用回调而不是在启动时把值抄进 totalCD：配置在运行时改了能立刻生效，
+    // 飞行 / 普通两套参数也能按当前状态切换。
+    // ==========================================================
+    private System.Func<float> cooldownSource;
+
+    public void BindCooldownSource(System.Func<float> source) => cooldownSource = source;
+
+    private float BaseCooldown
+        => cooldownSource != null ? Mathf.Max(0f, cooldownSource()) : totalCD;
+
     public float EffectiveCooldown
-        => stats != null ? stats.ApplyCooldownReduction(totalCD) : totalCD;
+        => stats != null ? stats.ApplyCooldownReduction(BaseCooldown) : BaseCooldown;
 
     // ==========================================
     // 1. 超时检测

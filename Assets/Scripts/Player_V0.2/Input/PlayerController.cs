@@ -143,7 +143,29 @@ public class PlayerController : MonoBehaviour
             if (isSubAttackHeld) subAttackHoldTime += Time.deltaTime;
 
             ResolveHoldIfNeeded();
+            PollChargeLockKeys();
         }
+    }
+
+    /// <summary>
+    /// 【实验 · R4】鼠标侧键锁/解锁蓄力等级（再按一次解锁）：
+    ///   前侧键（Forward / 鼠标按键 5）= 主手，原先是 Z
+    ///   后侧键（Back / 鼠标按键 4）   = 副手，原先是 X
+    /// 只在该手蓄力中有效，锁定后等级不再循环。
+    ///
+    /// 直接读鼠标，不改 .inputactions —— 实验性改动，方便整体回退。
+    /// 本文件是全项目唯一允许接触 Input System 的地方，所以读设备也放在这里。
+    /// </summary>
+    private void PollChargeLockKeys()
+    {
+        var mouse = Mouse.current;
+        if (mouse == null) return;
+
+        var charge = stateMachine != null ? stateMachine.chargeSystem : null;
+        if (charge == null) return;
+
+        if (mouse.forwardButton.wasPressedThisFrame) charge.ToggleLevelLock(InputCmd.MainAttack);
+        if (mouse.backButton.wasPressedThisFrame) charge.ToggleLevelLock(InputCmd.SubAttack);
     }
 
     /// <summary>

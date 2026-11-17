@@ -1765,7 +1765,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!61 &786768184
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1937,34 +1937,8 @@ MonoBehaviour:
   phase2SpecialBullets: []
   phase2SpecialMelees: []
   phase1Routines:
-  - routine: {fileID: 11400000, guid: 19ac1becee152fd4d80822b5c8a394ab, type: 2}
-    weightModifiers:
-    - condition:
-        playerSide: 2
-        minDistance: 0
-        maxDistance: 2
-        playerAirCondition: 0
-      multiplier: 3
-    - condition:
-        playerSide: 0
-        minDistance: 2
-        maxDistance: 20
-        playerAirCondition: 0
-      multiplier: 0.1
   - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
-    weightModifiers:
-    - condition:
-        playerSide: 2
-        minDistance: 0
-        maxDistance: 2
-        playerAirCondition: 0
-      multiplier: 3
-    - condition:
-        playerSide: 0
-        minDistance: 2
-        maxDistance: 20
-        playerAirCondition: 0
-      multiplier: 0.1
+    weightModifiers: []
   phase2Routines: []
   singleInterleaveChance: 0.2
   phase1Movement:
@@ -4353,6 +4327,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 852045959506467000, guid: b2f14d397095eb84092300f849141591, type: 3}
+      propertyPath: dualChargeRecipes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 852045959506467000, guid: b2f14d397095eb84092300f849141591, type: 3}
+      propertyPath: 'dualChargeRecipes.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 270bcf21c682f614491b80c9c358ef37, type: 2}
     - target: {fileID: 1326363344798443143, guid: b2f14d397095eb84092300f849141591, type: 3}
       propertyPath: jumpGem
       value: 
@@ -4465,6 +4447,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7054381341515684753, guid: b2f14d397095eb84092300f849141591, type: 3}
+      propertyPath: verboseLog
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7054381341515684753, guid: b2f14d397095eb84092300f849141591, type: 3}
+      propertyPath: autoResumeFlightAfterCharge
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7544423397950537741, guid: b2f14d397095eb84092300f849141591, type: 3}
       propertyPath: stateConfig
       value: 
@@ -4473,6 +4463,10 @@ PrefabInstance:
       propertyPath: attributeConfig
       value: 
       objectReference: {fileID: 11400000, guid: 6d39b76ad9514d6084f420adaba41e13, type: 2}
+    - target: {fileID: 7799267512172020457, guid: b2f14d397095eb84092300f849141591, type: 3}
+      propertyPath: dashSkill.totalCD
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8841629755396617766, guid: b2f14d397095eb84092300f849141591, type: 3}
       propertyPath: overlayOnlyWhenIdle
       value: 1

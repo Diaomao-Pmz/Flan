@@ -131,10 +131,10 @@ public class FlyCombatState : PlayerStateBase
     /// <summary>这只手想不想出招：刚按过（排队中），或者一直按着</summary>
     private bool Wants(InputCmd cmd)
     {
-        if (queued[HandIndex(cmd)]) return true;
-
-        var pc = sm.playerController;
-        return cmd == InputCmd.MainAttack ? pc.isMainAttackHeld : pc.isSubAttackHeld;
+        // 【实验改动】只认排队的点按。
+        // 原先"按住攻击键 = 持续连发"；飞行中现在可以蓄力，按住的含义改成了蓄力，
+        // 再把按住算作"想攻击"的话，蓄力的同时会不停地打飞行攻击。
+        return queued[HandIndex(cmd)];
     }
 
     /// <summary>

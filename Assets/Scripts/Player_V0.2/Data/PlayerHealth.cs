@@ -319,7 +319,10 @@ namespace Flandre.CombatSystem
         /// <summary>滑铲全程无敌</summary>
         public static readonly object Slide = new object();
 
-        /// <summary>飞行中按 Ctrl 解除飞行后的无敌下坠</summary>
+        /// <summary>空中按 Ctrl 之后的无敌下坠（原先是飞行中 Ctrl 解除飞行）</summary>
         public static readonly object FlightDrop = new object();
+
+        /// <summary>飞行中按 Ctrl：限时不可选中</summary>
+        public static readonly object FlightSlide = new object();
     }
 }

@@ -115,45 +115,40 @@ namespace Flandre.CombatSystem
         // ==========================================================
 
         /// <summary>
-        /// 由动画事件调用：播放【当前招式】配置的特效。
-        ///
-        /// 在攻击动画里该出刀光的那一帧插一个 Animation Event，
-        /// Function 选 PlayEffect，不需要参数。
+        /// 【已改为空操作】原先由动画事件触发攻击特效。
+        /// 现在由 AttackTimelineRunner 按时间表调用 SpawnAttackEffect —— 时间点仍然取自动画里的这个事件，
+        /// 所以动画上的事件【不要删】。保留本方法只是为了让 Unity 不报 "has no receiver"。
         /// </summary>
-        public void PlayEffect()
-        {
-            ComboNode node = buffer != null ? buffer.currentNode : null;
+        public void PlayEffect() { }
 
-            if (node == null)
-            {
-                if (verboseLog) Debug.Log("[特效] PlayEffect 触发时没有当前招式，已跳过");
-                return;
-            }
+        /// <summary>【已改为空操作】同上，改由时间表调用 SpawnEffectByKey</summary>
+        public void PlayEffectByKey(string key) { }
+
+        /// <summary>播放指定招式配置的特效。返回生成的特效物体（没生成则 null）</summary>
+        public GameObject SpawnAttackEffect(ComboNode node)
+        {
+            if (node == null) return null;
 
             string key = node.effectKey;
 
             if (string.IsNullOrEmpty(key)) key = defaultAttackEffectKey;
-            if (string.IsNullOrEmpty(key)) return;
+            if (string.IsNullOrEmpty(key)) return null;
 
             float life = node.effectLifetime > 0f ? node.effectLifetime : defaultEffectLifetime;
 
-            Spawn(key, node.GetEffectOffset(), life, persistent: false,
-                  node.effectScale, node.effectRotation);
+            return Spawn(key, node.GetEffectOffset(), life, persistent: false,
+                         node.effectScale, node.effectRotation);
         }
 
-        /// <summary>
-        /// 由动画事件调用：播放指定 key 的特效。
-        /// 一招需要多个特效时用这个 —— Animation Event 的 String 参数填 key。
-        /// </summary>
-        public void PlayEffectByKey(string key)
+        /// <summary>播放指定 key 的特效（一招多个特效时用，对应动画事件 PlayEffectByKey 的 String 参数）</summary>
+        public GameObject SpawnEffectByKey(string key, ComboNode node)
         {
-            if (string.IsNullOrEmpty(key)) return;
+            if (string.IsNullOrEmpty(key)) return null;
 
             Vector2 offset = Vector2.zero;
             Vector2 scale = Vector2.one;
             float rot = 0f;
 
-            ComboNode node = buffer != null ? buffer.currentNode : null;
             if (node != null)
             {
                 offset = node.GetEffectOffset();
@@ -161,7 +156,7 @@ namespace Flandre.CombatSystem
                 rot = node.effectRotation;
             }
 
-            Spawn(key, offset, defaultEffectLifetime, persistent: false, scale, rot);
+            return Spawn(key, offset, defaultEffectLifetime, persistent: false, scale, rot);
         }
 
         // ==========================================================

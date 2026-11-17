@@ -63,6 +63,15 @@ public class ComboState : PlayerStateBase
     /// </summary>
     private WeaponMoveSet ownerWeapon;
 
+    /// <summary>
+    /// 【实验】本招的攻击实例（判定/子弹/特效与阶段都在它身上）。
+    /// 本状态只管"动画 + 身体"：动画被顶掉或取消后，实例照常自己跑完。
+    /// </summary>
+    private AttackInstance instance;
+
+    /// <summary>出招那一刻方向键的左右（-1/0/1）。前摇里只有【出招之后新按下/换向】才算移动取消</summary>
+    private int baselineMoveSign;
+
     // 兜底超时
     private float timeoutLimit;
     private float elapsed;
@@ -101,10 +110,12 @@ public class ComboState : PlayerStateBase
         wasAirborneOnEnter = !sm.IsGrounded();
 
         isBodyAdjusting = false;
+        instance = Buffer.CurrentInstance;
         activeNode = Buffer.currentNode;
         ownerCmd = Buffer.LastTriggerCmd;
         ownerAttackId = Buffer.GetHandAttackId(ownerCmd);
         ownerWeapon = Buffer.ActiveWeapon;
+        baselineMoveSign = MoveSign();
 
         // 空中连段反重力悬停：把角色钉在空中，防止挥剑时诡异下滑
         if (wasAirborneOnEnter)
@@ -153,11 +164,31 @@ public class ComboState : PlayerStateBase
             return;
         }
 
+        // 【实验】飞行中放出来的蓄力招：进入后摇阶段就回到飞行状态
+        if (TryResumeFlight(force: false)) return;
+
+        // 【实验】这一招的总时长（前摇 + 攻击 + 后摇）走完了 → 收招。
+        // 后摇填得比动画剩余时间短时，会在这里把动画提前收掉；
+        // 填得长则由动画事件 OnAttackAnimationEnd 先收动画，手继续锁到总时长结束。
+        if (instance != null && instance.elapsed >= instance.duration)
+        {
+            Buffer.StartGracePeriod();
+
+            if (TryResumeFlight(force: true)) return;
+
+            if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
+            else HandleLanding();
+            return;
+        }
+
         // 后摇取消检测
         if (isCancelable)
         {
             if (Buffer.TryAdvanceCombo()) return;
         }
+
+        // 【实验 · R1】前摇 / 后摇里的方向键移动取消（跳跃、飞行、冲刺、滑铲由路由器处理）
+        if (TryMovementCancel()) return;
 
         // 【P1b 改动】攻击动画中【不再】响应方向键转向。
         //
@@ -220,6 +251,95 @@ public class ComboState : PlayerStateBase
         sm.rb.linearVelocity = Vector2.zero;
         // 注意：位移期间 TickThrust 已经 return 了，走不到这里 ——
         // 所以空中的蓄力位移不会被这句抹掉
+    }
+
+    /// <summary>
+    /// 【实验】飞行中松手放蓄力 → 人先变回地面状态把这一招打出来 → 进入后摇阶段后回到飞行状态。
+    ///
+    /// 前摇被移动 / 跳跃取消、被冲刺滑铲打断、受击时不会走到这里，也就不会回飞行 ——
+    /// 那些都是"这一招没正常打完"。
+    /// </summary>
+    /// <param name="force">动画已经播完（没有后摇可等了）：不看阶段，直接回</param>
+    /// <returns>是否已经切回飞行状态</returns>
+    public bool TryResumeFlight(bool force)
+    {
+        if (instance == null || !instance.resumeFlight) return false;
+
+        if (!force && Buffer.MovementPhase != AttackPhase.Recovery) return false;
+
+        instance.resumeFlight = false;
+
+        // MP 耗尽就不回了，照常往下掉
+        if (sm.playerState != null && sm.playerState.health.currentMP <= 0) return false;
+
+        sm.ChangeState(sm.flyState);
+        return true;
+    }
+
+    private int MoveSign()
+    {
+        float x = sm.playerController.moveInput.x;
+        return Mathf.Abs(x) > 0.1f ? (x > 0f ? 1 : -1) : 0;
+    }
+
+    /// <summary>
+    /// 【实验 · R1】平a三阶段与方向键移动。
+    ///
+    /// | 阶段 | 方向键 | 后果 |
+    /// |---|---|---|
+    /// | 前摇 | 允许 | 本招作废，连段归零 |
+    /// | 判定 | 无效 | — |
+    /// | 后摇 | 允许 | 取消动作，连段保留；同手仍要等后摇走完 |
+    ///
+    /// 【规则没覆盖到、自行决定的地方】
+    /// 前摇里只认【出招之后新按下 / 换向】的方向键：
+    /// 按着方向键跑动中出招是最常见的操作，若"按着"就算移动，
+    /// 每一招都会在前摇被自己取消，根本打不出来。
+    /// 后摇里则是"按着就算"—— 一直按着方向键的话，判定一结束就接着跑。
+    ///
+    /// 带位移的招式在位移走完之前不取消；
+    /// 没勾「出招期间锁死移动」的招式（边走边砍）不适用本规则。
+    /// </summary>
+    /// <returns>是否已经切走状态</returns>
+    private bool TryMovementCancel()
+    {
+        if (Buffer == null) return false;
+        if (activeNode != null && !activeNode.lockMovementDuringAttack) return false;
+
+        int sign = MoveSign();
+        bool fresh = sign != 0 && sign != baselineMoveSign;
+
+        // 松开过 → 之后再按就是新输入
+        if (sign == 0) baselineMoveSign = 0;
+
+        if (sign == 0) return false;
+        if (IsThrustActive) return false;
+
+        AttackPhase phase = Buffer.MovementPhase;
+
+        if (phase == AttackPhase.Windup)
+        {
+            if (!fresh) return false;
+
+            Buffer.VoidCurrentAttackAndResetCombo();
+            LeaveToMove();
+            return true;
+        }
+
+        if (phase == AttackPhase.Recovery)
+        {
+            // 连段保留；这只手的锁（到总时长结束）在出招时就算好了，不用动
+            LeaveToMove();
+            return true;
+        }
+
+        return false;   // 判定中：移动无效
+    }
+
+    private void LeaveToMove()
+    {
+        if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
+        else sm.ChangeState(sm.runState);
     }
 
     /// <summary>
@@ -582,11 +702,12 @@ public class ComboState : PlayerStateBase
 
     public override void Exit()
     {
-        // 招式结束 → 这只手开始算后摇。
-        // 无论是正常收招、被换手抢拍、还是被打断，都走这一条路，
-        // 所以不存在"某种结束方式漏了没开始后摇"的可能。
-        float recovery = ResolveRecoveryTime();
-        Buffer?.BeginHandRecovery(ownerCmd, recovery, ownerAttackId);
+        // 【实验改动】这里不再碰判定、连射和手部后摇：
+        //   · 判定 / 连射 / 特效归攻击实例管，动画被顶掉或取消后照常跑完（R5「只打断动画、不打断逻辑」）
+        //   · 这只手锁到「前摇 + 攻击 + 后摇」走完，出招时就算好了，和动画何时结束无关
+        //   · 该掐断判定的场合（冲刺/滑铲、前摇作废、受击）由 Buffer 的对应入口显式处理
+        if (instance != null) instance.ownsAnimation = false;
+        instance = null;
 
         // 攻击结束必须把碰撞箱还原，否则会带着蹲姿/缩腿姿态离开攻击状态
         if (isBodyAdjusting)
@@ -595,19 +716,10 @@ public class ComboState : PlayerStateBase
             isBodyAdjusting = false;
         }
 
-        HitDetection?.ForceStopHitbox();
-
-        // 中断连射：否则玩家已经被击飞了，枪还在原地继续突突
-        WeaponEmitter?.CancelBurst();
-
         sm.rb.gravityScale = originalGravity;
         activeNode = null;
         ownerWeapon = null;
     }
-
-    /// <summary>本招的后摇时长 —— 就是节点上配的值，不再做任何加工</summary>
-    private float ResolveRecoveryTime()
-        => activeNode != null ? activeNode.recoveryTime : 0f;
 
     // 【已删除】TryGetPendingStun —— 弱化蓄力打完后的大僵直（ChargeStunState）已随连放惩罚一并移除。
 
@@ -637,6 +749,8 @@ public class ComboState : PlayerStateBase
 
         // 走和正常收招一样的流程，保证连招宽恕期照常开始
         Buffer.StartGracePeriod();
+
+        if (TryResumeFlight(force: true)) return;
 
         if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
         else HandleLanding();

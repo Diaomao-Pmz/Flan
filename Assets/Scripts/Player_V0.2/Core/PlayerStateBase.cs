@@ -67,8 +67,9 @@ public abstract class PlayerStateBase : IState
         //
         // 它是配合"蓄力减速"的补偿，所以只在 chargeSlowsMovement 打开时生效；
         // 不减速时再套它，蓄力反而会比平时跑得快。
-        var moveCfg = sm.playerState != null ? sm.playerState.movementConfig : null;
-        bool chargeSlows = moveCfg != null && moveCfg.chargeSlowsMovement;
+        // 蓄力相关参数已从 PlayerMovementConfig 搬到 PlayerCombatConfig
+        var chargeCfg = sm.playerState != null ? sm.playerState.combatConfig : null;
+        bool chargeSlows = chargeCfg != null && chargeCfg.chargeSlowsMovement;
 
         if (chargeSlows && IsCharging && Momentum != null)
         {
@@ -78,7 +79,7 @@ public abstract class PlayerStateBase : IState
         // 【蓄力准备窗口】按住攻击键准备蓄力、人还在攻击动画/后摇里 → 地面移速打折
         if (IsInPreChargeWindow && sm.IsGrounded())
         {
-            speed *= moveCfg != null ? moveCfg.preChargeMoveSpeedMultiplier : 0.5f;
+            speed *= chargeCfg != null ? chargeCfg.preChargeMoveSpeedMultiplier : 0.5f;
         }
 
         sm.rb.linearVelocity = new Vector2(moveDir * speed, sm.rb.linearVelocity.y);

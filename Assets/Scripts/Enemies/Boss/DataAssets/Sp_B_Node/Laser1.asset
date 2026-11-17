@@ -32,7 +32,7 @@ MonoBehaviour:
   aimAngleOffset: 0
   telegraphTrackTime: 0.3
   fireTrackTime: 0
-  trackTurnSpeed: 90
+  trackTurnSpeed: 50
   beamSprite: {fileID: 3028865238080725439, guid: 65cb3bd3111445f4e9c14ec35da9d441, type: 3}
   telegraphColor: {r: 0, g: 0.8862748, b: 1, a: 0.36862746}
   fireColor: {r: 0, g: 0.85098046, b: 0.9607844, a: 1}

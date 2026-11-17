@@ -110,6 +110,11 @@ namespace Flandre.CombatSystem
 
         private bool wasGroundedLastFrame = true;
 
+        // 飞行中按 Ctrl 的限时不可选中：到点解除。计时放在这里（路由器每帧都跑），
+        // 不放在飞行状态里 —— 中途退出飞行也要把这几秒走完，不能提前收掉也不能漏收
+        private bool flightUntargetableActive;
+        private float flightUntargetableUntil;
+
         private void Awake()
         {
             sm = GetComponent<PlayerStateMachine>();
@@ -130,7 +135,23 @@ namespace Flandre.CombatSystem
             if (grounded && !wasGroundedLastFrame) HandleLandingFrame();
             wasGroundedLastFrame = grounded;
 
+            if (flightUntargetableActive && Time.time >= flightUntargetableUntil) EndFlightUntargetable();
+
             TryFlushBuffer();
+        }
+
+        private void OnDisable()
+        {
+            // 组件被关掉时别把不可选中留在身上
+            EndFlightUntargetable();
+        }
+
+        private void EndFlightUntargetable()
+        {
+            if (!flightUntargetableActive) return;
+
+            flightUntargetableActive = false;
+            sm.playerState?.health.ReleaseUntargetable(InvulnerableTokens.FlightSlide);
         }
 
         // ==========================================================
@@ -279,33 +300,25 @@ namespace Flandre.CombatSystem
             // 【P3 起】不再需要为蓄力单独开分支 ——
             // 蓄力不是状态了，冲刺只是普通的状态切换，天然不会打断它。
 
-            // ---- 攻击动画中：位移 + 打断连段 ----
+            // ---- 攻击动画中 ----
+            //
+            // 【实验改动 · R1】冲刺任何阶段可用，【永不打断连段】。
+            //   打断前摇       → 本招不算，段数退回
+            //   打断判定 / 后摇 → 本招算结束，不用等后摇；剩余判定立刻掐断
+            // 具体处理在 TryDash 里（冲出去之后通知 ComboInputBuffer.OnDashSlideInterrupt）。
             if (sm.currentState == sm.comboState)
             {
                 if (!CanCancelCurrentAttackByMovement())
                 {
-                    // 【Rejected → Retry】这道闸是"暂时关着"，不是"故意拒绝"：
-                    // 招式演完之后冲刺就完全合法了。按路由器自己的三态定义，
-                    // 这种情况本来就该 Retry —— 原先返回 Rejected 是自相矛盾。
-                    //
-                    // 效果：在不可打断招式的【末尾 0.15 秒内】按 Shift，
-                    // 招式一结束立刻冲出去；按得更早则照常作废。
+                    // 这道闸是"暂时关着"：招式演完之后冲刺就完全合法了 → Retry
                     if (verboseLog) Debug.Log("[路由器] 当前招式不允许被位移打断，Shift 已存入缓存");
                     return DispatchResult.Retry;
                 }
 
-                DispatchResult r = TryDash();
-
-                // 只有真的冲出去了才算打断 —— CD 中被拦下时连段应该保住
-                if (r == DispatchResult.Success)
-                {
-                    if (verboseLog) Debug.Log("[路由器] 攻击中 shift → 位移并打断连段");
-                    comboBuffer?.ResetCombo();
-                }
-                return r;
+                return TryDash();
             }
 
-            // ---- 连段间隔中 / 非战斗：普通冲刺，不碰连段 ----
+            // ---- 连段间隔中 / 非战斗：普通冲刺（同样免掉剩余后摇，不碰连段）----
             return TryDash();
         }
 
@@ -343,7 +356,7 @@ namespace Flandre.CombatSystem
             //
             // 这样空中蓄力唯一的调位手段是「可瞄准的」而不是「盲冲」——
             // 玩家花掉这次冲刺时，能明确知道自己会停在哪。
-            float maxDistance = sm.dashSpeed * sm.dashDuration;
+            float maxDistance = sm.dashDistance;
 
             Vector2 dir;
             float distance;
@@ -391,52 +404,35 @@ namespace Flandre.CombatSystem
                 return DispatchResult.Rejected;
             }
 
+            // ==========================================================
+            // 【实验改动 · R1】跳跃算"移动"，按攻击阶段处理：
+            //   前摇 → 允许：本招作废，连段归零
+            //   判定 → 无效：照旧进预输入缓存（jumpBufferTime），判定一结束若还在时限内就起跳
+            //   后摇 → 允许：取消动作，连段保留；同手仍要等「剩余动画 + recoveryTime」
+            // ==========================================================
             if (sm.currentState == sm.comboState)
             {
-                // 【Rejected → Retry】"攻击动画中不能跳"这条设计规则没有变 ——
-                // 跳跃依然打断不了攻击。变的只是这次按键的下场：
-                //
-                //   Rejected（旧）→ 输入直接消失。在动画将尽未尽时按跳，
-                //                   什么都不发生，必须再按一次 —— 玩家读作"吞键"。
-                //   Retry（新）  → 存入缓存。若动画在缓存时限（jumpBufferTime,
-                //                   默认 0.15s）内结束，收招那一帧立刻起跳。
-                //
-                // 这正是平台跳跃游戏的经典宽恕窗口：只有"差一点点就赶上"的
-                // 输入被原谅，按得太早照常作废，不会出现延迟很久的自动起跳。
-                if (verboseLog) Debug.Log("[路由器] 攻击动画中禁止跳跃，Jump 已存入缓存");
-                return DispatchResult.Retry;
+                AttackPhase phase = comboBuffer != null ? comboBuffer.MovementPhase : AttackPhase.None;
+
+                if (phase == AttackPhase.Active)
+                {
+                    if (verboseLog) Debug.Log("[路由器] 攻击判定中禁止跳跃，Jump 已存入缓存");
+                    return DispatchResult.Retry;
+                }
+
+                // 跳不起来（段数用完）就别白白作废这一招
+                if (sm.jumpCount >= sm.maxJumps) return DispatchResult.Retry;
+
+                if (phase == AttackPhase.Windup) comboBuffer.VoidCurrentAttackAndResetCombo();
+
+                if (verboseLog) Debug.Log($"[路由器] 攻击{(phase == AttackPhase.Windup ? "前摇" : "后摇")}中跳跃 → 取消动作");
+                return TryJump();
             }
 
-            // ==========================================================
-            // 【后摇（rt）期间禁止跳跃】
-            //
-            // 设计规则：普通招式打完进入 rt，期间方向键、跳跃、同手攻击都被禁用，
-            // 只允许换手攻击和 dash/slide 打断。
-            //
-            // 【原先为什么漏了】跳跃的禁用检查问的是"当前是不是在攻击状态里"，
-            // 而 rt 发生在攻击动画【结束之后】—— 那时状态已经切回 Idle/Run，
-            // 这个检查自然管不着。方向键之所以一直正常，是因为它走的是
-            // 另一条路：问 ComboInputBuffer"手忙不忙"，而不是问"在哪个状态"。
-            //
-            // 比喻：门禁只认"人在不在会议室里"，可罚站是在会议室门口罚的。
-            //       现在改成认"这个人还在不在受罚"。
-            //
-            // 【为什么这条必须有】rt 是后摇的成本。若能靠跳跃跳过它，
-            // 那打断后摇就成了零代价的操作，rt 这个参数等于失效。
-            //
-            // 【Retry 不是 Rejected】rt 一定会结束，属于"暂时关着的闸门"，
-            // 按路由器的三态定义该进缓存 —— 于是在 rt 结束前 0.15 秒
-            // （jumpBufferTime）内按跳，一解锁立刻起跳；按得更早照常作废。
-            //
-            // 【蹲下刻意不加这条】单按 Ctrl 在 rt 期间仍然有效。
-            // 那是原地躲擦边攻击，本身不产生位移、也没有跳跃那种"逃掉惩罚"的收益。
-            // TODO（设计预留）：以后可做成「rt 期间用 Ctrl 成功躲过一次攻击 →
-            //   奖励免去剩余后摇」。挂钩点是 PlayerHitDetection 的受击侧 +
-            //   ComboInputBuffer.ClearHandRecovery()。
-            // ==========================================================
+            // 不在攻击动画里，但还有脱离动画的判定在跑 → 同样按"判定中"处理
             if (comboBuffer != null && comboBuffer.IsMovementLockedByRecovery())
             {
-                if (verboseLog) Debug.Log("[路由器] 后摇中禁止跳跃，Jump 已存入缓存");
+                if (verboseLog) Debug.Log("[路由器] 仍有判定在进行，Jump 已存入缓存");
                 return DispatchResult.Retry;
             }
 
@@ -501,22 +497,86 @@ namespace Flandre.CombatSystem
         ///              落地那一帧还按着 Ctrl → 由 HandleLandingFrame 接蹲/铲（滑铲本身无敌）。
         ///   贴地飞行 → 没有可下坠的高度，直接按地面规则蹲/铲。
         /// </summary>
-        private DispatchResult TryFlightDrop()
+        // 【2026-11-16】上面这段注释描述的是旧的"飞行中 Ctrl = 解除飞行 + 无敌下坠（贴地则蹲 / 铲）"。
+        // 那套效果已从飞行中移除：无敌下坠搬去给"普通状态在空中按 Ctrl"用（TryAirSlideDrop），
+        // 飞行中按 Ctrl 现在是下面的 TryFlightUntargetable。
+
+        /// <summary>
+        /// 飞行中按 Ctrl：变为不可选中状态 n 秒，人继续飞。
+        /// 时长 n = MovementConfig.flySlideUntargetableDuration；
+        /// 冷却用滑铲的那一套（飞行参数分离时用 flySlideCooldown）。
+        /// </summary>
+        private DispatchResult TryFlightUntargetable()
         {
-            if (sm.IsGrounded())
+            var cfg = sm.playerState != null ? sm.playerState.movementConfig : null;
+            float duration = cfg != null ? cfg.flySlideUntargetableDuration : 0.5f;
+
+            // 时长填 0 = 关闭这个功能
+            if (duration <= 0f) return DispatchResult.Rejected;
+
+            // CD 中：这道闸是暂时关着的 → Retry
+            if (!sm.slideSkill.CanExecute()) return DispatchResult.Retry;
+
+            bool isFirstHit = sm.slideSkill.IsComboIdle;
+            sm.slideSkill.Execute();
+            sm.slideSkill.StartCooldownIfFirstHit(isFirstHit);
+
+            if (!flightUntargetableActive)
             {
-                if (verboseLog) Debug.Log("[路由器] 贴地飞行中按 Ctrl → 直接蹲/铲");
-                DispatchCrouchOrSlideOnGround();
+                flightUntargetableActive = true;
+                sm.playerState?.health.RequestUntargetable(InvulnerableTokens.FlightSlide);
+            }
+            flightUntargetableUntil = Time.time + duration;
+
+            if (verboseLog) Debug.Log($"[路由器] 飞行中 Ctrl → 不可选中 {duration:F2}s");
+            return DispatchResult.Success;
+        }
+
+        /// <summary>
+        /// 普通状态在空中按 Ctrl（空中滑铲）：收掉上升速度往下落，落地切进蹲下姿态。
+        ///
+        /// 无敌与滑铲共用冷却：
+        ///   滑铲冷却好了 → 这次下落全程无敌（落地即解除），并消耗滑铲冷却
+        ///   滑铲冷却没好 → 只是普通下落，不无敌，也不动冷却
+        /// 宝石若接管了空中 Ctrl，仍然宝石优先。
+        /// </summary>
+        private DispatchResult TryAirSlideDrop()
+        {
+            if (loadout != null && loadout.TryHandleAirCommand(InputCmd.Crouch))
+            {
+                if (verboseLog) Debug.Log("[路由器] 空中 Ctrl 已被宝石接管");
                 return DispatchResult.Success;
             }
 
+            // 已经在 Ctrl 下落里了：再按不重复触发（否则冷却没好的第二下会把这次的无敌换成普通下落）
+            if (sm.currentState == sm.fallState && sm.fallState.IsCtrlDrop) return DispatchResult.Rejected;
+
+            // 同冲刺 / 滑铲：先记下打断的是攻击的哪个阶段，切走之后就问不到了
+            bool wasInCombo = sm.currentState == sm.comboState;
+            AttackPhase phase = comboBuffer != null ? comboBuffer.CurrentAttackPhase : AttackPhase.None;
+
             Vector2 v = sm.rb.linearVelocity;
 
-            sm.fallState.PrepareInvulnerableDrop();
+            // 无敌与滑铲共用冷却：好了才无敌，并把冷却用掉
+            bool invulnerable = sm.slideSkill.CanExecute();
+            if (invulnerable)
+            {
+                bool isFirstHit = sm.slideSkill.IsComboIdle;
+                sm.slideSkill.Execute();
+                sm.slideSkill.StartCooldownIfFirstHit(isFirstHit);
+            }
+
+            // 无敌由 FallState 自己申请与释放 —— 这样无论从哪条路离开下落
+            // （落地 / 二段跳 / 受击 / 冲刺 / 起飞），无敌都一定被收回。
+            sm.fallState.PrepareCtrlDrop(invulnerable);
             sm.ChangeState(sm.fallState);
+
+            // 向上的速度清掉：按下即开始往下落，不会先飘一段。水平速度保留
             sm.rb.linearVelocity = new Vector2(v.x, Mathf.Min(v.y, 0f));
 
-            if (verboseLog) Debug.Log("[路由器] 飞行中 Ctrl → 无敌下坠");
+            if (wasInCombo) comboBuffer?.OnDashSlideInterrupt(true, phase);
+
+            if (verboseLog) Debug.Log(invulnerable ? "[路由器] 空中 Ctrl → 无敌下落" : "[路由器] 空中 Ctrl → 普通下落（滑铲冷却中）");
             return DispatchResult.Success;
         }
 
@@ -546,15 +606,19 @@ namespace Flandre.CombatSystem
             }
 
             // ---- 起飞闸门（与跳跃同一套规则）----
-            if (sm.currentState == sm.comboState)
+            // 【实验改动 · R1】起飞算"移动"：判定中无效（进缓存），前摇 / 后摇里允许
+            bool inCombo = sm.currentState == sm.comboState;
+            AttackPhase phase = (inCombo && comboBuffer != null) ? comboBuffer.MovementPhase : AttackPhase.None;
+
+            if (inCombo && phase == AttackPhase.Active)
             {
-                if (verboseLog) Debug.Log("[路由器] 攻击动画中，Fly 已存入缓存");
+                if (verboseLog) Debug.Log("[路由器] 攻击判定中，Fly 已存入缓存");
                 return DispatchResult.Retry;
             }
 
-            if (comboBuffer != null && comboBuffer.IsMovementLockedByRecovery())
+            if (!inCombo && comboBuffer != null && comboBuffer.IsMovementLockedByRecovery())
             {
-                if (verboseLog) Debug.Log("[路由器] 后摇中，Fly 已存入缓存");
+                if (verboseLog) Debug.Log("[路由器] 仍有判定在进行，Fly 已存入缓存");
                 return DispatchResult.Retry;
             }
 
@@ -564,8 +628,11 @@ namespace Flandre.CombatSystem
                 return DispatchResult.Rejected;
             }
 
+            // 前摇里起飞 → 本招作废，连段归零；后摇里起飞 → 连段保留
+            if (inCombo && phase == AttackPhase.Windup) comboBuffer.VoidCurrentAttackAndResetCombo();
+
             // ---- 起飞 ----
-            chargeSystem?.CancelAll();
+            // 【实验改动】起飞不再取消蓄力 —— 飞行中可以蓄力，地面蓄着的力带上天继续蓄
             sm.flightMotor.BeginSession();   // 新的一次飞行：耗蓝零头清零
             sm.ChangeState(sm.flyState);
 
@@ -594,7 +661,7 @@ namespace Flandre.CombatSystem
         private DispatchResult TryCrouchSlideOrCancel()
         {
             // ---- 飞行中：解除飞行，无敌下坠 ----
-            if (sm.IsFlying) return TryFlightDrop();
+            if (sm.IsFlying) return TryFlightUntargetable();
 
             // ---- 空中蓄力姿态：禁止滑铲 ----
             //
@@ -628,14 +695,15 @@ namespace Flandre.CombatSystem
                     return DispatchResult.Retry;
                 }
 
-                DispatchResult r = TryCrouchOrSlide();
-
-                if (r == DispatchResult.Success)
+                // 【实验改动 · R1】滑铲任何阶段可用，永不打断连段（处理在 DispatchCrouchOrSlideOnGround 里）。
+                // 滑铲 CD 中时不退化成"蹲下"—— 那会无缘无故把攻击动画切掉，改为存缓存。
+                if (sm.IsGrounded() && !sm.slideSkill.CanExecute())
                 {
-                    if (verboseLog) Debug.Log("[路由器] 攻击中 方向+ctrl → 滑铲并打断连段");
-                    comboBuffer?.ResetCombo();
+                    if (verboseLog) Debug.Log("[路由器] 攻击中 方向+ctrl，但滑铲 CD 中 → 存入缓存");
+                    return DispatchResult.Retry;
                 }
-                return r;
+
+                return TryCrouchOrSlide();
             }
 
             // ---- 连段间隔中 / 非战斗 ----
@@ -669,12 +737,47 @@ namespace Flandre.CombatSystem
             // 冲刺就用上了过期的朝向。
             ApplyAimFacingFromInput();
 
+            // 【2026-11-16】普通状态也是八方向冲刺（和飞行冲刺同一套取向规则）
+            Vector2 dashDir = ResolveGroundAirDashDirection();
+            if (dashDir == Vector2.zero) sm.dashState.SetNextDashStationary();
+            else sm.dashState.SetNextDashDirection(dashDir);
+
+            // 【实验 · R1】切状态之前先记下"打断的是哪个阶段"—— 切走之后就问不到了
+            bool wasInCombo = sm.currentState == sm.comboState;
+            AttackPhase phase = comboBuffer != null ? comboBuffer.CurrentAttackPhase : AttackPhase.None;
+
             if (verboseLog) Debug.Log("[路由器] Dash 放行");
             sm.ChangeState(sm.dashState);
+
+            comboBuffer?.OnDashSlideInterrupt(wasInCombo, phase);
             return DispatchResult.Success;
         }
 
         /// <summary>有方向键输入时，把角色朝向对齐到该方向</summary>
+        /// <summary>
+        /// 普通状态（地面 / 空中）冲刺的方向：按方向键取八方向，没按方向键就朝面朝方向。
+        ///
+        /// 地面上的特例：
+        ///   斜向下（↙ ↘）→ 视为同侧的水平冲刺
+        ///   正下方（↓）  → 返回 Vector2.zero，表示"原地冲刺"：位移上不做任何改变
+        /// 空中没有特例，和飞行冲刺完全一样。
+        /// </summary>
+        private Vector2 ResolveGroundAirDashDirection()
+        {
+            float facing = controller != null ? controller.facingDirection : 1f;
+
+            Vector2 dir = SnapToEightWay(controller != null ? controller.moveInput : Vector2.zero);
+            if (dir == Vector2.zero) return new Vector2(facing, 0f);
+
+            if (dir.y < 0f && sm.IsGrounded())
+            {
+                if (Mathf.Abs(dir.x) > 0.01f) return new Vector2(Mathf.Sign(dir.x), 0f);
+                return Vector2.zero;
+            }
+
+            return dir;
+        }
+
         private void ApplyAimFacingFromInput()
         {
             if (controller == null) return;
@@ -689,7 +792,8 @@ namespace Flandre.CombatSystem
         {
             if (!sm.IsGrounded())
             {
-                return TryAirCommand(InputCmd.Crouch);
+                // 【2026-11-16】空中 Ctrl = 空中滑铲（无敌下落）。原先没有宝石接管时什么都不做
+                return TryAirSlideDrop();
             }
 
             DispatchCrouchOrSlideOnGround();
@@ -712,8 +816,14 @@ namespace Flandre.CombatSystem
 
             if (hasDirection && sm.slideSkill.CanExecute())
             {
+                // 【实验 · R1】同冲刺：先记阶段，滑出去之后通知连招引擎
+                bool wasInCombo = sm.currentState == sm.comboState;
+                AttackPhase phase = comboBuffer != null ? comboBuffer.CurrentAttackPhase : AttackPhase.None;
+
                 if (verboseLog) Debug.Log("[路由器] Ctrl + 方向 → 滑铲");
                 sm.ChangeState(sm.slideState);
+
+                comboBuffer?.OnDashSlideInterrupt(wasInCombo, phase);
                 return;
             }
 
@@ -742,6 +852,9 @@ namespace Flandre.CombatSystem
             if (!useHeldCrouchOnLanding) return;
             if (controller == null || !controller.isCrouchHeld) return;
             if (IsInCombatStance) return;   // 攻击中落地不强行插入蹲/铲
+
+            // 空中 Ctrl 下落的落地由 FallState 自己切进蹲下，这里不再插一个滑铲
+            if (sm.currentState == sm.fallState && sm.fallState.IsCtrlDrop) return;
 
             // 飞行中贴地不算"落地"—— 否则按着 Ctrl 飞到地面会被插一个滑铲，飞行被打断
             if (sm.IsFlying) return;

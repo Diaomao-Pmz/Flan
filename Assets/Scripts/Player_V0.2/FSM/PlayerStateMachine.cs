@@ -85,12 +85,69 @@ public class PlayerStateMachine : MonoBehaviour
     public float moveSpeed => playerState.stats.moveSpeed.Value;
     public int maxJumps => playerState.stats.maxJumps.IntValue;
     public float jumpForce => playerState.stats.jumpForce.Value;
-    public float dashSpeed => playerState.stats.dashSpeed.Value;
+
+    // ==========================================================
+    // 【2026-11-16】冲刺 / 滑铲参数：给定「速度 + 距离」，时长反推。
+    // 飞行中是否另用一套参数由 MovementConfig.flightUsesNormalActionParams 决定（默认共用）。
+    // 下面这些属性已经把"现在该用哪一套"算好了，调用方直接读就行。
+    // ==========================================================
+
+    /// <summary>当前是否使用飞行专用的冲刺 / Ctrl 参数（飞行中，且配置里取消了"与普通一致"）</summary>
+    private bool UseFlightActionParams
+        => IsFlying && MoveCfg != null && !MoveCfg.flightUsesNormalActionParams;
+
+    /// <summary>
+    /// 冲刺速度。普通状态读 PlayerStats（含宝石 / buff 加成）；
+    /// 飞行参数分离时，以 flyDashSpeed 为基础值，加成按比例套用。
+    /// </summary>
+    public float dashSpeed
+    {
+        get
+        {
+            float statValue = playerState.stats.dashSpeed.Value;
+            if (!UseFlightActionParams) return statValue;
+
+            float baseSpeed = Mathf.Max(0.01f, MoveCfg.dashSpeed);
+            return MoveCfg.flyDashSpeed * (statValue / baseSpeed);
+        }
+    }
+
+    /// <summary>冲刺距离</summary>
+    public float dashDistance
+        => UseFlightActionParams ? MoveCfg.flyDashDistance : MoveCfg.dashDistance;
+
+    /// <summary>冲刺冷却的基础值（未套冷却缩减）</summary>
+    public float dashCooldown
+        => UseFlightActionParams ? MoveCfg.flyDashCooldown : MoveCfg.dashCooldown;
+
+    /// <summary>滑铲（飞行中是 Ctrl 不可选中）冷却的基础值</summary>
+    public float slideCooldown
+        => UseFlightActionParams ? MoveCfg.flySlideCooldown : MoveCfg.slideCooldown;
 
     public float minJumpVelocity => MoveCfg.minJumpVelocity;
-    public float dashDuration => MoveCfg.dashDuration;
+    /// <summary>冲刺时长 = 距离 / 速度（不再是配置项）</summary>
+    public float dashDuration => dashDistance / Mathf.Max(0.01f, dashSpeed);
     public float slideStartSpeedMultiplier => MoveCfg.slideStartSpeedMultiplier;
-    public float slideDeceleration => MoveCfg.slideDeceleration;
+
+    /// <summary>
+    /// 滑铲减速度，由滑铲距离反推（不再是配置项）：
+    /// 从初速 v0 匀减速到转蹲速度 vf 一共滑 d → a = (v0² - vf²) / (2d)
+    /// </summary>
+    public float slideDeceleration
+    {
+        get
+        {
+            float v0 = moveSpeed * MoveCfg.slideStartSpeedMultiplier;
+            float vf = moveSpeed * MoveCfg.slideToCrouchSpeedMultiplier;
+            float d = Mathf.Max(0.01f, MoveCfg.slideDistance);
+
+            // 初速不比末速快：没有可减的，给个大数让滑铲立刻结束
+            if (v0 <= vf) return 1000f;
+
+            return (v0 * v0 - vf * vf) / (2f * d);
+        }
+    }
+
     public float crouchSpeedMultiplier => MoveCfg.slideToCrouchSpeedMultiplier;
     public float crouchMoveSpeedMultiplier => MoveCfg.crouchMoveSpeedMultiplier;
     public float flyManaCostPerSecond => playerState.stats.flyManaCostPerSecond.Value;   // 基础值来自 PlayerStateConfig，可被成长加成
@@ -187,6 +244,13 @@ public class PlayerStateMachine : MonoBehaviour
             playerState.EnsureInitialized();
             dashSkill.BindStats(playerState.stats);
             slideSkill.BindStats(playerState.stats);
+
+            // 冷却改由 PlayerMovementConfig 提供（Dash / Slide Cooldown），覆盖 ComboSkill 上的 Total CD
+            if (playerState.movementConfig != null)
+            {
+                dashSkill.BindCooldownSource(() => dashCooldown);
+                slideSkill.BindCooldownSource(() => slideCooldown);
+            }
         }
         else Debug.LogError("[PlayerStateMachine] 找不到 PlayerState！", this);
 
@@ -386,6 +450,9 @@ public class PlayerStateMachine : MonoBehaviour
 
         inputBuffer.StartGracePeriod();
 
+        // 【实验】飞行中放出来的蓄力招：动画播完还没回飞行（这一招没有后摇段）→ 现在回
+        if (comboState.TryResumeFlight(force: true)) return;
+
         // ==========================================================
         // 【必须先查地面】空中招式演完不能直接回 Idle/Run。
         //
@@ -445,4 +512,4 @@ public class PlayerStateMachine : MonoBehaviour
             // playerState.health.OnPlayerDeath -= HandlePlayerDeath;
         }
     }
-}
+}

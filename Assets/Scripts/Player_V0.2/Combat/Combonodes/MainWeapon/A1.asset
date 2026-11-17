@@ -13,15 +13,17 @@ MonoBehaviour:
   m_Name: A1
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: A1
-  comboWindow: 0.25
-  recoveryTime: 0.1
+  comboWindow: 1
+  windupOverride: 0.2
+  activeOverride: -1
+  recoveryOverride: 0.2
+  recoveryTime: 0
+  chargeMinHoldAfter: 0.3
   castCondition: 0
   requiredState: 0
   inputSequence: 04000000
   isChargeSkill: 0
   chargeLevel: 0
-  chargeStartLevelAfter: 0
-  requiredChargeTime: 1
   attackClip: {fileID: 7400000, guid: 7dd7a87907b4b314e8dc68ae5aa98a80, type: 2}
   forwardThrust: {x: 2, y: 0}
   thrustDuration: 0.12
