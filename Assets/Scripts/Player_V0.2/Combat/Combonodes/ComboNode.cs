@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using System.Collections.Generic;
 using Flandre.CombatSystem;
 
@@ -22,14 +23,6 @@ namespace Flandre.CombatSystem
 
     /// <summary>
     /// 【一段判定窗口】
-    ///
-    /// 原先一个 ComboNode 只能有一个判定框、一个持续时间。
-    /// 做三连斩这种「一招多段」的招式撑不住 ——
-    /// 而且 TriggerAttackHitbox 重入时会掐断上一次的判定，
-    /// 想靠连打三次动画事件来模拟多段，只会互相打断。
-    ///
-    /// 现在一个招式可以配任意多段窗口，各自有独立的时机、范围与伤害。
-    /// 这是主副武器配合连招的前置条件之一。
     /// </summary>
     [System.Serializable]
     public class HitboxWindow
@@ -96,6 +89,7 @@ public class ComboNode : ScriptableObject
     [Header("节点基础属性")]
     public string nodeName = "XXX";
 
+<<<<<<< Updated upstream
     [Tooltip("本招打完后，玩家有多久时间可以接下一招。超时则连招断档回到起手")]
     public float comboWindow = 0.5f;
 
@@ -115,7 +109,27 @@ public class ComboNode : ScriptableObject
         "这段时间同时也计入升级进度，不是先等完再开始攒。")]
     [Min(0f)]
     public float chargeMinHoldAfter = 0.5f;
+=======
+    // ==========================================================
+    // 连段窗口 / 三段时长 —— 已搬到 1_Config/P_Animation 的 AttackTimingConfig（招式节拍总表）
+    // 这里留同名的只读属性去查表，用到它们的代码不用改。
+    // 表里没有的招式：三段 = -1（跟动画走），连段窗口 = 0。
+    // ==========================================================
 
+    /// <summary>本招总时长走完之后还能接下一招的时间（查 AttackTimingConfig）</summary>
+    public float comboWindow => AttackTimingConfig.GetComboWindow(this);
+
+    /// <summary>前摇时长，-1 = 跟动画事件走（查 AttackTimingConfig）</summary>
+    public float windupOverride => AttackTimingConfig.GetWindup(this);
+
+    /// <summary>攻击时长，-1 = 跟动画事件走（查 AttackTimingConfig）</summary>
+    public float activeOverride => AttackTimingConfig.GetActive(this);
+
+    /// <summary>后摇时长，-1 = 跟动画事件走（查 AttackTimingConfig）</summary>
+    public float recoveryOverride => AttackTimingConfig.GetRecovery(this);
+>>>>>>> Stashed changes
+
+    [Header("连段窗口 / 三段时长 / 动画与表现 / 蓄力位移 → 在节拍总表（1_Config/P_Animation）里调")]
     [Header("触发限制条件 (Trigger Requirements)")]
     public CastCondition castCondition = CastCondition.Anywhere;
     public RequiredState requiredState = RequiredState.Any;
@@ -137,44 +151,40 @@ public class ComboNode : ScriptableObject
     [Range(0, 3)]
     public int chargeLevel = 0;
 
-    // 【已删除】chargeStartLevelAfter 与 requiredChargeTime。
-    //
-    // 前者：P2 起蓄力等级改由【连段深度】决定（目标等级 = 上次普攻的段数），
-    //       因为「换手蓄力不加段数」要求等级与用哪只手无关，
-    //       而本字段是每招式各配一份，换手时会取到另一把武器的配置，对不上。
-    // 后者：批次J 起改用武器上的 chargeTimeLv1/2/3 阈值。
-    //
-    // 两个字段都已经不再被任何代码读取，留着只会让人以为它们还在生效。
+    // ==========================================================
+    // 动画与表现 —— 已搬到 1_Config/P_Animation 的 AttackTimingConfig（招式节拍总表）
+    // 这里留同名的只读属性去查表，用到它们的代码不用改。
+    // 表里没有的招式：没有动画（也打不出判定），不位移。
+    // ==========================================================
 
-    [Header("动画与表现")]
-    [Tooltip("直接把动画文件 (Anim Clip) 拖进来。请确保 Animator 里的 State 名与该动画文件名一致")]
-    public AnimationClip attackClip;
+    /// <summary>攻击动画剪辑（查 AttackTimingConfig）</summary>
+    public AnimationClip attackClip => AttackTimingConfig.GetClip(this);
     public string animName => attackClip != null ? attackClip.name : string.Empty;
-    [Tooltip(
-        "出招时的位移冲量。\n" +
-        "  X 正数 = 朝角色正面前进（A 系列用）\n" +
-        "  X 负数 = 朝背面后退（B 系列用）\n" +
-        "  Y 非 0 = 同时给一个垂直速度（跳斩、下沉斩之类）\n\n" +
-        "X 会自动乘以朝向，所以填「前进多少」即可，不用管角色朝左朝右。")]
-    public Vector2 forwardThrust = new Vector2(0f, 0f);
 
-    [Tooltip(
-        "位移持续时长（秒）。速度在这段时间内线性衰减到 0。\n\n" +
-        "填 0 = 沿用旧行为：速度设一次就不再衰减，\n" +
-        "整个招式期间匀速滑行（踩冰感），一般不是你想要的。\n" +
-        "推荐 0.1 ~ 0.2，表现为「往前一顿」然后停下。")]
-    public float thrustDuration = 0.12f;
+    /// <summary>出招位移【距离】：从 thrustStart 选的阶段开头起步，匀速走完（查节拍总表）</summary>
+    public Vector2 forwardThrust => AttackTimingConfig.GetThrust(this);
 
-    [Tooltip(
-        "空中出招时是否也产生位移。\n" +
-        "取消勾选则只有地面招式会位移（旧行为）。")]
-    public bool applyThrustInAir = true;
+    /// <summary>出招位移从哪个阶段的开头起步（查节拍总表）</summary>
+    public ThrustStartPhase thrustStart => AttackTimingConfig.GetThrustStart(this);
 
-    [Tooltip(
-        "出招期间锁死移动（默认开启，符合「攻击时不能走动」的基础设定）。\n\n" +
-        "锁的是冲量结束【之后】的那段时间 —— 冲量本身照常生效。\n" +
-        "取消勾选则保留进入攻击时的残留速度，做「边走边砍」的招式时才需要。")]
-    public bool lockMovementDuringAttack = true;
+    /// <summary>位移用多久走完，-1 = 和所选阶段一样长（查节拍总表）</summary>
+    public float thrustDuration => AttackTimingConfig.GetThrustDuration(this);
+
+    public bool applyThrustInAir => AttackTimingConfig.GetApplyThrustInAir(this);
+    public bool lockMovementDuringAttack => AttackTimingConfig.GetLockMovement(this);
+
+    // ---- 旧数据：只用来第一次搬进节拍总表，Inspector 里不显示 ----
+    [SerializeField, HideInInspector, FormerlySerializedAs("attackClip")] private AnimationClip legacyAttackClip;
+    [SerializeField, HideInInspector, FormerlySerializedAs("forwardThrust")] private Vector2 legacyForwardThrust;
+    [SerializeField, HideInInspector, FormerlySerializedAs("thrustDuration")] private float legacyThrustDuration = 0.12f;
+    [SerializeField, HideInInspector, FormerlySerializedAs("applyThrustInAir")] private bool legacyApplyThrustInAir = true;
+    [SerializeField, HideInInspector, FormerlySerializedAs("lockMovementDuringAttack")] private bool legacyLockMovement = true;
+
+    public AnimationClip LegacyAttackClip => legacyAttackClip;
+    public Vector2 LegacyForwardThrust => legacyForwardThrust;
+    public float LegacyThrustDuration => legacyThrustDuration;
+    public bool LegacyApplyThrustInAir => legacyApplyThrustInAir;
+    public bool LegacyLockMovement => legacyLockMovement;
 
     // ==========================================================
     // 【批次F 新增】取消权限
@@ -207,54 +217,10 @@ public class ComboNode : ScriptableObject
     // ==========================================================
     // 【批次G 新增】连段深度限制
     // ==========================================================
-    // ==========================================================
-    // 特效 (改为动画事件 + 对象池驱动)
-    // ==========================================================
-    [Header("特效")]
-    [Tooltip(
-        "本招的特效【对象池 key】。必须与 ObjectPoolManager 上注册的 key 一致。\n\n" +
-        "由动画事件 PlayEffect 触发。特效跟着招式数据走，不再跟着动画曲线走 ——\n" +
-        "所以三段普攻可以共用同一个动画剪辑，特效照样不同。")]
-    public string effectKey = "";
-
-    [Tooltip("特效存活时长。填 0 则使用 PlayerEffectSpawner 上的默认值")]
-    public float effectLifetime = 0f;
-
-    // 【已删除】weakenedEffectKey —— 弱化版蓄力的降级特效，已随连放惩罚一并移除。
-
-    [Tooltip(
-        "勾选 = 特效偏移复用下方判定框的 Hitbox Offset（省一次配置）\n" +
-        "取消 = 用下面的 Effect Offset 单独调")]
-    public bool useHitboxOffsetForEffect = true;
-
-    [Tooltip(
-        "特效偏移。仅在上方取消勾选时生效。\n\n" +
-        "注意这是【局部坐标】：特效挂成角色子物体，\n" +
-        "而角色翻转用的是 transform 旋转，子物体会自动跟着转 ——\n" +
-        "所以这里【不需要】像判定框那样手动处理左右朝向。")]
-    public Vector2 effectOffset = Vector2.zero;
-
-    [Tooltip(
-        "特效缩放。(1,1) 为预制体原始大小。\n\n" +
-        "⚠️ 想让特效左右翻转【不要】把 X 填负数 ——\n" +
-        "特效是角色的子物体，角色转身时用的是 transform 旋转，子物体已经自动翻了。\n" +
-        "再填负数会翻两次，等于没翻。")]
-    public Vector2 effectScale = Vector2.one;
-
-    [Tooltip(
-        "特效旋转角度（度）。正值逆时针。\n" +
-        "斜劈填 15~30，上挑填 90 左右，下砸填 -90 左右。\n" +
-        "角色朝左时会自动镜像，不需要另配一份。")]
-    public float effectRotation = 0f;
+    // 特效已全部搬到场景里的 EffectManager（特效表：预制体 + 参数），招式上不再配
 
     // ==========================================================
     // 目标交互
-    // ==========================================================
-    // ==========================================================
-    // 打断能力
-    // ==========================================================
-    // ==========================================================
-    // 弹幕参数（远程招式用 · 全部可选）
     // ==========================================================
     [Header("弹幕参数 (远程招式 · 留空则沿用武器默认值)")]
     [Tooltip(
@@ -288,36 +254,31 @@ public class ComboNode : ScriptableObject
     // ==========================================================
     // 蓄力位移（AA1 / BB1 这类"带位移的蓄力攻击"）
     // ==========================================================
-    [Header("蓄力位移")]
-    [Tooltip(
-        "本招是否带瞄准方向的位移。\n\n" +
-        "AA1 / BB1 勾上 —— 它们的定位是「功能 + 输出」，\n" +
-        "位移本身就是价值的一部分（蓄力中调整身位）。")]
-    public bool useAimDash = false;
+    // ==========================================================
+    // 蓄力位移（Aim Dash）—— 已搬到 1_Config/P_Animation 的 AttackTimingConfig（招式节拍总表）
+    // 动量加成已删除，距离就是表里填的距离。
+    // ==========================================================
 
-    [Tooltip(
-        "位移方向的自由度。\n" +
-        "  远程武器 → Free（任意角度，完全跟鼠标）\n" +
-        "  近战武器 → FourWay（上下左右四向）")]
-    public AimDashMode aimDashMode = AimDashMode.FourWay;
+    /// <summary>本招是否带瞄准方向的位移（查 AttackTimingConfig）</summary>
+    public bool useAimDash => AttackTimingConfig.GetUseAimDash(this);
+    public AimDashMode aimDashMode => AttackTimingConfig.GetAimDashMode(this);
 
-    [Tooltip(
-        "低保距离 —— 站着不动放也能挪这么远。\n" +
-        "保证这招在任何情况下都有基本的调位能力。\n\n" +
-        "【填负数 = 朝瞄准的反方向弹开】用来做枪的后坐力。\n" +
-        "此时角色仍然面朝鼠标，只是身体被推开。\n" +
-        "动量加成按绝对值照常生效，方向始终是后退。")]
-    public float aimDashBaseDistance = 2f;
+    /// <summary>位移距离，负数 = 朝瞄准的反方向弹开（查 AttackTimingConfig）</summary>
+    public float aimDashDistance => AttackTimingConfig.GetAimDashDistance(this);
 
-    [Tooltip(
-        "动量加成系数。实际距离 = max(低保, 动量储量 × 本系数)。\n\n" +
-        "填 0 = 关闭动量加成，永远是低保距离。\n" +
-        "填 0.3 = 冲刺后（动量 12）能挪 3.6 格，比站着放远得多 ——\n" +
-        "这是对「保持机动」的奖励，而不是站桩蓄力。")]
-    public float aimDashMomentumScale = 0.3f;
+    /// <summary>位移用多久走完，-1 = 和攻击段一样长（查 AttackTimingConfig）</summary>
+    public float aimDashDuration => AttackTimingConfig.GetAimDashDuration(this);
 
-    [Tooltip("位移过程持续多久。太短像瞬移，太长会拖慢出招节奏")]
-    public float aimDashDuration = 0.15f;
+    // ---- 旧数据：只用来第一次搬进节拍总表，Inspector 里不显示 ----
+    [SerializeField, HideInInspector, FormerlySerializedAs("useAimDash")] private bool legacyUseAimDash;
+    [SerializeField, HideInInspector, FormerlySerializedAs("aimDashMode")] private AimDashMode legacyAimDashMode = AimDashMode.FourWay;
+    [SerializeField, HideInInspector, FormerlySerializedAs("aimDashBaseDistance")] private float legacyAimDashBaseDistance = 2f;
+    [SerializeField, HideInInspector, FormerlySerializedAs("aimDashDuration")] private float legacyAimDashDuration = 0.15f;
+
+    public bool LegacyUseAimDash => legacyUseAimDash;
+    public AimDashMode LegacyAimDashMode => legacyAimDashMode;
+    public float LegacyAimDashBaseDistance => legacyAimDashBaseDistance;
+    public float LegacyAimDashDuration => legacyAimDashDuration;
 
     [Header("打断能力")]
     [Tooltip(
@@ -353,13 +314,6 @@ public class ComboNode : ScriptableObject
         "普通平A【不建议】勾选 —— 砍到背后的敌人时会突然转身，手感很怪。")]
     public bool faceTargetOnHit = false;
 
-    [Tooltip(
-        "继承滑铲动量。\n\n" +
-        "勾选 = 滑铲途中打出本招时，滑行继续（滑铲攻击要的就是这个）\n" +
-        "取消 = 本招会中止滑行，改用自己的 Forward Thrust\n\n" +
-        "默认勾选。想做「一刀刹停」这类招式时取消。")]
-    public bool inheritMomentum = true;
-
     [Header("连段深度限制 (武器化)")]
     [Tooltip("本招最早能出现在第几段。1 = 可作起手。填 0 表示不限制")]
     public int minComboDepth = 0;
@@ -384,10 +338,6 @@ public class ComboNode : ScriptableObject
 
     /// <summary>
     /// 取得本招式的所有判定窗口。
-    ///
-    /// 【向后兼容】hitboxWindows 为空时，自动用旧版单段参数合成一个窗口。
-    /// 这样你已经配好的 6 个连招资产一个都不用改，照常工作；
-    /// 想升级成多段时再往列表里加条目即可。
     /// </summary>
     public void CollectWindows(List<HitboxWindow> output)
     {
@@ -429,19 +379,52 @@ public class ComboNode : ScriptableObject
     /// <summary>本招式能否被位移动作（跳/冲/铲）打断</summary>
     public bool CanBeCanceledByMovement => cancelPermission.byMovement;
 
-    /// <summary>
-    /// 特效应该放在哪个局部坐标。
-    /// 勾了复用就返回判定框偏移，否则返回单独配置的偏移。
-    /// </summary>
-    public Vector2 GetEffectOffset()
+    /// <summary>判定框的偏移：有多段判定时取第一段，否则用旧版单段参数。EffectManager 的「用判定框偏移」读这个</summary>
+    public Vector2 GetFirstHitboxOffset()
     {
-        if (!useHitboxOffsetForEffect) return effectOffset;
-
-        // 有多段判定时取第一段的偏移，否则用旧版单段参数
         if (HasMultipleWindows && hitboxWindows[0] != null) return hitboxWindows[0].offset;
         return hitboxOffset;
     }
 
+<<<<<<< Updated upstream
+=======
+    /// <summary>
+    /// 在 Inspector 里右键组件标题 → 「打印三段时长」：
+    /// 把本招最终生效的 前摇 / 攻击 / 后摇 打到 Console，并说明每一段是从动画读的还是手填的。
+    /// </summary>
+    [ContextMenu("打印三段时长")]
+    private void PrintPhaseTimings()
+    {
+        // 编辑器里动画事件可能刚改过，先丢掉缓存再读
+        if (!Application.isPlaying) AttackTimelineData.Invalidate(attackClip);
+
+        AttackTiming timing = AttackTimelineData.ResolveTiming(this);
+        float windup = timing.windup, active = timing.active, recovery = timing.recovery;
+        AttackTimelineData data = AttackTimelineData.Get(attackClip);
+
+        // 每一段动画的播放倍速（实际时长为 0 的段直接跳过）
+        string Speed(int seg, float realLen) =>
+            !timing.hasClip ? "不调速" : realLen <= 0.0001f ? "动画跳过" : $"动画 ×{timing.SpeedOf(seg):F2}";
+
+        string clipInfo = attackClip != null ? $"{attackClip.name}（{attackClip.length:F3}s）" : "未指定动画";
+        string windupSrc = windupOverride >= 0f ? "节拍总表"
+            : (data.firstStrikeTime >= 0f ? "动画事件" : "动画里没有出刀/出弹事件 → 0");
+        string activeSrc = activeOverride >= 0f ? "节拍总表"
+            : (data.attackEndTime >= 0f ? "动画事件 MarkAttackEnd"
+                : (data.firstStrikeTime >= 0f ? "没有 MarkAttackEnd → 按判定窗口/连射推算" : "没有任何事件 → 整招都算攻击"));
+        string recoverySrc = recoveryOverride >= 0f ? "节拍总表" : "动画剩余时间";
+        string tableInfo = AttackTimingConfig.Active == null ? "（工程里还没有 AttackTimingConfig，全部按动画走）"
+            : AttackTimingConfig.Contains(this) ? "" : "（不在节拍总表里，三段按动画走）";
+
+        PlayerLog.Info(
+            $"[连招节点] 「{nodeName}」 动画 {clipInfo}{tableInfo}\n" +
+            $"  前摇 {windup:F3}s（{windupSrc}，{Speed(0, windup)}）\n" +
+            $"  攻击 {active:F3}s（{activeSrc}，{Speed(1, active)}）\n" +
+            $"  后摇 {recovery:F3}s（{recoverySrc}，{Speed(2, recovery)}）\n" +
+            $"  总时长 {windup + active + recovery:F3}s，之后还有 {comboWindow:F2}s 连段窗口", this);
+    }
+
+>>>>>>> Stashed changes
     /// <summary>本招是否为蓄力招（且等级配置有效）</summary>
     public bool IsValidChargeNode => isChargeSkill && chargeLevel > 0;
 
@@ -472,6 +455,33 @@ public class ComboNode : ScriptableObject
             Debug.LogWarning(
                 $"[连招节点] 「{nodeName}」填了 chargeLevel 但没勾 isChargeSkill，等级不会生效。", this);
         }
+
+        // 【正式版整改 D · 规范 6】动画事件不能是唯一生命线。
+        // 出刀 / 出弹的时间点来自动画事件；动画里一个都没有时，这一招不会出伤害 —— 配置阶段就提醒。
+        // 只在非运行时检查，并先丢掉缓存（动画事件可能刚改过）。
+        // 动画剪辑在节拍总表里；这里只在表已经加载过时检查（资产导入期间不去全工程搜表）
+        AnimationClip clip = AttackTimingConfig.PeekClip(this);
+        if (!Application.isPlaying && clip != null)
+        {
+            AttackTimelineData.Invalidate(clip);
+            AttackTimelineData data = AttackTimelineData.Get(clip);
+
+            if (data.firstStrikeTime < 0f)
+            {
+                Debug.LogWarning(
+                    $"[连招节点] 「{nodeName}」的动画「{clip.name}」里没有 TriggerAttackHitbox / SpawnProjectile 事件，" +
+                    "这一招不会产生任何判定或子弹。如果它本来就不出伤害，可以忽略。", this);
+            }
+        }
     }
 #endif
+}
+
+/// <summary>招式特效的存活方式</summary>
+public enum EffectLifetimeMode
+{
+    FollowActive,   // 跟判定段走
+    FollowAttack,   // 跟整招走
+    Fixed,          // 播完特效自己的动画一遍
+    UntilMarker,    // 到动画里配对的 EffectEnd 事件为止
 }

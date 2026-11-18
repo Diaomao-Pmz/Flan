@@ -4,26 +4,6 @@ using Flandre.CombatSystem;
 
 /// <summary>
 /// 【虚拟手柄】—— 全项目唯一允许接触 Input System 的文件。
-///
-/// ==========================================================
-/// 【批次C 改动】
-///
-/// 1. C 键从"只置一个 bool"升级为"置 bool + 发脉冲"。
-///
-///    为什么两者都要？
-///      脉冲(InputCmd.Crouch) → 表达"按下的那一瞬间"，用于触发滑铲/蹲下，
-///                              享受预输入宽恕
-///      持续(isCrouchHeld)    → 表达"还按着"，用于判断能不能站起来
-///    这两个语义不同，缺一不可。
-///
-/// 2. 位移指令（跳/冲/蹲铲）改为发给 PlayerCommandRouter，
-///    不再发给 ComboInputBuffer。
-///
-///    原因：ComboInputBuffer 的本职是连招匹配，
-///          它同时兼任位移指令分发是越权。现在各归各位：
-///            攻击键 → ComboInputBuffer
-///            位移键 → PlayerCommandRouter
-/// ==========================================================
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D), typeof(ComboInputBuffer))]
 [RequireComponent(typeof(PlayerCommandRouter))]
@@ -46,50 +26,16 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>
     /// 鼠标/指针的屏幕坐标。由 PlayerAimProvider 转成世界方向。
-    ///
-    /// 【为什么放在这里】本文件是全项目唯一允许接触 Input System 的地方。
-    /// 让瞄准组件自己去读 Mouse.current 的话，这条规矩就破了 ——
-    /// 以后想支持手柄右摇杆瞄准、或者做输入录制回放，会发现输入源散落在好几处。
     /// </summary>
     public Vector2 screenAimPosition { get; private set; }
 
     /// <summary>
     /// 这台机器上到底有没有鼠标。
-    ///
-    /// 【为什么需要它】PlayerAimProvider 的 Auto 模式原本用「鼠标 2 秒没动」
-    /// 来判断玩家是不是换手柄了 —— 但"没动"和"没有"是两回事。
-    /// 蓄力时玩家瞄准不动是常态，于是会被误判成手柄，瞄准方向悄悄
-    /// 从鼠标切成方向键，AA1 的位移方向跟着一起变。
-    ///
-    /// 设备有无是硬件事实，该由本文件（全项目唯一碰 Input System 的地方）回答。
     /// </summary>
     public bool hasPointerDevice { get; private set; }
 
     /// <summary>
     /// 玩家【现在】用的是手柄还是鼠标。
-    ///
-    /// ==========================================================
-    /// 【为什么由本文件回答，而不是让瞄准组件自己猜】
-    ///
-    /// PlayerAimProvider 的 Auto 模式原先靠「鼠标多久没动」来推断玩家换了手柄。
-    /// 但"没动"有两种完全不同的原因：
-    ///     玩家换手柄了      —— 该切八向
-    ///     玩家瞄好了在等时机 —— 绝对不该切
-    /// 一个信号区分不了两件事，所以必然会误判 —— 而蓄力时把鼠标停住瞄准
-    /// 恰恰是常态，于是子弹会在鼠标静止一段时间后突然改朝角色正面飞，
-    /// 玩家完全不知道发生了什么。
-    ///
-    /// 比喻：柜台"两秒没人说话就默认改说另一种语言"。真正该看的不是沉默多久，
-    ///       而是【最后开口的人说的是哪种语言】。
-    ///
-    /// 现在改成记录事实：谁最后动过，就是谁在用。
-    ///   鼠标动了     → false（用鼠标）
-    ///   手柄推方向了 → true （用手柄）
-    /// 停着不动时维持上一个结论，所以"瞄好了等时机"永远不会被误判。
-    ///
-    /// 这类硬件事实该由本文件回答 —— 它是全项目唯一碰 Input System 的地方，
-    /// 和 hasPointerDevice 是同一条规矩。
-    /// ==========================================================
     /// </summary>
     public bool isUsingGamepad { get; private set; }
 
@@ -133,6 +79,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         PollPointer();
+        PollDebugReviewRepeat();
 
         bool isHit = (stateMachine != null && stateMachine.currentState == stateMachine.hitState);
 
@@ -146,12 +93,117 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    // ==========================================================
+    // 【正式版整改 批次B】蓄力上限键改走 InputActions
+    // 症状：试验版直接读 Mouse.current 的侧键，改不了键位，也接不了手柄
+    // 根因：试验时为了方便整体回退，没有动 .inputactions
+    // ==========================================================
+    private InputAction chargeCapMainAction;
+    private InputAction chargeCapSubAction;
+
+    // 调试用：逐帧回看的按键（F5~F9）。本文件只负责读键并转发，回看逻辑在 CombatDebugPanel
+    private static readonly string[] debugReviewActionNames =
+    {
+        "DebugReviewToggle", "DebugReviewPrevFrame", "DebugReviewNextFrame",
+        "DebugReviewPrevChange", "DebugReviewNextChange",
+    };
+    private readonly InputAction[] debugReviewActions = new InputAction[5];
+
+    /// <summary>逐帧回看的按键被按下。CombatDebugPanel 订阅</summary>
+    public event System.Action<DebugReviewCommand> DebugReviewCommandPressed;
+
+    void Start()
+    {
+        var playerInput = GetComponent<PlayerInput>();
+        var actions = playerInput != null ? playerInput.actions : null;
+
+        chargeCapMainAction = actions != null ? actions.FindAction("ChargeCapMain") : null;
+        chargeCapSubAction = actions != null ? actions.FindAction("ChargeCapSub") : null;
+
+        if (chargeCapMainAction != null) chargeCapMainAction.performed += OnChargeCapMainPerformed;
+        if (chargeCapSubAction != null) chargeCapSubAction.performed += OnChargeCapSubPerformed;
+
+        for (int i = 0; i < debugReviewActions.Length; i++)
+        {
+            debugReviewActions[i] = actions != null ? actions.FindAction(debugReviewActionNames[i]) : null;
+            if (debugReviewActions[i] != null) debugReviewActions[i].performed += OnDebugReviewPerformed;
+        }
+
+        if (chargeCapMainAction == null || chargeCapSubAction == null)
+        {
+            PlayerLog.Warn(
+                "[输入] 没找到 ChargeCapMain / ChargeCapSub 这两个 Action，蓄力上限键（鼠标侧键）不会生效。\n" +
+                "请检查玩家身上的 PlayerInput 组件用的是不是 PlayerInputConfig，以及里面有没有这两个 Action。");
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (chargeCapMainAction != null) chargeCapMainAction.performed -= OnChargeCapMainPerformed;
+        if (chargeCapSubAction != null) chargeCapSubAction.performed -= OnChargeCapSubPerformed;
+
+        for (int i = 0; i < debugReviewActions.Length; i++)
+        {
+            if (debugReviewActions[i] != null) debugReviewActions[i].performed -= OnDebugReviewPerformed;
+        }
+    }
+
+    // 调试翻帧键（上一帧 / 下一帧）按住不放时连续翻：先停顿一下，再每帧翻 1 帧，按久了每帧翻 5 帧
+    private const float DebugRepeatDelay = 0.3f;
+    private const float DebugRepeatFastAfter = 1.5f;
+    private float debugRepeatHeldTime;
+    private int debugRepeatIndex = -1;
+
+    private void PollDebugReviewRepeat()
+    {
+        // 下标 1 = 上一帧，2 = 下一帧（见 debugReviewActionNames）
+        int held = -1;
+        for (int i = 1; i <= 2; i++)
+        {
+            if (debugReviewActions[i] != null && debugReviewActions[i].IsPressed()) { held = i; break; }
+        }
+
+        if (held != debugRepeatIndex)
+        {
+            debugRepeatIndex = held;
+            debugRepeatHeldTime = 0f;
+            return;
+        }
+        if (held < 0) return;
+
+        // 回看时游戏是暂停的，必须用不受 timeScale 影响的时间
+        debugRepeatHeldTime += Time.unscaledDeltaTime;
+        if (debugRepeatHeldTime < DebugRepeatDelay) return;
+
+        int steps = debugRepeatHeldTime < DebugRepeatFastAfter ? 1 : 5;
+        for (int s = 0; s < steps; s++)
+            DebugReviewCommandPressed?.Invoke((DebugReviewCommand)held);
+    }
+
+    private void OnDebugReviewPerformed(InputAction.CallbackContext ctx)
+    {
+        // 五个 Action 共用一个回调，靠名字认是哪一个；数组下标和 DebugReviewCommand 的顺序一致
+        int index = System.Array.IndexOf(debugReviewActionNames, ctx.action.name);
+        if (index >= 0) DebugReviewCommandPressed?.Invoke((DebugReviewCommand)index);
+    }
+
+    private void OnChargeCapMainPerformed(InputAction.CallbackContext ctx) => RaiseChargeCap(InputCmd.MainAttack);
+    private void OnChargeCapSubPerformed(InputAction.CallbackContext ctx) => RaiseChargeCap(InputCmd.SubAttack);
+
+    /// <summary>蓄力上限 +1（3 级之后回到 1）。只在该手蓄力中有效；受击硬直中不响应</summary>
+    private void RaiseChargeCap(InputCmd cmd)
+    {
+        if (stateMachine == null || stateMachine.currentState == stateMachine.hitState) return;
+
+        var charge = stateMachine.chargeSystem;
+        if (charge != null) charge.RaiseLevelCap(cmd);
+    }
+
+>>>>>>> Stashed changes
     /// <summary>
     /// 每帧同步指针位置。
-    ///
-    /// 直接读 Mouse.current 而不是绑一个 Look Action，是为了少一步配置 ——
-    /// 你不需要去 Input Actions 资产里新建 Action 再绑函数。
-    /// 想改成 Action 驱动的话，调用下面的 OnLook 即可，两条路都留着。
     /// </summary>
     private void PollPointer()
     {
@@ -186,10 +238,6 @@ public class PlayerController : MonoBehaviour
         moveInput = ctx.ReadValue<Vector2>();
 
         // 方向输入来自手柄 → 记下"玩家在用手柄"。
-        //
-        // 【只认手柄，不管键盘】键盘 + 鼠标是同一套操作方式，
-        // 按 a/d 跑动不代表玩家放弃了鼠标瞄准 —— 那正是最常见的玩法。
-        // 只有手柄摇杆才意味着"这个人手上没有鼠标可用"。
         if (ctx.control != null && ctx.control.device is Gamepad) isUsingGamepad = true;
     }
 
@@ -214,9 +262,6 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>
     /// 滑铲 / 下蹲（共用 C 键）。
-    ///
-    /// 【批次C 改动】按下的瞬间额外发出 Crouch 脉冲。
-    /// "变成铲还是变成蹲"由路由器判断 —— 那是决策层的事，不是输入层的事。
     /// </summary>
     public void OnCrouchSlidePerformed(InputAction.CallbackContext ctx)
     {
@@ -253,10 +298,6 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>
     /// 主动技能键。
-    ///
-    /// 目前 PlayerInputConfig 里可能还没有这个 Action —— 需要你在
-    /// Input Actions 资产里新建一个（建议绑 R 或 E），然后把这个函数绑上去。
-    /// 不绑也不影响编译与运行。
     /// </summary>
     public void OnActiveSkillPerformed(InputAction.CallbackContext ctx)
     {
@@ -269,19 +310,6 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>
     /// 【P1a 重写】攻击键改为「点按 / 长按」二选一。
-    ///
-    /// 按下的那一刻【什么都不做】—— 因为还分不清玩家想干嘛：
-    ///   0.15 秒内松手  → 点按 → 打出普攻
-    ///   0.15 秒后仍按着 → 长按 → 直接进蓄力（不打出普攻）
-    ///
-    /// 旧版是"按下立刻出普攻，动画放完还按着才进蓄力"（效仿空洞骑士），
-    /// 新规则把那一发普攻删掉了，用这段判定延迟来分离两种意图。
-    ///
-    /// 代价是普攻有 0.15 秒输入延迟，这是同一个键承担两种用法必然要付的账。
-    ///
-    /// 【飞行中例外】飞行时没有蓄力，也就不需要区分点按和长按 ——
-    /// 按下立刻出招（按住连发由 FlyCombatState 读 isXxxAttackHeld 实现）。
-    /// 这次按压直接标记为"已判定"，松手时不会再补发一次点按普攻。
     /// </summary>
     public void OnMainAttackPerformed(InputAction.CallbackContext ctx)
     {
@@ -290,9 +318,6 @@ public class PlayerController : MonoBehaviour
             isMainAttackHeld = true;
             mainAttackHoldTime = 0f;
             mainHoldResolved = false;
-
-            if (inputBuffer != null && inputBuffer.OnAttackPressedInFlight(InputCmd.MainAttack))
-                mainHoldResolved = true;
         }
         else if (ctx.canceled)
         {
@@ -320,10 +345,6 @@ public class PlayerController : MonoBehaviour
             isSubAttackHeld = true;
             subAttackHoldTime = 0f;
             subHoldResolved = false;
-
-            // 飞行中：按下立刻出招（同主手）
-            if (inputBuffer != null && inputBuffer.OnAttackPressedInFlight(InputCmd.SubAttack))
-                subHoldResolved = true;
         }
         else if (ctx.canceled)
         {
@@ -362,10 +383,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // 【已删除】ConsumeMainCharge / ConsumeSubCharge 与两个 isXxxChargeConsumed 标记。
-    // 它们服务的是批次J 之前「蓄满自动放」的模型：放完要标记一下免得重复放。
-    // 改成「松手才放」之后，松手这个动作本身就是一次性的，不需要额外的消耗标记。
-
     // ==========================================
     // 杂项
     // ==========================================
@@ -382,14 +399,6 @@ public class PlayerController : MonoBehaviour
     // ==========================================
     // 角色透明度（无敌半透明 + 受击闪烁）
     // ==========================================
-    //
-    // 【唯一写入者】sprite 的 alpha 只在 LateUpdate 里写一次。
-    // 闪烁协程不再直接改颜色，只拨一个"现在该不该隐身"的开关；
-    // 无敌半透明也不由各个无敌来源各自去改 —— 每帧看一眼无敌计数器就够了。
-    //
-    // 比喻：以前是两个人轮流往同一块屏幕上写字，谁后写谁赢；
-    //       现在是两个人只递纸条，由一个人统一决定屏幕显示什么。
-    // 这样以后新增任何无敌来源（技能、宝石…），外观都会自动跟上。
 
     /// <summary>闪烁的"隐身"那一拍</summary>
     private bool isBlinkHidden;

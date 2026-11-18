@@ -20,6 +20,13 @@ public class PooledObject : MonoBehaviour
     /// <summary>当前是否躺在池里（未被借出）。</summary>
     public bool IsInPool { get; private set; }
 
+    /// <summary>
+    /// 第几次被借出，每借出一次 +1。
+    /// 调用方想"晚一点再回收自己借的东西"时，先记下这个号，回收前核对：
+    /// 号变了说明它早就被还回去、又被别人借走了，这时不能再回收。
+    /// </summary>
+    public int BorrowId { get; private set; }
+
     private IPoolable[] cached;
     private bool cacheReady;
 
@@ -41,7 +48,11 @@ public class PooledObject : MonoBehaviour
     public void BindKey(string key) => PoolKey = key;
 
     /// <summary>仅供 ObjectPoolManager 调用。</summary>
-    public void SetInPool(bool value) => IsInPool = value;
+    public void SetInPool(bool value)
+    {
+        if (IsInPool && !value) BorrowId++;
+        IsInPool = value;
+    }
 
     /// <summary>
     /// 运行时给物体动态增删了 IPoolable 组件时，手动调用它让缓存失效。

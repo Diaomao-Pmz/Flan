@@ -29,6 +29,8 @@ AnimationClip:
     - time: 0.27272728
       value: {fileID: 827538889749247048, guid: e1c73c374cf10654a8b257abc5e6c4c4, type: 3}
     - time: 0.36363637
+      value: {fileID: 827538889749247048, guid: e1c73c374cf10654a8b257abc5e6c4c4, type: 3}
+    - time: 0.45454547
       value: {fileID: 4893907754814711077, guid: a79ffaf11516e26479b23df482e9b485, type: 3}
     attribute: m_Sprite
     path: 
@@ -56,13 +58,14 @@ AnimationClip:
     - {fileID: 827538889749247048, guid: e1c73c374cf10654a8b257abc5e6c4c4, type: 3}
     - {fileID: 827538889749247048, guid: e1c73c374cf10654a8b257abc5e6c4c4, type: 3}
     - {fileID: 827538889749247048, guid: e1c73c374cf10654a8b257abc5e6c4c4, type: 3}
+    - {fileID: 827538889749247048, guid: e1c73c374cf10654a8b257abc5e6c4c4, type: 3}
     - {fileID: 4893907754814711077, guid: a79ffaf11516e26479b23df482e9b485, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 0.45454547
+    m_StopTime: 0.54545456
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
@@ -96,7 +99,25 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+<<<<<<< Updated upstream
   - time: 0.36363637
+=======
+  - time: 0.27272728
+    functionName: MarkAttackEnd
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.27272728
+    functionName: EffectEnd
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.45454547
+>>>>>>> Stashed changes
     functionName: OnAttackAnimationEnd
     data: 
     objectReferenceParameter: {fileID: 0}

@@ -17,17 +17,6 @@ namespace Flandre.CombatSystem
 
     /// <summary>
     /// 【武器招式表】—— 一把武器的全部招式，与角色解耦。
-    ///
-    /// 【设计核心：武器之间互不认识】
-    /// 武器只声明自己有哪些起手招与接续招。
-    /// 谁在另一个槽里、上一段是谁打的，武器完全不需要知道。
-    /// 「主A → 副B → 主C」是连招引擎在运行时拼出来的。
-    ///
-    /// ⚠️【本资产运行时只读】
-    /// 蓄力 CD 这类运行时状态【绝不能】写在这里 ——
-    /// ScriptableObject 是磁盘上的资产文件，运行时往它字段上写值，
-    /// 编辑器里会污染资产、打包后会被所有实例共享。
-    /// 计时器一律放在 WeaponLoadout 的运行时数据里。
     /// </summary>
     [CreateAssetMenu(fileName = "NewWeapon", menuName = "Flandre/Combat/Weapon MoveSet")]
     public class WeaponMoveSet : ScriptableObject
@@ -77,44 +66,7 @@ namespace Flandre.CombatSystem
             "只作用于「打完普攻接着蓄力」的情况，原地起手不享受。")]
         public float comboChargeSpeedMultiplier = 1f;
 
-        // 【已删除】蓄力 CD（chargeCooldownLv1~3）与弱化僵直时长（weakenedStunDuration）
-        // 连放惩罚已整体移除，蓄力不再有冷却。
-
-        // ==========================================================
-        // 蓄力特效
-        // ==========================================================
-        [Header("蓄力光效 (对象池 key · 按等级)")]
-        [Tooltip("蓄到 1 级时挂的光效 key。留空则该级不出特效")]
-        public string chargeEffectLv1 = "";
-
-        [Tooltip("蓄到 2 级时挂的光效 key")]
-        public string chargeEffectLv2 = "";
-
-        [Tooltip("蓄到 3 级时挂的光效 key")]
-        public string chargeEffectLv3 = "";
-
-        [Tooltip(
-            "蓄力光效相对角色的【局部坐标】偏移。\n" +
-            "特效是角色的子物体，朝向由父物体旋转自动处理，不用管左右。")]
-        public Vector2 chargeEffectOffset = Vector2.zero;
-
-        [Tooltip("蓄力光效缩放。(1,1) 为预制体原始大小")]
-        public Vector2 chargeEffectScale = Vector2.one;
-
-        [Tooltip("蓄力光效旋转角度（度）")]
-        public float chargeEffectRotation = 0f;
-
-        /// <summary>取指定蓄力等级的光效 key。等级无效或未配置时返回空串</summary>
-        public string GetChargeEffectKey(int level)
-        {
-            switch (level)
-            {
-                case 1: return chargeEffectLv1;
-                case 2: return chargeEffectLv2;
-                case 3: return chargeEffectLv3;
-                default: return "";
-            }
-        }
+        // 蓄力光效已搬到场景里的 EffectManager（特效表里选「蓄力光效」，按 武器 + 等级 配）
 
         // ==========================================================
         // 远程武器：走对象池

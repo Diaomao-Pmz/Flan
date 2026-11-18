@@ -772,6 +772,294 @@ Transform:
   m_Children: []
   m_Father: {fileID: 65104230}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &375274610
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 375274611}
+  - component: {fileID: 375274612}
+  m_Layer: 0
+  m_Name: EffectManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &375274611
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375274610}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.33944, y: -0.53218, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &375274612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375274610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809edf1e7f2655d42974f564b858481b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.EffectManager
+  effects:
+  - prefab: {fileID: 2819290616138335727, guid: d2fcde31f9dd58a42ad57c69158e742b, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: ff93485aa25713048beeb8ee1833ae9b, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.41, y: 0.41}
+      scale: {x: 1, y: 1}
+      rotation: 0
+  - prefab: {fileID: 2819290616138335727, guid: e4fa31d384c73784aba3e67dc3440fd2, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: 230a9ed5f65482f4cb1336ab55f59e14, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.288, y: 0.342}
+      scale: {x: 1.5, y: 1.35}
+      rotation: 0
+  - prefab: {fileID: 2819290616138335727, guid: 4f98a631af0ac2d44b2f9c6488fdcae2, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: f91ddddd4a0bac049b9d6065f0a0c0e3, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.477, y: 0.386}
+      scale: {x: 0.94, y: 1.55}
+      rotation: 0
+  - prefab: {fileID: 2819290616138335727, guid: 0eb33d93910293945a023cfeb6b7d396, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: a1cdab3a0f201784abc39fc4afe6503f, type: 2}
+      - {fileID: 11400000, guid: f93a7f4adbd77a34d9fa772db87b8d08, type: 2}
+      - {fileID: 11400000, guid: b60cc9455156a9e4e8f1897d7d75ebc9, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.41, y: 0.45}
+      scale: {x: 0.8, y: 0.2}
+      rotation: 10
+  - prefab: {fileID: 2819290616138335727, guid: 9a95ad2cf5e725543b48dad37ab78e17, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: b13bc296744cadf47958870dbc0a8465, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.425, y: 0.395}
+      scale: {x: 0.623, y: 0.648}
+      rotation: 27.367
+  - prefab: {fileID: 2819290616138335727, guid: 13d472be02f683f45b2ec38d50645ffd, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: 6527905d3ea5fe846a2e0f7637aabd23, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.45, y: 0.36}
+      scale: {x: 0.82, y: 0.8}
+      rotation: 24.596
+  - prefab: {fileID: 2819290616138335727, guid: b48052af9d464774992ddb6a3c10553e, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: ab1b05c724cbfa1439f95d6ad267956a, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.43, y: 0.395}
+      scale: {x: 1.07, y: 1.11}
+      rotation: 26.196
+  - prefab: {fileID: 2819290616138335727, guid: 3add2d3ba2c99ac478d6361d61538188, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: 69468ccf7a353984d8485855672c1ccd, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.31, y: 0.42}
+      scale: {x: 0.4, y: 0.235}
+      rotation: 9.896
+  - prefab: {fileID: 2819290616138335727, guid: d0f8f9583ebb8fd44820dbab0949a988, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: 87f3406d0748dde4b8a8dccb9e2f5e0b, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.31, y: 0.42}
+      scale: {x: 0.5, y: 0.386}
+      rotation: 9.896
+  - prefab: {fileID: 2819290616138335727, guid: 456d0083f09cea5429201ffb93236ee6, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
+      key: 
+      lifetimeMode: 3
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.377, y: 0.444}
+      scale: {x: 0.61, y: 0.66}
+      rotation: 9.896
+  - prefab: {fileID: 3587092818806866930, guid: 84fa3621a7b1bfa469d7f23301e5f547, type: 3}
+    settings:
+      usage: 1
+      nodes: []
+      key: 
+      lifetimeMode: 0
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons:
+      - {fileID: 11400000, guid: d8942c963d6a5a64da477ade8898a13a, type: 2}
+      chargeLevel: 1
+      offset: {x: 0, y: 0}
+      scale: {x: 1, y: 1}
+      rotation: 0
+  - prefab: {fileID: 3587092818806866930, guid: 140b47d5ea4dd0145b1c5d5d20999a63, type: 3}
+    settings:
+      usage: 1
+      nodes: []
+      key: 
+      lifetimeMode: 0
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons:
+      - {fileID: 11400000, guid: d8942c963d6a5a64da477ade8898a13a, type: 2}
+      chargeLevel: 2
+      offset: {x: 0, y: 0}
+      scale: {x: 1, y: 1}
+      rotation: 0
+  - prefab: {fileID: 3587092818806866930, guid: bd17b62f5cb2eb04c885710f7c1f3300, type: 3}
+    settings:
+      usage: 1
+      nodes: []
+      key: 
+      lifetimeMode: 0
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons:
+      - {fileID: 11400000, guid: d8942c963d6a5a64da477ade8898a13a, type: 2}
+      chargeLevel: 3
+      offset: {x: 0, y: 0}
+      scale: {x: 1, y: 1}
+      rotation: 0
+  - prefab: {fileID: 3587092818806866930, guid: 35a2a55ec7588a147a98d9d6120490a7, type: 3}
+    settings:
+      usage: 1
+      nodes: []
+      key: 
+      lifetimeMode: 0
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons:
+      - {fileID: 11400000, guid: 472877d09026e1e4ca1b194c5c2b1abb, type: 2}
+      chargeLevel: 1
+      offset: {x: 0, y: 0}
+      scale: {x: 1, y: 1}
+      rotation: 0
+  - prefab: {fileID: 3587092818806866930, guid: d946b3670d0c7ec44ad5981d4cdf9442, type: 3}
+    settings:
+      usage: 1
+      nodes: []
+      key: 
+      lifetimeMode: 0
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons:
+      - {fileID: 11400000, guid: 472877d09026e1e4ca1b194c5c2b1abb, type: 2}
+      chargeLevel: 2
+      offset: {x: 0, y: 0}
+      scale: {x: 1, y: 1}
+      rotation: 0
+  - prefab: {fileID: 3587092818806866930, guid: 1384d087cc784c340b293c920184684c, type: 3}
+    settings:
+      usage: 1
+      nodes: []
+      key: 
+      lifetimeMode: 0
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons:
+      - {fileID: 11400000, guid: 472877d09026e1e4ca1b194c5c2b1abb, type: 2}
+      chargeLevel: 3
+      offset: {x: 0, y: 0}
+      scale: {x: 1, y: 1}
+      rotation: 0
+  - prefab: {fileID: 2819290616138335727, guid: 173fe628d963d0b45ad2f4b79d6fc430, type: 3}
+    settings:
+      usage: 0
+      nodes:
+      - {fileID: 11400000, guid: 9408d96a840111045a1dae0bb494936f, type: 2}
+      key: 
+      lifetimeMode: 0
+      fitDuration: 1
+      useHitboxOffset: 0
+      weapons: []
+      chargeLevel: 1
+      offset: {x: 0.164, y: 0.168}
+      scale: {x: 0.678, y: 0.581}
+      rotation: -9.478
+  defaultLifetime: 0.4
+  prewarmCount: 8
+  verboseLog: 0
 --- !u!1 &408915418
 GameObject:
   m_ObjectHideFlags: 0
@@ -1370,7 +1658,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca56e44cd5a0ef24d9ad83f173c6d39c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HUDBars
-  playerState: {fileID: 907333748272688966}
+  playerState: {fileID: 3783173868775167042}
   hpFill: {fileID: 860824777}
   mpFill: {fileID: 593457179}
 --- !u!1 &674901185
@@ -1952,6 +2240,7 @@ MonoBehaviour:
         playerAirCondition: 0
       multiplier: 0.1
   - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
+<<<<<<< Updated upstream
     weightModifiers:
     - condition:
         playerSide: 2
@@ -1965,6 +2254,11 @@ MonoBehaviour:
         maxDistance: 20
         playerAirCondition: 0
       multiplier: 0.1
+=======
+    weightModifiers: []
+  - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
+    weightModifiers: []
+>>>>>>> Stashed changes
   phase2Routines: []
   singleInterleaveChance: 0.2
   phase1Movement:
@@ -2009,7 +2303,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossController
   maxHP: 100
   shieldVisual: {fileID: 1218982608}
-  playerTransform: {fileID: 8416553904814381600}
+  playerTransform: {fileID: 1090435265170860571}
   wallCheckDistance: 0.5
   wallLayer:
     serializedVersion: 2
@@ -2065,7 +2359,7 @@ MonoBehaviour:
   - {fileID: 368354254}
   - {fileID: 408915419}
   samePointThreshold: 0.1
-  playerTransform: {fileID: 8416553904814381600}
+  playerTransform: {fileID: 1090435265170860571}
   behindPlayerOffset: 3
   matchPlayerHeight: 1
   snapshotPlayerPosition: 0
@@ -2503,6 +2797,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 899437986}
   m_CullTransparentMesh: 1
+--- !u!1 &1031592409 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3212544334172396689, guid: bce200a076b1d8949aa45929203be613, type: 3}
+  m_PrefabInstance: {fileID: 6071378255647659083}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1164344982
 GameObject:
   m_ObjectHideFlags: 0
@@ -4329,23 +4628,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2129995105}
   m_CullTransparentMesh: 1
---- !u!114 &907333748272688966 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7544423397950537741, guid: b2f14d397095eb84092300f849141591, type: 3}
-  m_PrefabInstance: {fileID: 6643835901755429967}
+--- !u!4 &1090435265170860571 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
+  m_PrefabInstance: {fileID: 6071378255647659083}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3211292477212376308}
+--- !u!114 &3783173868775167042 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 619425497809008698, guid: bce200a076b1d8949aa45929203be613, type: 3}
+  m_PrefabInstance: {fileID: 6071378255647659083}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1031592409}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f7000653d82da384689c347ffa9d71b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerState
---- !u!1 &3211292477212376308 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4290539747665736860, guid: b2f14d397095eb84092300f849141591, type: 3}
-  m_PrefabInstance: {fileID: 6643835901755429967}
+--- !u!114 &3783173868775167064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &6643835901755429967
+  m_GameObject: {fileID: 1031592409}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ee9613a5510f92449882fe0b945489f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.CombatDebugPanel
+  show: 1
+  position: {x: 10, y: 10}
+  fontSize: 14
+  record: 1
+  recordFrames: 600
+  rewindPose: 1
+--- !u!1001 &6071378255647659083
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -4353,6 +4670,7 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+<<<<<<< Updated upstream
     - target: {fileID: 1326363344798443143, guid: b2f14d397095eb84092300f849141591, type: 3}
       propertyPath: jumpGem
       value: 
@@ -4422,49 +4740,65 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4290539747665736860, guid: b2f14d397095eb84092300f849141591, type: 3}
+=======
+    - target: {fileID: 584175311805934845, guid: bce200a076b1d8949aa45929203be613, type: 3}
+      propertyPath: verboseLog
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 619425497809008698, guid: bce200a076b1d8949aa45929203be613, type: 3}
+      propertyPath: attackTimingConfig
+      value: 
+      objectReference: {fileID: 11400000, guid: e0817d1fe4a7c054d8e4fc6b5f01e971, type: 2}
+    - target: {fileID: 3212544334172396689, guid: bce200a076b1d8949aa45929203be613, type: 3}
+>>>>>>> Stashed changes
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5087812893243016451, guid: bce200a076b1d8949aa45929203be613, type: 3}
+      propertyPath: verboseLog
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalPosition.x
       value: -6.747
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalPosition.y
       value: -4.4086
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
+    - target: {fileID: 5576489042822784086, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+<<<<<<< Updated upstream
     - target: {fileID: 7544423397950537741, guid: b2f14d397095eb84092300f849141591, type: 3}
       propertyPath: stateConfig
       value: 
@@ -4477,54 +4811,28 @@ PrefabInstance:
       propertyPath: overlayOnlyWhenIdle
       value: 1
       objectReference: {fileID: 0}
+=======
+>>>>>>> Stashed changes
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4290539747665736860, guid: b2f14d397095eb84092300f849141591, type: 3}
-      insertIndex: 11
-      addedObject: {fileID: 9065731652438355370}
-  m_SourcePrefab: {fileID: 100100000, guid: b2f14d397095eb84092300f849141591, type: 3}
---- !u!4 &8416553904814381600 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5985746343653539412, guid: b2f14d397095eb84092300f849141591, type: 3}
-  m_PrefabInstance: {fileID: 6643835901755429967}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &8480849977579960414 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8945739434960273018, guid: b2f14d397095eb84092300f849141591, type: 3}
-  m_PrefabInstance: {fileID: 6643835901755429967}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3211292477212376308}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca66d4c7420ccc94bb2ed0f760127281, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
---- !u!114 &9065731652438355370
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3211292477212376308}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7cc7346a15936647bb334fe775d1f15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerManaSystem
-  verboseLog: 0
+    - targetCorrespondingSourceObject: {fileID: 3212544334172396689, guid: bce200a076b1d8949aa45929203be613, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3783173868775167064}
+  m_SourcePrefab: {fileID: 100100000, guid: bce200a076b1d8949aa45929203be613, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1514568857}
   - {fileID: 1894342355}
-  - {fileID: 6643835901755429967}
+  - {fileID: 375274611}
+  - {fileID: 6071378255647659083}
   - {fileID: 786768187}
-  - {fileID: 1669677076}
   - {fileID: 713837934}
   - {fileID: 1257834514}
   - {fileID: 1164344987}
   - {fileID: 1950682223}
   - {fileID: 65104230}
+  - {fileID: 1669677076}

@@ -4,19 +4,6 @@ namespace Flandre.CombatSystem
 {
     /// <summary>
     /// 【属性面板】
-    ///
-    /// 每一条属性都是 ModifiableStat（一面可以贴便利贴的墙）：
-    ///   基础值来自 Config 说明书，宝石/buff/装备往上贴便利贴，读的时候拿最终值。
-    ///
-    /// 【批次B 新增】maxJumps
-    ///   原先它是 PlayerStateMachine 上一个普通 int，
-    ///   被 GemActionProcessor 每次跳跃都覆写一遍（Echo 写 2，Relay 写 1）。
-    ///   换宝石时前一颗写的值不会还原 —— 典型的「只装不卸」。
-    ///   现在改成便利贴，Echo 贴 +1，卸下自动撕掉。
-    ///
-    /// 【资源属性】最大 HP/MP、回蓝速度、飞行耗蓝
-    ///   基础值来自 PlayerStateConfig，成长加成由 PlayerState.SetAttributeLevel 贴上来。
-    ///   PlayerHealth 的 maxHP/maxMP 直接读这里，所以加成一贴，上限立刻变。
     /// </summary>
     [System.Serializable]
     public class PlayerStats
@@ -67,7 +54,7 @@ namespace Flandre.CombatSystem
             {
                 moveSpeed.SetBaseValue(moveConfig.moveSpeed);
                 jumpForce.SetBaseValue(moveConfig.jumpForce);
-                dashSpeed.SetBaseValue(moveConfig.dashSpeed);
+                dashSpeed.SetBaseValue(moveConfig.DashBaseSpeed);   // 基础值 = 距离 / 时长
                 maxJumps.SetBaseValue(moveConfig.maxJumps);
             }
 

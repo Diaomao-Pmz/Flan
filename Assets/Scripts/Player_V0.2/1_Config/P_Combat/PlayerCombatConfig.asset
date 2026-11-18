@@ -17,4 +17,12 @@ MonoBehaviour:
   blinkInterval: 0.15
   invulnerableAlpha: 0.2
   invulnerableDuration: 0.7
+<<<<<<< Updated upstream:Assets/Scripts/Player_V0.2/Config/PlayerCombatConfig.asset
+=======
+  meleeHitsBodyCollider: 1
+  chargeSlowsMovement: 0
+  chargeMoveSpeedMultiplier: 0.1
+  chargeJumpForceMultiplier: 0.8
+  preChargeMoveSpeedMultiplier: 0.35
+>>>>>>> Stashed changes:Assets/Scripts/Player_V0.2/1_Config/P_Combat/PlayerCombatConfig.asset
   projectileSpeed: 12

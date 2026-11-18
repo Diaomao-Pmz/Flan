@@ -28,6 +28,8 @@ public class PlayerState : MonoBehaviour, IDamageable
     public PlayerMovementConfig movementConfig;
     [Tooltip("受击规则：硬直、击飞、闪烁、无敌时长")]
     public PlayerCombatConfig combatConfig;
+    [Tooltip("节拍总表：每个招式的连段窗口、三段时长、动画与表现、蓄力位移")]
+    public AttackTimingConfig attackTimingConfig;
 
     [Header("成长表 (可选 · 不填则没有成长加成)")]
     [Tooltip("每个属性升一级加多少、最多几级。技能树通过 AddAttributeLevel 使用它")]
@@ -102,6 +104,18 @@ public class PlayerState : MonoBehaviour, IDamageable
                 "[PlayerState] 未指定 PlayerCombatConfig，已临时创建默认配置。\n" +
                 "请右键 Create > Flandre > Player > Combat Config 生成资产并拖上来。" +
                 "（临时配置不会保存）", this);
+        }
+
+        if (attackTimingConfig != null)
+        {
+            AttackTimingConfig.SetActive(attackTimingConfig);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[PlayerState] 未指定节拍总表（AttackTimingConfig）。\n" +
+                "编辑器里会临时用工程里找到的第一张表；打包后所有招式都会按动画原速、连段窗口为 0。\n" +
+                "请右键 Create > Flandre > Player > Attack Timing Config 生成资产并拖上来。", this);
         }
 
         // 顺序：先 Stats（算出最大值）再 Health（按最大值回满）

@@ -4,23 +4,6 @@ namespace Flandre.CombatSystem
 {
     /// <summary>
     /// 【武器装备中枢】—— 管理主武器(左键)与副武器(右键)两个槽。
-    ///
-    /// 两个槽各自可以插近战或远程，于是有四种战斗形态：
-    ///   近近 / 近远 / 远近 / 远远
-    ///
-    /// ==========================================================
-    /// 【批次J 新增】每把武器独立的蓄力 CD
-    ///
-    /// ⚠️ 计时器【必须】放在这里，不能放 WeaponMoveSet ——
-    /// 那是磁盘上的 ScriptableObject 资产，运行时往它字段上写值：
-    ///   编辑器里会污染资产文件，退出 Play Mode 后脏数据残留
-    ///   打包后所有实例共享同一份
-    /// 这正是我们做宝石系统时处理过的同一个雷：
-    /// 说明书是印刷品，不能在上面写字；每个人另配一本草稿本。
-    ///
-    /// 所以「谁在什么时候能蓄力」是本组件的运行时状态，与武器资产无关。
-    /// 换武器时 CD 会一并重置 —— 新武器不该继承上一把的冷却。
-    /// ==========================================================
     /// </summary>
     public class WeaponLoadout : MonoBehaviour
     {
@@ -37,9 +20,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>武器变更时广播。UI 与连招引擎可订阅</summary>
         public event System.Action<WeaponSlot, WeaponMoveSet> OnWeaponChanged;
-
-        // 【已删除】蓄力 CD（OnChargeReadyChanged / IsChargeReady / StartChargeCooldown …）
-        // 连放惩罚移除后蓄力不再有冷却，打完一发马上能再蓄。
 
         private ComboInputBuffer comboBuffer;
 
@@ -86,9 +66,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 换武器。传 null 表示卸空该槽。
-        ///
-        /// 换武器时会重置当前连招 ——
-        /// 否则会出现「上一段是旧武器打的，接续却从新武器的表里找」这种不一致状态。
         /// </summary>
         public void SetWeapon(WeaponSlot slot, WeaponMoveSet weapon)
         {
@@ -110,7 +87,7 @@ namespace Flandre.CombatSystem
 
             OnWeaponChanged?.Invoke(slot, weapon);
 
-            Debug.Log($"[武器中枢] {slot} 槽装备：{(weapon != null ? weapon.displayName : "空")}，当前形态 {GetLoadoutLabel()}");
+            PlayerLog.Info($"[武器中枢] {slot} 槽装备：{(weapon != null ? weapon.displayName : "空")}，当前形态 {GetLoadoutLabel()}");
         }
 
         /// <summary>主副互换</summary>

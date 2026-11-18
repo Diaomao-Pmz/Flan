@@ -6,19 +6,6 @@ namespace Flandre.CombatSystem
 {
     /// <summary>
     /// 【生命/魔力数据总线】
-    ///
-    /// 本次改动的核心是：无敌状态从「一个布尔开关」升级为「引用计数」。
-    ///
-    /// 【为什么？】
-    /// 原先 isUntargetable 有 3~4 个主人：
-    ///   受击无敌协程、Relay 冲刺无敌、Relay 滑铲无敌、Relay 跳跃无敌。
-    /// 谁都能把它关掉。
-    ///
-    /// 比喻：一间房里三个人共用一盏灯的开关。
-    ///       A 开灯干活，B 也开灯干活，A 干完随手关灯 —— B 还在黑暗里。
-    ///
-    /// 改成引用计数后：每人一把钥匙，请求无敌 +1，释放 -1，
-    /// 全部还回来（计数归零）才熄灯。谁也没法误伤别人。
     /// </summary>
     [System.Serializable]
     public class PlayerHealth
@@ -29,12 +16,6 @@ namespace Flandre.CombatSystem
 
         // ==========================================================
         // 【最大值不再存在这里】改为实时读 PlayerStats 上的 maxHP / maxMP。
-        //
-        // 原因：技能树要能加最大血量。如果这里存一份数字，
-        // 加成就得记得"同步过来"，忘了就是血条上限不变 —— 典型的两份真相。
-        // 现在只有一份真相（Stats），这里只是一个读取窗口。
-        //
-        // 名字保持 maxHP / maxMP 不变，所以 HUDBars、StatusCardUI 等读取方一行都不用改。
         // ==========================================================
         private PlayerStats stats;
 
@@ -71,17 +52,6 @@ namespace Flandre.CombatSystem
 
         // ==========================================================
         // 【阶段0 预埋 · 当前按要求注释】玩家死亡广播
-        //
-        // 你说过现在是测试阶段，故意保留「0血不死」的行为，所以整段封存。
-        //
-        // 解除步骤（阶段4 做 DeadState 时）：
-        //   1. 取消下面这一行的注释
-        //   2. 取消 TakeDamage() 里 CheckDeath() 调用的注释
-        //   3. 取消 CheckDeath() 方法体内部的注释
-        //   4. 在 PlayerStateMachine.Start() 里订阅它 → ChangeState(deadState)
-        //
-        // TODO: 阶段4 接 DeadState 时解除注释
-        // public event System.Action OnPlayerDeath;
         // ==========================================================
 
         public void Init(PlayerCombatConfig config, PlayerStats playerStats)
@@ -147,23 +117,10 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 【阶段0 预埋 · 当前按要求注释】统一死亡判定入口。
-        ///
-        /// 原先的死亡检查写在 Player.TakeDamage(int) 里，
-        /// 但敌人实际是通过 IDamageable.TakeDamage(in DamageInfo) 打进 PlayerState 的，
-        /// 那条路径完全绕过了死亡检查 —— 这是个真实存在的断链。
-        ///
-        /// 修法是让死亡由数据层自己广播，而不是靠调用方「记得检查」。
-        /// 方法体保留但内部注释，以维持你要求的「测试阶段 0血不死」行为。
         /// </summary>
         private void CheckDeath()
         {
             // TODO: 阶段4 接 DeadState 时解除注释
-            //
-            // if (currentHP > 0) return;
-            // if (hasBroadcastDeath) return;   // 防重复广播
-            // hasBroadcastDeath = true;
-            // Debug.Log("[健康总线] 玩家死亡，广播 OnPlayerDeath");
-            // OnPlayerDeath?.Invoke();
         }
 
         // private bool hasBroadcastDeath = false;   // 与上方 CheckDeath 一同解除注释
@@ -227,10 +184,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 【兼容层】旧的布尔式接口。
-        ///
-        /// 保留它是为了让还没来得及改的调用方不至于编译失败。
-        /// 新代码请直接用 RequestUntargetable / ReleaseUntargetable，
-        /// 否则多个系统仍然会共用 Legacy 这一个签名，退化回「共用一盏灯开关」的老问题。
         /// </summary>
         [System.Obsolete("请改用 RequestUntargetable(source) / ReleaseUntargetable(source)")]
         public void SetUntargetable(bool state)

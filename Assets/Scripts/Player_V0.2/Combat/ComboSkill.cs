@@ -4,29 +4,6 @@ using Flandre.CombatSystem;
 
 /// <summary>
 /// 动作充能/冷却计时器。dashSkill 与 slideSkill 各持有一份。
-///
-/// ==========================================================
-/// 【批次B 改动】宝石不再直接改写基础值
-///
-/// 原写法（GemActionProcessor 里）：
-///     sm.dashSkill.maxCombo = 2;
-///     sm.dashSkill.comboWindow = sm.dashSkill.totalCD;
-///
-/// 这是「直接在承重墙上凿洞，且没留原始图纸」——
-/// 换成别的宝石时，Echo 的分支根本不碰这些字段，
-/// 于是 comboWindow 被永久钉在 totalCD 上，再也回不来。
-///
-/// 新写法：
-///     skill.ApplyGemModifier(this, comboDelta: 1);
-///     skill.RemoveGemModifiers(this);   // 卸载时一句话还原
-///
-/// maxCombo / comboWindow 这两个 Inspector 上的值从此变成【只读基础值】，
-/// 运行时永远不被写入。
-/// ==========================================================
-///
-/// 【尚未改动 · 阶段3 处理】
-///   cdStartTime 这一个变量目前同时兼任「大CD计时」和「派生超时计时」两种语义。
-///   阶段3 会整体换成充能层数模型（最大层数 / 单层恢复时间 / 最小间隔）。
 /// </summary>
 [System.Serializable]
 public class ComboSkill
@@ -120,6 +97,20 @@ public class ComboSkill
 
     public void BindStats(PlayerStats playerStats) => stats = playerStats;
 
+<<<<<<< Updated upstream
+=======
+    // ==========================================================
+    // 【2026-11-16】冷却的基础值可以由外部提供（PlayerMovementConfig 上的 Dash / Slide Cooldown）。
+    // 绑了来源之后，上面的 totalCD 不再被读取；没绑则照旧用 totalCD。
+    // ==========================================================
+    private System.Func<float> cooldownSource;
+
+    public void BindCooldownSource(System.Func<float> source) => cooldownSource = source;
+
+    private float BaseCooldown
+        => cooldownSource != null ? Mathf.Max(0f, cooldownSource()) : totalCD;
+
+>>>>>>> Stashed changes
     public float EffectiveCooldown
         => stats != null ? stats.ApplyCooldownReduction(totalCD) : totalCD;
 
@@ -132,7 +123,7 @@ public class ComboSkill
         {
             if (Time.time - cdStartTime > EffectiveComboWindow)
             {
-                Debug.Log("[ComboSkill] 派生超时！已自动转入大CD");
+                PlayerLog.Info("[ComboSkill] 派生超时！已自动转入大CD");
                 currentCombo = 0;
             }
         }

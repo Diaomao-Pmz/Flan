@@ -5,21 +5,6 @@ using Flandre.CombatSystem;
 
 /// <summary>
 /// 【攻击判定框】
-///
-/// ==========================================================
-/// 【批次N 新增】命中通知管道
-///
-/// 判定框打中敌人后，原先【不告诉任何人】—— 伤害算完就结束了。
-/// 但有三个功能都需要知道"刚打中了谁"：
-///   自动朝向    —— 滑铲攻击命中后转向那个敌人
-///   命中回 MP   —— 按招式伤害回蓝
-///   蓄力突刺    —— dash 途中第一个碰到的敌人
-///
-/// 三个需求同一条管道，所以现在广播出去，而不是各自再写一遍检测。
-///
-/// 比喻：原先是收银员收完钱就把小票扔了。
-///       现在留一份账 —— 财务、会员积分、库存都要看这张单子。
-/// ==========================================================
 /// </summary>
 public class PlayerHitDetection : MonoBehaviour
 {
@@ -49,8 +34,34 @@ public class PlayerHitDetection : MonoBehaviour
     /// <summary>本次招式一共命中了几个目标</summary>
     public int HitCountThisAttack { get; private set; }
 
+<<<<<<< Updated upstream
     private Coroutine activeHitboxCoroutine;
     private readonly HashSet<Collider2D> alreadyHitEnemies = new HashSet<Collider2D>();
+=======
+    // ==========================================================
+    // 【实验：平a/蓄力重做】判定改为「多份并行 + 时间表驱动」
+    // ==========================================================
+
+    /// <summary>一次出刀的判定序列（一招里所有 HitboxWindow）</summary>
+    public class HitboxRun
+    {
+        public ComboNode node;
+        public readonly List<HitboxWindow> windows = new List<HitboxWindow>();
+        public readonly HashSet<Collider2D> alreadyHit = new HashSet<Collider2D>();
+
+        internal float seqTime;      // 序列已经走了多久
+        internal int index;          // 轮到第几段窗口
+        internal bool inWindow;      // 当前段是否正在判定
+        internal float winElapsed;   // 当前段已经判定了多久
+
+        /// <summary>这一帧正在判定的窗口（Gizmos 用）</summary>
+        internal HitboxWindow activeWindow;
+
+        public bool done;
+    }
+
+    private readonly List<HitboxRun> activeRuns = new List<HitboxRun>();
+>>>>>>> Stashed changes
 
     // 复用缓冲，避免每帧产生 GC
     private readonly List<Collider2D> overlapResults = new List<Collider2D>(16);
@@ -85,11 +96,22 @@ public class PlayerHitDetection : MonoBehaviour
     // ==========================================================
 
     /// <summary>
+<<<<<<< Updated upstream
     /// 由动画事件触发：开始跑本招式的判定窗口序列。
     ///
     /// 一次调用跑完整个招式的所有段。
     /// 【不要】为了做三连斩而在动画里插三个 TriggerAttackHitbox 事件 ——
     /// 那样后面的会掐断前面的。正确做法是在 ComboNode 里配三条 HitboxWindow。
+=======
+    /// 【已改为空操作】原先由动画事件触发判定。
+    /// 现在判定由 AttackTimelineRunner 按时间表调用 BeginRun —— 时间点仍然取自动画里的这个事件，
+    /// 所以动画上的事件【不要删】。保留本方法只是为了让 Unity 不报 "has no receiver"。
+    /// </summary>
+    public void TriggerAttackHitbox() { }
+
+    /// <summary>
+    /// 【"攻击结束"时间戳】动画事件用，本身是空操作。
+>>>>>>> Stashed changes
     /// </summary>
     public void TriggerAttackHitbox()
     {
@@ -227,13 +249,6 @@ public class PlayerHitDetection : MonoBehaviour
 
     /// <summary>
     /// 【批次N 新增】命中后自动转向目标。
-    ///
-    /// 用于滑铲攻击这类"边冲边砍"的招式：
-    ///   命中敌人 → 面向那个敌人
-    ///   没命中   → 维持原朝向（滑铲方向）
-    ///
-    /// 只有勾了 faceTargetOnHit 的招式才会转，
-    /// 普通平A 不该因为砍到背后的敌人就突然转身。
     /// </summary>
     private void TryFaceTarget(ComboNode node, Transform target)
     {
@@ -254,14 +269,6 @@ public class PlayerHitDetection : MonoBehaviour
 
     /// <summary>
     /// 【多段判定的可视化】
-    ///
-    /// 原先只画"当前正在生效的那一段"。但多段窗口的 duration 通常只有 0.1 秒，
-    /// 一闪而过基本看不见 —— 旧版单段 duration 是 0.5 才勉强看得清。
-    ///
-    /// 现在整套招式期间把【所有窗口】都画出来：
-    ///   暗色轮廓 = 这一段还没到 / 已经过去
-    ///   亮绿实线 = 这一帧正在判定
-    /// 调框时能一眼看到三段各自在哪、有没有重叠。
     /// </summary>
     private void OnDrawGizmos()
     {

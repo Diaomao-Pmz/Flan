@@ -3,25 +3,6 @@ using Flandre.CombatSystem;
 
 /// <summary>
 /// 连招执行状态。
-///
-/// ==========================================================
-/// 【批次L 新增】动画事件兜底超时
-///
-/// 攻击的退出【只】依赖动画事件 OnAttackAnimationEnd。
-/// 漏配一个事件 = 玩家永久卡在攻击动作里，而且【没有任何报错】——
-/// 你只能靠猜是哪个招式、哪个动画出的问题。
-///
-/// 这次动画重做后 A1/B1 全部卡死，就是这个隐患的实证。
-/// 后面还有十几个招式要配事件，漏一次就是一次卡死。
-///
-/// 比喻：办公室的门锁原本只靠"下班铃响了才开"。
-///       现在加了个定时熄灯的总闸 —— 铃坏了人照样能走，
-///       而且第二天保安会告诉你哪间屋的铃坏了。
-///
-/// 这和批次F 修连招指针泄漏是同一个思路：
-/// 【动画事件应该是"锦上添花的时机点"，不能是"唯一的生命线"】。
-/// 当时修的是连招指针，状态退出这条还留着同样的隐患，现在一并堵上。
-/// ==========================================================
 /// </summary>
 public class ComboState : PlayerStateBase
 {
@@ -36,21 +17,20 @@ public class ComboState : PlayerStateBase
     private float originalGravity;
     private bool wasAirborneOnEnter;
 
-    // ---- 出招位移 ----
-    private Vector2 thrustVelocity;
-    private float thrustTimer;
-    private float thrustDuration;
+    // ---- 出招位移：判定段开始时启动，匀速走完一段精确距离；被打断就停在半路 ----
+    private Vector2 thrustDistance;     // 这次要走的总位移（已乘朝向）
+    private float thrustDuration;       // 用多久走完
+    private float thrustTimer;          // 已经走了多久
+    private bool thrustPending;         // 准备好了，等起步的那个阶段开始
+    private float thrustStartAt;        // 出招后第几秒起步（所选阶段的开头）
+    private bool thrustRunning;         // 正在走
+    private bool thrustEndPending;      // 刚走完，下一物理帧把位移给的速度收掉
 
     // 碰撞箱微调是否生效中
     private bool isBodyAdjusting;
 
     /// <summary>
     /// 本招是哪只手打出的。
-    ///
-    /// 必须在 Enter 时就记下来 —— 因为换手抢拍时，
-    /// 新招式的 SetCurrentNode 已经把 Buffer.LastTriggerCmd 改成新的那只手了，
-    /// 等到旧招式 Exit 时再去问就问到错的手上，
-    /// 后摇会记到刚出招的那只手头上，抢拍直接失效。
     /// </summary>
     private InputCmd ownerCmd;
 
@@ -74,7 +54,6 @@ public class ComboState : PlayerStateBase
     private PlayerHitDetection hitDetection;
     private PlayerWeaponEmitter weaponEmitter;
     private PlayerAimProvider aimProvider;
-    private PlayerMomentum momentum;
 
     public ComboState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
@@ -89,9 +68,6 @@ public class ComboState : PlayerStateBase
 
     private PlayerAimProvider AimProvider
         => aimProvider != null ? aimProvider : (aimProvider = sm.GetComponent<PlayerAimProvider>());
-
-    private PlayerMomentum Momentum
-        => momentum != null ? momentum : (momentum = sm.GetComponent<PlayerMomentum>());
 
 
     public override void Enter()
@@ -121,8 +97,10 @@ public class ComboState : PlayerStateBase
             ? activeNode.attackClip.length
             : 0f;
 
-        timeoutLimit = (clipLength > 0f)
-            ? clipLength * TimeoutMultiplier
+        // 动画会按 ComboNode 的三段时长调速，实际可能比剪辑原长更久，所以取两者中较长的
+        float expected = Mathf.Max(clipLength, instance != null ? instance.duration : 0f);
+        timeoutLimit = (expected > 0f)
+            ? expected * TimeoutMultiplier
             : FallbackTimeout;
 
         if (activeNode != null)
@@ -137,6 +115,7 @@ public class ComboState : PlayerStateBase
             else
             {
                 sm.animDriver.SetBase(activeNode.animName, restart: true);
+                sm.animDriver.SetAttackOwner(instance);   // 按三段时长给攻击动画调速
             }
 
             SetupThrust();
@@ -153,6 +132,26 @@ public class ComboState : PlayerStateBase
             return;
         }
 
+<<<<<<< Updated upstream
+=======
+        // 【实验】飞行中放出来的蓄力招：进入后摇阶段就回到飞行状态
+        if (TryResumeFlight(force: false)) return;
+
+        // 【实验】这一招的总时长（前摇 + 攻击 + 后摇）走完了 → 收招。
+        // 动画按三段时长调速，正常情况下动画播完（OnAttackAnimationEnd）和总时长走完几乎同时；
+        // 哪个先到都走同样的收招流程。
+        if (instance != null && instance.elapsed >= instance.duration)
+        {
+            Buffer.StartGracePeriod();
+
+            if (TryResumeFlight(force: true)) return;
+
+            if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
+            else HandleLanding();
+            return;
+        }
+
+>>>>>>> Stashed changes
         // 后摇取消检测
         if (isCancelable)
         {
@@ -160,12 +159,6 @@ public class ComboState : PlayerStateBase
         }
 
         // 【P1b 改动】攻击动画中【不再】响应方向键转向。
-        //
-        // 原先允许用 a/d 微调朝向，但那会让玩家在挥刀途中来回转身，
-        // 判定框跟着左右横跳，看起来像 bug。
-        //
-        // 新规则：攻击中只有【带方向键的冲刺/滑铲】能改变朝向 ——
-        // 想转身就得付出一次位移的代价，不能白嫖。
 
         // ---- 碰撞箱微调（不打断攻击）----
         TickBodyAdjust();
@@ -173,37 +166,10 @@ public class ComboState : PlayerStateBase
 
     public override void FixedUpdate()
     {
-        // ---- 携带动量优先：滑铲途中出招时，滑行继续 ----
-        //
-        // 减速逻辑在 SlideMomentum 里，本状态只是"接手让它继续跑"，
-        // 没有复制任何一行滑铲的物理参数。
-        // ---- 出招位移优先 ----
-        //
-        // 【顺序修正】蓄力位移必须排在滑铲动量【之前】。
-        // 否则滑铲后接 AA1 时，滑铲的余速会一直接管速度，
-        // 蓄力位移永远轮不到执行 —— 而蓄力位移是玩家主动打出的、
-        // 有明确方向意图的动作，理应压过被动的残余冲劲。
+        // ---- 出招位移（判定段开始时起步）----
         if (TickThrust()) return;
 
-        // ---- 携带动量：滑铲途中出招时，滑行继续 ----
-        //
-        // 减速逻辑在 SlideMomentum 里，本状态只是"接手让它继续跑"，
-        // 没有复制任何一行滑铲的物理参数。
-        bool wantsMomentum = activeNode == null || activeNode.inheritMomentum;
-
-        if (wantsMomentum && sm.slideMomentum.Tick(sm, Time.fixedDeltaTime))
-        {
-            return;
-        }
-
         // ---- 冲量结束后锁死移动 ----
-        //
-        // 【为什么必须主动写 0】
-        // 原先地面上 ComboState 从来不写速度 —— 于是进入攻击那一刻的残留速度
-        // （比如蓄力架势允许的 0.2 倍微移）会一路保持到攻击结束，
-        // 表现出来就像"攻击期间还能走动"。
-        //
-        // 设计要求是「玩家攻击时默认都不能走动」，所以这里明确按住不放。
         if (sm.IsGrounded())
         {
             if (activeNode == null || activeNode.lockMovementDuringAttack)
@@ -223,16 +189,81 @@ public class ComboState : PlayerStateBase
     }
 
     /// <summary>
+<<<<<<< Updated upstream
+=======
+    /// 【实验】飞行中松手放蓄力 → 人先变回地面状态把这一招打出来 → 进入后摇阶段后回到飞行状态。
+    /// </summary>
+    /// <param name="force">动画已经播完（没有后摇可等了）：不看阶段，直接回</param>
+    /// <returns>是否已经切回飞行状态</returns>
+    public bool TryResumeFlight(bool force)
+    {
+        if (instance == null || !instance.resumeFlight) return false;
+
+        if (!force && Buffer.MovementPhase != AttackPhase.Recovery) return false;
+
+        instance.resumeFlight = false;
+
+        // MP 耗尽就不回了，照常往下掉
+        if (sm.playerState != null && sm.playerState.health.currentMP <= 0) return false;
+
+        sm.ChangeState(sm.flyState);
+        return true;
+    }
+
+    private int MoveSign()
+    {
+        float x = sm.playerController.moveInput.x;
+        return Mathf.Abs(x) > 0.1f ? (x > 0f ? 1 : -1) : 0;
+    }
+
+    /// <summary>
+    /// 【实验 · R1】平a三阶段与方向键移动。
+    /// </summary>
+    /// <returns>是否已经切走状态</returns>
+    private bool TryMovementCancel()
+    {
+        if (Buffer == null) return false;
+        if (activeNode != null && !activeNode.lockMovementDuringAttack) return false;
+
+        int sign = MoveSign();
+        bool fresh = sign != 0 && sign != baselineMoveSign;
+
+        // 松开过 → 之后再按就是新输入
+        if (sign == 0) baselineMoveSign = 0;
+
+        if (sign == 0) return false;
+        if (IsThrustActive) return false;
+
+        AttackPhase phase = Buffer.MovementPhase;
+
+        if (phase == AttackPhase.Windup)
+        {
+            if (!fresh) return false;
+
+            Buffer.VoidCurrentAttackAndResetCombo();
+            LeaveToMove();
+            return true;
+        }
+
+        if (phase == AttackPhase.Recovery)
+        {
+            // 连段保留；这只手的锁（到总时长结束）在出招时就算好了，不用动
+            LeaveToMove();
+            return true;
+        }
+
+        return false;   // 判定中：移动无效
+    }
+
+    private void LeaveToMove()
+    {
+        if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
+        else sm.ChangeState(sm.runState);
+    }
+
+    /// <summary>
+>>>>>>> Stashed changes
     /// 【P1b 新增】攻击动画中按住 Ctrl 微调身位。
-    ///
-    /// 不打断攻击、不影响连段，只是把碰撞箱挪一点，用来躲擦边的攻击。
-    ///   地面 → 蹲下，碰撞箱向下（躲头顶）
-    ///   空中 → 缩腿，碰撞箱向上（躲脚下）
-    ///
-    /// 【为什么放在 ComboState 而不是路由器】
-    /// 路由器负责"要不要切状态"，而这件事根本不切状态 ——
-    /// 它是攻击状态内部的一个持续行为，跟着攻击一起开始、一起结束。
-    /// 放路由器里的话，攻击结束时谁来还原碰撞箱就成了问题。
     /// </summary>
     private void TickBodyAdjust()
     {
@@ -243,13 +274,6 @@ public class ComboState : PlayerStateBase
                            && Mathf.Abs(sm.playerController.moveInput.x) <= 0.1f;
 
         // 【修正】每帧重算目标形态，而不是只在按键状态变化时算一次。
-        //
-        // 原先是"按下时判断一次地面还是空中"，于是：
-        //   按住 Ctrl 在地面攻击 → 应用 Crouch
-        //   保持按住跳到空中     → 按键状态没变 → 不重新判断 → 还停在 Crouch
-        // 反过来空中按住落地也一样，会停在 TuckUp。
-        //
-        // 环境是会变的，所以判断也必须跟着每帧走。
         PlayerSensor.ColliderShape desired = PlayerSensor.ColliderShape.Normal;
 
         if (wantsAdjust)
@@ -268,26 +292,21 @@ public class ComboState : PlayerStateBase
         }
     }
 
-    /// <summary>出招冲量是否仍在生效</summary>
-    private bool IsThrustActive => thrustDuration > 0f && thrustTimer < thrustDuration;
+    /// <summary>出招位移是否正在走</summary>
+    private bool IsThrustActive => thrustRunning;
 
     /// <summary>
     /// 准备本招的位移冲量。
-    ///
-    /// 【为什么要衰减，而不是设一次速度就不管】
-    /// 原先是 rb.linearVelocity = dir * forwardThrust.x 设完就走，
-    /// 而 ComboState 期间没有任何东西会把它降下来 ——
-    /// 结果是整个攻击动画期间角色匀速滑行，出招 0.5 秒就滑 0.5 秒，
-    /// 像踩在冰上。
-    ///
-    /// 想要的是"往前一顿然后停下"，所以给一个持续时长，
-    /// 速度在这段时间内线性衰减到 0。
     /// </summary>
     private void SetupThrust()
     {
         thrustTimer = 0f;
         thrustDuration = 0f;
-        thrustVelocity = Vector2.zero;
+        thrustDistance = Vector2.zero;
+        thrustPending = false;
+        thrustRunning = false;
+        thrustEndPending = false;
+        thrustStartAt = 0f;
 
         if (activeNode == null) return;
 
@@ -300,37 +319,54 @@ public class ComboState : PlayerStateBase
 
         if (activeNode.forwardThrust.sqrMagnitude < 0.0001f) return;
 
-        // 带着滑铲动量进来时不覆盖它 ——
-        // 否则"滑铲中出招"会在出招瞬间被拽回招式自己的速度，滑行断掉
-        if (activeNode.inheritMomentum && sm.slideMomentum.IsActive) return;
-
         if (wasAirborneOnEnter && !activeNode.applyThrustInAir) return;
 
         float dir = sm.playerController.facingDirection;
 
         // X 乘朝向：填「前进多少」即可，不用管角色朝左朝右
-        thrustVelocity = new Vector2(
+        thrustDistance = new Vector2(
             dir * activeNode.forwardThrust.x,
             activeNode.forwardThrust.y);
 
-        thrustDuration = activeNode.thrustDuration;
+        // 从所选阶段的开头起步；-1 = 和那个阶段一样长：阶段开始时起步，阶段结束时正好走到
+        ThrustStartPhase phase = activeNode.thrustStart;
+        thrustStartAt = PhaseStart(phase);
+        thrustDuration = activeNode.thrustDuration >= 0f ? activeNode.thrustDuration : PhaseLength(phase);
 
-        if (thrustDuration <= 0f)
+        // 不在这里起步 —— 等那个阶段开始（TickThrust）
+        thrustPending = true;
+    }
+
+    /// <summary>某个阶段从出招后第几秒开始</summary>
+    private float PhaseStart(ThrustStartPhase phase)
+    {
+        if (instance == null) return 0f;
+        switch (phase)
         {
-            // 兼容旧行为：设一次速度就不再管，整招匀速滑行
-            ApplyThrustVelocity(1f);
+            case ThrustStartPhase.Windup: return 0f;
+            case ThrustStartPhase.Recovery: return instance.activeEnd;
+            default: return instance.windupEnd;
         }
     }
 
+    /// <summary>某个阶段的实际时长</summary>
+    private float PhaseLength(ThrustStartPhase phase)
+    {
+        if (instance == null) return 0f;
+        switch (phase)
+        {
+            case ThrustStartPhase.Windup: return Mathf.Max(0f, instance.windupEnd);
+            case ThrustStartPhase.Recovery: return Mathf.Max(0f, instance.duration - instance.activeEnd);
+            default: return Mathf.Max(0f, instance.activeEnd - instance.windupEnd);
+        }
+    }
+
+    /// <summary>该起步了没有（没有攻击实例时立刻起步）</summary>
+    private bool ReachedThrustStart()
+        => instance == null || instance.elapsed >= thrustStartAt;
+
     /// <summary>
     /// 【蓄力位移】AA1 / BB1 这类"带位移的蓄力攻击"。
-    ///
-    /// 与普攻的 forwardThrust 有两点本质不同：
-    ///   ① 方向来自【瞄准】而不是角色朝向 —— 远程跟鼠标任意角度，近战四向吸附
-    ///   ② 距离受【动量池】影响 —— 冲刺/滑铲后放能挪得更远
-    ///
-    /// 第二点是对"保持机动"的奖励：站桩蓄力只能拿低保距离，
-    /// 而带着速度进蓄力再放，能挪出明显更远的身位。
     /// </summary>
     private void SetupAimDash()
     {
@@ -338,24 +374,10 @@ public class ComboState : PlayerStateBase
 
         // ==========================================================
         // 【负数 = 反向位移（后坐力）】
-        //
-        // 旧写法直接 Mathf.Max(baseDistance, momentum * scale)，把负数吃掉了：
-        //   baseDistance = -2、动量 0 → Mathf.Max(-2, 0) = 0 → 完全不位移
-        // 所以枪的后坐力填了负数没反应，而且填多少都一样。
-        //
-        // 病根是把【方向】和【距离】混在同一个数里，然后拿只认大小的 Max 去比。
-        // 现在拆开：符号决定朝前还是朝后，绝对值参与低保与动量的比较。
-        //
-        // 于是 BB1 填 -3 就是「朝鼠标反方向弹开 3 格」，
-        // 动量加成照常按绝对值生效，方向始终是后退。
         // ==========================================================
-        float signedBase = activeNode.aimDashBaseDistance;
-        float sign = signedBase < 0f ? -1f : 1f;
-
-        float momentumValue = Momentum != null ? Momentum.Value : 0f;
-        float distance = Mathf.Max(
-            Mathf.Abs(signedBase),
-            momentumValue * Mathf.Abs(activeNode.aimDashMomentumScale));
+        float signedDistance = activeNode.aimDashDistance;
+        float sign = signedDistance < 0f ? -1f : 1f;
+        float distance = Mathf.Abs(signedDistance);
 
         // 朝向跟【瞄准】走，不跟位移走 —— 打后坐力时角色仍然面朝鼠标，
         // 只是身体被弹开。若跟着位移方向翻，开一枪人就背过身去了。
@@ -370,24 +392,22 @@ public class ComboState : PlayerStateBase
             return;
         }
 
-        thrustDuration = Mathf.Max(0.01f, activeNode.aimDashDuration);
+        // -1 = 和攻击段一样长
+        float d = activeNode.aimDashDuration;
+        thrustDuration = d >= 0f ? Mathf.Max(0.01f, d) : PhaseLength(ThrustStartPhase.Active);
+        thrustStartAt = PhaseStart(ThrustStartPhase.Active);   // 蓄力位移固定从判定段开始
 
-        // 位移速度按线性衰减积分反推：
-        // 速度从 v 线性降到 0、历时 t，走过的距离是 v*t/2，
-        // 所以要走 distance 就得从 2*distance/t 起步。
-        float speed = 2f * distance / thrustDuration;
-
-        thrustVelocity = dir * speed;
+        // 和普通出招位移一样：判定段开始时起步，匀速走完 distance
+        thrustDistance = dir * distance;
         thrustTimer = 0f;
+        thrustPending = true;
 
         // 诊断：看不到这条日志 = 本文件没有被导入到工程里
         if (Buffer != null && Buffer.verboseLog)
         {
-            Debug.Log(
+            PlayerLog.Info(
                 $"[蓄力位移] {activeNode.nodeName} 方向 {dir}，" +
-                $"距离 {distance:F2}（低保 {activeNode.aimDashBaseDistance}，" +
-                $"动量 {momentumValue:F1}×{activeNode.aimDashMomentumScale}），" +
-                $"耗时 {thrustDuration:F2}s");
+                $"距离 {distance:F2}，耗时 {thrustDuration:F2}s（判定段开始时起步）");
         }
 
         // 朝向对齐瞄准方向，避免"往左冲却面朝右"。
@@ -398,12 +418,6 @@ public class ComboState : PlayerStateBase
 
     /// <summary>
     /// 按节点配置的自由度解析瞄准方向。
-    ///
-    /// 【方向来源刻意绕开 AimProvider.AimDirection】
-    /// 那条路带 Auto 降级（鼠标 2 秒没动就改用方向键，方向键没按又回退到角色朝向），
-    /// 而蓄力时"瞄好了不动"恰恰是常态 —— 于是四向/八向几乎永远吸附到角色正面。
-    /// 位移方向是一次性决策，必须问不会自作主张的来源。
-    /// 详见 PlayerAimProvider.TryGetPointerDirection。
     /// </summary>
     private Vector2 ResolveAimDashDirection()
     {
@@ -418,13 +432,6 @@ public class ComboState : PlayerStateBase
 
         // ==========================================================
         // 【方向来源由武器类型决定，AimDashMode 只管吸附精度】
-        //
-        // 这两件事以前混在一起，所以近战也去读了鼠标 —— 但近战的攻击方向
-        // 本来就不读鼠标，它跟人物朝向和方向键走。方向来源跟着武器的
-        // 交互方式走，吸附精度跟着招式配置走，两个维度各自独立。
-        //
-        //   远程 → 鼠标（BB1 配负数距离就是朝鼠标反方向弹开，做后坐力）
-        //   近战 → 方向键
         // ==========================================================
         bool isRanged = ownerWeapon != null && ownerWeapon.IsRanged;
 
@@ -478,55 +485,29 @@ public class ComboState : PlayerStateBase
 
     /// <summary>
     /// 【扩展点】贴地向下冲的处理。
-    ///
-    /// 当前实现：本次不位移。招式照常打出（动画、判定、伤害全都正常），
-    /// 只是没有位移分量 —— 因为往地里冲是无效指令，不该因此让整招落空。
-    ///
-    /// 【以后要补的反馈】现在玩家按了向下却什么都没挪，
-    /// 分不清是"这个方向不能冲"还是"我的输入没被识别"。设计上说好的表现是：
-    ///     朝面朝方向挪一点点 + 拖尾朝上
-    /// 也就是把向下的意图转译成一个明确可见的小动作，告诉玩家"收到了，但地面挡着"。
-    ///
-    /// 要补的时候把下面那段注释放开即可，方向已经算好传进来了：
-    ///     thrustVelocity = new Vector2(facingRef.x >= 0f ? 1f : -1f, 0f) * 小速度;
-    ///     thrustDuration = 短时长;
-    ///     然后让拖尾组件朝上播一次
-    /// 本方法之外的任何地方都不用改。
     /// </summary>
     private void HandleGroundedDownwardDash(Vector2 facingRef)
     {
-        thrustVelocity = Vector2.zero;
+        thrustDistance = Vector2.zero;
         thrustDuration = 0f;
         thrustTimer = 0f;
+        thrustPending = false;
 
         // 朝向仍然对齐瞄准，保持和正常位移一致
         if (Mathf.Abs(facingRef.x) > 0.01f)
             sm.playerController.SetFacingDirection(facingRef.x > 0f ? 1 : -1);
 
         if (Buffer != null && Buffer.verboseLog)
-            Debug.Log("[蓄力位移] 在地面上向下冲 → 本次不位移（招式照常打出）");
+            PlayerLog.Info("[蓄力位移] 在地面上向下冲 → 本次不位移（招式照常打出）");
     }
 
     /// <summary>
     /// 「贴地向下冲」的判定阈值。
-    ///
-    /// 用 -0.9 而不是 -0.5：四向的正下方是 (0,-1) 会被拦住，
-    /// 而八向的左下 / 右下（y ≈ -0.707）不拦 —— 那两个方向的水平分量是有意义的位移，
-    /// 玩家要的是"往斜下方冲"，贴着地面滑过去完全成立。
-    /// 想连斜下也一并拦掉，把这个值调到 -0.5 左右即可。
     /// </summary>
     private const float GroundedDownwardThreshold = -0.9f;
 
     /// <summary>
     /// 【诊断】把吸附前后的角度都打出来。
-    ///
-    /// 肉眼分不清「四向吸附」和「自由跟随鼠标」——
-    /// 因为鼠标大致水平时两者结果完全一样，只有把鼠标放在 40° 与 50° 这种
-    /// 跨过吸附分界线的位置才看得出区别。与其反复试，不如让它自己报数。
-    ///
-    /// 判读方法：把鼠标放在角色右上方约 40°，再放到约 50°，各放一次 AA1。
-    ///   FourWay 正常 → 吸附后应分别是 0° 和 90°
-    ///   若两次吸附后都等于原始角度 → 资产上的 Aim Dash Mode 其实是 Free
     /// </summary>
     private void LogAimDash(string mode, string source, Vector2 raw, Vector2 snapped)
     {
@@ -537,7 +518,7 @@ public class ComboState : PlayerStateBase
             : float.NaN;
         float snappedAngle = Mathf.Atan2(snapped.y, snapped.x) * Mathf.Rad2Deg;
 
-        Debug.Log(
+        PlayerLog.Info(
             $"[蓄力位移·方向] 来源={source}　模式={mode}　" +
             $"原始角度={rawAngle:F1}°　吸附后={snappedAngle:F1}°");
     }
@@ -556,28 +537,61 @@ public class ComboState : PlayerStateBase
     /// <returns>本帧是否由位移接管了速度</returns>
     private bool TickThrust()
     {
-        if (thrustDuration <= 0f) return false;
-        if (thrustTimer >= thrustDuration) return false;
+        // 上一物理帧刚走完：把位移给的速度收掉，免得惯性滑出终点
+        if (thrustEndPending)
+        {
+            thrustEndPending = false;
+            StopThrustVelocity();
+        }
 
-        thrustTimer += Time.fixedDeltaTime;
+        // 判定段开始 → 起步
+        if (thrustPending && ReachedThrustStart())
+        {
+            thrustPending = false;
+            thrustRunning = true;
+            thrustTimer = 0f;
+            thrustDuration = Mathf.Max(thrustDuration, Time.fixedDeltaTime);   // 填 0 也至少走一个物理帧
 
-        // 线性衰减：1 → 0
-        float t = Mathf.Clamp01(1f - thrustTimer / thrustDuration);
-        ApplyThrustVelocity(t);
+            if (Buffer != null && Buffer.verboseLog && activeNode != null)
+                PlayerLog.Info($"[出招位移] {activeNode.nodeName} 出招后 {thrustStartAt:F3}s 起步：位移 {thrustDistance}，用时 {thrustDuration:F3}s");
+        }
+
+        if (!thrustRunning) return false;
+
+        // 匀速：每秒走 距离 ÷ 时长；最后一个物理帧只走剩下的那一点，保证总距离精确
+        float dt = Time.fixedDeltaTime;
+        float step = Mathf.Min(dt, thrustDuration - thrustTimer);
+        thrustTimer += step;
+
+        ApplyThrustVelocity(thrustDistance / thrustDuration * (step / dt));
+
+        if (thrustTimer >= thrustDuration - 0.00001f)
+        {
+            thrustRunning = false;
+            thrustEndPending = true;
+        }
 
         return true;
     }
 
-    private void ApplyThrustVelocity(float scale)
+    private void ApplyThrustVelocity(Vector2 v)
     {
-        float vy = Mathf.Abs(thrustVelocity.y) > 0.0001f
-            ? thrustVelocity.y * scale
-            : sm.rb.linearVelocity.y;   // 没配 Y 就别干扰重力
+        bool hasY = Mathf.Abs(thrustDistance.y) > 0.0001f;
+        float vy = hasY ? v.y : sm.rb.linearVelocity.y;   // 没配 Y 就别干扰重力
 
         // 空中招式如果不带 Y 位移，保持原来的"锁死"语义，避免自由落体
-        if (wasAirborneOnEnter && Mathf.Abs(thrustVelocity.y) <= 0.0001f) vy = 0f;
+        if (wasAirborneOnEnter && !hasY) vy = 0f;
 
-        sm.rb.linearVelocity = new Vector2(thrustVelocity.x * scale, vy);
+        sm.rb.linearVelocity = new Vector2(v.x, vy);
+    }
+
+    /// <summary>把位移给的速度收掉（只收位移用到的方向）</summary>
+    private void StopThrustVelocity()
+    {
+        Vector2 v = sm.rb.linearVelocity;
+        if (Mathf.Abs(thrustDistance.x) > 0.0001f) v.x = 0f;
+        if (Mathf.Abs(thrustDistance.y) > 0.0001f) v.y = 0f;
+        sm.rb.linearVelocity = v;
     }
 
     public override void Exit()
@@ -595,27 +609,35 @@ public class ComboState : PlayerStateBase
             isBodyAdjusting = false;
         }
 
+<<<<<<< Updated upstream
         HitDetection?.ForceStopHitbox();
 
         // 中断连射：否则玩家已经被击飞了，枪还在原地继续突突
         WeaponEmitter?.CancelBurst();
+=======
+        // 位移走到一半被打断（冲刺 / 受击 / 换手顶掉 / 后摇取消）：停在原地，不滑到终点
+        if (thrustRunning || thrustEndPending) StopThrustVelocity();
+        thrustPending = false;
+        thrustRunning = false;
+        thrustEndPending = false;
+>>>>>>> Stashed changes
 
         sm.rb.gravityScale = originalGravity;
         activeNode = null;
         ownerWeapon = null;
     }
 
+<<<<<<< Updated upstream
     /// <summary>本招的后摇时长 —— 就是节点上配的值，不再做任何加工</summary>
     private float ResolveRecoveryTime()
         => activeNode != null ? activeNode.recoveryTime : 0f;
 
     // 【已删除】TryGetPendingStun —— 弱化蓄力打完后的大僵直（ChargeStunState）已随连放惩罚一并移除。
 
+=======
+>>>>>>> Stashed changes
     /// <summary>
     /// 超时未收到 OnAttackAnimationEnd。
-    ///
-    /// 警告里【点名是哪个招式】—— 这是本机制最大的价值：
-    /// 不用再一个个试，Console 直接告诉你哪个动画漏了事件。
     /// </summary>
     private void WarnAndExitOnTimeout()
     {

@@ -4,34 +4,12 @@ namespace Flandre.CombatSystem
 {
     /// <summary>
     /// 【蓄力系统】—— 持有两只手的蓄力模块，挂在玩家身上。
-    ///
-    /// ==========================================================
-    /// 它取代了原来的 ChargeState。
-    ///
-    /// 蓄力不再是"玩家待在某个状态里"，而是"某只手正攥着一个充能物"。
-    /// 于是蓄力期间玩家仍然处于 Idle / Run / Jump / Fall / Combo ——
-    /// 跳跃和跑动自然可用，另一只手也能正常打连招。
-    ///
-    /// 【移动折损用属性修饰器，不用硬编码】
-    /// 蓄力开始时往 moveSpeed / jumpForce 上贴一张便利贴，
-    /// 结束时按签名撕掉。这样：
-    ///   ① 不需要在每个状态里写 if(蓄力中) 速度×0.2
-    ///   ② 和宝石、buff 的加成自动叠加，不会互相覆盖
-    ///   ③ 撕的时候按签名撕，不可能漏减
-    /// ==========================================================
     /// </summary>
     public class PlayerChargeSystem : MonoBehaviour
     {
         // 【参数搬家】蓄力的移动折损（开关、移速倍率、跳跃倍率）统一放在 PlayerMovementConfig 的 Charge Settings。
         // 原先本组件上还有一份「覆盖移速倍率」和「跳跃倍率」—— 同一条规则两个来源，
         // 改了 config 却被组件上的覆盖值顶掉，所以删掉，只留 config 一处。
-
-        // 【已删除】airChargeMaxFallSpeed —— 空中蓄力的「最大下落速度」。
-        //
-        // 它做的是「每帧把 y 速度钳回上限」，但钳位跑在物理步进【之前】，
-        // 每步都有一帧重力从后面漏过去 —— 所以填 0 也停不住，只会缓降。
-        // 现在改成直接 gravityScale = 0 把重力源关掉，
-        // 见 PlayerStateBase.PinInAirWhileCharging，不再需要这个参数。
 
         [Header("Debug")]
         public bool verboseLog = false;
@@ -59,7 +37,6 @@ namespace Flandre.CombatSystem
         private PlayerController controller;
         private ComboInputBuffer buffer;
         private WeaponLoadout weapons;
-        private PlayerSensor sensor;
 
         private bool penaltyApplied;
 
@@ -69,7 +46,6 @@ namespace Flandre.CombatSystem
             controller = GetComponent<PlayerController>();
             buffer = GetComponent<ComboInputBuffer>();
             weapons = GetComponent<WeaponLoadout>();
-            sensor = GetComponent<PlayerSensor>();
 
             if (state != null) state.EnsureInitialized();
         }
@@ -86,6 +62,7 @@ namespace Flandre.CombatSystem
         /// <summary>有任意一只手在蓄力</summary>
         public bool IsAnyCharging => modules[0].IsCharging || modules[1].IsCharging;
 
+<<<<<<< Updated upstream
         /// <summary>
         /// 有任意一只手的蓄力是【在空中起手】的 —— 空中悬停的判据。
         ///
@@ -117,6 +94,8 @@ namespace Flandre.CombatSystem
         public bool IsAirChargeHovering
             => IsAnyChargeStartedInAir && sensor != null && !sensor.IsGrounded();
 
+=======
+>>>>>>> Stashed changes
         public bool IsCharging(InputCmd cmd)
         {
             var m = GetModule(cmd);
@@ -134,6 +113,36 @@ namespace Flandre.CombatSystem
             }
         }
 
+<<<<<<< Updated upstream
+=======
+        /// <summary>这只手正在蓄力，且已过起步时间（松手能打出东西）</summary>
+        public bool IsValidCharging(InputCmd cmd)
+        {
+            var m = GetModule(cmd);
+            return m != null && m.IsCharging && m.IsCharged;
+        }
+
+        /// <summary>某只手的蓄力上限变化 (槽位, 新上限 1~3)</summary>
+        public event System.Action<WeaponSlot, int> OnChargeCapChanged;
+
+        /// <summary>
+        /// 【实验】把某只手的蓄力上限提高一级（鼠标前侧键 = 主手，后侧键 = 副手）。
+        /// 3 级之后再按回到 1 级；可以连按。只在该手蓄力中有效。
+        /// 等级会沿 1→2→3→1 升到上限后停住。
+        /// </summary>
+        public void RaiseLevelCap(InputCmd cmd)
+        {
+            ChargeModule m = GetModule(cmd);
+            if (m == null || !m.IsCharging || !m.IsValid) return;
+
+            int cap = m.RaiseCap();
+            OnChargeCapChanged?.Invoke(m.Slot, cap);
+
+            if (verboseLog)
+                PlayerLog.Info($"[蓄力] {m.Slot} 上限 → {cap} 级（当前 {m.CurrentLevel} 级，起步 {m.StartLevel} 级）");
+        }
+
+>>>>>>> Stashed changes
         // ==========================================================
         // 开始 / 结束
         // ==========================================================
@@ -151,11 +160,7 @@ namespace Flandre.CombatSystem
 
             WeaponMoveSet weapon = weapons != null ? weapons.GetWeapon(m.Slot) : null;
 
-            // 【起手位置在这一刻定性】决定这次蓄力要不要把角色钉在空中。
-            // 同样是"这次蓄力的性质"，全程不变 —— 见 ChargeModule.BeganAirborne。
-            bool airborne = sensor != null && !sensor.IsGrounded();
-
-            m.Begin(weapon, startLevel, minHold, isAfterCombo, airborne);
+            m.Begin(weapon, startLevel, minHold, isAfterCombo);
 
             ApplyPenaltyIfNeeded();
 
@@ -165,7 +170,7 @@ namespace Flandre.CombatSystem
 
             if (verboseLog)
             {
-                Debug.Log(!m.IsValid
+                PlayerLog.Info(!m.IsValid
                     ? $"[蓄力] {m.Slot} 这只手没有武器，蓄不出东西"
                     : m.StartLevel > 0
                         ? $"[蓄力] {m.Slot} 普攻后起手，从 {m.StartLevel} 级起步，按住满 {minHold:F2}s 解锁"
@@ -188,7 +193,7 @@ namespace Flandre.CombatSystem
 
             if (verboseLog)
             {
-                Debug.Log(result == ChargeReleaseResult.Fired
+                PlayerLog.Info(result == ChargeReleaseResult.Fired
                     ? $"[蓄力] {m.Slot} 松手，打出 {level} 级"
                     : $"[蓄力] {m.Slot} 还没到 1 级就松手，连段清零");
             }
@@ -208,7 +213,7 @@ namespace Flandre.CombatSystem
             m.Stop();
             FinishModule(m);
 
-            if (verboseLog) Debug.Log($"[蓄力] {m.Slot} 被打断");
+            if (verboseLog) PlayerLog.Info($"[蓄力] {m.Slot} 被打断");
         }
 
         /// <summary>中断两只手的蓄力</summary>
@@ -247,7 +252,11 @@ namespace Flandre.CombatSystem
                 if (leveledUp)
                 {
                     OnChargeLevelChanged?.Invoke(m.Slot, m.CurrentLevel);
+<<<<<<< Updated upstream
                     if (verboseLog) Debug.Log($"[蓄力] {m.Slot} 升到 {m.CurrentLevel} 级，松手即发");
+=======
+                    if (verboseLog) PlayerLog.Info($"[蓄力] {m.Slot} 现在 {m.CurrentLevel} 级，松手即发");
+>>>>>>> Stashed changes
                 }
             }
         }
@@ -263,9 +272,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 贴便利贴：蓄力期间移速与跳跃力打折。
-        ///
-        /// 用属性修饰器而不是在每个状态里写 if(蓄力中)，好处是
-        /// 和宝石、buff 的加成自动叠加，而且撕的时候按签名撕，不可能漏减。
         /// </summary>
         private void ApplyPenaltyIfNeeded()
         {

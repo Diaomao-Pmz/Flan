@@ -13,18 +13,16 @@ MonoBehaviour:
   m_Name: BB1
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: BB1
-  comboWindow: 0.7
-  recoveryTime: 0.25
   castCondition: 0
   requiredState: 0
   inputSequence: 05000000
   isChargeSkill: 1
   chargeLevel: 1
-  attackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
-  forwardThrust: {x: 0, y: 0}
-  thrustDuration: 0.12
-  applyThrustInAir: 1
-  lockMovementDuringAttack: 1
+  legacyAttackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
+  legacyForwardThrust: {x: 0, y: 0}
+  legacyThrustDuration: 0.12
+  legacyApplyThrustInAir: 1
+  legacyLockMovement: 1
   cancelPermission:
     byMainWeapon: 1
     bySubWeapon: 1
@@ -36,6 +34,8 @@ MonoBehaviour:
   hitboxDuration: 0
   knockbackForce: 0
   effectKey: FX_BB1
+  effectLifetimeMode: 0
+  effectFitDuration: 1
   effectLifetime: 0
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.31, y: 0.42}
@@ -48,16 +48,14 @@ MonoBehaviour:
   projectileScaleMultiplier: 1.5
   projectileDamageOverride: 0
   recomputeAimPerShot: 1
-  useAimDash: 1
-  aimDashMode: 0
-  aimDashBaseDistance: -2
-  aimDashMomentumScale: 0.3
-  aimDashDuration: 0.15
+  legacyUseAimDash: 0
+  legacyAimDashMode: 0
+  legacyAimDashBaseDistance: -2
+  legacyAimDashDuration: 0.15
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0
   faceTargetOnHit: 0
-  inheritMomentum: 1
   minComboDepth: 0
   maxComboDepth: 0
   childNodes:

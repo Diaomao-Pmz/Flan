@@ -5,25 +5,6 @@ namespace Flandre.CombatSystem
 {
     /// <summary>
     /// 【远程发射器】—— 由动画事件调用，走对象池。
-    ///
-    /// ⚠️ 必须和 Animator 挂在同一个 GameObject 上，否则动画事件找不到它。
-    ///
-    /// ==========================================================
-    /// 【本批新增】连射（速射枪）
-    ///
-    /// 一次动画事件 = 一轮连射，发数与间隔由招式节点配置：
-    ///   B1 → 3 发    B2 → 6 发    B3 → 9 发
-    /// 于是"三段普攻"的差异变成压制时长的差异，玩家能感觉到一路突突的节奏。
-    ///
-    /// 【为什么不在动画里插 9 个事件】
-    /// 那样发数就被焊死在动画上了 —— 想把 B3 从 9 发调成 12 发，
-    /// 得去动画时间轴上手加 3 个事件，而且三段普攻共用同一个动画剪辑时根本做不到。
-    /// 参数留在节点上，改数字就行。
-    ///
-    /// 【弹匣可换】
-    /// 子弹池 key 优先取招式节点的覆盖值，没填才用武器上的默认值。
-    /// 枪是同一把，但 BB1/BB2 可以换成更大更快的特制弹。
-    /// ==========================================================
     /// </summary>
     public class PlayerWeaponEmitter : MonoBehaviour
     {
@@ -45,7 +26,30 @@ namespace Flandre.CombatSystem
         private ComboInputBuffer comboBuffer;
         private PlayerAimProvider aim;
 
+<<<<<<< Updated upstream
         private Coroutine burstRoutine;
+=======
+        // ==========================================================
+        // 【实验：平a/蓄力重做】连射改为「多份并行 + 时间表驱动」
+        // ==========================================================
+
+        /// <summary>一轮连射</summary>
+        public class BurstRun
+        {
+            public ComboNode node;
+            public WeaponMoveSet weapon;
+            public string poolKey;
+            public int count;
+            public float interval;
+            public int fired;
+            public float timer;
+            public Vector2 dir;
+            public bool recomputeAim;
+            public bool done;
+        }
+
+        private readonly List<BurstRun> activeBursts = new List<BurstRun>();
+>>>>>>> Stashed changes
 
         private void Awake()
         {
@@ -163,7 +167,12 @@ namespace Flandre.CombatSystem
 
             proj.Setup(direction);
 
+<<<<<<< Updated upstream
             if (verboseLog) Debug.Log($"[发射器] 射出 {poolKey}，方向 {direction}");
+=======
+            if (verboseLog) PlayerLog.Info($"[发射器] 射出 {poolKey}，方向 {direction}");
+            return bullet;
+>>>>>>> Stashed changes
         }
 
         // ==========================================================

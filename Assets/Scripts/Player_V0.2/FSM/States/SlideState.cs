@@ -3,24 +3,35 @@ using Flandre.CombatSystem;
 
 /// <summary>
 /// 滑铲状态。跑动中按 C 触发，速度衰减到阈值后自动转入蹲下。
-///
-/// 【批次O 改动】每帧把当前速度同步给 sm.slideMomentum。
-///
-/// 这样玩家在滑铲途中出招时，连招/蓄力状态可以接手这股冲劲继续滑 ——
-/// 而滑铲的减速逻辑仍然只有这一份，没有被复制到别的状态里去。
-///
-/// 【滑铲无敌】正常滑铲（没被宝石接管）全程无敌，离开本状态即解除。
-/// 开关在 PlayerMovementConfig.slideInvulnerable。蹲下不无敌。
 /// </summary>
 public class SlideState : PlayerStateBase
 {
     private float currentSlideSpeed;
+
+    /// <summary>这次滑铲已经滑了多久。滑满 slideDuration 就转入蹲下（物理帧里计时，和画面帧率无关）</summary>
+    private float slideTimer;
+
+    /// <summary>已滑满时长，下一物理帧转入蹲下</summary>
+    private bool slideFinished;
     private float slideDirection;
     private bool isFirstHit;
     private bool didStartSlide;
 
     /// <summary>正在进行常规滑铲（被宝石接管时为 false）。供穿身开关查询，需配合"当前状态是本状态"使用</summary>
     public bool IsSliding => didStartSlide;
+
+    // ==========================================================
+    // 【空中 Ctrl 下落 → 落地接滑铲】
+    // 由 FallState 在落地时调用。这次滑铲：
+    // ==========================================================
+    private bool pendingLandingSlide;
+    private bool pendingLandingInvulnerable;
+
+    public void PrepareLandingSlide(bool invulnerable)
+    {
+        pendingLandingSlide = true;
+        pendingLandingInvulnerable = invulnerable;
+    }
 
     public SlideState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
@@ -29,8 +40,21 @@ public class SlideState : PlayerStateBase
         didStartSlide = false;
 
         // CD 闸门已由路由器前置校验
-        isFirstHit = sm.slideSkill.IsComboIdle;
-        sm.slideSkill.Execute();
+        bool fromLanding = pendingLandingSlide;
+        bool landingInvulnerable = pendingLandingInvulnerable;
+        pendingLandingSlide = false;
+        pendingLandingInvulnerable = false;
+
+        if (fromLanding)
+        {
+            // 落地接的滑铲不走冷却：不 Execute，退出时也不开冷却（isFirstHit = false）
+            isFirstHit = false;
+        }
+        else
+        {
+            isFirstHit = sm.slideSkill.IsComboIdle;
+            sm.slideSkill.Execute();
+        }
 
         GemActionResult gemResult = sm.loadout != null
             ? sm.loadout.NotifyActionEnter(ActionType.Slide, isFirstHit)
@@ -45,14 +69,19 @@ public class SlideState : PlayerStateBase
         didStartSlide = true;
 
         var cfg = sm.playerState != null ? sm.playerState.movementConfig : null;
-        if (cfg == null || cfg.slideInvulnerable)
+        bool configInvulnerable = cfg == null || cfg.slideInvulnerable;
+
+        // 普通滑铲：按配置无敌。落地接的滑铲：还要看那次下落是不是无敌的
+        if (configInvulnerable && (!fromLanding || landingInvulnerable))
             sm.playerState?.health.RequestUntargetable(InvulnerableTokens.Slide);
 
         sm.animDriver.SetBase(PlayerAnimHash.Slide);
         sm.SetColliderHeight(true);
         if (sm.dashTrail != null) sm.dashTrail.emitting = true;
 
-        currentSlideSpeed = sm.moveSpeed * sm.slideStartSpeedMultiplier;
+        currentSlideSpeed = sm.slideStartSpeed;
+        slideTimer = 0f;
+        slideFinished = false;
 
         float inputX = sm.playerController.moveInput.x;
 
@@ -66,40 +95,48 @@ public class SlideState : PlayerStateBase
         {
             slideDirection = sm.playerController.facingDirection;
         }
-
-        // 立刻登记动量，这样出招那一帧接手的状态就能拿到正确的速度
-        sm.slideMomentum.Set(currentSlideSpeed, slideDirection);
     }
 
     public override void Update()
     {
         sm.loadout?.NotifyActionUpdate(ActionType.Slide, Time.deltaTime);
 
-        // 速度衰减到阈值 → 自然转入蹲下（「蹲不是独立入口」的实现处）
-        float targetCrouchSpeed = sm.moveSpeed * sm.crouchSpeedMultiplier;
-
-        if (currentSlideSpeed <= targetCrouchSpeed) sm.ChangeState(sm.crouchState);
-        else if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
+        // 滑满时长 → 转蹲下：改在 FixedUpdate 里判断（原先在这里，低帧率时会多滑一两个物理帧）
+        if (!slideFinished && !sm.IsGrounded()) sm.ChangeState(sm.fallState);
     }
 
     public override void FixedUpdate()
     {
-        currentSlideSpeed -= sm.slideDeceleration * Time.fixedDeltaTime;
+        if (!didStartSlide) return;   // 被宝石接管：不推进
+
+        // 上一物理帧已经滑满：交接给蹲下（速度和原来一样是滑铲末速度，蹲下状态自己接手）
+        if (slideFinished)
+        {
+            sm.rb.linearVelocity = new Vector2(slideDirection * currentSlideSpeed, sm.rb.linearVelocity.y);
+            sm.ChangeState(sm.crouchState);
+            return;
+        }
+
+        // 【精确距离】匀减速：这一步的平均速度 =（步初速度 + 步末速度）/ 2。
+        // 最后一个物理帧只滑剩下的那一点，总距离正好 = 滑铲距离，和帧率无关。
+        float dt = Time.fixedDeltaTime;
+        float step = Mathf.Min(dt, sm.slideDuration - slideTimer);
+        slideTimer += step;
+
+        float startSpeed = currentSlideSpeed;
+        currentSlideSpeed = Mathf.Max(0f, currentSlideSpeed - sm.slideDeceleration * step);
+        float avgSpeed = (startSpeed + currentSlideSpeed) * 0.5f;
+
         sm.rb.linearVelocity = new Vector2(
-            slideDirection * currentSlideSpeed,
+            slideDirection * avgSpeed * (step / dt),
             sm.rb.linearVelocity.y);
 
-        // 同步给携带动量：玩家随时可能在这一帧出招接手
-        sm.slideMomentum.Set(currentSlideSpeed, slideDirection);
+        if (slideTimer >= sm.slideDuration - 0.00001f) slideFinished = true;
     }
 
     public override void Exit()
     {
         sm.loadout?.NotifyActionExit(ActionType.Slide, !didStartSlide);
-
-        // 【动量池】把这次位移的速度存进去，供蓄力一段的位移距离取用。
-        // 存的是"刚才最快跑到多快"，不是累加 —— 连续冲刺不该把动量叠到天上。
-        sm.GetComponent<PlayerMomentum>()?.Deposit(currentSlideSpeed);
 
         if (!didStartSlide) return;
 
@@ -110,9 +147,5 @@ public class SlideState : PlayerStateBase
         if (sm.dashTrail != null) sm.dashTrail.emitting = false;
 
         sm.SetColliderHeight(false);
-
-        // 注意：这里【不】清空 slideMomentum ——
-        // 是否保留由 PlayerStateMachine.ChangeState 按目标状态统一裁决。
-        // 切去连招/蓄力时保留，切去别的地方自动清空。
     }
-}
+}

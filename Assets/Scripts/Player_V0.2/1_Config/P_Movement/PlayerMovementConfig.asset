@@ -13,15 +13,36 @@ MonoBehaviour:
   m_Name: PlayerMovementConfig
   m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerMovementConfig
   moveSpeed: 6
+  flySpeed: 6
   maxJumps: 1
   jumpForce: 13
   minJumpVelocity: 2
+<<<<<<< Updated upstream:Assets/Scripts/Player_V0.2/Config/PlayerMovementConfig.asset
   dashSpeed: 12
   dashDuration: 0.2
   slideStartSpeedMultiplier: 1.2
   slideDeceleration: 8
   slideToCrouchSpeedMultiplier: 0.3
   slideInvulnerable: 1
+=======
+  ctrlDropSpeedMultiplier: 3
+  dashDistance: 1.2
+  dashDuration: 0.15
+  dashCooldown: 0.5
+  slideDistance: 3
+  slideDuration: 0.59
+  slideToCrouchSpeedMultiplier: 0.4
+  slideInvulnerable: 1
+  landingSlideInputWindow: 0.1
+  slideCooldown: 2
+  flightDropInvulnerable: 1
+  flightUsesNormalActionParams: 0
+  flyDashDistance: 1.5
+  flyDashDuration: 0.1
+  flyDashCooldown: 0.5
+  flySlideCooldown: 2
+  flySlideUntargetableDuration: 0.5
+>>>>>>> Stashed changes:Assets/Scripts/Player_V0.2/1_Config/P_Movement/PlayerMovementConfig.asset
   passThroughLayers:
     serializedVersion: 2
     m_Bits: 65536
@@ -29,12 +50,15 @@ MonoBehaviour:
   slidePassThrough: 1
   crouchMoveSpeedMultiplier: 0.35
   crouchColliderHeightMultiplier: 0.6
+<<<<<<< Updated upstream:Assets/Scripts/Player_V0.2/Config/PlayerMovementConfig.asset
   flySpeed: 5
   flightDropInvulnerable: 1
   chargeSlowsMovement: 1
   chargeMoveSpeedMultiplier: 0.8
   chargeJumpForceMultiplier: 0.8
   preChargeMoveSpeedMultiplier: 0.35
+=======
+>>>>>>> Stashed changes:Assets/Scripts/Player_V0.2/1_Config/P_Movement/PlayerMovementConfig.asset
   groundCheckBoxSize: {x: 0.5, y: 0.2}
   groundCheckDistance: 0.1
   ceilingCheckBoxSize: {x: 0.4, y: 0.1}

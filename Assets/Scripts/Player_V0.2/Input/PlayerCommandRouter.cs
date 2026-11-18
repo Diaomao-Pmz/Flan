@@ -4,30 +4,6 @@ namespace Flandre.CombatSystem
 {
     /// <summary>
     /// 【指令路由器】—— 走廊里的前台。
-    ///
-    /// 两个核心职责：
-    ///   1. 守卫前置：切状态【之前】就问闸门，不通过就不切
-    ///   2. 预输入宽恕：闸门没开就存缓存，开的那一帧自动消费
-    ///
-    /// ==========================================================
-    /// 【本次修复】缓存兑现绕过了派发判断
-    ///
-    /// 症状：蓄力中按 shift 想突刺，但冲刺正在 CD →
-    ///       起势失败 → 指令被存进缓存 →
-    ///       0.15 秒后 CD 一好，它以【普通冲刺】的身份兑现 →
-    ///       角色莫名其妙冲出去，打断了正在蓄的力。
-    ///
-    /// 根因：TryFlushBuffer 直接调 TryDash()，绕过了突刺判断与取消权限校验，
-    ///       等于缓存和即时派发走了两条不同的规则。
-    ///
-    /// 比喻：前台判断"这位访客不该放行"，但没把便条撕掉。
-    ///       半小时后换班的人捡到便条，照着放行了。
-    ///
-    /// 修法两条：
-    ///   ① 缓存兑现和即时派发【共用同一个 TryDispatch】，规则只有一份
-    ///   ② 派发结果区分三态 —— 成功 / 闸门没开(该等) / 故意拒绝(该丢弃)
-    ///      "故意拒绝"的指令不进缓存，不会在几帧后借尸还魂
-    /// ==========================================================
     /// </summary>
     [RequireComponent(typeof(PlayerStateMachine))]
     public class PlayerCommandRouter : MonoBehaviour
@@ -78,33 +54,9 @@ namespace Flandre.CombatSystem
         private LoadoutManager loadout;
         private ComboInputBuffer comboBuffer;
         private PlayerChargeSystem chargeSystem;
-        private PlayerAimProvider aim;
 
         // ==========================================================
         // 【全项目预输入总纲】三套机制，一条教义
-        //
-        // ① 点按普攻（ComboInputBuffer.hasBufferedInput）
-        //    等的是【自己的动画】—— 时长已知且是玩家自找的，等多久都合理。
-        //    所以宽恕期锚定在"闸门打开"：闸门关着不计时，最多滞留 1.5s 兜底。
-        //
-        // ② 长按蓄力（ComboInputBuffer.pendingHold）
-        //    手指还物理按着 = 意图【现在进行时】，根本不存在"过期"的概念。
-        //    所以没有计时器，唯一的作废条件是松手。给它加上限反而是 bug ——
-        //    会出现"我明明一直按着，它却自己放弃了"。
-        //
-        // ③ 位移（本队列）
-        //    等的是【世界事件】—— CD 转好、落地，时机玩家无法精确预判。
-        //    位移延迟兑现的危害远大于攻击（1 秒后自己冲出去 = 失控感），
-        //    所以宽恕期锚定在"按下"：只原谅差一点点就赶上的输入（0.15s），
-        //    按得太早照常作废。这不是没改的旧毛病，是刻意的不同策略。
-        //
-        // 三套的分界线就一条：这次等待是"等自己"还是"等世界"，
-        // 以及意图是"一瞬间的"还是"持续按着的"。
-        //
-        // 【Retry / Rejected 的铁律】暂时关着、以后会开的闸门 → Retry 进缓存；
-        // 永远不该发生的事 → Rejected 直接丢弃。判断标准是闸门的性质，
-        // 不是当下方不方便 —— 攻击中跳跃曾被误标成 Rejected，
-        // 表现就是收招前一瞬的按键被吞。
         // ==========================================================
         private readonly InputBufferQueue buffer = new InputBufferQueue(4);
 
@@ -117,7 +69,6 @@ namespace Flandre.CombatSystem
             loadout = GetComponent<LoadoutManager>();
             comboBuffer = GetComponent<ComboInputBuffer>();
             chargeSystem = GetComponent<PlayerChargeSystem>();
-            aim = GetComponent<PlayerAimProvider>();
         }
 
         private void Update()
@@ -155,11 +106,11 @@ namespace Flandre.CombatSystem
             if (result == DispatchResult.Retry)
             {
                 buffer.Push(cmd, GetBufferTime(cmd));
-                if (verboseLog) Debug.Log($"[路由器] {cmd} 闸门未开，已存入预输入缓存");
+                if (verboseLog) PlayerLog.Info($"[路由器] {cmd} 闸门未开，已存入预输入缓存");
             }
             else if (verboseLog)
             {
-                Debug.Log($"[路由器] {cmd} 被拒绝，不进缓存");
+                PlayerLog.Info($"[路由器] {cmd} 被拒绝，不进缓存");
             }
         }
 
@@ -199,13 +150,6 @@ namespace Flandre.CombatSystem
         // ==========================================================
 
         /// <summary>玩家当前是否处于战斗姿态（连招中或蓄力架势中）</summary>
-        /// <summary>
-        /// 【P3 改动】战斗姿态只剩「攻击动画中」。
-        ///
-        /// 蓄力不再是一个 State，所以不能再用 currentState 判断 ——
-        /// 而且蓄力期间玩家本来就该能正常跑动跳跃，
-        /// 把它算作"战斗姿态"反而会误伤这些行为。
-        /// </summary>
         private bool IsInCombatStance
             => sm.currentState == sm.comboState;
 
@@ -236,54 +180,28 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 【P1b 重写】攻击动画中的 Shift。
-        ///
-        /// 新规则很简单：**攻击动画中按 Shift 一律位移，并且打断连段。**
-        ///   单按     → 朝角色当前面朝方向冲
-        ///   方向+shift → 朝方向键方向冲（顺带改变朝向）
-        ///
-        /// 已删除的旧行为：
-        ///   「单按 = 突刺（不打断连段）」—— 新规则表里没有突刺这一项
-        ///   「蓄力中单按 = 跳级」—— 蓄力只能升一级后，跳级设计已冗余
-        ///
-        /// 蓄力中的 Shift 只是单纯位移，【不打断蓄力】。
         /// </summary>
         /// <summary>有任意一只手在蓄力</summary>
         private bool IsCharging => chargeSystem != null && chargeSystem.IsAnyCharging;
-
-        /// <summary>
-        /// 空中蓄力姿态生效中（空中起手 且 仍在空中）。
-        /// 与角色悬停、方向键锁共用同一个判据 —— 见 PlayerChargeSystem.IsAirChargeHovering。
-        /// </summary>
-        private bool IsAirChargeHovering
-            => chargeSystem != null && chargeSystem.IsAirChargeHovering;
 
         private DispatchResult TryDashOrThrust()
         {
             // ---- 飞行中：八方向冲刺，冲完继续飞 ----
             if (sm.IsFlying) return TryFlightDash();
 
-            // ---- 空中蓄力：朝鼠标落点冲刺 ----
-            //
-            // 空中蓄力时方向键被锁（见 Jump/FallState），
-            // 想调整位置只能花这一次冲刺 —— 高风险承诺换一次精准位移。
-            //
-            // 【判据是"空中起手"，不是"现在在空中"】
-            // 用后者的话，地面起手蓄力再跳起来，Shift 也会变成"指哪去哪"——
-            // 可玩家并没有做出空中蓄力那个承诺，凭什么拿到它的特权。
-            // 现在与悬停、方向键锁共用同一个判据，三者永远同进同退。
-            if (IsAirChargeHovering)
-            {
-                return TryChargeAirDash();
-            }
-
             // 【P3 起】不再需要为蓄力单独开分支 ——
             // 蓄力不是状态了，冲刺只是普通的状态切换，天然不会打断它。
 
+<<<<<<< Updated upstream
             // ---- 攻击动画中：位移 + 打断连段 ----
+=======
+            // ---- 攻击动画中 ----
+>>>>>>> Stashed changes
             if (sm.currentState == sm.comboState)
             {
                 if (!CanCancelCurrentAttackByMovement())
                 {
+<<<<<<< Updated upstream
                     // 【Rejected → Retry】这道闸是"暂时关着"，不是"故意拒绝"：
                     // 招式演完之后冲刺就完全合法了。按路由器自己的三态定义，
                     // 这种情况本来就该 Retry —— 原先返回 Rejected 是自相矛盾。
@@ -291,6 +209,10 @@ namespace Flandre.CombatSystem
                     // 效果：在不可打断招式的【末尾 0.15 秒内】按 Shift，
                     // 招式一结束立刻冲出去；按得更早则照常作废。
                     if (verboseLog) Debug.Log("[路由器] 当前招式不允许被位移打断，Shift 已存入缓存");
+=======
+                    // 这道闸是"暂时关着"：招式演完之后冲刺就完全合法了 → Retry
+                    if (verboseLog) PlayerLog.Info("[路由器] 当前招式不允许被位移打断，Shift 已存入缓存");
+>>>>>>> Stashed changes
                     return DispatchResult.Retry;
                 }
 
@@ -311,13 +233,8 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 【P1b 重写】跳跃。
-        ///
-        /// **攻击动画中完全不能跳** —— 这是新规则里跳跃与冲刺/滑铲最大的区别：
-        /// 后两者能用（代价是打断连段），跳跃则是彻底禁用。
-        ///
-        /// 但【连段间隔中】可以自由跳，而且不会中断连段 ——
-        /// 「A1 放完 → 跳 → 接 b2」是合法且鼓励的操作。
         /// </summary>
+<<<<<<< Updated upstream
         /// <summary>
         /// 空中蓄力时的冲刺：朝【鼠标方向】任意角度冲出去。
         ///
@@ -382,15 +299,18 @@ namespace Flandre.CombatSystem
             return DispatchResult.Success;
         }
 
+=======
+>>>>>>> Stashed changes
         private DispatchResult TryJumpWithCancelCheck()
         {
             // 飞行中不能跳：起落只由 Space 开关决定，跳跃键（Q）在空中没有意义
             if (sm.IsFlying)
             {
-                if (verboseLog) Debug.Log("[路由器] 飞行中，Jump 被拒绝");
+                if (verboseLog) PlayerLog.Info("[路由器] 飞行中，Jump 被拒绝");
                 return DispatchResult.Rejected;
             }
 
+<<<<<<< Updated upstream
             if (sm.currentState == sm.comboState)
             {
                 // 【Rejected → Retry】"攻击动画中不能跳"这条设计规则没有变 ——
@@ -405,6 +325,29 @@ namespace Flandre.CombatSystem
                 // 输入被原谅，按得太早照常作废，不会出现延迟很久的自动起跳。
                 if (verboseLog) Debug.Log("[路由器] 攻击动画中禁止跳跃，Jump 已存入缓存");
                 return DispatchResult.Retry;
+=======
+            // ==========================================================
+            // 【实验改动 · R1】跳跃算"移动"，按攻击阶段处理：
+            //   前摇 → 允许：本招作废，连段归零
+            // ==========================================================
+            if (sm.currentState == sm.comboState)
+            {
+                AttackPhase phase = comboBuffer != null ? comboBuffer.MovementPhase : AttackPhase.None;
+
+                if (phase == AttackPhase.Active)
+                {
+                    if (verboseLog) PlayerLog.Info("[路由器] 攻击判定中禁止跳跃，Jump 已存入缓存");
+                    return DispatchResult.Retry;
+                }
+
+                // 跳不起来（段数用完）就别白白作废这一招
+                if (sm.jumpCount >= sm.maxJumps) return DispatchResult.Retry;
+
+                if (phase == AttackPhase.Windup) comboBuffer.VoidCurrentAttackAndResetCombo();
+
+                if (verboseLog) PlayerLog.Info($"[路由器] 攻击{(phase == AttackPhase.Windup ? "前摇" : "后摇")}中跳跃 → 取消动作");
+                return TryJump();
+>>>>>>> Stashed changes
             }
 
             // ==========================================================
@@ -436,15 +379,15 @@ namespace Flandre.CombatSystem
             // ==========================================================
             if (comboBuffer != null && comboBuffer.IsMovementLockedByRecovery())
             {
+<<<<<<< Updated upstream
                 if (verboseLog) Debug.Log("[路由器] 后摇中禁止跳跃，Jump 已存入缓存");
+=======
+                if (verboseLog) PlayerLog.Info("[路由器] 仍有判定在进行，Jump 已存入缓存");
+>>>>>>> Stashed changes
                 return DispatchResult.Retry;
             }
 
             // 【P3 起放开】蓄力中可以跳跃。
-            //
-            // 蓄力已经不是一个 State 了 —— 玩家蓄力时仍然待在 Idle/Run/Fall 里，
-            // 跳跃只是普通的状态切换，不会碰到蓄力模块。
-            // 跳跃高度的折损由 PlayerChargeSystem 贴在 jumpForce 上的修饰器负责。
             return TryJump();
         }
 
@@ -457,10 +400,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 【飞行中 Shift】八方向冲刺。
-        ///
-        /// 方向取方向键，吸附到 8 个方向；没按方向键就朝角色正面。
-        /// 和地面冲刺共用冷却（dashSkill），速度/时长也一样。
-        /// 冲刺由飞行引擎执行，所以冲完继续飞、冲的同时也能攻击。
         /// </summary>
         private DispatchResult TryFlightDash()
         {
@@ -481,7 +420,7 @@ namespace Flandre.CombatSystem
 
             sm.flightMotor.StartDash(dir);
 
-            if (verboseLog) Debug.Log($"[路由器] 飞行冲刺 → {dir}");
+            if (verboseLog) PlayerLog.Info($"[路由器] 飞行冲刺 → {dir}");
             return DispatchResult.Success;
         }
 
@@ -496,17 +435,33 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 【飞行中 Ctrl】解除飞行，自由下落。
-        ///
-        ///   人在空中 → 向上的速度清零、水平速度保留，进入【无敌下坠】，落地即解除。
-        ///              落地那一帧还按着 Ctrl → 由 HandleLandingFrame 接蹲/铲（滑铲本身无敌）。
-        ///   贴地飞行 → 没有可下坠的高度，直接按地面规则蹲/铲。
         /// </summary>
         private DispatchResult TryFlightDrop()
         {
             if (sm.IsGrounded())
             {
+<<<<<<< Updated upstream
                 if (verboseLog) Debug.Log("[路由器] 贴地飞行中按 Ctrl → 直接蹲/铲");
                 DispatchCrouchOrSlideOnGround();
+=======
+                flightUntargetableActive = true;
+                sm.playerState?.health.RequestUntargetable(InvulnerableTokens.FlightSlide);
+            }
+            flightUntargetableUntil = Time.time + duration;
+
+            if (verboseLog) PlayerLog.Info($"[路由器] 飞行中 Ctrl → 不可选中 {duration:F2}s");
+            return DispatchResult.Success;
+        }
+
+        /// <summary>
+        /// 普通状态在空中按 Ctrl（空中滑铲）：收掉上升速度往下落，落地切进蹲下姿态。
+        /// </summary>
+        private DispatchResult TryAirSlideDrop()
+        {
+            if (loadout != null && loadout.TryHandleAirCommand(InputCmd.Crouch))
+            {
+                if (verboseLog) PlayerLog.Info("[路由器] 空中 Ctrl 已被宝石接管");
+>>>>>>> Stashed changes
                 return DispatchResult.Success;
             }
 
@@ -516,7 +471,13 @@ namespace Flandre.CombatSystem
             sm.ChangeState(sm.fallState);
             sm.rb.linearVelocity = new Vector2(v.x, Mathf.Min(v.y, 0f));
 
+<<<<<<< Updated upstream
             if (verboseLog) Debug.Log("[路由器] 飞行中 Ctrl → 无敌下坠");
+=======
+            if (wasInCombo) comboBuffer?.OnDashSlideInterrupt(true, phase);
+
+            if (verboseLog) PlayerLog.Info(invulnerable ? "[路由器] 空中 Ctrl → 无敌下落" : "[路由器] 空中 Ctrl → 普通下落（滑铲冷却中）");
+>>>>>>> Stashed changes
             return DispatchResult.Success;
         }
 
@@ -526,14 +487,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 【Space】飞行开关：没在飞 → 起飞；正在飞（巡航或交战）→ 落下。
-        ///
-        /// 起飞的闸门和跳跃一致：
-        ///   攻击动画中 / 后摇中 → Retry（存缓存，收招那一帧立刻起飞）
-        ///   蓝为 0            → Rejected（直接丢弃，回蓝了也不会自己飞起来）
-        /// 受击硬直、蓄力大僵直在 OnCommand 入口就已经挡掉了。
-        ///
-        /// 【起飞时取消蓄力】蓄力不是状态，而是攥在手上的随身模块，切状态不会打断它。
-        /// 不取消的话，在空中一松手 → 蓄力招打出 → 切进 ComboState → 飞行被顶掉。
         /// </summary>
         private DispatchResult TryToggleFly()
         {
@@ -541,26 +494,34 @@ namespace Flandre.CombatSystem
             if (sm.IsFlying)
             {
                 sm.ChangeState(sm.fallState);
-                if (verboseLog) Debug.Log("[路由器] Space → 结束飞行");
+                if (verboseLog) PlayerLog.Info("[路由器] Space → 结束飞行");
                 return DispatchResult.Success;
             }
 
             // ---- 起飞闸门（与跳跃同一套规则）----
             if (sm.currentState == sm.comboState)
             {
+<<<<<<< Updated upstream
                 if (verboseLog) Debug.Log("[路由器] 攻击动画中，Fly 已存入缓存");
+=======
+                if (verboseLog) PlayerLog.Info("[路由器] 攻击判定中，Fly 已存入缓存");
+>>>>>>> Stashed changes
                 return DispatchResult.Retry;
             }
 
             if (comboBuffer != null && comboBuffer.IsMovementLockedByRecovery())
             {
+<<<<<<< Updated upstream
                 if (verboseLog) Debug.Log("[路由器] 后摇中，Fly 已存入缓存");
+=======
+                if (verboseLog) PlayerLog.Info("[路由器] 仍有判定在进行，Fly 已存入缓存");
+>>>>>>> Stashed changes
                 return DispatchResult.Retry;
             }
 
             if (sm.playerState != null && sm.playerState.health.currentMP <= 0)
             {
-                if (verboseLog) Debug.Log("[路由器] MP 不足，无法起飞");
+                if (verboseLog) PlayerLog.Info("[路由器] MP 不足，无法起飞");
                 return DispatchResult.Rejected;
             }
 
@@ -569,7 +530,7 @@ namespace Flandre.CombatSystem
             sm.flightMotor.BeginSession();   // 新的一次飞行：耗蓝零头清零
             sm.ChangeState(sm.flyState);
 
-            if (verboseLog) Debug.Log("[路由器] Space → 起飞");
+            if (verboseLog) PlayerLog.Info("[路由器] Space → 起飞");
             return DispatchResult.Success;
         }
 
@@ -579,34 +540,11 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 【P1b 重写】Ctrl 在不同时机下的三种含义。
-        ///
-        /// | 时机 | 输入 | 行为 | 连段 |
-        /// |---|---|---|---|
-        /// | 蓄力中 | 任意 | 滑铲位移，蓄力不中断 | — |
-        /// | 攻击动画中 | 单按 | 【碰撞箱微调】，由 ComboState 持续处理 | 保留 |
-        /// | 攻击动画中 | 方向+ | 滑铲位移 | **打断** |
-        /// | 其他 | — | 蹲下 / 滑铲 | 保留 |
-        ///
-        /// 「单按微调身位」和「带方向滑铲」是两件不同的事：
-        /// 前者是原地躲擦边攻击，不该有代价；
-        /// 后者是主动位移，付出打断连段的代价换来脱离。
         /// </summary>
         private DispatchResult TryCrouchSlideOrCancel()
         {
             // ---- 飞行中：解除飞行，无敌下坠 ----
             if (sm.IsFlying) return TryFlightDrop();
-
-            // ---- 空中蓄力姿态：禁止滑铲 ----
-            //
-            // 空中蓄力期间唯一的位移手段是 Shift 冲刺，
-            // 让 Ctrl 也能位移会削弱"空中蓄力是高风险承诺"这个设计。
-            //
-            // 同样用"空中起手"判据 —— 地面起手蓄力再跳起来时不受此限。
-            if (IsAirChargeHovering)
-            {
-                if (verboseLog) Debug.Log("[路由器] 空中蓄力姿态中，禁止滑铲");
-                return DispatchResult.Rejected;
-            }
 
             // ---- 攻击动画中 ----
             if (sm.currentState == sm.comboState)
@@ -617,18 +555,28 @@ namespace Flandre.CombatSystem
                 // 也只有它知道攻击结束时该把碰撞箱还原。
                 if (!HasDirection)
                 {
-                    if (verboseLog) Debug.Log("[路由器] 攻击中单按 ctrl → 碰撞箱微调（交给 ComboState）");
+                    if (verboseLog) PlayerLog.Info("[路由器] 攻击中单按 ctrl → 碰撞箱微调（交给 ComboState）");
                     return DispatchResult.Rejected;   // 不进缓存，避免几帧后跑出来滑铲
                 }
 
                 if (!CanCancelCurrentAttackByMovement())
                 {
                     // 与 Shift 同理：暂时关着的闸门存缓存，招式结束后若仍在时限内就兑现
-                    if (verboseLog) Debug.Log("[路由器] 当前招式不允许被位移打断，Ctrl 已存入缓存");
+                    if (verboseLog) PlayerLog.Info("[路由器] 当前招式不允许被位移打断，Ctrl 已存入缓存");
                     return DispatchResult.Retry;
                 }
 
+<<<<<<< Updated upstream
                 DispatchResult r = TryCrouchOrSlide();
+=======
+                // 【实验改动 · R1】滑铲任何阶段可用，永不打断连段（处理在 DispatchCrouchOrSlideOnGround 里）。
+                // 滑铲 CD 中时不退化成"蹲下"—— 那会无缘无故把攻击动画切掉，改为存缓存。
+                if (sm.IsGrounded() && !sm.slideSkill.CanExecute())
+                {
+                    if (verboseLog) PlayerLog.Info("[路由器] 攻击中 方向+ctrl，但滑铲 CD 中 → 存入缓存");
+                    return DispatchResult.Retry;
+                }
+>>>>>>> Stashed changes
 
                 if (r == DispatchResult.Success)
                 {
@@ -650,7 +598,7 @@ namespace Flandre.CombatSystem
         {
             if (sm.jumpCount >= sm.maxJumps) return DispatchResult.Retry;
 
-            if (verboseLog) Debug.Log($"[路由器] Jump 放行 ({sm.jumpCount + 1}/{sm.maxJumps})");
+            if (verboseLog) PlayerLog.Info($"[路由器] Jump 放行 ({sm.jumpCount + 1}/{sm.maxJumps})");
             sm.ChangeState(sm.jumpState);
             return DispatchResult.Success;
         }
@@ -660,21 +608,46 @@ namespace Flandre.CombatSystem
             if (!sm.dashSkill.CanExecute()) return DispatchResult.Retry;
 
             // 【修复】按方向键先把朝向定好，再切状态。
-            //
-            // DashState 读的是 facingDirection，而 SlideState 读的是 moveInput.x ——
-            // 所以以前「方向+ctrl」正常、「方向+shift」却总是朝面朝方向冲。
-            //
-            // 以前不明显是因为跑动时朝向一直跟着方向键走；
-            // 但 P1b 删掉了「攻击中按方向键转向」之后朝向被冻住，
-            // 冲刺就用上了过期的朝向。
             ApplyAimFacingFromInput();
 
+<<<<<<< Updated upstream
             if (verboseLog) Debug.Log("[路由器] Dash 放行");
+=======
+            // 【2026-11-16】普通状态也是八方向冲刺（和飞行冲刺同一套取向规则）
+            Vector2 dashDir = ResolveGroundAirDashDirection();
+            if (dashDir == Vector2.zero) sm.dashState.SetNextDashStationary();
+            else sm.dashState.SetNextDashDirection(dashDir);
+
+            // 【实验 · R1】切状态之前先记下"打断的是哪个阶段"—— 切走之后就问不到了
+            bool wasInCombo = sm.currentState == sm.comboState;
+            AttackPhase phase = comboBuffer != null ? comboBuffer.CurrentAttackPhase : AttackPhase.None;
+
+            if (verboseLog) PlayerLog.Info("[路由器] Dash 放行");
+>>>>>>> Stashed changes
             sm.ChangeState(sm.dashState);
             return DispatchResult.Success;
         }
 
         /// <summary>有方向键输入时，把角色朝向对齐到该方向</summary>
+<<<<<<< Updated upstream
+=======
+        private Vector2 ResolveGroundAirDashDirection()
+        {
+            float facing = controller != null ? controller.facingDirection : 1f;
+
+            Vector2 dir = SnapToEightWay(controller != null ? controller.moveInput : Vector2.zero);
+            if (dir == Vector2.zero) return new Vector2(facing, 0f);
+
+            if (dir.y < 0f && sm.IsGrounded())
+            {
+                if (Mathf.Abs(dir.x) > 0.01f) return new Vector2(Mathf.Sign(dir.x), 0f);
+                return Vector2.zero;
+            }
+
+            return dir;
+        }
+
+>>>>>>> Stashed changes
         private void ApplyAimFacingFromInput()
         {
             if (controller == null) return;
@@ -698,10 +671,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 地面上的蹲/铲裁决。落地帧与常规按键共用同一套判断。
-        ///
-        /// 【关键】用 moveInput.x 而不是 currentState == runState。
-        /// 前者是事实（方向键按着没有），后者是延迟一帧的代理指标 ——
-        /// 落地那一帧 FallState 还没来得及切成 RunState，用它判断会全落到蹲下。
         /// </summary>
         private void DispatchCrouchOrSlideOnGround()
         {
@@ -712,14 +681,22 @@ namespace Flandre.CombatSystem
 
             if (hasDirection && sm.slideSkill.CanExecute())
             {
+<<<<<<< Updated upstream
                 if (verboseLog) Debug.Log("[路由器] Ctrl + 方向 → 滑铲");
+=======
+                // 【实验 · R1】同冲刺：先记阶段，滑出去之后通知连招引擎
+                bool wasInCombo = sm.currentState == sm.comboState;
+                AttackPhase phase = comboBuffer != null ? comboBuffer.CurrentAttackPhase : AttackPhase.None;
+
+                if (verboseLog) PlayerLog.Info("[路由器] Ctrl + 方向 → 滑铲");
+>>>>>>> Stashed changes
                 sm.ChangeState(sm.slideState);
                 return;
             }
 
             if (verboseLog)
             {
-                Debug.Log(hasDirection
+                PlayerLog.Info(hasDirection
                     ? "[路由器] 有方向但滑铲 CD 中 → 蹲下"
                     : "[路由器] 仅 Ctrl → 蹲下");
             }
@@ -733,9 +710,6 @@ namespace Flandre.CombatSystem
         /// <summary>
         /// 从空中落到地面的那一帧。
         /// 不看缓存、不看 currentState，只看两件事实：Ctrl 还按着吗？方向键还按着吗？
-        ///
-        /// 之所以要单独处理，是因为「按住 Ctrl 下落」这个意图可能持续好几秒，
-        /// 用 0.15 秒的缓存表达不了。
         /// </summary>
         private void HandleLandingFrame()
         {
@@ -746,43 +720,12 @@ namespace Flandre.CombatSystem
             // 飞行中贴地不算"落地"—— 否则按着 Ctrl 飞到地面会被插一个滑铲，飞行被打断
             if (sm.IsFlying) return;
 
-            if (verboseLog) Debug.Log("[路由器] 落地帧检测到 Ctrl 按住，进入蹲/铲裁决");
+            if (verboseLog) PlayerLog.Info("[路由器] 落地帧检测到 Ctrl 按住，进入蹲/铲裁决");
 
             buffer.TryConsume(InputCmd.Crouch);
             buffer.TryConsume(InputCmd.Slide);
 
             DispatchCrouchOrSlideOnGround();
-        }
-
-        // ==========================================================
-        // 【扩展点】空中指令
-        // ==========================================================
-
-        /// <summary>
-        /// 空中按 C 该做什么 —— 留好的接口，尚未实现具体动作。
-        ///
-        /// 填法 A：由铲槽宝石决定（推荐，不需要新建状态卡带）
-        ///   在对应宝石里覆写 TryHandleAirCommand() 即可，本文件一行不用改。
-        ///
-        /// 填法 B：固定动作（比如下砸）
-        ///   新建 AirSlamState 卡带，把下方 TODO 换成 sm.ChangeState(sm.airSlamState)。
-        ///
-        /// 当前返回 Retry：指令留在缓存里，落地后仍可兑现 ——
-        /// 这正是"空中按 C 落地滑铲"这一手感的来源。
-        /// </summary>
-        private DispatchResult TryAirCommand(InputCmd cmd)
-        {
-            if (loadout != null && loadout.TryHandleAirCommand(cmd))
-            {
-                if (verboseLog) Debug.Log($"[路由器] 空中 {cmd} 已被宝石接管");
-                return DispatchResult.Success;
-            }
-
-            // TODO: 填法 B 的入口 —— 想做固定的空中动作（下砸等）就写在这里
-            // sm.ChangeState(sm.airSlamState);
-            // return DispatchResult.Success;
-
-            return DispatchResult.Retry;
         }
 
         // ==========================================================
@@ -799,7 +742,7 @@ namespace Flandre.CombatSystem
             DispatchResult result = TryDispatch(cmd);
 
             if (result != DispatchResult.Success) sm.isBreakingHitStun = false;
-            else if (verboseLog) Debug.Log($"[路由器] 受身成功，{cmd} 打断硬直");
+            else if (verboseLog) PlayerLog.Info($"[路由器] 受身成功，{cmd} 打断硬直");
         }
 
         // ==========================================================

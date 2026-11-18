@@ -13,8 +13,15 @@ MonoBehaviour:
   m_Name: A1
   m_EditorClassIdentifier: Assembly-CSharp::ComboNode
   nodeName: A1
+<<<<<<< Updated upstream
   comboWindow: 0.25
   recoveryTime: 0.1
+=======
+  comboWindow: 0.3
+  windupOverride: 0.2
+  activeOverride: -1
+  recoveryOverride: 0.2
+>>>>>>> Stashed changes
   castCondition: 0
   requiredState: 0
   inputSequence: 04000000
@@ -38,6 +45,8 @@ MonoBehaviour:
   hitboxDuration: 0.5
   knockbackForce: 0
   effectKey: FX_A1
+  effectLifetimeMode: 0
+  effectFitDuration: 1
   effectLifetime: 0
   useHitboxOffsetForEffect: 0
   effectOffset: {x: 0.41, y: 0.41}

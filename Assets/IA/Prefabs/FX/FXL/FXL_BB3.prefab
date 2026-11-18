@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8264271984161569237}
   - component: {fileID: 7579448739313212348}
   - component: {fileID: 8282674518615130125}
-  - component: {fileID: 5577034335831813893}
   m_Layer: 0
   m_Name: FXL_BB3
   m_TagString: Untagged
@@ -115,18 +114,3 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &5577034335831813893
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3587092818806866930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d78b9e5a09a9537458865ad28ed24a1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PooledEffect
-  lifetime: 0
-  animatorToReset: {fileID: 8282674518615130125}
-  particlesToReset: {fileID: 0}

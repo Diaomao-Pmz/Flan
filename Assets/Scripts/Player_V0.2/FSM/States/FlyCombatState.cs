@@ -3,34 +3,6 @@ using Flandre.CombatSystem;
 
 /// <summary>
 /// 飞行战斗状态（交战）—— 边飞边打。
-///
-/// ==========================================================
-/// 【规则】
-///   · 左键只出 A1、右键只出 B1（由武器资产上的 Fly Attack 栏位决定）
-///   · 没有连段、没有蓄力
-///   · 按下立刻出招；按住就连续出招
-///   · 身体不僵直：攻击期间照常八方向飞行
-///   · 但动画要演完才能出下一招 —— 出招间隔 = 这一招动画的长度
-///     （ComboNode 上的 recoveryTime 是"行动僵直"，飞行中不生效）
-///   · 一次只演一个攻击动画；两个键都按着时左右手交替
-///   · 攻击动画期间朝向锁定，免得近战判定框挥到一半翻到身后
-/// ==========================================================
-///
-/// 【和地面 ComboState 的区别】
-/// ComboState 是"站定挥剑"：进去就锁移动、打完再出来。
-/// 这里是"边开车边伸手开枪"：飞行由 sm.flightMotor 照常驱动，
-/// 本状态只多管一件事 —— 手上这一招演到哪了、下一招轮到谁。
-///
-/// 【判定框和子弹】仍由 A1/B1 动画里原有的动画事件触发
-/// （TriggerAttackHitbox / SpawnProjectile），它们读的是 ComboInputBuffer.currentNode，
-/// 所以出招时由 Buffer.BeginFlyAttack 把这一招登记上去即可，动画资产一行不用改。
-/// 动画末尾的 OnAttackAnimationEnd 事件在这里会被状态机忽略（它只认 ComboState）。
-///
-/// 【离开本状态的出口】
-///   打完且两个键都没按着 → FlyState
-///   再按一次 Space       → FallState（路由器发起）
-///   蓝耗光               → FallState
-///   受击                 → HitState（状态机发起）
 /// </summary>
 public class FlyCombatState : PlayerStateBase
 {
@@ -63,7 +35,7 @@ public class FlyCombatState : PlayerStateBase
     private static int HandIndex(InputCmd cmd) => cmd == InputCmd.SubAttack ? 1 : 0;
 
     /// <summary>
-    /// 登记一次飞行中的攻击按键。由 ComboInputBuffer.OnAttackPressedInFlight 调用，
+    /// 登记一次飞行中的攻击按键。由 ComboInputBuffer 在飞行中点按时调用，
     /// 必须在切进本状态【之前】调，这样 Enter 一进来就知道该出哪一招。
     /// </summary>
     public void QueueAttack(InputCmd cmd)
@@ -175,7 +147,12 @@ public class FlyCombatState : PlayerStateBase
         else
         {
             sm.animDriver.SetBase(node.animName, restart: true);
-            attackTimer = node.attackClip.length > 0f ? node.attackClip.length : FallbackAttackDuration;
+
+            // 飞行攻击也按 ComboNode 的三段时长给动画调速，演多久就按总时长算
+            AttackInstance inst = Buffer.FlyInstance;
+            sm.animDriver.SetAttackOwner(inst);
+            if (inst != null && inst.duration > 0f) attackTimer = inst.duration;
+            else attackTimer = node.attackClip != null && node.attackClip.length > 0f ? node.attackClip.length : FallbackAttackDuration;
         }
 
         isAttacking = true;

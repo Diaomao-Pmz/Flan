@@ -17,6 +17,7 @@ namespace Flandre.CombatSystem
 
     /// <summary>
     /// 【蓄力模块】—— 一只手的充能进度，纯逻辑，不是状态。
+<<<<<<< Updated upstream
     ///
     /// ==========================================================
     /// 【为什么要从状态里抽出来】
@@ -44,6 +45,8 @@ namespace Flandre.CombatSystem
     /// 但必须按住满 minHoldTime（来自刚打完那一招的 ComboNode.chargeMinHoldAfter）才解锁；
     /// 锁住期间等级显示为 0，松手 = 什么都不放。锁住的这段时间照样计入升级进度。
     /// ==========================================================
+=======
+>>>>>>> Stashed changes
     /// </summary>
     public class ChargeModule
     {
@@ -92,12 +95,19 @@ namespace Flandre.CombatSystem
         public bool IsValid { get; private set; }
 
         /// <summary>
+<<<<<<< Updated upstream
         /// 本次蓄力是不是【在空中起手】的 —— "要不要把角色钉在空中"的唯一判据。
         ///   空中起手 → 钉住（空中蓄力是一次高风险承诺，想挪位置只能花一次冲刺）
         ///   地面起手 → 不钉（跳跃只是普通的折损跳跃）
         /// 起手位置在整段蓄力里是不变的，所以不会出现"某一帧忽然变规则"。
         /// </summary>
         public bool BeganAirborne { get; private set; }
+=======
+        /// 蓄力上限（1~3）。等级沿 1→2→3→1 循环升到这一级就停住。
+        /// 平a后接蓄力一开始 = 当前连段深度；原地起手一开始 = 1。侧键每按一下 +1（3 之后回到 1）。
+        /// </summary>
+        public int CapLevel { get; private set; }
+>>>>>>> Stashed changes
 
         // 普攻后蓄力的加速倍率（武器上的 comboChargeSpeedMultiplier），原地起手为 1
         private float speedMultiplier = 1f;
@@ -123,12 +133,9 @@ namespace Flandre.CombatSystem
         /// <param name="startLevel">起步等级：原地起手 0，第 N 段普攻后为 N</param>
         /// <param name="minHold">起步等级 > 0 时，按住满多少秒才解锁（保险锁）</param>
         /// <param name="isAfterCombo">是否接在普攻后面（决定要不要吃加速倍率）</param>
-        /// <param name="beganAirborne">起手那一刻角色在空中吗。全程不变，见 BeganAirborne</param>
-        public void Begin(WeaponMoveSet weapon, int startLevel, float minHold,
-                          bool isAfterCombo, bool beganAirborne)
+        public void Begin(WeaponMoveSet weapon, int startLevel, float minHold, bool isAfterCombo)
         {
             Weapon = weapon;
-            BeganAirborne = beganAirborne;
             IsValid = weapon != null;
 
             speedMultiplier = (IsValid && isAfterCombo)

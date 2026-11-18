@@ -4,36 +4,6 @@ namespace Flandre.CombatSystem
 {
     /// <summary>
     /// 【动画调度器】—— 全项目【唯一】允许调用 Animator.Play 的地方。
-    ///
-    /// ==========================================================
-    /// 【为什么必须唯一】
-    ///
-    /// 改造前，往 Animator 写东西的有两方：
-    ///   ① 9 张状态卡带各自调 anim.Play
-    ///   ② 本调度器事后覆盖蓄力动画
-    /// 两方都写、没有仲裁、谁最后写谁赢 —— 于是：
-    ///   JumpState 每帧切换上升/顶点/下落动画 → 每帧把蓄力姿势顶掉 → 抽搐
-    ///   蓄力取消时没人把移动动画播回来        → 角色卡在蓄力姿势里
-    ///
-    /// 这和早期「无敌开关有三个主人」是完全同一类 bug。
-    /// 当时的解法是引用计数（让状态有唯一裁决方），这次的解法是唯一写入者。
-    ///
-    /// 比喻：以前是每个部门自己往公告栏贴纸，谁后贴谁盖住。
-    ///       现在所有人把稿子交给文管，由他决定贴什么。
-    /// ==========================================================
-    ///
-    /// 【两条轨道】
-    ///   Base    —— 移动与动作动画，由状态卡带声明（"我要播跑动"）
-    ///   Overlay —— 蓄力姿势，由本组件根据蓄力系统自行判断
-    ///
-    /// 每帧结算：有覆盖就播覆盖，没有就播 Base。
-    /// 因为 Base 一直被记着，覆盖一撤销就能立刻播回去 —— 不会再卡姿势。
-    ///
-    /// 【为以后的 Animator 分层预留】
-    /// 现在覆盖是"盖住"Base（同一层）。等美术做了上下半身分离之后，
-    /// 把 overlayLayer 改成 1、Animator 里建好第 1 层，
-    /// 覆盖就变成"叠加"而不是"盖住"，Base 得以保留。
-    /// 【状态卡带一行都不用改】—— 这正是把决策集中到一处的价值。
     /// </summary>
     [DefaultExecutionOrder(200)]   // 排在所有玩法逻辑之后，确保拿到本帧最终意图
     public class PlayerAnimationDriver : MonoBehaviour
@@ -73,6 +43,11 @@ namespace Flandre.CombatSystem
         private int playingHash;
         private int playingLayer;
 
+        // ---- 攻击动画倍速 ----
+        private AttackInstance attackOwner;
+        private int attackHash;
+        private int attackSegment = -1;
+
         private void Awake()
         {
             anim = GetComponent<Animator>();
@@ -86,10 +61,6 @@ namespace Flandre.CombatSystem
 
         /// <summary>
         /// 声明底层动画（移动 / 攻击 / 受击等）。
-        ///
-        /// 【只是声明，不会立刻播】—— 本帧最终播什么由 LateUpdate 结算。
-        /// 所以每帧重复调用同一个 hash 是安全的（JumpState 就是这么用的），
-        /// 不会重置动画进度。
         /// </summary>
         /// <param name="restart">
         /// 即使与当前动画相同也从第 0 帧重播。
@@ -108,6 +79,21 @@ namespace Flandre.CombatSystem
         {
             if (string.IsNullOrEmpty(stateName)) return;
             SetBase(Animator.StringToHash(stateName), restart);
+        }
+
+        /// <summary>
+        /// 登记"现在播的攻击动画属于哪一招"。之后每帧按这一招所处的阶段（前摇 / 攻击 / 后摇）调 Animator 倍速，
+        /// 让三段动画分别在 ComboNode 填的时长里播完。
+        /// 动画被别的招顶掉、或切到别的动画后，自动恢复 1 倍速。
+        /// 出招时在 SetBase 之后调用（ComboState / FlyCombatState）。
+        /// </summary>
+        public void SetAttackOwner(AttackInstance inst)
+        {
+            attackOwner = inst;
+            attackHash = (inst != null && inst.node != null && !string.IsNullOrEmpty(inst.node.animName))
+                ? Animator.StringToHash(inst.node.animName)
+                : 0;
+            attackSegment = -1;
         }
 
         // ==========================================================
@@ -132,7 +118,11 @@ namespace Flandre.CombatSystem
                 desiredLayer = 0;
             }
 
-            if (desiredHash == 0) return;
+            if (desiredHash == 0)
+            {
+                ApplyAttackSpeed(0, 0);
+                return;
+            }
 
             bool changed = desiredHash != playingHash || desiredLayer != playingLayer;
 
@@ -150,6 +140,43 @@ namespace Flandre.CombatSystem
             }
 
             basePendingRestart = false;
+
+            ApplyAttackSpeed(desiredHash, desiredLayer);
+        }
+
+        /// <summary>
+        /// 攻击动画三段倍速。只有"登记过的那一招还拥有动画、而且当前播的正是它的动画"时才调速，
+        /// 其他任何时候 Animator 都是 1 倍速。
+        /// </summary>
+        private void ApplyAttackSpeed(int desiredHash, int desiredLayer)
+        {
+            AttackInstance inst = attackOwner;
+            bool driving = inst != null && attackHash != 0 && inst.ownsAnimation && inst.timing.hasClip
+                           && desiredHash == attackHash && desiredLayer == 0;
+
+            if (!driving)
+            {
+                attackOwner = null;   // 动画已经被顶掉 / 切走，这一招不会再回来
+                if (anim.speed != 1f) anim.speed = 1f;
+                return;
+            }
+
+            AttackTiming t = inst.timing;
+            int seg = t.SegmentAt(inst.elapsed);
+
+            if (seg != attackSegment)
+            {
+                // 进入新的一段：把动画对齐到这一刻该在的位置。
+                // 消掉段与段交界处一帧的误差；实际时长为 0 的段（比如前摇填 0）也靠这一下直接跳过
+                float animTime = t.ToAnim(inst.elapsed);
+                anim.Play(attackHash, 0, t.clipLength > 0f ? animTime / t.clipLength : 0f);
+                attackSegment = seg;
+
+                if (verboseLog)
+                    Debug.Log($"[动画] {inst.node.nodeName} 进入第 {seg} 段（0 前摇 / 1 攻击 / 2 后摇），倍速 ×{t.SpeedOf(seg):F2}");
+            }
+
+            anim.speed = t.SpeedOf(seg);
         }
 
         /// <summary>本帧要不要用蓄力姿势覆盖</summary>

@@ -68,6 +68,69 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ChargeCapMain",
+                    "type": "Button",
+                    "id": "a5771ca0-7d75-4259-8462-965edb2dbdc7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ChargeCapSub",
+                    "type": "Button",
+                    "id": "9c87f97a-a395-48e8-99df-44de4b80e6a9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugReviewToggle",
+                    "type": "Button",
+                    "id": "96d2a494-9b32-458c-a973-bf3f4c4a7892",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugReviewPrevFrame",
+                    "type": "Button",
+                    "id": "8a10bbdb-0558-4d7f-af4e-445c9d965d6d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugReviewNextFrame",
+                    "type": "Button",
+                    "id": "e8ced0e9-ee19-4960-a489-d09c111e32db",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugReviewPrevChange",
+                    "type": "Button",
+                    "id": "d3256fe1-0b91-4d93-b148-2faa96059f27",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugReviewNextChange",
+                    "type": "Button",
+                    "id": "3e13cbdc-8a8b-42c2-8be1-6647e3e5f013",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -189,6 +252,83 @@
                     "processors": "",
                     "groups": "",
                     "action": "Fly",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "56580d45-7529-497f-bc6a-29b87aa863e7",
+                    "path": "<Mouse>/forwardButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChargeCapMain",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0745f662-2691-49e7-8ec7-ee1b697a2e19",
+                    "path": "<Mouse>/backButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChargeCapSub",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3fce625b-9128-49dc-8acc-1ee0184794dc",
+                    "path": "<Keyboard>/f5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugReviewToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6d26e9dc-fb4d-49a6-86a7-a75806c638e3",
+                    "path": "<Keyboard>/f6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugReviewPrevFrame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d6497d4f-3a29-4fb9-a463-ce02f68b73fa",
+                    "path": "<Keyboard>/f7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugReviewNextFrame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4bcd2c82-c8f1-4aa2-ac38-ab90e5360e5f",
+                    "path": "<Keyboard>/f8",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugReviewPrevChange",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "68d174b0-f774-459d-a88e-9a2a8da6ed58",
+                    "path": "<Keyboard>/f9",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugReviewNextChange",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
