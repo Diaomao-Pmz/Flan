@@ -171,7 +171,6 @@ GameObject:
   - component: {fileID: 2440175113679751877}
   - component: {fileID: 3388935916549362062}
   - component: {fileID: 584175311805934845}
-  - component: {fileID: 5400749524155439458}
   - component: {fileID: -1850771718162211410}
   m_Layer: 21
   m_Name: Player
@@ -600,6 +599,7 @@ MonoBehaviour:
   stateConfig: {fileID: 11400000, guid: ca1f832de12641e88393e6755a8cc93c, type: 2}
   movementConfig: {fileID: 11400000, guid: 3e514375332815549b5084a3da7fc7d1, type: 2}
   combatConfig: {fileID: 11400000, guid: b1a83f28ca762b8499b26accf98de905, type: 2}
+  attackTimingConfig: {fileID: 0}
   attributeConfig: {fileID: 11400000, guid: 6d39b76ad9514d6084f420adaba41e13, type: 2}
   playerLayerName: Player
   phaseThroughLayerName: Invincible
@@ -731,8 +731,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ff93485aa25713048beeb8ee1833ae9b, type: 2}
   bufferLifespan: 0.2
   maxBufferedHoldTime: 1.5
-  allowCancelWindowRecovery: 1
-  lockMovementDuringRecovery: 1
+  lockMovementWhileHitActive: 1
   chargeStartHoldTime: 0.3
   autoResumeFlightAfterCharge: 0
   verboseLog: 0
@@ -799,8 +798,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerEffectSpawner
   effectRoot: {fileID: 0}
-  defaultAttackEffectKey: 
-  defaultEffectLifetime: 0.4
   verboseLog: 0
 --- !u!114 &3388935916549362062
 MonoBehaviour:
@@ -831,23 +828,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b03ae90312122a4084e21fe5edd6d53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerChargeSystem
-  verboseLog: 0
-  enableAirChargeHover: 0
---- !u!114 &5400749524155439458
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3212544334172396689}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbcf6055f0a63cc44b8ff5bd6251a6b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Flandre.CombatSystem.PlayerMomentum
-  decayPerSecond: 6
-  maxStored: 20
-  chargeSpeedScale: 0.3
   verboseLog: 0
 --- !u!114 &-1850771718162211410
 MonoBehaviour:
