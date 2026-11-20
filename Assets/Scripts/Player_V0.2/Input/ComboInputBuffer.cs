@@ -41,14 +41,6 @@ public class ComboInputBuffer : MonoBehaviour
 
     [Header("后摇")]
     [Tooltip(
-<<<<<<< Updated upstream
-        "后摇期间锁住移动（默认开启）。\n\n" +
-        "按「攻击时不能走动」的基础规则，后摇属于攻击的一部分，\n" +
-        "所以攻击动画结束后的这段时间也不该能走。\n" +
-        "关掉则退回旧行为：动画一结束就能自由走动。")]
-    public bool lockMovementDuringRecovery = true;
-
-=======
         "后摇本身不锁移动（后摇允许移动）。\n\n" +
         "这个开关只管一种情况：动画已经被别的招顶掉、但判定/连射还在跑的时候，\n" +
         "是否继续按「判定期间禁止移动」锁住走动与跳跃。默认开启。")]
@@ -125,7 +117,6 @@ public class ComboInputBuffer : MonoBehaviour
     }
     private LastSingle lastSingle;        // 判定方式 B：刚打出去的那一发单蓄力
 
->>>>>>> Stashed changes
     [Header("Debug")]
     public bool verboseLog = false;
 
@@ -151,17 +142,10 @@ public class ComboInputBuffer : MonoBehaviour
     // ==================================================
     private readonly float[] handBusyUntil = new float[2];
 
-    /// <summary>
-    /// 每只手最近一次出招的编号。
-    ///
-    /// 【为什么需要它】同手接招时的执行顺序是：
-    ///     新招 SetCurrentNode（标记本手"出招中"）
-    ///       → ChangeState → 旧招 Exit（写后摇）
-    /// 旧招的 Exit 会把新招刚打上的"出招中"标记覆盖掉，
-    /// 导致新招的动画期间手是空闲的，后摇从新招【开始】那一刻算起而不是结束。
-    ///
-    /// 有了编号，Exit 只在"我还是最新那一次"时才写后摇。
-    /// </summary>
+    /// <summary>每只手当前这一招的动画预计演到什么时候（之前算"出招中"，之后算"后摇中"）</summary>
+    private readonly float[] handAnimEnd = new float[2];
+
+    /// <summary>每只手最近一次出招的编号</summary>
     private readonly int[] handAttackId = new int[2];
     private int attackIdCounter;
 
@@ -178,20 +162,10 @@ public class ComboInputBuffer : MonoBehaviour
         => lastChargeReleaseSerial[HandIndex(cmd)] > lastNormalAttackSerial;
 
     /// <summary>
-    /// 后摇期间按下的长按意图，存着等后摇结束再兑现。
-    ///
-    /// 【为什么需要它】0.15 秒的点按/长按判定发生在按键松开或超时的那一刻。
-    /// 如果那时手还在后摇里，长按分支会直接 return，
-    /// 而松手时又因为"已经判定过"不会补发点按 ——
-    /// 这一次按键就彻底消失了。
-    ///
-    /// 表现出来就是：后摇越长被吞得越多，感知延迟远大于参数，且复现不稳定
-    /// （取决于手指按了多久、跨没跨过 0.15 秒）。
+    /// 后摇期间按下的长按意图，存着等后摇结束再兑现（松手则作废）。
     /// </summary>
     private readonly bool[] pendingHold = new bool[2];
 
-<<<<<<< Updated upstream
-=======
     /// <summary>暂存的长按意图对应的起步等级（长按判定成立那一刻的连段深度）</summary>
     private readonly int[] pendingHoldLevel = new int[2];
 
@@ -201,28 +175,23 @@ public class ComboInputBuffer : MonoBehaviour
     /// <summary>这只手当前这次蓄力是不是「平a后接蓄力」。只在该手蓄力中有意义</summary>
     private readonly bool[] chargeIsAfterCombo = new bool[2];
 
->>>>>>> Stashed changes
     private static int HandIndex(InputCmd cmd)
         => cmd == InputCmd.SubAttack ? 1 : 0;
+
+    private static InputCmd OtherHand(InputCmd cmd)
+        => cmd == InputCmd.SubAttack ? InputCmd.MainAttack : InputCmd.SubAttack;
 
     /// <summary>这只手现在能不能出招（招式演完且后摇结束了吗）</summary>
     public bool IsHandReady(InputCmd cmd)
         => Time.time >= handBusyUntil[HandIndex(cmd)];
 
-    /// <summary>
-    /// 这只手正在出招中（招式还没演完）。
-    ///
-    /// 与「后摇中」是两种不同的忙碌状态：
-    ///   出招中 —— 招式还在演，用 float.MaxValue 表示无限期锁死，没有倒计时
-    ///   后摇中 —— 招式演完了，正在走 recoveryTime 的倒计时
-    /// 对玩家来说都是"这只手不能用"，但排查问题时必须分清。
-    /// </summary>
+    /// <summary>这只手正在出招中（招式动画还没到自然结束的时刻）</summary>
     public bool IsHandAttacking(InputCmd cmd)
-        => handBusyUntil[HandIndex(cmd)] >= float.MaxValue * 0.5f;
+        => !IsHandReady(cmd) && Time.time < handAnimEnd[HandIndex(cmd)];
 
     /// <summary>
     /// 该手剩余后摇秒数。供 UI 显示。
-    /// 出招中（无倒计时）时返回 -1，调用方据此区分两种忙碌。
+    /// 出招中时返回 -1，调用方据此区分两种忙碌。
     /// </summary>
     public float GetHandRecoveryRemaining(InputCmd cmd)
     {
@@ -231,40 +200,22 @@ public class ComboInputBuffer : MonoBehaviour
     }
 
     /// <summary>
-<<<<<<< Updated upstream
-    /// 把某只手标记为「正在出招」—— 在招式结束之前一直锁死。
-    ///
-    /// 用一个很大的时间戳表示"暂时无限期"，等 BeginHandRecovery 来解锁。
-=======
     /// 【实验改动】出招即把这只手锁到这一招的总时长（前摇 + 攻击 + 后摇）结束。
->>>>>>> Stashed changes
     /// </summary>
-    /// <returns>本次出招的编号，供 Exit 时核对</returns>
-    private int MarkHandBusy(InputCmd cmd)
+    /// <returns>本次出招的编号</returns>
+    private int MarkHandBusy(InputCmd cmd, float animDuration, float recovery)
     {
         int i = HandIndex(cmd);
-        handBusyUntil[i] = float.MaxValue;
+        handAnimEnd[i] = Time.time + Mathf.Max(0f, animDuration);
+        handBusyUntil[i] = handAnimEnd[i] + Mathf.Max(0f, recovery);
         handAttackId[i] = ++attackIdCounter;
         return handAttackId[i];
     }
 
-    /// <summary>取某只手当前的出招编号。ComboState 在 Enter 时记下它</summary>
+    /// <summary>取某只手当前的出招编号</summary>
     public int GetHandAttackId(InputCmd cmd) => handAttackId[HandIndex(cmd)];
 
-    /// <summary>
-    /// 【修正】招式结束时才开始算后摇。
-    ///
-    /// 原先是从【出招那一刻】起算，于是：
-    /// 动画 0.5 秒、后摇填 0.35 秒的话，后摇在动画演完之前就走完了 ——
-    ///   ① 同手能打断自己的动画，违反「同手必须等后摇结束」
-    ///   ② 调这个参数完全感觉不到变化，因为总被动画长度盖过
-    ///
-    /// 比喻：原先是"下单后 30 分钟内不接新单"，但做菜就花了 40 分钟，
-    ///       那 30 分钟形同虚设。改成"上菜后再歇 30 分钟"。
-    ///
-    /// 现在 同手封锁 = 动画演完 + recoveryTime，
-    /// 这个参数才真正对应「后摇」，而且动画换了也不用重调。
-    /// </summary>
+    /// <summary>从现在起这只手只剩 seconds 秒后摇</summary>
     public void BeginHandRecovery(InputCmd cmd, float seconds, int attackId = -1)
     {
         int i = HandIndex(cmd);
@@ -277,10 +228,19 @@ public class ComboInputBuffer : MonoBehaviour
             return;
         }
 
+        handAnimEnd[i] = Time.time;
         handBusyUntil[i] = Time.time + Mathf.Max(0f, seconds);
 
         if (verboseLog)
             PlayerLog.Info($"[连招] {cmd} 进入后摇 {seconds:F2}s");
+    }
+
+    /// <summary>立刻解锁一只手（招式作废 / 被冲刺滑铲打断）</summary>
+    private void FreeHand(InputCmd cmd)
+    {
+        int i = HandIndex(cmd);
+        handAnimEnd[i] = 0f;
+        handBusyUntil[i] = 0f;
     }
 
     /// <summary>
@@ -290,18 +250,10 @@ public class ComboInputBuffer : MonoBehaviour
         => !IsHandReady(InputCmd.MainAttack) || !IsHandReady(InputCmd.SubAttack);
 
     /// <summary>
-<<<<<<< Updated upstream
-    /// 后摇是否应当锁住移动。Idle/Run 查这个。
-    /// 关掉开关就退回旧行为（后摇期间可自由走动）。
-    /// </summary>
-    public bool IsMovementLockedByRecovery()
-        => lockMovementDuringRecovery && IsAnyHandBusy();
-=======
     /// 【实验后含义已变】攻击是否仍然锁住移动。Idle/Run/路由器查这个。
     /// </summary>
     public bool IsMovementLockedByRecovery()
         => lockMovementWhileHitActive && timeline != null && timeline.AnyGroundActive();
->>>>>>> Stashed changes
 
     // ==================================================
     // 【蓄力准备窗口】攻击键已判定为长按，但人还在攻击动画 / 后摇里、蓄力还没真正放开手脚
@@ -327,8 +279,15 @@ public class ComboInputBuffer : MonoBehaviour
     {
         handBusyUntil[0] = 0f;
         handBusyUntil[1] = 0f;
+        handAnimEnd[0] = 0f;
+        handAnimEnd[1] = 0f;
         pendingHold[0] = false;
         pendingHold[1] = false;
+
+        // 受击：所有还在跑的攻击逻辑一起掐断，双蓄力的等待状态也作废
+        timeline?.VoidAll();
+        pendingDual.active = false;
+        lastSingle.valid = false;
     }
 
     void Awake()
@@ -338,8 +297,6 @@ public class ComboInputBuffer : MonoBehaviour
         state = GetComponent<PlayerState>();
         weapons = GetComponent<WeaponLoadout>();
         chargeSystem = GetComponent<PlayerChargeSystem>();
-<<<<<<< Updated upstream
-=======
 
         // 【正式版整改 批次A】时间表执行器常驻在玩家 prefab 上，不在运行时 AddComponent
         // 症状：试验版在这里 AddComponent 补挂，违反"组件常驻、禁止运行时增删"
@@ -352,7 +309,6 @@ public class ComboInputBuffer : MonoBehaviour
                 "[连招] 玩家身上缺少 AttackTimelineRunner 组件，攻击 / 冲刺 / 滑铲会报空引用。\n" +
                 "请在玩家 prefab 上添加：Add Component → Attack Timeline Runner，然后 Apply。", this);
         }
->>>>>>> Stashed changes
     }
 
     private float ComboWindowTolerance
@@ -392,6 +348,14 @@ public class ComboInputBuffer : MonoBehaviour
             }
         }
 
+        // ---- 1.5 双蓄力判定方式 A：挂起的第一发等不到第二发 → 按单蓄力打出 ----
+        if (pendingDual.active && Time.time >= pendingDual.expire)
+        {
+            PendingDual p = pendingDual;
+            pendingDual.active = false;
+            FireSingle(p.cmd, p.level);
+        }
+
         // ---- 2. 长按意图兑现（后摇期间被暂存的那一次）----
         TryFlushPendingHold(InputCmd.MainAttack, player != null && player.isMainAttackHeld);
         TryFlushPendingHold(InputCmd.SubAttack, player != null && player.isSubAttackHeld);
@@ -425,38 +389,22 @@ public class ComboInputBuffer : MonoBehaviour
     {
         if (currentNode == null) return;
 
-        if (IsInCombatStance)
+        // 攻击动画还在演 / 飞行攻击中：不判超时
+        if (sm.currentState == sm.comboState || sm.currentState == sm.flyCombatState) return;
+
+        // 冲刺 / 滑铲永不打断连段（R1）：这段时间不计入窗口
+        if (sm.currentState == sm.dashState || sm.currentState == sm.slideState)
         {
-            comboIdleTimer = 0f;
+            comboExpireTime += Time.deltaTime;
             return;
         }
 
-        if (!allowCancelWindowRecovery)
+        // 【实验改动 · R3】连段窗口 = 这一招的总时长（前摇 + 攻击 + 后摇）走完 + Combo Window，
+        // 用绝对时刻记（出招时算好）。
+        // 窗口内没有新的【平a】→ 归零；蓄力输入不延长窗口 —— 正在蓄的力不受影响，继续蓄。
+        if (Time.time > comboExpireTime)
         {
-<<<<<<< Updated upstream
-            if (verboseLog) Debug.Log("[连招] 离开战斗姿态，立刻断档");
-            ResetCombo();
-            return;
-        }
-
-        comboIdleTimer += Time.deltaTime;
-
-        // 【修复】连段存活时长 = Recovery Time + Combo Window
-        //
-        // 原先两个计时是【并行】的：Combo Window 从动画结束那一刻就开始走，
-        // 和 Recovery Time 同时跑。后摇 0.35 + 窗口 0.5 的话，
-        // 玩家真正能接的窗口只剩 0.15 秒，而且后摇越长窗口越短 —— 很反直觉。
-        //
-        // 改成串行后，时间轴是：
-        //     动画演完 → Recovery Time（不能出招）→ Combo Window（可接）→ 重置
-        // 两个参数各管各的，调其中一个不会挤压另一个。
-        float limit = currentNode.recoveryTime + currentNode.comboWindow + ComboWindowTolerance;
-        if (comboIdleTimer > limit)
-        {
-            if (verboseLog) Debug.Log($"[连招] 闲置 {comboIdleTimer:F2}s 超过 {limit:F2}s，断档");
-=======
             if (verboseLog) PlayerLog.Info("[连招] 连段窗口到期，段数归零");
->>>>>>> Stashed changes
             ResetCombo();
         }
     }
@@ -474,6 +422,17 @@ public class ComboInputBuffer : MonoBehaviour
     {
         if (!AcceptsAttackInput(cmd)) return;
 
+        // 【实验改动】飞行中的点按 = 一发飞行攻击（原先是"按下那一刻"就出，且按住会连发）。
+        // 飞行中现在可以蓄力，所以和地面一样先分辨点按 / 长按：点按出飞行攻击，长按蓄力。
+        if (sm.IsFlying)
+        {
+            sm.flyCombatState.QueueAttack(cmd);
+
+            // 已经在交战模式里 → 排上队就行，演完当前这招自然轮到它
+            if (sm.currentState == sm.flyState) sm.ChangeState(sm.flyCombatState);
+            return;
+        }
+
         hasBufferedInput = true;
         bufferedCmd = cmd;
         bufferTimer = bufferLifespan;
@@ -490,21 +449,6 @@ public class ComboInputBuffer : MonoBehaviour
     {
         if (!AcceptsAttackInput(cmd)) return;
 
-        // 同手后摇中不能起蓄力（普攻也不行，规则一致）。
-        // 但【不能直接丢弃】—— 存下来等后摇结束再兑现，
-        // 否则这一次按键就彻底消失了，玩家会觉得"按了没反应"。
-        if (!IsHandReady(cmd))
-        {
-            pendingHold[HandIndex(cmd)] = true;
-            if (verboseLog)
-            {
-                Debug.Log(IsHandAttacking(cmd)
-                    ? $"[连招] {cmd} 出招中，长按意图已暂存"
-                    : $"[连招] {cmd} 后摇中（剩 {GetHandRecoveryRemaining(cmd):F2}s），长按意图已暂存");
-            }
-            return;
-        }
-
         if (chargeSystem == null)
         {
             Debug.LogError("[连招] 缺少 PlayerChargeSystem 组件，无法蓄力。", this);
@@ -514,19 +458,8 @@ public class ComboInputBuffer : MonoBehaviour
         // 这只手已经在蓄了就别重复开始
         if (chargeSystem.IsCharging(cmd)) return;
 
-        hasBufferedInput = false;
+        int i = HandIndex(cmd);
 
-<<<<<<< Updated upstream
-        // 【P3 改动】不再 ChangeState —— 蓄力已经不是状态了。
-        // 玩家仍然待在 Idle / Run / Jump 里，只是某只手攥着一个充能物。
-        // 于是跳跃、跑动自然可用，另一只手也能正常打连招。
-        // 【顺序】先读连段信息再清连段，清零之后就读不到了：
-        //   起步等级 = 刚打到第几段（A1 后 1、A2 后 2、A3 后 3；原地起手 0）
-        //   保险锁   = 刚打完那一招的 chargeMinHoldAfter（按住不满就松手 = 什么都不放）
-        bool afterCombo = IsChargeAfterCombo;
-        int startLevel = Mathf.Clamp(comboDepth, 0, WeaponMoveSet.MaxChargeLevel);
-        float minHold = (startLevel > 0 && currentNode != null) ? currentNode.chargeMinHoldAfter : 0f;
-=======
         // 这只手刚放完蓄力（之后还没人打过平a）→ 这次长按按"原地起手"从头蓄（见下）。
         // 只看这只手自己：另一只手放蓄力不影响这只手"平a后接蓄力"的判定
         bool afterChargeRelease = HandJustReleasedCharge(cmd);
@@ -572,23 +505,26 @@ public class ComboInputBuffer : MonoBehaviour
         chargeIsAfterCombo[HandIndex(cmd)] = afterCombo;
 
         if (hasBufferedInput && bufferedCmd == cmd) hasBufferedInput = false;
->>>>>>> Stashed changes
 
         // 换手蓄力时人可能还在攻击动画 / 后摇里 —— 记下来，让蓄力准备窗口把这段也算进去
         chargeBeganInsideAttack = sm.currentState == sm.comboState || IsAnyHandBusy();
 
-        chargeSystem.BeginCharge(cmd, startLevel, minHold, afterCombo);
+        // 起步时间：
+        //   平a后接蓄力（含原地 A1/B1 起手之后）→ chargeStartHoldTime（0.3s）就进入对应等级
+        //   连段为 0 的原地起手                 → 要按住满武器的 Lv1 阈值（1s）才到 1 级
+        float startHold = chargeStartHoldTime;
+        if (!afterCombo)
+        {
+            WeaponMoveSet w = weapons != null ? weapons.GetWeaponForCommand(cmd) : null;
+            startHold = w != null ? w.chargeTimeLv1 : 1f;
+        }
 
-        // 【规则】蓄力一开始，协助手的连段从第 1 段重新计数。
-        // 例：A1 → A2（第2段）→ 长按左键蓄力 → 此时按右键打出的是 b1，不是 b3
-        ResetCombo();
+        chargeSystem.BeginCharge(cmd, startLevel, startHold, afterCombo);
+
+        // 【实验改动 · R6】蓄力开始不再清连段 —— 一只手蓄着，另一只手的平a段数照常往下数。
 
         if (verboseLog)
-<<<<<<< Updated upstream
-            Debug.Log($"[连招] {cmd} 长按确认 → 开始蓄力（起步 {startLevel} 级，保险锁 {minHold:F2}s）");
-=======
             PlayerLog.Info($"[连招] {cmd} 长按确认 → 开始蓄力（起步 {startLevel} 级，起步时间 {startHold:F2}s，{(afterCombo ? "平a后" : "原地起手")}）");
->>>>>>> Stashed changes
     }
 
     /// <summary>
@@ -610,14 +546,10 @@ public class ComboInputBuffer : MonoBehaviour
         if (!IsHandReady(cmd)) return;
 
         pendingHold[i] = false;
-<<<<<<< Updated upstream
-        OnAttackHold(cmd);
-=======
 
         if (!AcceptsAttackInput(cmd)) return;
 
         BeginChargeNow(cmd, pendingHoldLevel[i], pendingHoldAfterCombo[i]);
->>>>>>> Stashed changes
     }
 
     /// <summary>
@@ -627,12 +559,7 @@ public class ComboInputBuffer : MonoBehaviour
     {
         if (cmd != InputCmd.MainAttack && cmd != InputCmd.SubAttack) return false;
 
-<<<<<<< Updated upstream
-        // 飞行中的攻击走 OnAttackPressedInFlight，地面的点按/长按/蓄力一律不收
-        if (sm.IsFlying) return false;
-=======
         // 飞行中不整体拒收：点按在 OnAttackTap 里转成飞行攻击，长按照常蓄力。
->>>>>>> Stashed changes
         if (sm.currentState == sm.hitState) return false;
 
         return true;
@@ -649,14 +576,11 @@ public class ComboInputBuffer : MonoBehaviour
 
         ChargeModule module = chargeSystem.GetModule(cmd);
 
-        // 必须在 ReleaseCharge 之前读（虽然 Stop() 刻意不清等级，但依赖"别人没清"是脆的）
+        // 必须在 ReleaseCharge 之前读
         int level = module != null ? module.CurrentLevel : 0;
 
         ChargeReleaseResult result = chargeSystem.ReleaseCharge(cmd);
 
-<<<<<<< Updated upstream
-        if (result == ChargeReleaseResult.Fired)
-=======
         // 【实验改动】没过起步时间就松手（Aborted）：什么都不放，连段也不动。
         if (result != ChargeReleaseResult.Fired) return;
 
@@ -678,26 +602,40 @@ public class ComboInputBuffer : MonoBehaviour
 
         // ---- A：另一只手的第一发正挂着等我 ----
         if (pendingDual.active && pendingDual.cmd == other)
->>>>>>> Stashed changes
         {
-            if (!TryReleaseCharge(cmd, level))
+            PendingDual p = pendingDual;
+            pendingDual.active = false;
+
+            DualChargeRecipe recipe = FindDualRecipe(p.cmd, p.level, cmd, level);
+            if (recipe != null)
             {
-                // 蓄到了但招式表没配全 —— 已经在 TryReleaseCharge 里打过诊断日志
-                ResetCombo();
+                FireDual(recipe, cmd, null);
                 return;
             }
 
-            if (verboseLog) Debug.Log($"[蓄力] 打出 AA{level}");
+            // 查不到配方 → 两发单蓄力先后打出
+            FireSingle(p.cmd, p.level);
+            FireSingle(cmd, level);
             return;
         }
 
-        if (result == ChargeReleaseResult.Aborted)
+        // ---- B：另一只手刚在窗口内放过一发（当时我也在有效蓄力）→ 撤掉它换强化招 ----
+        if (!modeA && lastSingle.valid && lastSingle.cmd == other && lastSingle.otherWasValid
+            && Time.time - lastSingle.time <= window)
         {
-            // 还没到 1 级就松手：什么都不放，连段清零（"蓄力是一场赌注"的实现处）
-            ResetCombo();
+            DualChargeRecipe recipe = FindDualRecipe(lastSingle.cmd, lastSingle.level, cmd, level);
+            if (recipe != null)
+            {
+                AttackInstance first = lastSingle.instance;
+                lastSingle.valid = false;
+
+                // 第一发：动画（由强化招顶掉）、判定、子弹、特效全停
+                timeline.KillAll(first);
+
+                FireDual(recipe, cmd, first);
+                return;
+            }
         }
-<<<<<<< Updated upstream
-=======
 
         // ---- A：另一只手也在有效蓄力 → 先挂起，等它松手 ----
         if (modeA && chargeSystem != null && chargeSystem.IsValidCharging(other))
@@ -774,7 +712,6 @@ public class ComboInputBuffer : MonoBehaviour
         sm.ChangeState(sm.comboState);
 
         if (verboseLog) PlayerLog.Info($"[双蓄] 强化招：{recipe.result.nodeName}（配方 {recipe.name}），连段归零");
->>>>>>> Stashed changes
     }
 
     // ==================================================
@@ -782,29 +719,6 @@ public class ComboInputBuffer : MonoBehaviour
     // ==================================================
 
     /// <summary>
-<<<<<<< Updated upstream
-    /// 飞行中按下攻击键。由 PlayerController 在【按下那一刻】调用。
-    ///
-    /// 飞行中没有蓄力，所以不需要 0.15 秒的点按/长按判定 —— 按下立刻出招。
-    /// 具体打哪一招、何时打由 FlyCombatState 负责，这里只负责"把人送进交战模式"。
-    /// </summary>
-    /// <returns>true = 已作为飞行攻击处理，调用方不要再走地面的点按/长按流程</returns>
-    public bool OnAttackPressedInFlight(InputCmd cmd)
-    {
-        if (cmd != InputCmd.MainAttack && cmd != InputCmd.SubAttack) return false;
-        if (!sm.IsFlying) return false;
-
-        sm.flyCombatState.QueueAttack(cmd);
-
-        // 已经在交战模式里 → 排上队就行，演完当前这招自然轮到它
-        if (sm.currentState == sm.flyState) sm.ChangeState(sm.flyCombatState);
-
-        return true;
-    }
-
-    /// <summary>
-=======
->>>>>>> Stashed changes
     /// 飞行攻击出手：把这只手武器上配的「飞行攻击」登记为当前招式。
     /// </summary>
     /// <returns>本次出的招；武器或招式没配时返回 null</returns>
@@ -832,9 +746,6 @@ public class ComboInputBuffer : MonoBehaviour
         LastTriggerCmd = cmd;
         ActiveWeapon = weapon;
 
-<<<<<<< Updated upstream
-        if (verboseLog) Debug.Log($"[飞行攻击] {node.nodeName}（{weapon.displayName}）");
-=======
         // 【实验改动】判定/子弹/特效改由时间表执行，飞行攻击也要开一份攻击实例。
         // 飞行攻击一次只有一份：上一份还没走完就掐掉（和旧版"新招顶掉旧判定"一致）
         if (flyInstance != null) timeline.Void(flyInstance);
@@ -842,14 +753,22 @@ public class ComboInputBuffer : MonoBehaviour
         currentNodeIsFly = true;
 
         if (verboseLog) PlayerLog.Info($"[飞行攻击] {node.nodeName}（{weapon.displayName}）");
->>>>>>> Stashed changes
         return node;
     }
 
     /// <summary>离开飞行战斗时调用：清掉登记的招式，落地后连段从第 1 段开始</summary>
     public void EndFlyAttack()
     {
-        ResetCombo();
+        if (flyInstance != null)
+        {
+            timeline.Void(flyInstance);
+            flyInstance = null;
+        }
+
+        // 只清飞行攻击自己登记的"当前招式"。
+        // 飞行中松手放蓄力时，蓄力招已经先登记好了才切状态（FlyCombatState.Exit 会调到这里），
+        // 这时再清连段会把刚登记的蓄力招抹掉。
+        if (currentNodeIsFly) ResetCombo();
     }
 
     // ==================================================
@@ -881,13 +800,6 @@ public class ComboInputBuffer : MonoBehaviour
         // ==================================================
         // 取消权限：当前招式允许被这个键【派生】吗？
         // ==================================================
-<<<<<<< Updated upstream
-        if (currentNode != null && comboDepth > 0
-            && !currentNode.CanBeCanceledBy(bufferedCmd))
-        {
-            if (verboseLog)
-                Debug.Log($"[连招] {currentNode.nodeName} 不允许被 {bufferedCmd} 派生（连段第 {comboDepth} 段）");
-=======
         ComboNode animating = (sm.currentState == sm.comboState && CurrentInstance != null)
             ? CurrentInstance.node
             : null;
@@ -896,7 +808,6 @@ public class ComboInputBuffer : MonoBehaviour
         {
             if (verboseLog)
                 PlayerLog.Info($"[连招] {animating.nodeName} 演出中不允许被 {bufferedCmd} 打断");
->>>>>>> Stashed changes
             return false;
         }
 
@@ -915,13 +826,8 @@ public class ComboInputBuffer : MonoBehaviour
             // 说明 A2 没配对 —— 下面这条日志能直接看出是哪一环出了问题。
             if (verboseLog)
             {
-<<<<<<< Updated upstream
-                Debug.Log(
-                    $"[连招诊断] {bufferedCmd} 在深度 {comboDepth + 1} 找不到后续。" +
-=======
                 PlayerLog.Info(
                     $"[连招诊断] {bufferedCmd} 在深度 {NextDepth(comboDepth)} 找不到后续。" +
->>>>>>> Stashed changes
                     $"当前招式={currentNode.nodeName}，候选数={candidateBuffer.Count}。" +
                     "候选数为 0 → 检查武器 Follow Ups 有没有配；" +
                     "候选数不为 0 → 检查这些节点的 Min/Max Combo Depth 与 Input Sequence。");
@@ -1002,12 +908,8 @@ public class ComboInputBuffer : MonoBehaviour
             return false;
         }
 
-<<<<<<< Updated upstream
-        hasBufferedInput = false;
-=======
         // 只清这只手的预输入：另一只手存着的那一下不能被这次放蓄力吞掉
         if (hasBufferedInput && bufferedCmd == cmd) hasBufferedInput = false;
->>>>>>> Stashed changes
         SetCurrentNode(match, cmd);
         sm.ChangeState(sm.comboState);
 
@@ -1035,13 +937,9 @@ public class ComboInputBuffer : MonoBehaviour
         // ==================================================
         // 【判"有没有连段"要看深度，不能只看指针】
         // ==================================================
-<<<<<<< Updated upstream
-        if (currentNode == null || comboDepth <= 0)
-=======
         int nextDepth = NextDepth(comboDepth);
 
         if (currentNode == null || comboDepth <= 0 || nextDepth == 1)
->>>>>>> Stashed changes
         {
             int depth = 1;
 
@@ -1059,8 +957,6 @@ public class ComboInputBuffer : MonoBehaviour
 
             return;
         }
-
-        int nextDepth = comboDepth + 1;
 
         AddCandidates(currentNode.childNodes, nextDepth);          // 同武器固定衔接
         if (weapon != null)
@@ -1178,30 +1074,42 @@ public class ComboInputBuffer : MonoBehaviour
         return false;
     }
 
-<<<<<<< Updated upstream
-    private void SetCurrentNode(ComboNode node, InputCmd triggerCmd)
-=======
     /// <summary>
     /// 登记一次出招：改连段、锁手、算连段窗口，并开一份攻击实例（判定/子弹/特效由它按时间表执行）。
     /// </summary>
     /// <param name="dual">是否双蓄力强化招</param>
     private void SetCurrentNode(ComboNode node, InputCmd triggerCmd,
                                 bool dual = false, WeaponMoveSet weaponOverride = null)
->>>>>>> Stashed changes
     {
+        // ---- 回退快照：冲刺/滑铲打断前摇时"本招不算"，段数退回到这里 ----
+        ComboNode prevNode = currentNode;
+        int prevDepth = comboDepth;
+        InputCmd prevCmd = LastTriggerCmd;
+        WeaponMoveSet prevWeapon = ActiveWeapon;
+        float prevExpire = comboExpireTime;
+
+        // ---- 上一招的动画被这一招顶掉：逻辑照常跑完，只是不再是动画的主人 ----
+        AttackInstance prevInst = CurrentInstance;
+        if (prevInst != null)
+        {
+            // 换手抢拍：后摇可以被另一只手顶掉 —— 被顶掉的那只手等到它自己的【攻击段】结束就能再用，
+            // 不用把后摇走完（Recovery Time 取消后，"换手可以抢拍"靠这一条保留）
+            if (prevInst.ownsAnimation && prevInst.node != null
+                && sm.currentState == sm.comboState && prevInst.cmd != triggerCmd)
+            {
+                int pi = HandIndex(prevInst.cmd);
+                if (handAttackId[pi] == prevInst.attackId)
+                {
+                    float activeEndAt = Mathf.Max(Time.time, prevInst.startTime + prevInst.activeEnd);
+                    handAnimEnd[pi] = Mathf.Min(handAnimEnd[pi], activeEndAt);
+                    handBusyUntil[pi] = Mathf.Min(handBusyUntil[pi], activeEndAt);
+                }
+            }
+
+            prevInst.ownsAnimation = false;
+        }
+
         currentNode = node;
-<<<<<<< Updated upstream
-
-        // 【规则】蓄力招不推进段数，而是把连段计数归零 —— 打完蓄力招后普攻从第 1 段重新开始。
-        if (node.isChargeSkill) comboDepth = 0;
-        else comboDepth++;
-        comboIdleTimer = 0f;
-        LastTriggerCmd = triggerCmd;
-
-        // 出招即锁本手，直到招式结束才开始算后摇。
-        // 另一只手不受影响，这就是换手抢拍的基础。
-        MarkHandBusy(triggerCmd);
-=======
         currentNodeIsFly = false;
 
         // 飞行中放出来的招（或顶掉了一招"要回飞行"的招）→ 进入后摇后自动回到飞行状态
@@ -1234,9 +1142,29 @@ public class ComboInputBuffer : MonoBehaviour
         ActiveWeapon = weaponOverride != null
             ? weaponOverride
             : (weapons != null ? weapons.GetWeaponForCommand(triggerCmd) : null);
->>>>>>> Stashed changes
 
-        ActiveWeapon = weapons != null ? weapons.GetWeaponForCommand(triggerCmd) : null;
+        // ---- 锁手：到这一招的总时长（前摇 + 攻击 + 后摇）走完。另一只手不受影响（强化招两只手一起锁）----
+        float duration = AttackTimelineRunner.ExpectedDuration(node);
+        const float recovery = 0f;   // 旧的"动画播完再加一段 Recovery Time"已并入总时长
+
+        int id = MarkHandBusy(triggerCmd, duration, recovery);
+        if (dual) MarkHandBusy(OtherHand(triggerCmd), duration, recovery);
+
+        // ---- 连段窗口：总时长走完 + comboWindow ----
+        comboExpireTime = Time.time + duration + recovery + node.comboWindow + ComboWindowTolerance;
+
+        // ---- 攻击实例 ----
+        AttackInstance inst = timeline.Begin(node, ActiveWeapon, triggerCmd);
+        inst.attackId = id;
+        inst.isChargeRelease = node.isChargeSkill;
+        inst.isDual = dual;
+        inst.resumeFlight = resumeFlight;
+        inst.prevNode = prevNode;
+        inst.prevDepth = prevDepth;
+        inst.prevCmd = prevCmd;
+        inst.prevWeapon = prevWeapon;
+        inst.prevExpire = prevExpire;
+        CurrentInstance = inst;
 
         if (verboseLog)
         {
@@ -1246,14 +1174,6 @@ public class ComboInputBuffer : MonoBehaviour
     }
 
     /// <summary>
-<<<<<<< Updated upstream
-    /// 【兼容层】原本由动画事件 OnAttackAnimationEnd 调用。
-    /// 现在生命周期由 TickComboIdle 全权管理，本方法只是把计时器归零。
-    /// </summary>
-    public void StartGracePeriod()
-    {
-        comboIdleTimer = 0f;
-=======
     /// 攻击动画播完（动画事件 OnAttackAnimationEnd / ComboState 的兜底超时 / 总时长走完）。
     /// </summary>
     public void StartGracePeriod()
@@ -1331,18 +1251,17 @@ public class ComboInputBuffer : MonoBehaviour
 
         pendingDual.active = false;
         lastSingle.valid = false;
->>>>>>> Stashed changes
     }
 
     /// <summary>
     /// 清空连段。
     ///
-    /// 【注意】不清手部后摇 —— 连段断了不代表手就闲下来了。
-    /// 比如蓄力失败时连段归零，但那只手的后摇仍然该走完。
+    /// 【注意】不清手部后摇，也不动正在跑的攻击实例 —— 连段断了不代表手就闲下来了。
     /// </summary>
     public void ResetCombo()
     {
         currentNode = null;
+        currentNodeIsFly = false;
         comboDepth = 0;
         hasBufferedInput = false;
         ActiveWeapon = null;

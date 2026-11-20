@@ -89,27 +89,6 @@ public class ComboNode : ScriptableObject
     [Header("节点基础属性")]
     public string nodeName = "XXX";
 
-<<<<<<< Updated upstream
-    [Tooltip("本招打完后，玩家有多久时间可以接下一招。超时则连招断档回到起手")]
-    public float comboWindow = 0.5f;
-
-    [Tooltip(
-        "后摇时长（秒）—— 打出本招后，【同一只手】要等这么久才能再出招。\n\n" +
-        "换手不受影响，这正是「换手可以抢拍」的实现基础。\n\n" +
-        "刻意用参数而不是读动画长度：动画后期会替换，\n" +
-        "参数化才不会每换一次美术就要重调手感。\n" +
-        "蓄力招按等级填，等级越高锁越久。")]
-    public float recoveryTime = 0.35f;
-
-    [Tooltip(
-        "【普攻后蓄力最短时长】（秒）—— 只对普通攻击生效，蓄力招填了也不用。\n\n" +
-        "打完本招接长按蓄力时，蓄力直接从「本段对应的等级」起步（第 1 段 → AA1，第 2 段 → AA2…），\n" +
-        "但必须按住满这么久才解锁；不满就松手 = 什么都不放。\n\n" +
-        "从进入蓄力姿态那一刻（长按判定成立时）开始计。\n" +
-        "这段时间同时也计入升级进度，不是先等完再开始攒。")]
-    [Min(0f)]
-    public float chargeMinHoldAfter = 0.5f;
-=======
     // ==========================================================
     // 连段窗口 / 三段时长 —— 已搬到 1_Config/P_Animation 的 AttackTimingConfig（招式节拍总表）
     // 这里留同名的只读属性去查表，用到它们的代码不用改。
@@ -127,7 +106,6 @@ public class ComboNode : ScriptableObject
 
     /// <summary>后摇时长，-1 = 跟动画事件走（查 AttackTimingConfig）</summary>
     public float recoveryOverride => AttackTimingConfig.GetRecovery(this);
->>>>>>> Stashed changes
 
     [Header("连段窗口 / 三段时长 / 动画与表现 / 蓄力位移 → 在节拍总表（1_Config/P_Animation）里调")]
     [Header("触发限制条件 (Trigger Requirements)")]
@@ -386,8 +364,6 @@ public class ComboNode : ScriptableObject
         return hitboxOffset;
     }
 
-<<<<<<< Updated upstream
-=======
     /// <summary>
     /// 在 Inspector 里右键组件标题 → 「打印三段时长」：
     /// 把本招最终生效的 前摇 / 攻击 / 后摇 打到 Console，并说明每一段是从动画读的还是手填的。
@@ -424,7 +400,6 @@ public class ComboNode : ScriptableObject
             $"  总时长 {windup + active + recovery:F3}s，之后还有 {comboWindow:F2}s 连段窗口", this);
     }
 
->>>>>>> Stashed changes
     /// <summary>本招是否为蓄力招（且等级配置有效）</summary>
     public bool IsValidChargeNode => isChargeSkill && chargeLevel > 0;
 

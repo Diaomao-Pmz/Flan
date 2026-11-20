@@ -31,13 +31,6 @@ MonoBehaviour:
     hitboxSize: {x: 1, y: 2}
     damage: 20
     swingAnimName: 
-  - windupTime: 0.5
-    hitboxDuration: 0.5
-    recoverTime: 0.2
-    hitboxOffset: {x: 1, y: 0}
-    hitboxSize: {x: 3, y: 1}
-    damage: 20
-    swingAnimName: 
   faceTargetEachSwing: 1
   autoRangeFromHitbox: 1
   autoRangeMargin: 0.2

@@ -11,8 +11,6 @@ public class FallState : PlayerStateBase
     private bool pendingInvulnerableDrop;
     private bool isInvulnerableDrop;
 
-<<<<<<< Updated upstream
-=======
     // 【2026-11-16】空中按 Ctrl 的下落（空中滑铲）：无论有没有无敌，落地都切进蹲下姿态
     private bool pendingCtrlDrop;
     private bool isCtrlDrop;
@@ -43,7 +41,6 @@ public class FallState : PlayerStateBase
         else pendingInvulnerableDrop = false;
     }
 
->>>>>>> Stashed changes
     /// <summary>
     /// 让【下一次】进入下落时变成无敌下坠。必须在 ChangeState(fallState) 之前调用，用一次就清。
     /// PlayerMovementConfig 里关掉「空中 Ctrl 下落无敌」时不生效。
@@ -65,8 +62,6 @@ public class FallState : PlayerStateBase
         isInvulnerableDrop = pendingInvulnerableDrop;
         pendingInvulnerableDrop = false;
 
-<<<<<<< Updated upstream
-=======
         isCtrlDrop = pendingCtrlDrop;
         pendingCtrlDrop = false;
 
@@ -74,7 +69,6 @@ public class FallState : PlayerStateBase
         pendingCtrlDropCooldownReady = false;
         lastHorizontalInputTime = -10f;
 
->>>>>>> Stashed changes
         if (isInvulnerableDrop)
             sm.playerState?.health.RequestUntargetable(InvulnerableTokens.FlightDrop);
     }
@@ -87,9 +81,6 @@ public class FallState : PlayerStateBase
 
         if (sm.IsGrounded())
         {
-<<<<<<< Updated upstream
-            HandleLanding();
-=======
             if (!isCtrlDrop)
             {
                 HandleLanding();
@@ -111,25 +102,11 @@ public class FallState : PlayerStateBase
             {
                 sm.ChangeState(sm.crouchState);
             }
->>>>>>> Stashed changes
         }
     }
 
     public override void FixedUpdate()
     {
-<<<<<<< Updated upstream
-        // 空中蓄力：钉在原地悬停（详见 PlayerStateBase.PinInAirWhileCharging）。
-        // 下落状态里 y 速度本来就 <= 0，所以这里几乎总是成立 ——
-        // 但仍然走同一个判据，免得两张卡带的规则各写一套、日后走偏。
-        if (IsAirChargePinned)
-        {
-            PinInAirWhileCharging();
-            return;
-        }
-
-        // 蓄力一结束立刻还原重力，否则松手后角色会一直浮到状态切换为止
-        sm.rb.gravityScale = originalGravity;
-=======
         // 空中 Ctrl 下落：重力乘以配置的倍率（默认 1 = 不加速）
         float dropMultiplier = 1f;
         if (isCtrlDrop)
@@ -139,7 +116,6 @@ public class FallState : PlayerStateBase
         }
 
         sm.rb.gravityScale = originalGravity * dropMultiplier;
->>>>>>> Stashed changes
 
         ApplyHorizontalMove();
     }
@@ -147,6 +123,8 @@ public class FallState : PlayerStateBase
     public override void Exit()
     {
         sm.rb.gravityScale = originalGravity;
+
+        isCtrlDrop = false;
 
         if (isInvulnerableDrop)
         {

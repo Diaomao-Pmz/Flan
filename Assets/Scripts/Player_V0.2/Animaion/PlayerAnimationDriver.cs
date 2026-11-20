@@ -190,6 +190,9 @@ namespace Flandre.CombatSystem
             if (sm.currentState == sm.comboState) return false;
             if (sm.currentState == sm.hitState) return false;
 
+            // 飞行中一只手蓄力、另一只手点按出飞行攻击时，攻击动画不被蓄力姿势盖掉
+            if (sm.currentState == sm.flyCombatState) return false;
+
             // 默认在所有移动状态下都保持蓄力姿势。
             // 勾上 overlayOnlyWhenIdle 才退回"只在静止时覆盖"。
             if (overlayOnlyWhenIdle && sm.currentState != sm.idleState) return false;

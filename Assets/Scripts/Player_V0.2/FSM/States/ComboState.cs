@@ -43,6 +43,15 @@ public class ComboState : PlayerStateBase
     /// </summary>
     private WeaponMoveSet ownerWeapon;
 
+    /// <summary>
+    /// 【实验】本招的攻击实例（判定/子弹/特效与阶段都在它身上）。
+    /// 本状态只管"动画 + 身体"：动画被顶掉或取消后，实例照常自己跑完。
+    /// </summary>
+    private AttackInstance instance;
+
+    /// <summary>出招那一刻方向键的左右（-1/0/1）。前摇里只有【出招之后新按下/换向】才算移动取消</summary>
+    private int baselineMoveSign;
+
     // 兜底超时
     private float timeoutLimit;
     private float elapsed;
@@ -77,10 +86,12 @@ public class ComboState : PlayerStateBase
         wasAirborneOnEnter = !sm.IsGrounded();
 
         isBodyAdjusting = false;
+        instance = Buffer.CurrentInstance;
         activeNode = Buffer.currentNode;
         ownerCmd = Buffer.LastTriggerCmd;
         ownerAttackId = Buffer.GetHandAttackId(ownerCmd);
         ownerWeapon = Buffer.ActiveWeapon;
+        baselineMoveSign = MoveSign();
 
         // 空中连段反重力悬停：把角色钉在空中，防止挥剑时诡异下滑
         if (wasAirborneOnEnter)
@@ -132,8 +143,6 @@ public class ComboState : PlayerStateBase
             return;
         }
 
-<<<<<<< Updated upstream
-=======
         // 【实验】飞行中放出来的蓄力招：进入后摇阶段就回到飞行状态
         if (TryResumeFlight(force: false)) return;
 
@@ -151,12 +160,14 @@ public class ComboState : PlayerStateBase
             return;
         }
 
->>>>>>> Stashed changes
         // 后摇取消检测
         if (isCancelable)
         {
             if (Buffer.TryAdvanceCombo()) return;
         }
+
+        // 【实验 · R1】前摇 / 后摇里的方向键移动取消（跳跃、飞行、冲刺、滑铲由路由器处理）
+        if (TryMovementCancel()) return;
 
         // 【P1b 改动】攻击动画中【不再】响应方向键转向。
 
@@ -189,8 +200,6 @@ public class ComboState : PlayerStateBase
     }
 
     /// <summary>
-<<<<<<< Updated upstream
-=======
     /// 【实验】飞行中松手放蓄力 → 人先变回地面状态把这一招打出来 → 进入后摇阶段后回到飞行状态。
     /// </summary>
     /// <param name="force">动画已经播完（没有后摇可等了）：不看阶段，直接回</param>
@@ -262,7 +271,6 @@ public class ComboState : PlayerStateBase
     }
 
     /// <summary>
->>>>>>> Stashed changes
     /// 【P1b 新增】攻击动画中按住 Ctrl 微调身位。
     /// </summary>
     private void TickBodyAdjust()
@@ -596,11 +604,12 @@ public class ComboState : PlayerStateBase
 
     public override void Exit()
     {
-        // 招式结束 → 这只手开始算后摇。
-        // 无论是正常收招、被换手抢拍、还是被打断，都走这一条路，
-        // 所以不存在"某种结束方式漏了没开始后摇"的可能。
-        float recovery = ResolveRecoveryTime();
-        Buffer?.BeginHandRecovery(ownerCmd, recovery, ownerAttackId);
+        // 【实验改动】这里不再碰判定、连射和手部后摇：
+        //   · 判定 / 连射 / 特效归攻击实例管，动画被顶掉或取消后照常跑完（R5「只打断动画、不打断逻辑」）
+        //   · 这只手锁到「前摇 + 攻击 + 后摇」走完，出招时就算好了，和动画何时结束无关
+        //   · 该掐断判定的场合（冲刺/滑铲、前摇作废、受击）由 Buffer 的对应入口显式处理
+        if (instance != null) instance.ownsAnimation = false;
+        instance = null;
 
         // 攻击结束必须把碰撞箱还原，否则会带着蹲姿/缩腿姿态离开攻击状态
         if (isBodyAdjusting)
@@ -609,33 +618,17 @@ public class ComboState : PlayerStateBase
             isBodyAdjusting = false;
         }
 
-<<<<<<< Updated upstream
-        HitDetection?.ForceStopHitbox();
-
-        // 中断连射：否则玩家已经被击飞了，枪还在原地继续突突
-        WeaponEmitter?.CancelBurst();
-=======
         // 位移走到一半被打断（冲刺 / 受击 / 换手顶掉 / 后摇取消）：停在原地，不滑到终点
         if (thrustRunning || thrustEndPending) StopThrustVelocity();
         thrustPending = false;
         thrustRunning = false;
         thrustEndPending = false;
->>>>>>> Stashed changes
 
         sm.rb.gravityScale = originalGravity;
         activeNode = null;
         ownerWeapon = null;
     }
 
-<<<<<<< Updated upstream
-    /// <summary>本招的后摇时长 —— 就是节点上配的值，不再做任何加工</summary>
-    private float ResolveRecoveryTime()
-        => activeNode != null ? activeNode.recoveryTime : 0f;
-
-    // 【已删除】TryGetPendingStun —— 弱化蓄力打完后的大僵直（ChargeStunState）已随连放惩罚一并移除。
-
-=======
->>>>>>> Stashed changes
     /// <summary>
     /// 超时未收到 OnAttackAnimationEnd。
     /// </summary>
@@ -659,6 +652,8 @@ public class ComboState : PlayerStateBase
 
         // 走和正常收招一样的流程，保证连招宽恕期照常开始
         Buffer.StartGracePeriod();
+
+        if (TryResumeFlight(force: true)) return;
 
         if (!sm.IsGrounded()) sm.ChangeState(sm.fallState);
         else HandleLanding();

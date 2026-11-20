@@ -97,8 +97,6 @@ public class ComboSkill
 
     public void BindStats(PlayerStats playerStats) => stats = playerStats;
 
-<<<<<<< Updated upstream
-=======
     // ==========================================================
     // 【2026-11-16】冷却的基础值可以由外部提供（PlayerMovementConfig 上的 Dash / Slide Cooldown）。
     // 绑了来源之后，上面的 totalCD 不再被读取；没绑则照旧用 totalCD。
@@ -110,9 +108,8 @@ public class ComboSkill
     private float BaseCooldown
         => cooldownSource != null ? Mathf.Max(0f, cooldownSource()) : totalCD;
 
->>>>>>> Stashed changes
     public float EffectiveCooldown
-        => stats != null ? stats.ApplyCooldownReduction(totalCD) : totalCD;
+        => stats != null ? stats.ApplyCooldownReduction(BaseCooldown) : BaseCooldown;
 
     // ==========================================
     // 1. 超时检测

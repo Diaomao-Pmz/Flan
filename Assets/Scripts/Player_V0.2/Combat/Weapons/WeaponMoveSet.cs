@@ -50,14 +50,15 @@ namespace Flandre.CombatSystem
         // ==========================================================
         [Header("蓄力等级阈值 (秒 · 从等级0起算的累计时间)")]
         [Tooltip("按住多久达到 AA1")]
-        public float chargeTimeLv1 = 0.4f;
+        public float chargeTimeLv1 = 1f;
 
         [Tooltip("按住多久达到 AA2")]
-        public float chargeTimeLv2 = 0.9f;
+        public float chargeTimeLv2 = 2f;
 
-        [Tooltip("按住多久达到 AA3。到此封顶，玩家可以无限期继续举着。\n" +
-                 "按住过程中逐级升：到 Lv1 阈值是 AA1，到 Lv2 阈值是 AA2……松手打出当前达到的最高级")]
-        public float chargeTimeLv3 = 1.5f;
+        [Tooltip("按住多久达到 AA3。\n" +
+                 "【实验 R4】等级循环：1→2 等 (Lv2-Lv1)，2→3 等 (Lv3-Lv2)，3 之后再等 Lv1 回到 1 级。\n" +
+                 "起步等级由连段深度决定，起步时间见 ComboInputBuffer.chargeStartHoldTime")]
+        public float chargeTimeLv3 = 3f;
 
         [Tooltip(
             "【蓄力加速倍率】接在普攻后面的蓄力，蓄满所需时间除以本值。\n\n" +
@@ -113,6 +114,22 @@ namespace Flandre.CombatSystem
         }
 
         public const int MaxChargeLevel = 3;
+
+        /// <summary>
+        /// 【实验 R4】等级循环：从第 level 级跳到下一级要按住多久。
+        /// 由累计阈值换算：1→2 = Lv2-Lv1，2→3 = Lv3-Lv2，3→1 = Lv1。
+        /// </summary>
+        public float GetTimeToNextLevel(int level)
+        {
+            float t;
+            switch (level)
+            {
+                case 1: t = chargeTimeLv2 - chargeTimeLv1; break;
+                case 2: t = chargeTimeLv3 - chargeTimeLv2; break;
+                default: t = chargeTimeLv1; break;
+            }
+            return Mathf.Max(0.05f, t);
+        }
 
 #if UNITY_EDITOR
         private void OnValidate()

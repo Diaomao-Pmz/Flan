@@ -16,6 +16,10 @@ namespace Flandre.CombatSystem
         public const string CrouchName = "Flandre_Crouch";
         public const string SlideName = "Flandre_Slide";
         public const string FlyName = "Flandre_Fly";
+
+        // 【冲刺动画】目前还没有专门的冲刺动画，先借用滑铲的。
+        // 以后做好了：在 Animator 里加一个状态，把下面这一行改成它的状态名即可，别处不用动。
+        public const string DashName = SlideName;
         public const string ChargeName = "Flandre_Charge";
         public const string HitName = "Flandre_Hit";
 
@@ -31,6 +35,7 @@ namespace Flandre.CombatSystem
         public static readonly int Crouch = Animator.StringToHash(CrouchName);
         public static readonly int Slide = Animator.StringToHash(SlideName);
         public static readonly int Fly = Animator.StringToHash(FlyName);
+        public static readonly int Dash = Animator.StringToHash(DashName);
         public static readonly int Charge = Animator.StringToHash(ChargeName);
         public static readonly int Hit = Animator.StringToHash(HitName);
         public static readonly int Death = Animator.StringToHash(DeathName);

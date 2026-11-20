@@ -93,8 +93,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-<<<<<<< Updated upstream
-=======
     // ==========================================================
     // 【正式版整改 批次B】蓄力上限键改走 InputActions
     // 症状：试验版直接读 Mouse.current 的侧键，改不了键位，也接不了手柄
@@ -201,7 +199,6 @@ public class PlayerController : MonoBehaviour
         if (charge != null) charge.RaiseLevelCap(cmd);
     }
 
->>>>>>> Stashed changes
     /// <summary>
     /// 每帧同步指针位置。
     /// </summary>

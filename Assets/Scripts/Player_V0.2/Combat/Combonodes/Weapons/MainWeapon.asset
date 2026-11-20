@@ -26,9 +26,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6527905d3ea5fe846a2e0f7637aabd23, type: 2}
   - {fileID: 11400000, guid: ab1b05c724cbfa1439f95d6ad267956a, type: 2}
   flyAttack: {fileID: 11400000, guid: ff93485aa25713048beeb8ee1833ae9b, type: 2}
-  chargeTimeLv1: 0.5
+  chargeTimeLv1: 1
   chargeTimeLv2: 2
-  chargeTimeLv3: 3.5
+  chargeTimeLv3: 3
   comboChargeSpeedMultiplier: 1
   chargeEffectLv1: FXL_AA1
   chargeEffectLv2: FXL_AA2

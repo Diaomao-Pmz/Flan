@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Flandre.CombatSystem;
@@ -34,10 +33,6 @@ public class PlayerHitDetection : MonoBehaviour
     /// <summary>本次招式一共命中了几个目标</summary>
     public int HitCountThisAttack { get; private set; }
 
-<<<<<<< Updated upstream
-    private Coroutine activeHitboxCoroutine;
-    private readonly HashSet<Collider2D> alreadyHitEnemies = new HashSet<Collider2D>();
-=======
     // ==========================================================
     // 【实验：平a/蓄力重做】判定改为「多份并行 + 时间表驱动」
     // ==========================================================
@@ -61,19 +56,10 @@ public class PlayerHitDetection : MonoBehaviour
     }
 
     private readonly List<HitboxRun> activeRuns = new List<HitboxRun>();
->>>>>>> Stashed changes
 
     // 复用缓冲，避免每帧产生 GC
     private readonly List<Collider2D> overlapResults = new List<Collider2D>(16);
     private ContactFilter2D overlapFilter;
-    private readonly List<HitboxWindow> windowBuffer = new List<HitboxWindow>();
-
-    // 当前正在生效的窗口（供 Gizmos 精确绘制）
-    private HitboxWindow activeWindow;
-    private bool isHitboxActiveThisFrame = false;
-
-    // 整套招式期间保留全部窗口，供 Gizmos 一并画出来
-    private bool isSequenceRunning = false;
 
     void Awake()
     {
@@ -92,17 +78,10 @@ public class PlayerHitDetection : MonoBehaviour
     }
 
     // ==========================================================
-    // 动画事件入口
+    // 动画事件入口（已改为空操作）
     // ==========================================================
 
     /// <summary>
-<<<<<<< Updated upstream
-    /// 由动画事件触发：开始跑本招式的判定窗口序列。
-    ///
-    /// 一次调用跑完整个招式的所有段。
-    /// 【不要】为了做三连斩而在动画里插三个 TriggerAttackHitbox 事件 ——
-    /// 那样后面的会掐断前面的。正确做法是在 ComboNode 里配三条 HitboxWindow。
-=======
     /// 【已改为空操作】原先由动画事件触发判定。
     /// 现在判定由 AttackTimelineRunner 按时间表调用 BeginRun —— 时间点仍然取自动画里的这个事件，
     /// 所以动画上的事件【不要删】。保留本方法只是为了让 Unity 不报 "has no receiver"。
@@ -111,97 +90,125 @@ public class PlayerHitDetection : MonoBehaviour
 
     /// <summary>
     /// 【"攻击结束"时间戳】动画事件用，本身是空操作。
->>>>>>> Stashed changes
     /// </summary>
-    public void TriggerAttackHitbox()
+    public void MarkAttackEnd() { }
+
+    /// <summary>掐断所有正在跑的判定</summary>
+    public void ForceStopHitbox()
     {
-        ComboNode currentNode = player.inputBuffer.currentNode;
-        if (currentNode == null) return;
+        for (int i = 0; i < activeRuns.Count; i++)
+        {
+            activeRuns[i].done = true;
+            activeRuns[i].activeWindow = null;
+        }
+        activeRuns.Clear();
+    }
 
-        if (activeHitboxCoroutine != null) StopCoroutine(activeHitboxCoroutine);
+    // ==========================================================
+    // 判定序列（由时间表驱动）
+    // ==========================================================
 
-        alreadyHitEnemies.Clear();
+    /// <summary>开一份判定序列，并立刻做第 0 帧的检测</summary>
+    public HitboxRun BeginRun(ComboNode node)
+    {
+        if (node == null) return null;
+
+        HitboxRun run = new HitboxRun { node = node };
+
+        // 没配多段的话会自动用旧版单段参数合成一条 —— 已配好的资产无需改动
+        node.CollectWindows(run.windows);
+
         LastHitTarget = null;
         HitCountThisAttack = 0;
 
-        activeHitboxCoroutine = StartCoroutine(HitboxSequenceCoroutine(currentNode));
+        activeRuns.Add(run);
+        TickRun(run, 0f);
+        return run;
     }
 
-    public void ForceStopHitbox()
+    /// <summary>
+    /// 推进一份判定序列。口径与旧协程一致：
+    /// 各段按顺序执行，等到 startDelay 才开；duration 为 0 的段只判定一帧。
+    /// </summary>
+    public void TickRun(HitboxRun run, float dt)
     {
-        if (activeHitboxCoroutine != null)
+        if (run == null || run.done) return;
+
+        int guard = 0;
+        while (!run.done && guard++ < 64)
         {
-            StopCoroutine(activeHitboxCoroutine);
-            activeHitboxCoroutine = null;
-        }
-
-        alreadyHitEnemies.Clear();
-        activeWindow = null;
-        isHitboxActiveThisFrame = false;
-        isSequenceRunning = false;
-    }
-
-    // ==========================================================
-    // 判定序列
-    // ==========================================================
-
-    private IEnumerator HitboxSequenceCoroutine(ComboNode node)
-    {
-        // 没配多段的话会自动用旧版单段参数合成一条 —— 已配好的资产无需改动
-        node.CollectWindows(windowBuffer);
-        isSequenceRunning = true;
-
-        float sequenceTime = 0f;
-
-        for (int i = 0; i < windowBuffer.Count; i++)
-        {
-            HitboxWindow window = windowBuffer[i];
-
-            float waitTime = window.startDelay - sequenceTime;
-            if (waitTime > 0f)
+            if (run.index >= run.windows.Count)
             {
-                yield return new WaitForSeconds(waitTime);
-                sequenceTime += waitTime;
+                EndRun(run);
+                return;
             }
 
-            // 本段是否重新允许命中同一个敌人（三连斩每刀都吃伤害）
-            if (window.refreshHitList) alreadyHitEnemies.Clear();
+            HitboxWindow w = run.windows[run.index];
 
-            yield return RunSingleWindow(node, window);
+            if (!run.inWindow)
+            {
+                float wait = w.startDelay - run.seqTime;
+                if (wait > 0f)
+                {
+                    if (dt < wait)
+                    {
+                        run.seqTime += dt;
+                        return;
+                    }
+                    run.seqTime += wait;
+                    dt -= wait;
+                }
 
-            sequenceTime += Mathf.Max(0f, window.duration);
+                run.inWindow = true;
+                run.winElapsed = 0f;
+                run.activeWindow = w;
+
+                // 本段是否重新允许命中同一个敌人（三连斩每刀都吃伤害）
+                if (w.refreshHitList) run.alreadyHit.Clear();
+
+                CheckOverlap(run, w);
+
+                // duration 为 0 → 瞬间伤害，只判定一帧
+                if (w.duration <= 0f)
+                {
+                    run.inWindow = false;
+                    run.activeWindow = null;
+                    run.index++;
+                    continue;
+                }
+                return;
+            }
+
+            run.winElapsed += dt;
+            dt = 0f;
+
+            if (run.winElapsed < w.duration)
+            {
+                CheckOverlap(run, w);
+                return;
+            }
+
+            run.inWindow = false;
+            run.activeWindow = null;
+            run.seqTime += Mathf.Max(0f, w.duration);
+            run.index++;
         }
-
-        activeWindow = null;
-        isHitboxActiveThisFrame = false;
-        isSequenceRunning = false;
-        activeHitboxCoroutine = null;
     }
 
-    private IEnumerator RunSingleWindow(ComboNode node, HitboxWindow window)
+    /// <summary>结束一份判定序列</summary>
+    public void EndRun(HitboxRun run)
     {
-        float elapsed = 0f;
-
-        activeWindow = window;
-        isHitboxActiveThisFrame = true;
-
-        do
-        {
-            CheckOverlap(node, window);
-
-            // duration 为 0 → 瞬间伤害，只判定一帧
-            if (window.duration <= 0f) break;
-
-            yield return null;
-            elapsed += Time.deltaTime;
-
-        } while (elapsed < window.duration);
-
-        isHitboxActiveThisFrame = false;
+        if (run == null) return;
+        run.done = true;
+        run.activeWindow = null;
+        activeRuns.Remove(run);
     }
 
-    private void CheckOverlap(ComboNode node, HitboxWindow window)
+    private void CheckOverlap(HitboxRun run, HitboxWindow window)
     {
+        ComboNode node = run.node;
+        HashSet<Collider2D> alreadyHitEnemies = run.alreadyHit;
+
         float dirX = player.facingDirection;
         Vector2 finalOffset = new Vector2(window.offset.x * dirX, window.offset.y);
         Vector2 boxCenter = (Vector2)transform.position + finalOffset;
@@ -273,23 +280,28 @@ public class PlayerHitDetection : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (!showHitbox || !Application.isPlaying) return;
-        if (!isSequenceRunning) return;
+        if (activeRuns.Count == 0) return;
 
         float dirX = (player != null) ? player.facingDirection : 1f;
 
-        for (int i = 0; i < windowBuffer.Count; i++)
+        for (int r = 0; r < activeRuns.Count; r++)
         {
-            HitboxWindow w = windowBuffer[i];
-            if (w == null) continue;
+            HitboxRun run = activeRuns[r];
 
-            bool isActive = isHitboxActiveThisFrame && ReferenceEquals(w, activeWindow);
+            for (int i = 0; i < run.windows.Count; i++)
+            {
+                HitboxWindow w = run.windows[i];
+                if (w == null) continue;
 
-            Gizmos.color = isActive
-                ? Color.green
-                : new Color(0.3f, 0.9f, 0.3f, 0.25f);
+                bool isActive = ReferenceEquals(w, run.activeWindow);
 
-            Vector2 offset = new Vector2(w.offset.x * dirX, w.offset.y);
-            Gizmos.DrawWireCube((Vector2)transform.position + offset, w.size);
+                Gizmos.color = isActive
+                    ? Color.green
+                    : new Color(0.3f, 0.9f, 0.3f, 0.25f);
+
+                Vector2 offset = new Vector2(w.offset.x * dirX, w.offset.y);
+                Gizmos.DrawWireCube((Vector2)transform.position + offset, w.size);
+            }
         }
     }
 }

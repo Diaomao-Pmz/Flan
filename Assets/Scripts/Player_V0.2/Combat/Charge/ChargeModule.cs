@@ -8,45 +8,15 @@ namespace Flandre.CombatSystem
         /// <summary>没在蓄力，什么都没发生</summary>
         NotCharging,
 
-        /// <summary>还没蓄到 1 级就松手 —— 什么都不放，连段清零</summary>
+        /// <summary>还没过起步时间就松手 —— 什么都不放</summary>
         Aborted,
 
-        /// <summary>至少蓄到了 1 级，应当打出当前达到的最高等级</summary>
+        /// <summary>已过起步时间，应当打出当前所在的等级</summary>
         Fired,
     }
 
     /// <summary>
     /// 【蓄力模块】—— 一只手的充能进度，纯逻辑，不是状态。
-<<<<<<< Updated upstream
-    ///
-    /// ==========================================================
-    /// 【为什么要从状态里抽出来】
-    ///
-    /// 旧设计里蓄力是一个 State：玩家"待在蓄力房间里"。
-    /// 于是任何换房间的动作 —— 跳跃、跑动、另一只手出招 ——
-    /// 都会触发 ChargeState.Exit，蓄了半天的力直接清零。
-    ///
-    /// 比喻：改成"我左手一直攥着一个正在充能的东西"，
-    ///       人走到哪儿都不影响左手继续攥着。
-    /// ==========================================================
-    ///
-    /// ==========================================================
-    /// 【本次重写：逐级升，像加热旋钮】
-    ///
-    /// 删掉的：
-    ///   ✗ 目标等级由连段深度决定（打几段普攻才能蓄几级、一次只升一级）
-    ///   ✗ 连放惩罚（CD 内起手 → 弱化版 AA1 + 大僵直）
-    ///
-    /// 现在：按住越久等级越高，按武器上的三个累计阈值逐级升到 3 级封顶，
-    /// 松手打出【当前达到的最高等级】。还没到 1 级就松手 → 什么都不放。
-    ///
-    /// 【普攻后接蓄力：起步更高，但有保险锁】
-    /// 打完第 N 段普攻接蓄力，进度直接从 N 级的阈值起算（A2 后一起手就在 AA2 刻度上），
-    /// 但必须按住满 minHoldTime（来自刚打完那一招的 ComboNode.chargeMinHoldAfter）才解锁；
-    /// 锁住期间等级显示为 0，松手 = 什么都不放。锁住的这段时间照样计入升级进度。
-    /// ==========================================================
-=======
->>>>>>> Stashed changes
     /// </summary>
     public class ChargeModule
     {
@@ -59,28 +29,28 @@ namespace Flandre.CombatSystem
         public bool IsCharging { get; private set; }
 
         /// <summary>
-        /// 当前已经蓄到第几级（0 = 还没到 1 级）。
+        /// 当前对外生效的等级（0 = 还没过起步时间）。
         /// 本值在 Stop() 里【刻意不清】：它是"刚结束那次蓄力蓄到了几级"，调用方要在 Release() 之后读。
         /// </summary>
         public int CurrentLevel { get; private set; }
 
-        /// <summary>至少蓄到了 1 级（松手能打出东西）</summary>
+        /// <summary>已过起步时间（松手能打出东西）</summary>
         public bool IsCharged => CurrentLevel >= 1;
 
-        /// <summary>已经蓄到封顶等级</summary>
+        /// <summary>当前正处在最高级（等级会循环，所以这只是"此刻是不是 3 级"）</summary>
         public bool IsMaxed => CurrentLevel >= WeaponMoveSet.MaxChargeLevel;
 
-        /// <summary>已经蓄了多久（已套用加速倍率，可直接和武器阈值比较）</summary>
+        /// <summary>在当前这一级里已经攒了多久（已套用加速倍率）</summary>
         public float ChargedTime { get; private set; }
 
-        /// <summary>整体进度 0~1：从开始到蓄满最高级</summary>
+        /// <summary>距离跳到下一级的进度 0~1</summary>
         public float Progress
         {
             get
             {
                 if (!IsValid) return 0f;
-                float full = Weapon.GetTimeForLevel(WeaponMoveSet.MaxChargeLevel);
-                return full <= 0f ? 1f : Mathf.Clamp01(ChargedTime / full);
+                float need = Weapon.GetTimeToNextLevel(rawLevel);
+                return need <= 0f ? 1f : Mathf.Clamp01(ChargedTime / need);
             }
         }
 
@@ -88,38 +58,28 @@ namespace Flandre.CombatSystem
         public WeaponMoveSet Weapon { get; private set; }
 
         /// <summary>
-        /// 本次蓄力是否有效。唯一的无效情况：这只手没装武器 ——
-        /// 没有招式表，蓄出来也没东西可放。
-        /// 这种情况下仍然进入蓄力姿态（否则按住毫无反馈，玩家会以为卡键），但永远升不了级。
+        /// 本次蓄力是否有效。唯一的无效情况：这只手没装武器。
+        /// 这种情况下仍然进入蓄力姿态（否则按住毫无反馈），但永远没有等级。
         /// </summary>
         public bool IsValid { get; private set; }
 
         /// <summary>
-<<<<<<< Updated upstream
-        /// 本次蓄力是不是【在空中起手】的 —— "要不要把角色钉在空中"的唯一判据。
-        ///   空中起手 → 钉住（空中蓄力是一次高风险承诺，想挪位置只能花一次冲刺）
-        ///   地面起手 → 不钉（跳跃只是普通的折损跳跃）
-        /// 起手位置在整段蓄力里是不变的，所以不会出现"某一帧忽然变规则"。
-        /// </summary>
-        public bool BeganAirborne { get; private set; }
-=======
         /// 蓄力上限（1~3）。等级沿 1→2→3→1 循环升到这一级就停住。
         /// 平a后接蓄力一开始 = 当前连段深度；原地起手一开始 = 1。侧键每按一下 +1（3 之后回到 1）。
         /// </summary>
         public int CapLevel { get; private set; }
->>>>>>> Stashed changes
 
         // 普攻后蓄力的加速倍率（武器上的 comboChargeSpeedMultiplier），原地起手为 1
         private float speedMultiplier = 1f;
 
-        // ---- 保险锁 ----
         private float heldTime;       // 本次蓄力实际按住了多久（不吃加速倍率）
-        private float minHoldTime;    // 按住满这么久才解锁；原地起手为 0
+        private float minHoldTime;    // 起步时间：按住满这么久等级才生效
+        private int rawLevel;         // 内部等级（不管起步时间有没有过）
 
-        /// <summary>本次蓄力的起步等级（原地起手为 0）</summary>
+        /// <summary>本次蓄力的起步等级（1~3）</summary>
         public int StartLevel { get; private set; }
 
-        /// <summary>还在保险锁里（普攻后起手、按住还不满最短时长）</summary>
+        /// <summary>还没过起步时间</summary>
         public bool IsLocked => heldTime < minHoldTime;
 
         public ChargeModule(WeaponSlot slot)
@@ -130,8 +90,8 @@ namespace Flandre.CombatSystem
 
         /// <summary>开始蓄力</summary>
         /// <param name="weapon">这只手的武器，可为 null</param>
-        /// <param name="startLevel">起步等级：原地起手 0，第 N 段普攻后为 N</param>
-        /// <param name="minHold">起步等级 > 0 时，按住满多少秒才解锁（保险锁）</param>
+        /// <param name="startLevel">起步等级：连段为 0 时 1，第 N 段普攻后为 N</param>
+        /// <param name="minHold">起步时间（秒）</param>
         /// <param name="isAfterCombo">是否接在普攻后面（决定要不要吃加速倍率）</param>
         public void Begin(WeaponMoveSet weapon, int startLevel, float minHold, bool isAfterCombo)
         {
@@ -142,36 +102,68 @@ namespace Flandre.CombatSystem
                 ? Mathf.Max(0.01f, weapon.comboChargeSpeedMultiplier)
                 : 1f;
 
-            StartLevel = IsValid ? Mathf.Clamp(startLevel, 0, WeaponMoveSet.MaxChargeLevel) : 0;
+            StartLevel = Mathf.Clamp(startLevel, 1, WeaponMoveSet.MaxChargeLevel);
+            rawLevel = StartLevel;
 
-            // 进度直接从起步等级的阈值起算（A2 后 → 从 AA2 的刻度开始）
-            ChargedTime = IsValid ? Weapon.GetTimeForLevel(StartLevel) : 0f;
-
+            ChargedTime = 0f;
             heldTime = 0f;
-            minHoldTime = StartLevel > 0 ? Mathf.Max(0f, minHold) : 0f;
+            minHoldTime = Mathf.Max(0f, minHold);
 
+            // 上限一律 = 起步等级：平a后接蓄力是当前深度，原地起手固定 1 级。按侧键才往上升
+            CapLevel = StartLevel;
             IsCharging = true;
             CurrentLevel = 0;
         }
 
-        /// <summary>每帧推进。返回本帧是否【升了级】（用于广播升级事件、换光效）</summary>
+        /// <summary>把蓄力上限提高一级（3 级之后回到 1 级）。只在蓄力中有效，可以连按</summary>
+        /// <returns>提高后的上限</returns>
+        public int RaiseCap()
+        {
+            if (!IsCharging || !IsValid) return CapLevel;
+
+            bool wasStopped = rawLevel == CapLevel;
+
+            CapLevel = CapLevel >= WeaponMoveSet.MaxChargeLevel ? 1 : CapLevel + 1;
+
+            // 原本停在上限、现在又要往上升 → 当前这一级的时间从头算；
+            // 上限被按回当前等级 → 就地停住，清掉攒到一半的时间。
+            // 正在升的途中继续加上限（连按）→ 已经攒的时间保留
+            if (wasStopped || rawLevel == CapLevel) ChargedTime = 0f;
+
+            return CapLevel;
+        }
+
+        /// <summary>每帧推进。返回本帧对外等级是否【变了】（用于广播事件、换光效）</summary>
         public bool Tick(float deltaTime)
         {
-            if (!IsCharging || !IsValid || IsMaxed) return false;
+            if (!IsCharging || !IsValid) return false;
 
             heldTime += deltaTime;
 
-            // 进度封顶在最高级阈值，没必要无限累加
-            float full = Weapon.GetTimeForLevel(WeaponMoveSet.MaxChargeLevel);
-            ChargedTime = Mathf.Min(ChargedTime + deltaTime * speedMultiplier, full);
+            // 起步时间内：只等起步等级生效，不攒升级进度。
+            // 已到上限：等级停住，进度不涨
+            if (rawLevel != CapLevel && !IsLocked)
+            {
+                ChargedTime += deltaTime * speedMultiplier;
 
-            // 保险锁没开：进度照涨，但等级不对外生效
-            if (IsLocked) return false;
+                // 沿 1→2→3→1 往上限升，到了就停
+                int guard = 0;
+                float need = Weapon.GetTimeToNextLevel(rawLevel);
+                while (rawLevel != CapLevel && ChargedTime >= need && guard++ < 8)
+                {
+                    ChargedTime -= need;
+                    rawLevel = rawLevel >= WeaponMoveSet.MaxChargeLevel ? 1 : rawLevel + 1;
+                    need = Weapon.GetTimeToNextLevel(rawLevel);
+                }
 
-            int level = Weapon.GetLevelForTime(ChargedTime);
-            if (level <= CurrentLevel) return false;
+                if (rawLevel == CapLevel) ChargedTime = 0f;
+            }
 
-            CurrentLevel = level;
+            // 起步时间没过：等级不对外生效
+            int visible = IsLocked ? 0 : rawLevel;
+            if (visible == CurrentLevel) return false;
+
+            CurrentLevel = visible;
             return true;
         }
 
@@ -183,11 +175,11 @@ namespace Flandre.CombatSystem
             bool fired = IsValid && IsCharged;
             Stop();
 
-            // 还没到 1 级就松手 → 什么都不放（"蓄力是一场赌注"的实现处）
+            // 还没过起步时间就松手 → 什么都不放
             return fired ? ChargeReleaseResult.Fired : ChargeReleaseResult.Aborted;
         }
 
-        /// <summary>被打断（受击、起飞、换武器等）。与未蓄到 1 级就松手后果相同</summary>
+        /// <summary>被打断（受击、起飞、换武器等）。什么都不放</summary>
         public void Stop()
         {
             IsCharging = false;

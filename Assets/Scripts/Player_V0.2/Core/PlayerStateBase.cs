@@ -34,31 +34,12 @@ public abstract class PlayerStateBase : IState
         float moveDir = sm.playerController.moveInput.x;
         float speed = sm.moveSpeed * speedMultiplier;
 
-<<<<<<< Updated upstream
-        // 【蓄力时的速度继承】动量充当一个逐渐衰减的速度下限。
-        //
-        // 冲刺后立刻进蓄力 → 起步接近冲刺速度 → 随动量衰减自然滑落到折损速度。
-        // 表现是「带着冲劲进蓄力还能滑一小段」，而不是一进蓄力就急刹车。
-        //
-        // 取 max 而不是相加 —— 它是"你还剩多少冲劲"，不是额外加成。
-        //
-        // 它是配合"蓄力减速"的补偿，所以只在 chargeSlowsMovement 打开时生效；
-        // 不减速时再套它，蓄力反而会比平时跑得快。
-        var moveCfg = sm.playerState != null ? sm.playerState.movementConfig : null;
-        bool chargeSlows = moveCfg != null && moveCfg.chargeSlowsMovement;
-
-        if (chargeSlows && IsCharging && Momentum != null)
-        {
-            speed = Mathf.Max(speed, Momentum.GetChargeSpeedFloor());
-        }
-=======
         var chargeCfg = sm.playerState != null ? sm.playerState.combatConfig : null;
->>>>>>> Stashed changes
 
         // 【蓄力准备窗口】按住攻击键准备蓄力、人还在攻击动画/后摇里 → 地面移速打折
         if (IsInPreChargeWindow && sm.IsGrounded())
         {
-            speed *= moveCfg != null ? moveCfg.preChargeMoveSpeedMultiplier : 0.5f;
+            speed *= chargeCfg != null ? chargeCfg.preChargeMoveSpeedMultiplier : 0.5f;
         }
 
         sm.rb.linearVelocity = new Vector2(moveDir * speed, sm.rb.linearVelocity.y);

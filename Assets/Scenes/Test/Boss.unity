@@ -2053,7 +2053,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!61 &786768184
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2225,40 +2225,10 @@ MonoBehaviour:
   phase2SpecialBullets: []
   phase2SpecialMelees: []
   phase1Routines:
-  - routine: {fileID: 11400000, guid: 19ac1becee152fd4d80822b5c8a394ab, type: 2}
-    weightModifiers:
-    - condition:
-        playerSide: 2
-        minDistance: 0
-        maxDistance: 2
-        playerAirCondition: 0
-      multiplier: 3
-    - condition:
-        playerSide: 0
-        minDistance: 2
-        maxDistance: 20
-        playerAirCondition: 0
-      multiplier: 0.1
   - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
-<<<<<<< Updated upstream
-    weightModifiers:
-    - condition:
-        playerSide: 2
-        minDistance: 0
-        maxDistance: 2
-        playerAirCondition: 0
-      multiplier: 3
-    - condition:
-        playerSide: 0
-        minDistance: 2
-        maxDistance: 20
-        playerAirCondition: 0
-      multiplier: 0.1
-=======
     weightModifiers: []
   - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
     weightModifiers: []
->>>>>>> Stashed changes
   phase2Routines: []
   singleInterleaveChance: 0.2
   phase1Movement:
@@ -4670,77 +4640,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-<<<<<<< Updated upstream
-    - target: {fileID: 1326363344798443143, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: jumpGem
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[5].m_ActionId
-      value: b9791fc7-3baa-4181-ad40-206db4eb63dc
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_ActionId
-      value: de9895ef-14f7-4e9b-b772-ca827628829d
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[5].m_ActionName
-      value: 'Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_ActionName
-      value: 'Player/Fly[/Keyboard/leftAlt]'
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_DeviceRegainedEvent.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[5].m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 8480849977579960414}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 8480849977579960414}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[5].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnMove
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnFlyPerformed
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PlayerController, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 1503309345814325882, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: m_ActionEvents.Array.data[6].m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
-      objectReference: {fileID: 0}
-    - target: {fileID: 1892511228687450334, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: moveMultiplierOverride
-      value: 0.155
-      objectReference: {fileID: 0}
-    - target: {fileID: 1892511228687450334, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: overrideMoveMultiplier
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4290539747665736860, guid: b2f14d397095eb84092300f849141591, type: 3}
-=======
     - target: {fileID: 584175311805934845, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: verboseLog
       value: 1
@@ -4750,7 +4649,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0817d1fe4a7c054d8e4fc6b5f01e971, type: 2}
     - target: {fileID: 3212544334172396689, guid: bce200a076b1d8949aa45929203be613, type: 3}
->>>>>>> Stashed changes
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
@@ -4798,21 +4696,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-<<<<<<< Updated upstream
-    - target: {fileID: 7544423397950537741, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: stateConfig
-      value: 
-      objectReference: {fileID: 11400000, guid: ca1f832de12641e88393e6755a8cc93c, type: 2}
-    - target: {fileID: 7544423397950537741, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: attributeConfig
-      value: 
-      objectReference: {fileID: 11400000, guid: 6d39b76ad9514d6084f420adaba41e13, type: 2}
-    - target: {fileID: 8841629755396617766, guid: b2f14d397095eb84092300f849141591, type: 3}
-      propertyPath: overlayOnlyWhenIdle
-      value: 1
-      objectReference: {fileID: 0}
-=======
->>>>>>> Stashed changes
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

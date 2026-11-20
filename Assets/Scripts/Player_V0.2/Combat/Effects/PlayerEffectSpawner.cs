@@ -96,55 +96,6 @@ namespace Flandre.CombatSystem
         // ==========================================================
 
         /// <summary>
-<<<<<<< Updated upstream
-        /// 由动画事件调用：播放【当前招式】配置的特效。
-        ///
-        /// 在攻击动画里该出刀光的那一帧插一个 Animation Event，
-        /// Function 选 PlayEffect，不需要参数。
-        /// </summary>
-        public void PlayEffect()
-        {
-            ComboNode node = buffer != null ? buffer.currentNode : null;
-
-            if (node == null)
-            {
-                if (verboseLog) Debug.Log("[特效] PlayEffect 触发时没有当前招式，已跳过");
-                return;
-            }
-
-            string key = node.effectKey;
-
-            if (string.IsNullOrEmpty(key)) key = defaultAttackEffectKey;
-            if (string.IsNullOrEmpty(key)) return;
-
-            float life = node.effectLifetime > 0f ? node.effectLifetime : defaultEffectLifetime;
-
-            Spawn(key, node.GetEffectOffset(), life, persistent: false,
-                  node.effectScale, node.effectRotation);
-        }
-
-        /// <summary>
-        /// 由动画事件调用：播放指定 key 的特效。
-        /// 一招需要多个特效时用这个 —— Animation Event 的 String 参数填 key。
-        /// </summary>
-        public void PlayEffectByKey(string key)
-        {
-            if (string.IsNullOrEmpty(key)) return;
-
-            Vector2 offset = Vector2.zero;
-            Vector2 scale = Vector2.one;
-            float rot = 0f;
-
-            ComboNode node = buffer != null ? buffer.currentNode : null;
-            if (node != null)
-            {
-                offset = node.GetEffectOffset();
-                scale = node.effectScale;
-                rot = node.effectRotation;
-            }
-
-            Spawn(key, offset, defaultEffectLifetime, persistent: false, scale, rot);
-=======
         /// 【空操作】动画事件 PlayEffect 的接收方法。
         /// 特效由 AttackTimelineRunner 按时间表调用 SpawnAttackEffect —— 时间点仍然取自动画里的这个事件，
         /// 所以动画上的事件【不要删】。保留本方法只是为了让 Unity 不报 "has no receiver"。
@@ -181,7 +132,6 @@ namespace Flandre.CombatSystem
             if (string.IsNullOrEmpty(key)) return null;
             EffectManager m = Manager;
             return m != null ? m.PlayByKey(key, node, Root, activeRemain, attackRemain, markerLife) : null;
->>>>>>> Stashed changes
         }
 
         // ==========================================================

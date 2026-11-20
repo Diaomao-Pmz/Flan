@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Flandre.CombatSystem
@@ -26,9 +26,6 @@ namespace Flandre.CombatSystem
         private ComboInputBuffer comboBuffer;
         private PlayerAimProvider aim;
 
-<<<<<<< Updated upstream
-        private Coroutine burstRoutine;
-=======
         // ==========================================================
         // 【实验：平a/蓄力重做】连射改为「多份并行 + 时间表驱动」
         // ==========================================================
@@ -49,7 +46,6 @@ namespace Flandre.CombatSystem
         }
 
         private readonly List<BurstRun> activeBursts = new List<BurstRun>();
->>>>>>> Stashed changes
 
         private void Awake()
         {
@@ -59,25 +55,33 @@ namespace Flandre.CombatSystem
         }
 
         // ==========================================================
-        // 动画事件入口
+        // 动画事件入口（已改为空操作）
         // ==========================================================
 
         /// <summary>
-        /// 由动画事件调用：打出本招配置的一整轮弹幕。
-        ///
-        /// 单发招式（count = 1）会立刻同步射出，不起协程 ——
-        /// 避免为了一发子弹产生一次协程分配。
+        /// 【已改为空操作】原先由动画事件触发发射。
+        /// 现在由 AttackTimelineRunner 按时间表调用 BeginBurst —— 时间点仍然取自动画里的这个事件，
+        /// 所以动画上的事件【不要删】。保留本方法只是为了让 Unity 不报 "has no receiver"。
         /// </summary>
-        public void SpawnProjectile()
+        public void SpawnProjectile() { }
+
+        // ==========================================================
+        // 连射（由时间表驱动）
+        // ==========================================================
+
+        /// <summary>
+        /// 打出一招配置的一整轮弹幕。
+        /// 单发 / 零间隔会立刻同步射完并返回 null；否则返回一份 BurstRun，由调用方每帧 TickBurst。
+        /// </summary>
+        /// <param name="allowFace">这一招还是不是当前动画的主人。不是的话开火不再让角色转向</param>
+        /// <param name="bulletSink">射出的子弹记到这里（R5 撤掉整发时回收用），可为 null</param>
+        public BurstRun BeginBurst(ComboNode node, WeaponMoveSet weapon, bool allowFace, List<GameObject> bulletSink)
         {
             if (firePoint == null)
             {
                 Debug.LogWarning("[发射器] 未指定枪口位置 firePoint，本次发射已跳过。", this);
-                return;
+                return null;
             }
-
-            ComboNode node = comboBuffer != null ? comboBuffer.currentNode : null;
-            WeaponMoveSet weapon = comboBuffer != null ? comboBuffer.ActiveWeapon : null;
 
             string poolKey = ResolvePoolKey(node, weapon);
             if (string.IsNullOrEmpty(poolKey))
@@ -85,66 +89,89 @@ namespace Flandre.CombatSystem
                 Debug.LogWarning(
                     "[发射器] 没找到可用的子弹池 key，本次发射已跳过。\n" +
                     "请在武器资产上填 Projectile Pool Key，或在招式节点上填覆盖值。", this);
-                return;
+                return null;
             }
 
             int count = node != null ? Mathf.Max(1, node.projectileCount) : 1;
             float interval = node != null ? node.projectileInterval : 0f;
 
-            // 单发或零间隔 → 同步射完，不必起协程
+            Vector2 dir = ResolveDirection(weapon, allowFace);
+
+            // 单发或零间隔 → 同步射完
             if (count == 1 || interval <= 0f)
             {
-                Vector2 dir = ResolveDirection(weapon);
-                for (int i = 0; i < count; i++) FireOne(poolKey, node, dir);
-                return;
+                for (int i = 0; i < count; i++) Track(bulletSink, FireOne(poolKey, node, dir));
+                return null;
             }
 
-            // 上一轮还没打完就被新的一轮顶掉（连招推进很快时会发生）
-            CancelBurst();
-            burstRoutine = StartCoroutine(BurstRoutine(poolKey, node, weapon, count, interval));
-        }
-
-        private IEnumerator BurstRoutine(
-            string poolKey, ComboNode node, WeaponMoveSet weapon, int count, float interval)
-        {
-            bool recomputeAim = node == null || node.recomputeAimPerShot;
-            Vector2 dir = ResolveDirection(weapon);
-
-            for (int i = 0; i < count; i++)
+            BurstRun run = new BurstRun
             {
-                if (recomputeAim) dir = ResolveDirection(weapon);
+                node = node,
+                weapon = weapon,
+                poolKey = poolKey,
+                count = count,
+                interval = interval,
+                dir = dir,
+                recomputeAim = node == null || node.recomputeAimPerShot,
+            };
 
-                FireOne(poolKey, node, dir);
+            // 第一发立刻射出
+            Track(bulletSink, FireOne(poolKey, node, dir));
+            run.fired = 1;
 
-                // 最后一发之后不用再等
-                if (i < count - 1) yield return new WaitForSeconds(interval);
-            }
-
-            burstRoutine = null;
+            activeBursts.Add(run);
+            return run;
         }
 
-        /// <summary>
-        /// 中断连射。招式被打断时必须调用，
-        /// 否则玩家已经被击飞了，枪还在原地继续突突。
-        /// </summary>
+        /// <summary>推进一轮连射</summary>
+        public void TickBurst(BurstRun run, float dt, bool allowFace, List<GameObject> bulletSink)
+        {
+            if (run == null || run.done) return;
+
+            run.timer += dt;
+
+            while (run.fired < run.count && run.timer >= run.interval)
+            {
+                run.timer -= run.interval;
+
+                if (run.recomputeAim) run.dir = ResolveDirection(run.weapon, allowFace);
+
+                Track(bulletSink, FireOne(run.poolKey, run.node, run.dir));
+                run.fired++;
+            }
+
+            if (run.fired >= run.count) EndBurst(run);
+        }
+
+        /// <summary>结束一轮连射</summary>
+        public void EndBurst(BurstRun run)
+        {
+            if (run == null) return;
+            run.done = true;
+            activeBursts.Remove(run);
+        }
+
+        /// <summary>中断所有连射</summary>
         public void CancelBurst()
         {
-            if (burstRoutine != null)
-            {
-                StopCoroutine(burstRoutine);
-                burstRoutine = null;
-            }
+            for (int i = 0; i < activeBursts.Count; i++) activeBursts[i].done = true;
+            activeBursts.Clear();
+        }
+
+        private static void Track(List<GameObject> sink, GameObject go)
+        {
+            if (sink != null && go != null) sink.Add(go);
         }
 
         // ==========================================================
         // 单发
         // ==========================================================
 
-        private void FireOne(string poolKey, ComboNode node, Vector2 direction)
+        private GameObject FireOne(string poolKey, ComboNode node, Vector2 direction)
         {
             // key 未注册时池会自己报 LogError，这里拿到 null 就静默跳过避免刷屏
             GameObject bullet = ObjectPoolManager.Instance?.Get(poolKey);
-            if (bullet == null) return;
+            if (bullet == null) return null;
 
             bullet.transform.position = firePoint.position;
 
@@ -152,7 +179,7 @@ namespace Flandre.CombatSystem
             if (proj == null)
             {
                 Debug.LogWarning($"[发射器] 池「{poolKey}」取出的对象上没有 Player_Projectile。", bullet);
-                return;
+                return null;
             }
 
             // 先套用倍率与覆盖，再 Setup 定方向。
@@ -167,12 +194,8 @@ namespace Flandre.CombatSystem
 
             proj.Setup(direction);
 
-<<<<<<< Updated upstream
-            if (verboseLog) Debug.Log($"[发射器] 射出 {poolKey}，方向 {direction}");
-=======
             if (verboseLog) PlayerLog.Info($"[发射器] 射出 {poolKey}，方向 {direction}");
             return bullet;
->>>>>>> Stashed changes
         }
 
         // ==========================================================
@@ -196,12 +219,13 @@ namespace Flandre.CombatSystem
         /// 鼠标瞄准 / 八向回退 / 以后的辅助瞄准都在那一个组件里，
         /// 本文件不需要知道玩家用的是鼠标还是手柄。
         /// </summary>
-        private Vector2 ResolveDirection(WeaponMoveSet weapon)
+        private Vector2 ResolveDirection(WeaponMoveSet weapon, bool allowFace = true)
         {
             if (aim != null)
             {
-                // 开火时按策略转向瞄准方向（默认策略：攻击时转，平时不转）
-                aim.FaceAimIfNeeded();
+                // 开火时按策略转向瞄准方向（默认策略：攻击时转，平时不转）。
+                // 动画已被别的招顶掉、只剩逻辑在跑的连射不转向 —— 否则会把新招的朝向抢走
+                if (allowFace) aim.FaceAimIfNeeded();
                 return aim.AimDirection;
             }
 
@@ -223,8 +247,11 @@ namespace Flandre.CombatSystem
                 Mathf.Cos(angle * Mathf.Deg2Rad),
                 Mathf.Sin(angle * Mathf.Deg2Rad));
 
-            if (dir.x < -0.1f) controller.SetFacingDirection(-1);
-            else if (dir.x > 0.1f) controller.SetFacingDirection(1);
+            if (allowFace)
+            {
+                if (dir.x < -0.1f) controller.SetFacingDirection(-1);
+                else if (dir.x > 0.1f) controller.SetFacingDirection(1);
+            }
 
             return dir;
         }
