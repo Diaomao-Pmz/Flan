@@ -25,6 +25,7 @@ public class ComboState : PlayerStateBase
     private float thrustStartAt;        // 出招后第几秒起步（所选阶段的开头）
     private bool thrustRunning;         // 正在走
     private bool thrustEndPending;      // 刚走完，下一物理帧把位移给的速度收掉
+    private GuardedMove thrustGuard;    // 终点裁判：位移不停在 Boss 身体里（见 DashEndpointGuard）
 
     // 碰撞箱微调是否生效中
     private bool isBodyAdjusting;
@@ -64,7 +65,10 @@ public class ComboState : PlayerStateBase
     private PlayerWeaponEmitter weaponEmitter;
     private PlayerAimProvider aimProvider;
 
-    public ComboState(PlayerStateMachine stateMachine) : base(stateMachine) { }
+    public ComboState(PlayerStateMachine stateMachine) : base(stateMachine)
+    {
+        thrustGuard = new GuardedMove(stateMachine);
+    }
 
     private ComboInputBuffer Buffer
         => buffer != null ? buffer : (buffer = sm.GetComponent<ComboInputBuffer>());
@@ -302,6 +306,14 @@ public class ComboState : PlayerStateBase
 
     /// <summary>出招位移是否正在走</summary>
     private bool IsThrustActive => thrustRunning;
+
+    /// <summary>
+    /// 此刻要不要穿过敌人：这一招勾了 Pass Through Boss，且位移正在走（或这一物理帧就要起步）。
+    /// 状态机在本状态的 FixedUpdate 之前问 —— 所以"这一帧就要起步"也要算上，否则第一步会撞上去。
+    /// </summary>
+    public bool WantsPassThrough
+        => activeNode != null && activeNode.passThroughDuringThrust
+           && (thrustRunning || (thrustPending && ReachedThrustStart()));
 
     /// <summary>
     /// 准备本招的位移冲量。
@@ -559,6 +571,8 @@ public class ComboState : PlayerStateBase
             thrustRunning = true;
             thrustTimer = 0f;
             thrustDuration = Mathf.Max(thrustDuration, Time.fixedDeltaTime);   // 填 0 也至少走一个物理帧
+            thrustGuard.Begin(thrustDistance, thrustDistance.magnitude, thrustDuration,
+                              activeNode != null && activeNode.passThroughDuringThrust);
 
             if (Buffer != null && Buffer.verboseLog && activeNode != null)
                 PlayerLog.Info($"[出招位移] {activeNode.nodeName} 出招后 {thrustStartAt:F3}s 起步：位移 {thrustDistance}，用时 {thrustDuration:F3}s");
@@ -566,17 +580,21 @@ public class ComboState : PlayerStateBase
 
         if (!thrustRunning) return false;
 
-        // 匀速：每秒走 距离 ÷ 时长；最后一个物理帧只走剩下的那一点，保证总距离精确
+        // 匀速：每秒走 距离 ÷ 时长；最后一个物理帧只走剩下的那一点，保证总距离精确。
+        // 终点裁判可能让这一步变短（停在 Boss 面前），或在时间到了之后继续走（穿到 Boss 身后）
         float dt = Time.fixedDeltaTime;
-        float step = Mathf.Min(dt, thrustDuration - thrustTimer);
-        thrustTimer += step;
+        float timeStep = Mathf.Max(0f, Mathf.Min(dt, thrustDuration - thrustTimer));
+        thrustTimer += timeStep;
 
-        ApplyThrustVelocity(thrustDistance / thrustDuration * (step / dt));
+        float length = thrustDistance.magnitude;
+        float step = thrustGuard.Step(length / thrustDuration * timeStep);
+        ApplyThrustVelocity(length > 0.0001f ? thrustDistance / length * (step / dt) : Vector2.zero);
 
-        if (thrustTimer >= thrustDuration - 0.00001f)
+        if (thrustTimer >= thrustDuration - 0.00001f && thrustGuard.Reached)
         {
             thrustRunning = false;
             thrustEndPending = true;
+            thrustGuard.End();
         }
 
         return true;
@@ -591,6 +609,29 @@ public class ComboState : PlayerStateBase
         if (wasAirborneOnEnter && !hasY) vy = 0f;
 
         sm.rb.linearVelocity = new Vector2(v.x, vy);
+    }
+
+    /// <summary>
+    /// 【拼刀急退】BB1 拼刀成功：立刻用出招位移那套逻辑走完一段精确距离（顶掉本招原来的位移）。
+    /// 只在本状态还拥有这一招时生效。
+    /// </summary>
+    /// <param name="distance">位移（已经算好方向，远离 Boss）</param>
+    /// <returns>是否接下了</returns>
+    public bool StartClashRecoil(AttackInstance inst, Vector2 distance, float duration)
+    {
+        if (inst == null || inst != instance) return false;
+
+        thrustDistance = distance;
+        thrustDuration = Mathf.Max(duration, Time.fixedDeltaTime);
+        thrustTimer = 0f;
+        thrustPending = false;
+        thrustRunning = true;
+        thrustEndPending = false;
+        thrustGuard.Begin(thrustDistance, thrustDistance.magnitude, thrustDuration, false);
+
+        if (Buffer != null && Buffer.verboseLog && activeNode != null)
+            PlayerLog.Info($"[拼刀] {activeNode.nodeName} 急退：位移 {distance}，用时 {thrustDuration:F3}s");
+        return true;
     }
 
     /// <summary>把位移给的速度收掉（只收位移用到的方向）</summary>
@@ -623,6 +664,7 @@ public class ComboState : PlayerStateBase
         thrustPending = false;
         thrustRunning = false;
         thrustEndPending = false;
+        thrustGuard.End();
 
         sm.rb.gravityScale = originalGravity;
         activeNode = null;

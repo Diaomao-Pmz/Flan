@@ -11,7 +11,8 @@ namespace Flandre.CombatSystem.EditorTools
     ///   第二行：Combo Window（双蓄没有）
     ///   第三行：三段时长 标题
     ///   四~六行：前摇 / 攻击 / 后摇
-    ///   之后：动画与表现（动画剪辑 / 出招位移 / 锁移动）、蓄力位移（勾上才展开）
+    ///   之后：动画与表现（动画剪辑 / 出招位移 / 锁移动）、蓄力位移（勾上才展开）、
+    ///         拼刀（招式上勾了 Can Clash 才显示）
     /// </summary>
     [CustomEditor(typeof(AttackTimingConfig))]
     public class AttackTimingConfigEditor : Editor
@@ -134,6 +135,7 @@ namespace Flandre.CombatSystem.EditorTools
             EditorGUILayout.PropertyField(e.FindPropertyRelative("forwardThrust"), new GUIContent("Forward Thrust (距离)"));
             EditorGUILayout.PropertyField(e.FindPropertyRelative("thrustStart"));
             EditorGUILayout.PropertyField(e.FindPropertyRelative("thrustDuration"));
+            EditorGUILayout.PropertyField(e.FindPropertyRelative("passThroughBoss"), new GUIContent("Pass Through Boss", "位移走着的时候可以穿过 Boss"));
             EditorGUILayout.PropertyField(e.FindPropertyRelative("applyThrustInAir"));
             EditorGUILayout.PropertyField(e.FindPropertyRelative("lockMovementDuringAttack"));
 
@@ -150,6 +152,20 @@ namespace Flandre.CombatSystem.EditorTools
                 EditorGUI.indentLevel--;
                 if (e.FindPropertyRelative("forwardThrust").vector2Value.sqrMagnitude > 0.0001f)
                     EditorGUILayout.HelpBox("勾了蓄力位移，上面的 Forward Thrust 不会生效。", MessageType.Info);
+            }
+
+            // 拼刀：招式上勾了 Can Clash 才显示（拼刀框和效果在招式资产上调）
+            ComboNode n = e.FindPropertyRelative("node").objectReferenceValue as ComboNode;
+            if (n != null && n.canClash)
+            {
+                EditorGUILayout.Space(2);
+                EditorGUILayout.LabelField("拼刀 (Clash)", EditorStyles.miniBoldLabel);
+                EditorGUILayout.PropertyField(e.FindPropertyRelative("clashWindow"), new GUIContent("Clash Window (秒)"));
+                if (n.clashEffect == ClashEffect.EndCurrentAction)
+                {
+                    EditorGUILayout.PropertyField(e.FindPropertyRelative("clashRecoilDistance"), new GUIContent("急退距离 (格)"));
+                    EditorGUILayout.PropertyField(e.FindPropertyRelative("clashRecoilDuration"), new GUIContent("急退用时 (秒)"));
+                }
             }
         }
 

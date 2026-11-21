@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9971b8cd00a813c4cbb238064c12e378, type: 3}
-  m_Name: KnockBack
+  m_Name: BT_Verical
   m_EditorClassIdentifier: Assembly-CSharp::MeleeNode
   actionName: KnockBack
   baseWeight: 100
@@ -19,17 +19,22 @@ MonoBehaviour:
   maxCastDistance: 2
   preferredDistance: -1
   overrideKnockback: 1
-  knockbackForce: {x: 10, y: 5}
+  knockbackForce: {x: 10, y: 4}
   chargeAnimName: KnockBack
   activeAnimName: 
   recoverAnimName: 
   swings:
   - windupTime: 0.5
-    hitboxDuration: 0.5
+    holdTime: 0.5
+    attackTime: 0.4
     recoverTime: 0.2
+    hitboxActiveRange: {x: 0.2, y: 0.4}
+    releaseBias: 0.5
     hitboxOffset: {x: 1, y: 0}
     hitboxSize: {x: 1, y: 2}
     damage: 20
+    clashable: 1
+    swingDirection: 0
     swingAnimName: 
   faceTargetEachSwing: 1
   autoRangeFromHitbox: 1

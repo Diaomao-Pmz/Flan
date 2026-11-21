@@ -148,6 +148,9 @@ public class ComboNode : ScriptableObject
     /// <summary>位移用多久走完，-1 = 和所选阶段一样长（查节拍总表）</summary>
     public float thrustDuration => AttackTimingConfig.GetThrustDuration(this);
 
+    /// <summary>位移走着的时候可以穿过 Boss（查节拍总表）</summary>
+    public bool passThroughDuringThrust => AttackTimingConfig.GetPassThroughBoss(this);
+
     public bool applyThrustInAir => AttackTimingConfig.GetApplyThrustInAir(this);
     public bool lockMovementDuringAttack => AttackTimingConfig.GetLockMovement(this);
 
@@ -284,6 +287,39 @@ public class ComboNode : ScriptableObject
         "  Slam   → 落地后的弹起速度。AA3 下砸填正数实现「落地再弹起」\n" +
         "  其余   → 不使用")]
     public float hitReactionParam = 0f;
+
+    // ==========================================================
+    // 【2026-11-20】拼刀
+    // ==========================================================
+    [Header("拼刀 (Clash)")]
+    [Tooltip(
+        "勾上 = 这一招在判定段开头有一小段拼刀窗口：\n" +
+        "窗口里拼刀框撞上 Boss 正在生效的近战判定框 → 拼刀成功，Boss 这一下不造成伤害。\n" +
+        "只认 Boss 的近战挥击，子弹不算。窗口时长、急退距离在节拍总表里调。")]
+    public bool canClash = false;
+
+    [Tooltip(
+        "拼刀框中心相对角色位置的偏移（和判定框同一个算法）。X 会自动乘朝向，填正数 = 身前。\n" +
+        "点下面的「编辑拼刀框」按钮，可以在 Scene 视图里拖着调。")]
+    public Vector2 clashBoxOffset = new Vector2(0.8f, 0.8f);
+
+    [Tooltip("拼刀框尺寸（宽, 高）。不造成伤害，只用来拼刀")]
+    public Vector2 clashBoxSize = new Vector2(1f, 1.2f);
+
+    [Tooltip(
+        "拼刀成功后的效果：\n" +
+        "  中断整个套路 = Boss 这一招剩下的挥击作废，整个套路也作废（主手 AA1）\n" +
+        "  只结束当前招 + 玩家急退 = 只结束 Boss 当前这一招，套路照常接下一步；玩家往远离 Boss 的方向急退（副手 BB1）")]
+    public ClashEffect clashEffect = ClashEffect.AbortRoutine;
+
+    /// <summary>拼刀窗口时长（秒），从判定段开始算（查节拍总表）</summary>
+    public float clashWindow => AttackTimingConfig.GetClashWindow(this);
+
+    /// <summary>拼刀成功后的急退距离（查节拍总表）</summary>
+    public float clashRecoilDistance => AttackTimingConfig.GetClashRecoilDistance(this);
+
+    /// <summary>急退用时（查节拍总表）</summary>
+    public float clashRecoilDuration => AttackTimingConfig.GetClashRecoilDuration(this);
 
     [Header("目标交互")]
     [Tooltip(

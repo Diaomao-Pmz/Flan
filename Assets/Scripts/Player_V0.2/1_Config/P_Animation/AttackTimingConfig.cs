@@ -85,6 +85,12 @@ namespace Flandre.CombatSystem
                 "-1 = 和上面选的阶段一样长 —— 阶段开始时起步，阶段结束时正好走到。")]
             public float thrustDuration = -1f;
 
+            [Tooltip(
+                "位移走着的这段时间里可以穿过 Boss（敌人）的身体。位移走完就恢复碰撞；\n" +
+                "走完时还卡在身体里的话，最多再穿 0.5 秒，分开了再恢复。\n" +
+                "能穿过哪些图层看 PlayerMovementConfig 的 Pass Through Layers（和冲刺共用）。")]
+            public bool passThroughBoss = false;
+
             [Tooltip("空中出招时是否也产生位移。取消勾选则只有地面招式会位移")]
             public bool applyThrustInAir = true;
 
@@ -112,6 +118,19 @@ namespace Flandre.CombatSystem
 
             [Tooltip("位移用多久走完（秒）。-1 = 和攻击段一样长")]
             public float aimDashDuration = 0.15f;
+
+            // ---------------- 拼刀（招式上勾了 Can Clash 才生效）----------------
+
+            [Tooltip(
+                "拼刀窗口（秒）：从判定段开始那一刻算起，这么久之内拼刀框生效。\n" +
+                "窗口里拼刀框撞上 Boss 正在生效的近战判定框 → 拼刀成功。0 = 不开窗口。")]
+            public float clashWindow = 0.15f;
+
+            [Tooltip("拼刀成功后玩家往远离 Boss 的方向急退多远（格）。只在招式的拼刀效果选「只结束当前招 + 玩家急退」时生效")]
+            public float clashRecoilDistance = 2f;
+
+            [Tooltip("急退用多久走完（秒）")]
+            public float clashRecoilDuration = 0.15f;
 
             /// <summary>动画与表现是从哪个招式身上搬过来的（换了招式会重新搬一次）</summary>
             [HideInInspector] public ComboNode migratedFrom;
@@ -343,6 +362,7 @@ namespace Flandre.CombatSystem
 
         public static Vector2 GetThrust(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.forwardThrust : Vector2.zero; }
         public static ThrustStartPhase GetThrustStart(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.thrustStart : ThrustStartPhase.Active; }
+        public static bool GetPassThroughBoss(ComboNode node) { TimingEntry e = Find(node); return e != null && e.passThroughBoss; }
         public static float GetThrustDuration(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.thrustDuration : -1f; }
         public static bool GetApplyThrustInAir(ComboNode node) { TimingEntry e = Find(node); return e == null || e.applyThrustInAir; }
         public static bool GetLockMovement(ComboNode node) { TimingEntry e = Find(node); return e == null || e.lockMovementDuringAttack; }
@@ -352,6 +372,11 @@ namespace Flandre.CombatSystem
         public static AimDashMode GetAimDashMode(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.aimDashMode : AimDashMode.FourWay; }
         public static float GetAimDashDistance(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.aimDashDistance : 0f; }
         public static float GetAimDashDuration(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.aimDashDuration : 0.15f; }
+        // ---- 拼刀 ----
+        public static float GetClashWindow(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.clashWindow : 0f; }
+        public static float GetClashRecoilDistance(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.clashRecoilDistance : 0f; }
+        public static float GetClashRecoilDuration(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.clashRecoilDuration : 0.15f; }
+
         public static float GetActive(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.activeOverride : -1f; }
         public static float GetRecovery(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.recoveryOverride : -1f; }
 

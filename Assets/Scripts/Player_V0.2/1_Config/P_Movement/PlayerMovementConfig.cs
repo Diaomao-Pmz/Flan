@@ -133,6 +133,21 @@ namespace Flandre.CombatSystem
         [Tooltip("地面滑铲期间可以穿过敌人（滑铲结束转入蹲下后不再穿过）")]
         public bool slidePassThrough = true;
 
+        [Header("位移终点判定 (冲刺 / 飞行冲刺 / 滑铲 / 招式位移不落进 Boss 身体)")]
+        [Tooltip("勾上 = 位移期间每个物理帧检查：按剩下的路走完，会不会停在 Boss 身体里。\n" +
+                 "会的话：已穿过一定比例且这个动作能穿身 → 送到 Boss 身后；否则停在 Boss 面前（两个碰撞箱边贴边）。\n" +
+                 "Boss = 上面 Pass Through Layers 里那些图层（没配图层时本功能不生效）。")]
+        public bool endpointGuard = true;
+
+        [Tooltip("穿过比例：终点要穿进 Boss 身体多深才算「穿过去了」（0.5 = 过了 Boss 中线）。\n" +
+                 "调高 = 更难穿过去（更常停在面前）；调低 = 更容易穿过去。只对能穿身的动作有意义")]
+        [Range(0f, 1f)]
+        public float endpointPassRatio = 0.5f;
+
+        [Tooltip("重叠容差（格）：终点和 Boss 只重叠这么浅时当作没撞上，照常走完")]
+        [Min(0f)]
+        public float endpointOverlapTolerance = 0.1f;
+
         [Header("Crouch Settings")]
         [Tooltip("蹲行移动速度 = moveSpeed * 本倍率（原先在 CrouchState 里硬编码为 0.5）")]
         public float crouchMoveSpeedMultiplier = 0.5f;

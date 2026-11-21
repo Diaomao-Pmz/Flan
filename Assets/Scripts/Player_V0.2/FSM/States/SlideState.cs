@@ -13,6 +13,9 @@ public class SlideState : PlayerStateBase
 
     /// <summary>已滑满时长，下一物理帧转入蹲下</summary>
     private bool slideFinished;
+
+    /// <summary>终点裁判：不停在 Boss 身体里（见 DashEndpointGuard）</summary>
+    private readonly GuardedMove guard;
     private float slideDirection;
     private bool isFirstHit;
     private bool didStartSlide;
@@ -33,7 +36,21 @@ public class SlideState : PlayerStateBase
         pendingLandingInvulnerable = invulnerable;
     }
 
-    public SlideState(PlayerStateMachine stateMachine) : base(stateMachine) { }
+    public SlideState(PlayerStateMachine stateMachine) : base(stateMachine)
+    {
+        guard = new GuardedMove(stateMachine);
+    }
+
+    /// <summary>这次滑铲的总距离：匀减速（减到 0 就停）走完 slideDuration</summary>
+    private float PlannedSlideDistance()
+    {
+        float v0 = sm.slideStartSpeed;
+        float a = sm.slideDeceleration;
+        float T = sm.slideDuration;
+
+        if (a > 0f && v0 / a < T) return v0 * v0 / (2f * a);   // 没到时间就减到 0 了
+        return (v0 + Mathf.Max(0f, v0 - a * T)) * 0.5f * T;
+    }
 
     public override void Enter()
     {
@@ -95,6 +112,9 @@ public class SlideState : PlayerStateBase
         {
             slideDirection = sm.playerController.facingDirection;
         }
+
+        guard.Begin(new Vector2(slideDirection, 0f), PlannedSlideDistance(), sm.slideDuration,
+                    cfg != null && cfg.slidePassThrough);
     }
 
     public override void Update()
@@ -110,9 +130,12 @@ public class SlideState : PlayerStateBase
         if (!didStartSlide) return;   // 被宝石接管：不推进
 
         // 上一物理帧已经滑满：交接给蹲下（速度和原来一样是滑铲末速度，蹲下状态自己接手）
+        // 被 Boss 挡住停在它面前的，交接速度为 0
         if (slideFinished)
         {
-            sm.rb.linearVelocity = new Vector2(slideDirection * currentSlideSpeed, sm.rb.linearVelocity.y);
+            float handover = guard.Blocked ? 0f : slideDirection * currentSlideSpeed;
+            sm.rb.linearVelocity = new Vector2(handover, sm.rb.linearVelocity.y);
+            guard.End();
             sm.ChangeState(sm.crouchState);
             return;
         }
@@ -120,18 +143,22 @@ public class SlideState : PlayerStateBase
         // 【精确距离】匀减速：这一步的平均速度 =（步初速度 + 步末速度）/ 2。
         // 最后一个物理帧只滑剩下的那一点，总距离正好 = 滑铲距离，和帧率无关。
         float dt = Time.fixedDeltaTime;
-        float step = Mathf.Min(dt, sm.slideDuration - slideTimer);
-        slideTimer += step;
+        float timeStep = Mathf.Max(0f, Mathf.Min(dt, sm.slideDuration - slideTimer));
+        slideTimer += timeStep;
 
         float startSpeed = currentSlideSpeed;
-        currentSlideSpeed = Mathf.Max(0f, currentSlideSpeed - sm.slideDeceleration * step);
+        currentSlideSpeed = Mathf.Max(0f, currentSlideSpeed - sm.slideDeceleration * timeStep);
         float avgSpeed = (startSpeed + currentSlideSpeed) * 0.5f;
 
+        // 终点裁判可能让这一步变短（停在 Boss 面前），或在时间到了之后继续滑（穿到 Boss 身后）
+        float step = guard.Step(avgSpeed * timeStep);
+
         sm.rb.linearVelocity = new Vector2(
-            slideDirection * avgSpeed * (step / dt),
+            slideDirection * (step / dt),
             sm.rb.linearVelocity.y);
 
-        if (slideTimer >= sm.slideDuration - 0.00001f) slideFinished = true;
+        // 滑铲时长不变：被挡住就贴着 Boss 停到时间结束；要穿到身后就滑完才结束
+        if (slideTimer >= sm.slideDuration - 0.00001f && guard.Reached) slideFinished = true;
     }
 
     public override void Exit()
@@ -139,6 +166,8 @@ public class SlideState : PlayerStateBase
         sm.loadout?.NotifyActionExit(ActionType.Slide, !didStartSlide);
 
         if (!didStartSlide) return;
+
+        guard.End();
 
         // 没申请过时释放也是安全的（引用计数里本来就没有这把钥匙）
         sm.playerState?.health.ReleaseUntargetable(InvulnerableTokens.Slide);

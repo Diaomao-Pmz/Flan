@@ -24,7 +24,7 @@ MonoBehaviour:
   activeAnimName: 
   recoverAnimName: 
   telegraphTime: 0.4
-  fireTime: 1.2
+  fireTime: 0.6
   recoverTime: 0.6
   maxLength: 25
   beamWidth: 0.65

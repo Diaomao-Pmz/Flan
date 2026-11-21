@@ -900,9 +900,9 @@ MonoBehaviour:
       useHitboxOffset: 0
       weapons: []
       chargeLevel: 1
-      offset: {x: 0.45, y: 0.36}
-      scale: {x: 0.82, y: 0.8}
-      rotation: 24.596
+      offset: {x: 0, y: 0.36}
+      scale: {x: 4, y: 0.8}
+      rotation: 0
   - prefab: {fileID: 2819290616138335727, guid: b48052af9d464774992ddb6a3c10553e, type: 3}
     settings:
       usage: 0
@@ -1199,8 +1199,8 @@ MonoBehaviour:
   blockRenderer: {fileID: 492576233}
   sizeMultiplier: {x: 1, y: 1}
   raiseHeight: 2.5
+  pullBackDistance: 2.5
   windupScale: 0.9
-  windupColor: {r: 1, g: 1, b: 1, a: 1}
   raiseCurve:
     serializedVersion: 2
     m_Curve:
@@ -1225,7 +1225,32 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  strikeColor: {r: 0.05, g: 0.05, b: 0.05, a: 1}
+  swingCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  inactiveColor: {r: 0.55, g: 0.55, b: 0.55, a: 0.45}
+  activeColor: {r: 0.95, g: 0.15, b: 0.15, a: 0.85}
 --- !u!212 &492576233
 SpriteRenderer:
   serializedVersion: 2
@@ -1275,7 +1300,7 @@ SpriteRenderer:
   m_SortingLayer: 7
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -8084766084190663891, guid: 90081d1f92477554286208c7edb408f8, type: 3}
+  m_Sprite: {fileID: 4457835537561387818, guid: 9e6b34c672a4b8c4bb62df4724a98d18, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1294,8 +1319,8 @@ Transform:
   m_GameObject: {fileID: 492576231}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.062, y: 0.3917, z: 0}
-  m_LocalScale: {x: 3.0174959, y: 0.8995239, z: 1}
+  m_LocalPosition: {x: 0, y: 0.66, z: 0}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 786768187}
@@ -2053,7 +2078,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!61 &786768184
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2225,20 +2250,11 @@ MonoBehaviour:
   phase2SpecialBullets: []
   phase2SpecialMelees: []
   phase1Routines:
-  - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
-    weightModifiers: []
-  - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
+  - routine: {fileID: 11400000, guid: 9093444a9d58bb2478c97ee4f5f8256d, type: 2}
     weightModifiers: []
   phase2Routines: []
   singleInterleaveChance: 0.2
-  phase1Movement:
-  - phaseTag: 0
-    trigger: 2
-    minGap: 0
-    maxGap: 5
-    weight: 20
-    chance: 1
-    action: {fileID: 11400000, guid: e3bf1c646a69c084b91d9428f5c37f15, type: 2}
+  phase1Movement: []
   phase2Movement: []
   rangedModeWeights:
     ranged: 3
@@ -2298,7 +2314,7 @@ MonoBehaviour:
     isDead: 0
   bossMechanic:
     shieldMaxHP: 300
-    meleeShieldDamage: 100
+    meleeShieldDamage: 5
     rangedShieldDamage: 3
     stunDuration: 2
     shieldRecoverTime: 5
@@ -4651,6 +4667,10 @@ PrefabInstance:
     - target: {fileID: 3212544334172396689, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 3388935916549362062, guid: bce200a076b1d8949aa45929203be613, type: 3}
+      propertyPath: aimSource
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5087812893243016451, guid: bce200a076b1d8949aa45929203be613, type: 3}
       propertyPath: verboseLog

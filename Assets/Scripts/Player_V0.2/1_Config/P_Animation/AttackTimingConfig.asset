@@ -21,16 +21,20 @@ MonoBehaviour:
     forwardThrust: {x: 0.1, y: 0}
     thrustStart: 1
     thrustDuration: 0.05
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 5
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: ff93485aa25713048beeb8ee1833ae9b, type: 2}
     migratedVersion: 2
     slotName: A1
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: 230a9ed5f65482f4cb1336ab55f59e14, type: 2}
     windupOverride: 0.1
     activeOverride: 0.2
@@ -39,16 +43,20 @@ MonoBehaviour:
     forwardThrust: {x: 0.2, y: 0}
     thrustStart: 1
     thrustDuration: 0.05
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: 230a9ed5f65482f4cb1336ab55f59e14, type: 2}
     migratedVersion: 2
     slotName: A2
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: f91ddddd4a0bac049b9d6065f0a0c0e3, type: 2}
     windupOverride: 0.2
     activeOverride: 0.2
@@ -57,16 +65,20 @@ MonoBehaviour:
     forwardThrust: {x: 0.6, y: 0}
     thrustStart: 1
     thrustDuration: 0.05
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 1
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: f91ddddd4a0bac049b9d6065f0a0c0e3, type: 2}
     migratedVersion: 2
     slotName: A3
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: a1cdab3a0f201784abc39fc4afe6503f, type: 2}
     windupOverride: 0.1
     activeOverride: 0.2
@@ -75,16 +87,20 @@ MonoBehaviour:
     forwardThrust: {x: -0.2, y: 0}
     thrustStart: 1
     thrustDuration: 0.05
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: a1cdab3a0f201784abc39fc4afe6503f, type: 2}
     migratedVersion: 2
     slotName: B1
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: f93a7f4adbd77a34d9fa772db87b8d08, type: 2}
     windupOverride: 0.1
     activeOverride: 0.2
@@ -93,71 +109,87 @@ MonoBehaviour:
     forwardThrust: {x: -0.2, y: 0}
     thrustStart: 1
     thrustDuration: 0.05
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: f93a7f4adbd77a34d9fa772db87b8d08, type: 2}
     migratedVersion: 2
     slotName: B2
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: b60cc9455156a9e4e8f1897d7d75ebc9, type: 2}
     windupOverride: 0.2
     activeOverride: 0.2
     recoveryOverride: 0.4
     attackClip: {fileID: 7400000, guid: 35a10e2847a305942a187189787edd46, type: 2}
-    forwardThrust: {x: -0.4, y: 0}
+    forwardThrust: {x: -0.8, y: 0}
     thrustStart: 1
     thrustDuration: 0.05
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: b60cc9455156a9e4e8f1897d7d75ebc9, type: 2}
     migratedVersion: 2
     slotName: B3
-    comboWindow: 0.2
+    comboWindow: 0.5
   chargeAttacks:
   - node: {fileID: 11400000, guid: b13bc296744cadf47958870dbc0a8465, type: 2}
-    windupOverride: 0.2
+    windupOverride: 0.05
     activeOverride: 0.2
     recoveryOverride: 0.1
     attackClip: {fileID: 7400000, guid: dbaab0c076895944ab0d335aa1972f53, type: 2}
-    forwardThrust: {x: 0.4, y: 0}
+    forwardThrust: {x: 0, y: 0}
     thrustStart: 1
     thrustDuration: 0.03
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 1
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: b13bc296744cadf47958870dbc0a8465, type: 2}
     migratedVersion: 2
     slotName: AA1
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: 6527905d3ea5fe846a2e0f7637aabd23, type: 2}
-    windupOverride: 0.3
-    activeOverride: 0.4
-    recoveryOverride: 0.3
-    attackClip: {fileID: 7400000, guid: dbaab0c076895944ab0d335aa1972f53, type: 2}
-    forwardThrust: {x: 2, y: 0}
+    windupOverride: 0.15
+    activeOverride: 0.2
+    recoveryOverride: 0
+    attackClip: {fileID: 7400000, guid: f43126ca2140fc64e8378489c1ea6fc8, type: 2}
+    forwardThrust: {x: 2.5, y: 0}
     thrustStart: 0
-    thrustDuration: 0.04
+    thrustDuration: 0.1
+    passThroughBoss: 1
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: 6527905d3ea5fe846a2e0f7637aabd23, type: 2}
     migratedVersion: 2
     slotName: AA2
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: ab1b05c724cbfa1439f95d6ad267956a, type: 2}
     windupOverride: 0.3
     activeOverride: 0.5
@@ -166,52 +198,64 @@ MonoBehaviour:
     forwardThrust: {x: 1.5, y: 0}
     thrustStart: 1
     thrustDuration: 0.1
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: ab1b05c724cbfa1439f95d6ad267956a, type: 2}
     migratedVersion: 2
     slotName: AA3
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: 69468ccf7a353984d8485855672c1ccd, type: 2}
-    windupOverride: 0.2
+    windupOverride: 0.05
     activeOverride: 0.2
     recoveryOverride: 0.1
     attackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
-    forwardThrust: {x: -0.4, y: 0}
+    forwardThrust: {x: 0, y: 0}
     thrustStart: 1
     thrustDuration: 0.03
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 0
     aimDashDistance: -2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: 69468ccf7a353984d8485855672c1ccd, type: 2}
     migratedVersion: 2
     slotName: BB1
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: 87f3406d0748dde4b8a8dccb9e2f5e0b, type: 2}
-    windupOverride: 0.3
-    activeOverride: 0.4
+    windupOverride: 0.1
+    activeOverride: 0.2
     recoveryOverride: 0.3
     attackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
     forwardThrust: {x: -2, y: 0}
     thrustStart: 0
     thrustDuration: 0.04
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 0
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: 87f3406d0748dde4b8a8dccb9e2f5e0b, type: 2}
     migratedVersion: 2
     slotName: BB2
-    comboWindow: 0.2
+    comboWindow: 0.5
   - node: {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
     windupOverride: 0.5
     activeOverride: 0.2
@@ -220,16 +264,20 @@ MonoBehaviour:
     forwardThrust: {x: -4, y: 0}
     thrustStart: 1
     thrustDuration: 0.2
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 0
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
     migratedVersion: 2
     slotName: BB3
-    comboWindow: 0.2
+    comboWindow: 0.5
   dualAttacks:
   - node: {fileID: 0}
     windupOverride: -1
@@ -239,12 +287,16 @@ MonoBehaviour:
     forwardThrust: {x: 0, y: 0}
     thrustStart: 1
     thrustDuration: -1
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 0}
     migratedVersion: 0
   - node: {fileID: 0}
@@ -255,12 +307,16 @@ MonoBehaviour:
     forwardThrust: {x: 0, y: 0}
     thrustStart: 1
     thrustDuration: -1
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 0}
     migratedVersion: 0
   - node: {fileID: 0}
@@ -271,12 +327,16 @@ MonoBehaviour:
     forwardThrust: {x: 0, y: 0}
     thrustStart: 1
     thrustDuration: -1
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 0}
     migratedVersion: 0
   - node: {fileID: 0}
@@ -287,12 +347,16 @@ MonoBehaviour:
     forwardThrust: {x: 0, y: 0}
     thrustStart: 1
     thrustDuration: -1
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 0}
     migratedVersion: 0
   - node: {fileID: 0}
@@ -303,11 +367,15 @@ MonoBehaviour:
     forwardThrust: {x: 0, y: 0}
     thrustStart: 1
     thrustDuration: -1
+    passThroughBoss: 0
     applyThrustInAir: 1
     lockMovementDuringAttack: 1
     useAimDash: 0
     aimDashMode: 2
     aimDashDistance: 2
     aimDashDuration: 0.15
+    clashWindow: 0.15
+    clashRecoilDistance: 2
+    clashRecoilDuration: 0.15
     migratedFrom: {fileID: 0}
     migratedVersion: 0

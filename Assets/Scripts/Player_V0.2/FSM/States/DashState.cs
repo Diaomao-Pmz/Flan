@@ -12,6 +12,7 @@ public class DashState : PlayerStateBase
     private float dashTotalTime;        // 这次冲刺要用多久
     private Vector2 dashVelocity;       // 冲刺速度（方向 × 速度）
     private bool dashFinished;          // 已走完，下一物理帧交接给后续状态
+    private GuardedMove guard;          // 终点裁判：不停在 Boss 身体里（见 DashEndpointGuard）
     private float originalGravity;
     private bool isFirstHit;
 
@@ -49,7 +50,10 @@ public class DashState : PlayerStateBase
         overrideDirection = null;
     }
 
-    public DashState(PlayerStateMachine stateMachine) : base(stateMachine) { }
+    public DashState(PlayerStateMachine stateMachine) : base(stateMachine)
+    {
+        guard = new GuardedMove(stateMachine);
+    }
 
     public override void Enter()
     {
@@ -92,6 +96,7 @@ public class DashState : PlayerStateBase
         dashTotalTime = Mathf.Max(Time.fixedDeltaTime, sm.dashDuration);
         dashFinished = false;
         dashVelocity = Vector2.zero;
+        guard.End();
 
         if (overrideStationary)
         {
@@ -120,6 +125,14 @@ public class DashState : PlayerStateBase
             dashVelocity = new Vector2(direction * sm.dashSpeed, 0f);
             sm.rb.linearVelocity = dashVelocity;
         }
+
+        // 终点裁判：原地冲刺不用管
+        if (!isStationaryDash)
+        {
+            var cfg = sm.playerState != null ? sm.playerState.movementConfig : null;
+            guard.Begin(dashVelocity, dashVelocity.magnitude * dashTotalTime, dashTotalTime,
+                        cfg != null && cfg.dashPassThrough);
+        }
     }
 
     public override void Update()
@@ -133,23 +146,29 @@ public class DashState : PlayerStateBase
         if (!didStartDash) return;   // 被宝石接管：不推进
 
         // 上一物理帧已经走完：恢复重力，交接给后续状态。
-        // 交接时速度和原来一样是冲刺速度，后续状态（下落 / 跑动 / 待机）照旧自己接手。
+        // 交接时速度和原来一样是冲刺速度，后续状态（下落 / 跑动 / 待机）照旧自己接手；
+        // 被 Boss 挡住停在它面前的，交接速度为 0（不然会顶着 Boss 继续推）。
         if (dashFinished)
         {
-            sm.rb.linearVelocity = dashVelocity;
+            sm.rb.linearVelocity = guard.Blocked ? Vector2.zero : dashVelocity;
             sm.rb.gravityScale = originalGravity;
+            guard.End();
             HandleFallback();
             return;
         }
 
         float dt = Time.fixedDeltaTime;
-        float step = Mathf.Min(dt, dashTotalTime - dashTimer);
-        dashTimer += step;
+        float timeStep = Mathf.Max(0f, Mathf.Min(dt, dashTotalTime - dashTimer));
+        dashTimer += timeStep;
 
-        // 匀速；最后一个物理帧按剩余比例缩小速度，保证总距离正好 = 冲刺距离
-        sm.rb.linearVelocity = dashVelocity * (step / dt);
+        // 匀速；最后一个物理帧只走剩下的那一点，保证总距离正好 = 冲刺距离。
+        // 终点裁判可能让这一步变短（停在 Boss 面前），或在时间到了之后继续走（穿到 Boss 身后）
+        float speed = dashVelocity.magnitude;
+        float step = guard.Step(speed * timeStep);
+        sm.rb.linearVelocity = speed > 0.0001f ? dashVelocity / speed * (step / dt) : Vector2.zero;
 
-        if (dashTimer >= dashTotalTime - 0.00001f) dashFinished = true;
+        // 冲刺时长不变：被挡住就贴着 Boss 站到时间结束；要穿到身后就走完才结束
+        if (dashTimer >= dashTotalTime - 0.00001f && guard.Reached) dashFinished = true;
     }
 
     public override void Exit()
@@ -159,6 +178,7 @@ public class DashState : PlayerStateBase
 
         if (!didStartDash) return;
 
+        guard.End();
         sm.dashSkill.StartCooldownIfFirstHit(isFirstHit);
 
         if (sm.dashTrail != null) sm.dashTrail.emitting = false;

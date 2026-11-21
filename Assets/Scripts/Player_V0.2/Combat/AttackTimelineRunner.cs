@@ -14,6 +14,9 @@ namespace Flandre.CombatSystem
     {
         public bool verboseLog = false;
 
+        [Tooltip("运行时在 Scene 视图里画出正在生效的拼刀框（青色）")]
+        public bool showClashBox = true;
+
         private readonly List<AttackInstance> instances = new List<AttackInstance>();
 
         // 【正式版整改 D · 规范 6】动画事件不能是唯一生命线。
@@ -47,12 +50,25 @@ namespace Flandre.CombatSystem
         private PlayerHitDetection hit;
         private PlayerWeaponEmitter emitter;
         private PlayerEffectSpawner fx;
+        private PlayerStateMachine sm;
+        private PlayerController controller;
+
+        // 每个攻击实例的拼刀框（开过一次就记在这里，招式结束时关掉并移除）
+        private readonly Dictionary<AttackInstance, ClashWindow> clashOf = new Dictionary<AttackInstance, ClashWindow>();
 
         private void Awake()
         {
             hit = GetComponent<PlayerHitDetection>();
             emitter = GetComponent<PlayerWeaponEmitter>();
             fx = GetComponent<PlayerEffectSpawner>();
+            sm = GetComponent<PlayerStateMachine>();
+            controller = GetComponent<PlayerController>();
+        }
+
+        private void OnDisable()
+        {
+            foreach (ClashWindow w in clashOf.Values) ClashRegistry.Close(w);
+            clashOf.Clear();
         }
 
         /// <summary>一招的总时长 = 前摇 + 攻击 + 后摇</summary>
@@ -125,7 +141,11 @@ namespace Flandre.CombatSystem
 
             for (int i = instances.Count - 1; i >= 0; i--)
             {
-                if (!instances[i].alive) instances.RemoveAt(i);
+                if (!instances[i].alive)
+                {
+                    CloseClash(instances[i]);
+                    instances.RemoveAt(i);
+                }
             }
         }
 
@@ -160,6 +180,9 @@ namespace Flandre.CombatSystem
 
                 Fire(inst, e);
             }
+
+            // 拼刀窗口：判定段开始时打开，到时间关掉
+            TickClash(inst);
 
             // 攻击段结束。
             if (!inst.strikesClosed && inst.elapsed >= inst.activeEnd)
@@ -287,8 +310,102 @@ namespace Flandre.CombatSystem
         // 结束的几种方式
         // ==========================================================
 
+        // ==========================================================
+        // 拼刀（2026-11-20）
+        // ==========================================================
+
+        /// <summary>
+        /// 招式勾了 Can Clash：判定段开始那一刻打开拼刀框（登记到 ClashRegistry），
+        /// 过了节拍总表里的 Clash Window 就关掉。招式结束 / 被掐断时也会关掉（StopStrikes）。
+        /// 拼刀成功与否由 Boss 那边在结算伤害前判断（见 ClashRegistry）。
+        /// </summary>
+        private void TickClash(AttackInstance inst)
+        {
+            ComboNode node = inst.node;
+            if (node == null || !node.canClash) return;
+
+            if (clashOf.TryGetValue(inst, out ClashWindow w))
+            {
+                if (w.open && inst.elapsed >= w.closeAt) ClashRegistry.Close(w);
+                return;
+            }
+
+            if (inst.elapsed < inst.windupEnd) return;
+
+            float length = node.clashWindow;
+            if (length <= 0f) return;
+
+            w = new ClashWindow
+            {
+                node = node,
+                origin = transform,
+                controller = controller,
+                offset = node.clashBoxOffset,
+                size = node.clashBoxSize,
+                effect = node.clashEffect,
+                closeAt = inst.windupEnd + length,
+            };
+            w.onClash = (cw, attackerPos) => OnClashed(inst, cw, attackerPos);
+            clashOf[inst] = w;   // 开过一次就记下，这一招不会再开第二次
+
+            if (inst.elapsed < w.closeAt)
+            {
+                ClashRegistry.Open(w);
+                if (verboseLog) PlayerLog.Info($"[拼刀] {node.nodeName} 拼刀框打开（{length:F2}s）");
+            }
+        }
+
+        private void CloseClash(AttackInstance inst)
+        {
+            if (clashOf.TryGetValue(inst, out ClashWindow w))
+            {
+                ClashRegistry.Close(w);
+                clashOf.Remove(inst);
+            }
+        }
+
+        /// <summary>Boss 那边判定拼刀成功后回调（Boss 这一下已经确定不造成伤害）</summary>
+        private void OnClashed(AttackInstance inst, ClashWindow w, Vector2 attackerPos)
+        {
+            ComboNode node = inst.node;
+            PlayerLog.Info($"[拼刀] {(node != null ? node.nodeName : "?")} 拼刀成功 → " +
+                           (w.effect == ClashEffect.AbortRoutine ? "中断 Boss 套路" : "只结束 Boss 当前招 + 急退"));
+
+            if (w.effect != ClashEffect.EndCurrentAction || node == null) return;
+
+            // 急退：往远离 Boss 的方向（Boss 正好重叠时按面朝的反方向）
+            float distance = node.clashRecoilDistance;
+            if (distance <= 0f) return;
+
+            float dx = transform.position.x - attackerPos.x;
+            float dir = Mathf.Abs(dx) > 0.01f
+                ? Mathf.Sign(dx)
+                : (controller != null && controller.facingDirection < 0 ? 1f : -1f);
+
+            bool started = sm != null && sm.currentState == sm.comboState
+                && sm.comboState.StartClashRecoil(inst, new Vector2(dir * distance, 0f), node.clashRecoilDuration);
+
+            if (!started && verboseLog)
+                PlayerLog.Info($"[拼刀] {node.nodeName} 已经不在出招状态（动画被顶掉 / 飞行中），这次不急退");
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (!showClashBox || !Application.isPlaying) return;
+
+            IReadOnlyList<ClashWindow> list = ClashRegistry.Active;
+            Gizmos.color = Color.cyan;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].origin != transform) continue;
+                Gizmos.DrawWireCube(list[i].Center, list[i].size);
+            }
+        }
+
         private void StopStrikes(AttackInstance inst)
         {
+            CloseClash(inst);
+
             for (int i = 0; i < inst.hitRuns.Count; i++) hit?.EndRun(inst.hitRuns[i]);
             inst.hitRuns.Clear();
 

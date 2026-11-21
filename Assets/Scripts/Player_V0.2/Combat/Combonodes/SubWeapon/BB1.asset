@@ -33,14 +33,6 @@ MonoBehaviour:
   hitboxOffset: {x: 0, y: 0}
   hitboxDuration: 0
   knockbackForce: 0
-  effectKey: FX_BB1
-  effectLifetimeMode: 0
-  effectFitDuration: 1
-  effectLifetime: 0
-  useHitboxOffsetForEffect: 0
-  effectOffset: {x: 0.31, y: 0.42}
-  effectScale: {x: 0.4, y: 0.235}
-  effectRotation: 9.896
   projectilePoolKeyOverride: 
   projectileCount: 1
   projectileInterval: 0.06
@@ -55,6 +47,10 @@ MonoBehaviour:
   breakMask: 0
   hitReaction: 0
   hitReactionParam: 0
+  canClash: 1
+  clashBoxOffset: {x: 0.85, y: 0.8}
+  clashBoxSize: {x: 0.87, y: 1.2}
+  clashEffect: 1
   faceTargetOnHit: 0
   minComboDepth: 0
   maxComboDepth: 0

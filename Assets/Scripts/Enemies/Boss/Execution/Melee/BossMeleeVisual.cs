@@ -1,5 +1,21 @@
 ﻿using UnityEngine;
 
+/// <summary>占位方块此刻处在挥击的哪一步（由 MeleeSwingRunner 告诉 BossMeleeVisual）</summary>
+public enum MeleeSwingPose
+{
+    /// <summary>前摇：从判定框位置举起 / 往后拉，progress 0→1</summary>
+    Windup,
+
+    /// <summary>蓄势：举到最高（拉到最远）停着不动</summary>
+    Hold,
+
+    /// <summary>攻击：挥向判定框，progress 0→1（1 = 到达）</summary>
+    Swing,
+
+    /// <summary>已到达判定框：判定中 / 后摇，停着不动</summary>
+    Arrived,
+}
+
 /// <summary>
 /// 近战占位视觉。**它显示的就是判定框本身** —— 位置和尺寸直接取自 MeleeSwing，
 /// 而不是另外做一个「看起来像手」的东西。
@@ -9,11 +25,14 @@
 /// 2. 免费的调试工具 —— 不用切 Scene 视图看 Gizmos，Game 视图里直接可见。
 /// 3. 换真美术时替换的是本组件，判定逻辑一行不用动。
 ///
-/// 【完整时序】
-///   前摇 windupTime    手出现在判定位置，逐渐**升高**（举起来蓄力）
-///   判定 hitboxDuration 瞬间**落回**判定框，尺寸=hitboxSize，颜色转实
-///   后摇 recoverTime   停在判定位置**不动**（砸完了还没抬起来）
-///   结束               消失
+/// 【完整时序】（由 MeleeSwingRunner 每帧调用 Pose 摆出来）
+///   前摇 windupTime   手出现在判定位置，逐渐**升高**（举起来蓄力）
+///                     水平挥击：改为逐渐**往 Boss 身后拉**（把锤子往后抡）
+///   蓄势 holdTime     举在最高处（拉在最远处）**不动**，随机憋一会儿（快慢刀）
+///   攻击 attackTime   从举起 / 后拉的位置**挥向**判定框，在判定打开的那一刻正好到达，尺寸放大到 hitboxSize
+///   后摇 recoverTime  停在判定位置**不动**（砸完了还没抬起来）
+///   结束              消失
+/// 颜色只看判定：判定生效（Hitbox Active Range 里）= 红色，其余时间 = 半透明灰。
 ///
 /// 【时长全部来自 SO，本组件不持有任何时长参数】
 /// 与「用参数代替动画时长」的项目原则一致：以后美术给了真动画，
@@ -39,22 +58,29 @@ public class BossMeleeVisual : MonoBehaviour
     [Tooltip("举到最高时，比判定框高多少")]
     [SerializeField] private float raiseHeight = 2.5f;
 
+    [Tooltip("水平挥击：拉到最远时，离判定框多远（往 Boss 身后的方向）")]
+    [SerializeField] private float pullBackDistance = 2.5f;
+
     [Tooltip("举起阶段的尺寸倍率。略小于判定框，落下时的放大感更明显。")]
     [SerializeField] private float windupScale = 0.7f;
 
-    [Tooltip("举起阶段的颜色。建议半透明，表示「还没生效」。")]
-    [SerializeField] private Color windupColor = new Color(0.1f, 0.1f, 0.1f, 0.45f);
-
-    [Tooltip("举起的速度曲线。左端=刚出现，右端=举到最高。\n" +
+    [Tooltip("举起 / 后拉的速度曲线。左端=刚出现，右端=举到最高（拉到最远）。\n" +
              "EaseOut（先快后慢）更像蓄力，EaseInOut 更平缓。")]
     [SerializeField]
     private AnimationCurve raiseCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-    [Header("--- 判定 / 后摇：落下 ---")]
-    [Tooltip("判定生效及后摇期间的颜色。建议不透明，和举起阶段明确区分。")]
-    [SerializeField] private Color strikeColor = new Color(0.05f, 0.05f, 0.05f, 1f);
+    [Header("--- 攻击：挥过去 ---")]
+    [Tooltip("挥过去的速度曲线。左端=从举起 / 后拉的位置出发，右端=到达判定框。\n" +
+             "默认先慢后快，像锤子越挥越快砸下去。")]
+    [SerializeField]
+    private AnimationCurve swingCurve = new AnimationCurve(new Keyframe(0f, 0f, 0f, 0f), new Keyframe(1f, 1f, 2f, 0f));
 
-    private bool active;
+    [Header("--- 颜色 ---")]
+    [Tooltip("判定没生效时的颜色（前摇、挥动中、判定结束之后）")]
+    [SerializeField] private Color inactiveColor = new Color(0.55f, 0.55f, 0.55f, 0.45f);
+
+    [Tooltip("判定生效时的颜色（Hitbox Active Range 里）")]
+    [SerializeField] private Color activeColor = new Color(0.95f, 0.15f, 0.15f, 0.85f);
 
     // scale 为 1 时的实际渲染尺寸（世界单位），Awake 时测一次
     private Vector2 unitSize = Vector2.one;
@@ -104,65 +130,67 @@ public class BossMeleeVisual : MonoBehaviour
     }
 
     /// <summary>
-    /// 前摇：手出现在判定位置，逐渐举高。
-    /// duration 来自 swing.windupTime —— 由本协程 yield 掉这段时间，
-    /// 因此视觉与判定时序天然一致，不会出现「举到一半判定就来了」。
+    /// 摆一帧（MeleeSwingRunner 每帧调用）。
     /// </summary>
-    public System.Collections.IEnumerator Windup(Vector2 hitboxAnchor, Vector2 hitboxSize, float duration)
-    {
-        if (blockRenderer == null) yield break;
-
-        active = true;
-        blockRenderer.enabled = true;
-        blockRenderer.color = windupColor;
-
-        ApplySize(hitboxSize * windupScale);
-
-        // duration 为 0 时也要摆一帧，否则瞬发挥击完全看不到举手
-        float elapsed = 0f;
-        do
-        {
-            float t = duration > 0f ? Mathf.Clamp01(elapsed / duration) : 1f;
-            float eased = raiseCurve.Evaluate(t);
-
-            // 从判定框底边往上升，升到 raiseHeight
-            transform.position = hitboxAnchor + new Vector2(0f, raiseHeight * eased);
-
-            if (duration <= 0f) break;
-
-            yield return null;
-            elapsed += Time.deltaTime;
-
-        } while (elapsed < duration);
-    }
-
-    /// <summary>
-    /// 判定生效瞬间：从高处落回判定框，贴合真实的位置与尺寸。
-    /// 后摇期间保持这个状态不动，直到 Hide() 被调用。
-    /// </summary>
-    public void Strike(Vector2 hitboxAnchor, Vector2 hitboxSize)
+    /// <param name="hitboxAnchor">判定框底边中点（世界坐标）</param>
+    /// <param name="hitboxSize">判定框尺寸</param>
+    /// <param name="pose">此刻处在哪一步</param>
+    /// <param name="progress">这一步走了多少（0→1）。前摇 / 攻击用，蓄势 / 已到达不看</param>
+    /// <param name="direction">挥击方向，来自 MeleeSwing</param>
+    /// <param name="facing">Boss 这一刀的朝向（+1 右 / -1 左）。水平挥击往它的反方向拉</param>
+    /// <param name="hitboxLive">此刻判定是否生效（红 / 灰）</param>
+    public void Pose(
+        Vector2 hitboxAnchor, Vector2 hitboxSize, MeleeSwingPose pose, float progress,
+        MeleeSwingDirection direction, float facing, bool hitboxLive)
     {
         if (blockRenderer == null) return;
 
-        active = true;
         blockRenderer.enabled = true;
-        blockRenderer.color = strikeColor;
+        blockRenderer.color = hitboxLive ? activeColor : inactiveColor;
 
-        transform.position = hitboxAnchor;
-        ApplySize(hitboxSize);
-    }
+        // 举到最高 / 拉到最远时，相对判定框的偏移
+        Vector2 held = direction == MeleeSwingDirection.Horizontal
+            ? new Vector2((facing < 0f ? 1f : -1f) * pullBackDistance, 0f)
+            : new Vector2(0f, raiseHeight);
 
-    /// <summary>判定窗口内每帧跟随（支持边移动边挥砍）。</summary>
-    public void Follow(Vector2 hitboxAnchor)
-    {
-        if (!active || blockRenderer == null) return;
-        transform.position = hitboxAnchor;
+        progress = Mathf.Clamp01(progress);
+
+        Vector2 offset;
+        float scale;
+
+        switch (pose)
+        {
+            case MeleeSwingPose.Windup:
+                offset = held * raiseCurve.Evaluate(progress);
+                scale = windupScale;
+                break;
+
+            case MeleeSwingPose.Hold:
+                offset = held;
+                scale = windupScale;
+                break;
+
+            case MeleeSwingPose.Swing:
+            {
+                float p = swingCurve.Evaluate(progress);
+                offset = held * (1f - p);
+                scale = Mathf.Lerp(windupScale, 1f, p);
+                break;
+            }
+
+            default:   // Arrived：停在判定框上（判定中 + 之后的后摇）
+                offset = Vector2.zero;
+                scale = 1f;
+                break;
+        }
+
+        transform.position = hitboxAnchor + offset;
+        ApplySize(hitboxSize * scale);
     }
 
     /// <summary>收起。后摇结束时、以及被打断时调用。</summary>
     public void Hide()
     {
-        active = false;
         if (blockRenderer != null) blockRenderer.enabled = false;
     }
 

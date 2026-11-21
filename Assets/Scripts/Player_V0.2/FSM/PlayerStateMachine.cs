@@ -278,7 +278,8 @@ public class PlayerStateMachine : MonoBehaviour
     }
 
     /// <summary>
-    /// 此刻是否在做"可以穿过敌人"的动作：地面/空中冲刺、飞行八向冲刺、地面滑铲。
+    /// 此刻是否在做"可以穿过敌人"的动作：地面/空中冲刺、飞行八向冲刺、地面滑铲、
+    /// 节拍总表里勾了 Pass Through Boss 的招式位移（AA2 / BB2 …）。
     /// 与无敌（无法选中）无关。
     /// </summary>
     private bool WantsPassThrough()
@@ -293,6 +294,9 @@ public class PlayerStateMachine : MonoBehaviour
         }
 
         if (cfg.slidePassThrough && currentState == slideState && slideState.IsSliding) return true;
+
+        // 招式位移（节拍总表里逐招勾选，不看上面两个总开关）
+        if (currentState == comboState && comboState.WantsPassThrough) return true;
 
         return false;
     }

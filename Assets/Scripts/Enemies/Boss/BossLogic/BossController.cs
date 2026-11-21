@@ -220,6 +220,29 @@ public class BossController : EntityBase
         if (CurrentState == CombatState) ChangeState(MoveState);
     }
 
+    /// <summary>
+    /// 近战挥击被玩家拼刀（MeleeSwingRunner 在结算伤害前发现的）。
+    /// 这一招剩下的挥击由 Runner 自己收掉（它提前结束，出招协程照常走完 → Finish）；
+    /// 这里只决定套路要不要跟着作废：
+    ///   中断整个套路 → 意图全部作废，Finish 时没有下一步 → 回移动状态重新决定
+    ///   只结束当前招 → 什么都不动，Finish 时套路照常接下一步
+    /// 套路 / 招式的冷却在出手时就开始算了，被打断不影响冷却。
+    /// </summary>
+    public void OnMeleeClashed(ClashEffect effect, ComboNode by)
+    {
+        string who = by != null ? by.nodeName : "玩家";
+
+        if (effect == ClashEffect.AbortRoutine)
+        {
+            Debug.Log($"[Boss] 被 {who} 拼刀：这一招和整个套路都中断");
+            if (AI != null) AI.ClearIntent($"被 {who} 拼刀");
+        }
+        else
+        {
+            Debug.Log($"[Boss] 被 {who} 拼刀：只结束这一招，套路继续");
+        }
+    }
+
     private void HideShieldVisual() { if (shieldVisual != null) shieldVisual.SetActive(false); }
     private void ShowShieldVisual() { if (shieldVisual != null) shieldVisual.SetActive(true); }
 

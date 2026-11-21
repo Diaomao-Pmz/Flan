@@ -12,14 +12,17 @@ namespace Flandre.CombatSystem
 
         // ---- 飞行冲刺（Shift）----
         private Vector2 dashDirection;
-        private float dashTimer;
+        private float dashTimer;            // 冲刺时间还剩多久
+        private bool dashing;               // 冲刺中（时间到了但还在穿过 Boss 时也算）
+        private readonly GuardedMove guard; // 终点裁判：不停在 Boss 身体里（见 DashEndpointGuard）
 
         /// <summary>正在飞行冲刺中</summary>
-        public bool IsDashing => dashTimer > 0f;
+        public bool IsDashing => dashing;
 
         public FlightMotor(PlayerStateMachine stateMachine)
         {
             sm = stateMachine;
+            guard = new GuardedMove(stateMachine);
         }
 
         /// <summary>一次新的飞行开始（起飞那一刻）。只在这里清零耗蓝零头</summary>
@@ -27,6 +30,8 @@ namespace Flandre.CombatSystem
         {
             manaAccumulator = 0f;
             dashTimer = 0f;
+            dashing = false;
+            guard.End();
         }
 
         /// <summary>
@@ -38,7 +43,12 @@ namespace Flandre.CombatSystem
 
             dashDirection = direction.normalized;
             dashTimer = sm.dashDuration;   // 飞行参数分离时读的是飞行那一套
+            dashing = true;
             SetTrail(true);
+
+            var cfg = sm.playerState != null ? sm.playerState.movementConfig : null;
+            guard.Begin(dashDirection, sm.dashSpeed * sm.dashDuration, sm.dashDuration,
+                        cfg != null && cfg.dashPassThrough);
 
             // 冲刺动画（目前借用滑铲动画，见 PlayerAnimHash.Dash）。
             // 只在巡航时换：交战中正在演攻击动画，不去盖它
@@ -102,13 +112,22 @@ namespace Flandre.CombatSystem
         /// <summary>物理帧：八方向移动。X/Y 都由输入完全接管，不保留原速度</summary>
         public void FixedTick()
         {
-            // 冲刺中：方向键不参与，按冲刺方向全速推进
-            if (dashTimer > 0f)
+            // 冲刺中：方向键不参与，按冲刺方向全速推进。
+            // 精确距离：最后一个物理帧只走剩下的那一点；终点裁判可能让它停在 Boss 面前 / 穿到 Boss 身后
+            if (dashing)
             {
-                sm.rb.linearVelocity = dashDirection * sm.dashSpeed;
-                dashTimer -= Time.fixedDeltaTime;
-                if (dashTimer <= 0f)
+                float dt = Time.fixedDeltaTime;
+                float timeStep = Mathf.Max(0f, Mathf.Min(dt, dashTimer));
+                dashTimer -= timeStep;
+
+                float step = guard.Step(sm.dashSpeed * timeStep);
+                sm.rb.linearVelocity = dashDirection * (step / dt);
+
+                // 冲刺时长不变：被挡住就贴着 Boss 停到时间结束；要穿到身后就走完才结束
+                if (dashTimer <= 0f && guard.Reached)
                 {
+                    dashing = false;
+                    guard.End();
                     SetTrail(false);
 
                     // 冲刺结束：巡航中换回飞行动画（交战中由下一招的攻击动画接手）

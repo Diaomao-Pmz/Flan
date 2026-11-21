@@ -19,6 +19,21 @@ public class FallState : PlayerStateBase
     private bool pendingCtrlDropCooldownReady;
     private bool ctrlDropCooldownReady;
 
+    // 【2026-11-20】击飞惯性：受击硬直结束时人还在空中 → 保留被击飞的横向速度，不被"空中左右移动"覆盖。
+    // 按左右键（A / D）立刻结束，横向换成输入速度；W / S 不影响；离开下落（落地 / 出招 / 受击…）时结束。
+    // Ctrl 下落会让本状态重新进入一次，这种情况下惯性接着保留。
+    private bool pendingKnockbackCarry;
+    private bool knockbackCarry;
+    private bool knockbackCarryOnExit;   // 上次离开时是不是带着惯性（给 Ctrl 下落的重新进入用）
+
+    /// <summary>
+    /// 让【下一次】进入下落时带着击飞惯性。必须在 ChangeState(fallState) 之前调用，用一次就清。由 HitState 调用。
+    /// </summary>
+    public void PrepareKnockbackCarry()
+    {
+        pendingKnockbackCarry = true;
+    }
+
     // 最近一次按着左右方向键的时刻。落地时用它判断"落地前 n 秒内有没有方向键输入"
     private float lastHorizontalInputTime = -10f;
 
@@ -69,6 +84,12 @@ public class FallState : PlayerStateBase
         pendingCtrlDropCooldownReady = false;
         lastHorizontalInputTime = -10f;
 
+        // 从下落切回下落（空中按 Ctrl）时 previousState 就是自己 —— 惯性不断
+        bool reentered = ReferenceEquals(sm.previousState, this);
+        knockbackCarry = pendingKnockbackCarry || (reentered && knockbackCarryOnExit);
+        pendingKnockbackCarry = false;
+        knockbackCarryOnExit = false;
+
         if (isInvulnerableDrop)
             sm.playerState?.health.RequestUntargetable(InvulnerableTokens.FlightDrop);
     }
@@ -117,12 +138,20 @@ public class FallState : PlayerStateBase
 
         sm.rb.gravityScale = originalGravity * dropMultiplier;
 
-        ApplyHorizontalMove();
+        // 击飞惯性：按了左右键 → 结束惯性，交给正常的空中操作；没按 → 不碰横向速度
+        if (knockbackCarry && Mathf.Abs(sm.playerController.moveInput.x) > 0.1f)
+            knockbackCarry = false;
+
+        if (!knockbackCarry)
+            ApplyHorizontalMove();
     }
 
     public override void Exit()
     {
         sm.rb.gravityScale = originalGravity;
+
+        knockbackCarryOnExit = knockbackCarry;
+        knockbackCarry = false;
 
         isCtrlDrop = false;
 

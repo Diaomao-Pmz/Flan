@@ -67,8 +67,16 @@ public class HitState : PlayerStateBase
 
         if (hitStunTimer <= 0f)
         {
-            if (sm.IsGrounded()) sm.ChangeState(sm.idleState);
-            else sm.ChangeState(sm.fallState);
+            if (sm.IsGrounded())
+            {
+                sm.ChangeState(sm.idleState);
+            }
+            else
+            {
+                // 还在空中：带着击飞惯性下落 —— 不按左右键时横向速度不被覆盖，继续沿抛物线飞（见 FallState）
+                sm.fallState.PrepareKnockbackCarry();
+                sm.ChangeState(sm.fallState);
+            }
         }
     }
 
