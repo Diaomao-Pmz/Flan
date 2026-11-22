@@ -15,18 +15,21 @@ MonoBehaviour:
   moveSpeed: 6
   flySpeed: 6
   maxJumps: 1
+  maxJumpHeight: 2.87
+  minJumpHeight: 0.4
+  minJumpVelocity: 0
+  fallGravityMultiplier: 1
   jumpForce: 13
-  minJumpVelocity: 2
   ctrlDropSpeedMultiplier: 3
-  dashDistance: 1.2
+  dashDistance: 3
   dashDuration: 0.15
-  dashCooldown: 0.5
+  dashCooldown: 3
   slideDistance: 3
   slideDuration: 0.59
   slideToCrouchSpeedMultiplier: 0.4
   slideInvulnerable: 1
   landingSlideInputWindow: 0.1
-  slideCooldown: 2
+  slideCooldown: 3
   airDropInvulnerable: 1
   flightUsesNormalActionParams: 0
   flyDashDistance: 1.5

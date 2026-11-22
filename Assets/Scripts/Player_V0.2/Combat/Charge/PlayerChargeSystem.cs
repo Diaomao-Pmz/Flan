@@ -7,9 +7,8 @@ namespace Flandre.CombatSystem
     /// </summary>
     public class PlayerChargeSystem : MonoBehaviour
     {
-        // 【参数搬家】蓄力的移动折损（开关、移速倍率、跳跃倍率）统一放在 PlayerMovementConfig 的 Charge Settings。
-        // 原先本组件上还有一份「覆盖移速倍率」和「跳跃倍率」—— 同一条规则两个来源，
-        // 改了 config 却被组件上的覆盖值顶掉，所以删掉，只留 config 一处。
+        // 【参数搬家 2026-11-21】蓄力的移动折损（开关、移速倍率、跳跃倍率）放在每个蓄力招式（ComboNode）的
+        // 「蓄力设定」里：蓄到哪一级就用哪一招的设定，两只手同时蓄时取更重的。只此一处，没有全局开关。
 
         [Header("Debug")]
         public bool verboseLog = false;
@@ -38,7 +37,18 @@ namespace Flandre.CombatSystem
         private ComboInputBuffer buffer;
         private WeaponLoadout weapons;
 
-        private bool penaltyApplied;
+        // 当前贴在属性上的折损倍率（1 = 没折损）
+        private float appliedMoveMultiplier = 1f;
+        private float appliedJumpMultiplier = 1f;
+
+        // ---- 减速渐变：每只手各记一份（下标同 modules）----
+        private readonly bool[] slowTracking = new bool[2];           // 这只手正在蓄力（已经开始记了）
+        private readonly ComboNode[] slowNode = new ComboNode[2];     // 当前生效的减速招式（null = 不减速）
+        private readonly float[] slowStartTime = new float[2];        // 这一招的减速从什么时候开始
+        private readonly float[] slowMoveFrom = new float[2];         // 渐变起点（移速）
+        private readonly float[] slowJumpFrom = new float[2];         // 渐变起点（跳跃）
+        private readonly float[] slowMoveNow = { 1f, 1f };            // 这只手此刻的倍率（移速）
+        private readonly float[] slowJumpNow = { 1f, 1f };            // 这只手此刻的倍率（跳跃）
 
         private void Awake()
         {
@@ -125,7 +135,7 @@ namespace Flandre.CombatSystem
 
             m.Begin(weapon, startLevel, minHold, isAfterCombo);
 
-            ApplyPenaltyIfNeeded();
+            RefreshPenalty();
 
             OnChargeStarted?.Invoke(m.Slot);
             OnChargeLevelChanged?.Invoke(m.Slot, 0);
@@ -191,7 +201,7 @@ namespace Flandre.CombatSystem
             OnChargeProgressChanged?.Invoke(m.Slot, 0f);
             OnChargeEnded?.Invoke(m.Slot);
 
-            ReleasePenaltyIfNeeded();
+            RefreshPenalty();
         }
 
         // ==========================================================
@@ -217,54 +227,140 @@ namespace Flandre.CombatSystem
                     if (verboseLog) PlayerLog.Info($"[蓄力] {m.Slot} 现在 {m.CurrentLevel} 级，松手即发");
                 }
             }
+
+            // 等级变了，对应的招式就变了 → 折损跟着换（没变化时不动属性）
+            RefreshPenalty();
         }
 
         // ==========================================================
         // 移动折损
         // ==========================================================
 
-        private PlayerMovementConfig MoveCfg => state != null ? state.movementConfig : null;
-
-        // 蓄力折损参数已从 PlayerMovementConfig 搬到 PlayerCombatConfig
-        private PlayerCombatConfig CombatCfg => state != null ? state.combatConfig : null;
-
-        private float MoveMultiplier => CombatCfg != null ? CombatCfg.chargeMoveSpeedMultiplier : 0.2f;
-        private float JumpMultiplier => CombatCfg != null ? CombatCfg.chargeJumpForceMultiplier : 0.7f;
-
         /// <summary>
-        /// 贴便利贴：蓄力期间移速与跳跃力打折。
+        /// 这只手此刻蓄的是哪一招：按当前等级（还没到 1 级时按起步等级）在武器里找
+        /// 「等级 ≤ 它」里最高的那个蓄力招。只看裸按键的那一招（AA1/AA2/AA3），不看方向变招。
         /// </summary>
-        private void ApplyPenaltyIfNeeded()
+        private static ComboNode ChargeNodeFor(ChargeModule m)
         {
-            if (penaltyApplied || state == null) return;
+            WeaponMoveSet weapon = m.Weapon;
+            if (weapon == null) return null;
 
-            // 开关关闭（默认）→ 蓄力时正常跑跳，不贴折损便利贴。倍率参数原样保留
-            if (state.combatConfig != null && !state.combatConfig.chargeSlowsMovement) return;
+            int level = m.CurrentLevel > 0 ? m.CurrentLevel : Mathf.Max(1, m.StartLevel);
 
-            // 倍率转成"减少百分之多少"的加法修饰
-            state.stats.moveSpeed.AddModifier(
-                StatModifier.Percent(MoveMultiplier - 1f, this));
-
-            state.stats.jumpForce.AddModifier(
-                StatModifier.Percent(JumpMultiplier - 1f, this));
-
-            penaltyApplied = true;
+            ComboNode best = null;
+            Pick(weapon.followUps, level, ref best);
+            Pick(weapon.openers, level, ref best);
+            return best;
         }
 
-        private void ReleasePenaltyIfNeeded()
+        private static void Pick(System.Collections.Generic.List<ComboNode> nodes, int level, ref ComboNode best)
         {
-            if (!penaltyApplied) return;
-            if (IsAnyCharging) return;   // 另一只手还在蓄，折损保持
+            if (nodes == null) return;
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                ComboNode n = nodes[i];
+                if (n == null || !n.IsValidChargeNode || n.chargeLevel > level) continue;
+                if (n.inputSequence != null && n.inputSequence.Count > 1) continue;   // 方向变招不算
+                if (best == null || n.chargeLevel > best.chargeLevel) best = n;
+            }
+        }
 
-            state?.stats.RemoveAllModifiersFrom(this);
-            penaltyApplied = false;
+        /// <summary>
+        /// 按此刻两只手蓄的招，算出该贴的移速 / 跳跃折损；和已贴的不一样才重贴。
+        /// </summary>
+        private void RefreshPenalty()
+        {
+            if (state == null || state.stats == null) return;
+
+            float move = 1f;
+            float jump = 1f;
+
+            for (int i = 0; i < modules.Length && i < slowTracking.Length; i++)
+            {
+                TickHandSlow(i);
+                move = Mathf.Min(move, slowMoveNow[i]);
+                jump = Mathf.Min(jump, slowJumpNow[i]);
+            }
+
+            // 渐变中每帧都在变：变化太小就不重贴，省得每帧都拆装修饰
+            bool sameMove = Mathf.Abs(move - appliedMoveMultiplier) < 0.001f;
+            bool sameJump = Mathf.Abs(jump - appliedJumpMultiplier) < 0.001f;
+            if (sameMove && sameJump) return;
+
+            bool wasSlowed = appliedMoveMultiplier < 1f || appliedJumpMultiplier < 1f;
+
+            state.stats.RemoveAllModifiersFrom(this);
+
+            // 倍率转成"减少百分之多少"的加法修饰
+            if (move < 1f) state.stats.moveSpeed.AddModifier(StatModifier.Percent(move - 1f, this));
+            if (jump < 1f) state.stats.jumpForce.AddModifier(StatModifier.Percent(jump - 1f, this));
+
+            appliedMoveMultiplier = move;
+            appliedJumpMultiplier = jump;
+
+            // 只在开始减速 / 解除时打日志（渐变途中每帧都会走到这里）
+            bool isSlowed = move < 1f || jump < 1f;
+            if (verboseLog && isSlowed != wasSlowed)
+                PlayerLog.Info(isSlowed
+                    ? $"[蓄力] 移动折损开始：移速 ×{move:F2}，跳跃 ×{jump:F2}"
+                    : "[蓄力] 移动折损解除");
+        }
+
+        /// <summary>
+        /// 算出第 i 只手此刻的移速 / 跳跃倍率：
+        /// 当前蓄的招勾了减速 → 从渐变起点按 Charge Slow Ramp Time 线性变到终点倍率。
+        /// 刚开始蓄 → 起点 = 这一招的起始倍率；中途换到另一招 → 起点 = 换招那一刻的实际倍率（不会突然变快）。
+        /// </summary>
+        private void TickHandSlow(int i)
+        {
+            ChargeModule m = modules[i];
+            if (!m.IsCharging)
+            {
+                slowTracking[i] = false;
+                slowNode[i] = null;
+                slowMoveNow[i] = 1f;
+                slowJumpNow[i] = 1f;
+                return;
+            }
+
+            ComboNode node = ChargeNodeFor(m);
+            ComboNode slow = node != null && node.chargeSlowsMovement ? node : null;
+
+            if (!slowTracking[i] || slow != slowNode[i])
+            {
+                bool fresh = !slowTracking[i];
+                slowTracking[i] = true;
+                slowNode[i] = slow;
+                slowStartTime[i] = Time.time;
+
+                if (slow != null)
+                {
+                    slowMoveFrom[i] = fresh ? Mathf.Clamp01(slow.chargeMoveSpeedStart) : slowMoveNow[i];
+                    slowJumpFrom[i] = fresh ? Mathf.Clamp(slow.chargeJumpForceStart, 0.1f, 1f) : slowJumpNow[i];
+                }
+            }
+
+            if (slow == null)
+            {
+                slowMoveNow[i] = 1f;
+                slowJumpNow[i] = 1f;
+                return;
+            }
+
+            float ramp = slow.ResolvedChargeSlowRampTime;
+            float t = ramp > 0f ? Mathf.Clamp01((Time.time - slowStartTime[i]) / ramp) : 1f;
+
+            slowMoveNow[i] = Mathf.Lerp(slowMoveFrom[i], Mathf.Clamp01(slow.chargeMoveSpeedMultiplier), t);
+            slowJumpNow[i] = Mathf.Lerp(slowJumpFrom[i], Mathf.Clamp(slow.chargeJumpForceMultiplier, 0.1f, 1f), t);
         }
 
         private void OnDisable()
         {
             // 组件被关掉时别把折损留在属性面板上
             CancelAll();
-            ReleasePenaltyIfNeeded();
+            if (state != null && state.stats != null) state.stats.RemoveAllModifiersFrom(this);
+            appliedMoveMultiplier = 1f;
+            appliedJumpMultiplier = 1f;
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Flandre.CombatSystem
         // ==========================================================
         [Header("双蓄力强化招 (实验)")]
         [Tooltip(
-            "配方表：近/远 + 等级 的组合（无序）→ 强化招。\n" +
+            "配方表：两只手蓄力等级的总和（2~6）→ 强化招。不能有两个总和相同的配方（会报错，这几个都不生效）。\n" +
             "留空 = 没有任何强化招，双手先后松手一律按两发单蓄力处理。")]
         public List<DualChargeRecipe> dualChargeRecipes = new List<DualChargeRecipe>();
 
@@ -48,9 +48,12 @@ namespace Flandre.CombatSystem
         [Min(0f)]
         public float dualChargeWindow = 0.2f;
 
+        private readonly HashSet<int> warnedDuplicateSums = new HashSet<int>();
+
         /// <summary>
         /// 按两只手各自的蓄力等级查双蓄配方。查不到返回 null。
-        /// 组合只看「武器类型 + 等级」，与先后顺序、主副手无关。
+        /// 只看两只手等级的总和，与先后顺序、主副手无关。
+        /// 有不止一个配方的总和对得上 → 报错，都不生效（返回 null）。
         /// </summary>
         public DualChargeRecipe FindDualRecipe(int mainLevel, int subLevel)
         {
@@ -58,16 +61,48 @@ namespace Flandre.CombatSystem
             if (mainLevel <= 0 || subLevel <= 0) return null;
             if (dualChargeRecipes == null) return null;
 
+            DualChargeRecipe found = null;
+            bool duplicated = false;
+
+            for (int i = 0; i < dualChargeRecipes.Count; i++)
+            {
+                DualChargeRecipe r = dualChargeRecipes[i];
+                if (r == null || !r.Matches(mainLevel, subLevel)) continue;
+
+                if (found == null) found = r;
+                else if (r != found) duplicated = true;
+            }
+
+            if (duplicated)
+            {
+                int sum = mainLevel + subLevel;
+                if (warnedDuplicateSums.Add(sum))
+                    Debug.LogError($"[双蓄] 配方表里有不止一个等级总和为 {sum} 的配方，这几个都不生效。请只保留一个。", this);
+                return null;
+            }
+
+            return found;
+        }
+
+#if UNITY_EDITOR
+        // 编辑配方表时就检查：有总和重复的配方直接报错
+        private void OnValidate()
+        {
+            if (dualChargeRecipes == null) return;
+
+            var seen = new Dictionary<int, DualChargeRecipe>();
             for (int i = 0; i < dualChargeRecipes.Count; i++)
             {
                 DualChargeRecipe r = dualChargeRecipes[i];
                 if (r == null) continue;
 
-                if (r.Matches(mainWeapon.weaponType, mainLevel, subWeapon.weaponType, subLevel))
-                    return r;
+                if (seen.TryGetValue(r.levelSum, out DualChargeRecipe other) && other != r)
+                    Debug.LogError($"[双蓄] 配方「{other.name}」和「{r.name}」的等级总和都是 {r.levelSum}，这几个配方都不会生效。请只保留一个。", this);
+                else
+                    seen[r.levelSum] = r;
             }
-            return null;
         }
+#endif
 
         /// <summary>武器变更时广播。UI 与连招引擎可订阅</summary>
         public event System.Action<WeaponSlot, WeaponMoveSet> OnWeaponChanged;

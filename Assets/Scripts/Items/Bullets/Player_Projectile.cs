@@ -55,6 +55,10 @@ public class Player_Projectile : MonoBehaviour, IPoolable
 
     private Vector2 moveDirection;
     private Rigidbody2D rb;
+    private Collider2D body;
+
+    // 【消弹】这一发会擦掉碰到的 Boss 子弹（招式勾了「子弹」消弹时由发射器写入，回池时清掉）
+    private bool cancelsBullets;
 
     // 出厂快照。避免把被外部改写过的值带回池子
     private Vector3 originalScale;
@@ -67,6 +71,9 @@ public class Player_Projectile : MonoBehaviour, IPoolable
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        rb.gravityScale = 0f;   // 玩家子弹笔直飞：不管预制体上 Gravity Scale 填多少都不受重力
+        body = GetComponent<Collider2D>();
+        if (body == null) body = GetComponentInChildren<Collider2D>();
         originalScale = transform.localScale;
         originalSpeed = speed;
         originalDamage = damage;
@@ -106,6 +113,18 @@ public class Player_Projectile : MonoBehaviour, IPoolable
         if (damageOverride > 0) damage = damageOverride;
     }
 
+    /// <summary>直接设定这一发的伤害（可以是 0）。回池时由 OnDespawn 还原成预制体伤害</summary>
+    public void SetDamage(int value)
+    {
+        damage = Mathf.Max(0, value);
+    }
+
+    /// <summary>这一发要不要擦掉碰到的 Boss 子弹。回池时自动清掉</summary>
+    public void SetCancelsBullets(bool on)
+    {
+        cancelsBullets = on;
+    }
+
     public void Setup(Vector2 direction)
     {
         moveDirection = direction.normalized;
@@ -116,6 +135,9 @@ public class Player_Projectile : MonoBehaviour, IPoolable
     void FixedUpdate()
     {
         rb.linearVelocity = moveDirection * speed;
+
+        // 消弹：扫自己身上 + 这一帧要飞过的那段路（飞得快时小子弹可能卡在两帧之间）
+        if (cancelsBullets) BulletCanceller.CancelAlong(body, moveDirection, speed * Time.fixedDeltaTime);
     }
 
     void Update()
@@ -191,6 +213,7 @@ public class Player_Projectile : MonoBehaviour, IPoolable
         damage = originalDamage;
         moveDirection = Vector2.zero;
         aliveTimer = 0f;
+        cancelsBullets = false;
 
         // 脱离父节点由 ObjectPoolManager.Recycle 统一处理，这里不重复 SetParent
     }

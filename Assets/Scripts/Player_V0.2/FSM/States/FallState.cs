@@ -136,7 +136,9 @@ public class FallState : PlayerStateBase
             if (cfg != null) dropMultiplier = Mathf.Max(0f, cfg.ctrlDropSpeedMultiplier);
         }
 
-        sm.rb.gravityScale = originalGravity * dropMultiplier;
+        // 往下掉时再乘下落重力倍率（PlayerMovementConfig）
+        float fallMultiplier = sm.rb.linearVelocity.y < 0f ? sm.fallGravityMultiplier : 1f;
+        sm.rb.gravityScale = originalGravity * dropMultiplier * fallMultiplier;
 
         // 击飞惯性：按了左右键 → 结束惯性，交给正常的空中操作；没按 → 不碰横向速度
         if (knockbackCarry && Mathf.Abs(sm.playerController.moveInput.x) > 0.1f)

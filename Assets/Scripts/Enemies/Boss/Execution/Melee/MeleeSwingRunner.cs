@@ -80,7 +80,7 @@ public class MeleeSwingRunner
 
             // --- 被拼刀：这一招到此为止（剩下的挥击、后摇都不打了）---
             // 只在这里收招、不在判定的半路上掐协程：这一帧已经确定不造成伤害，再干净地退出。
-            // 套路要不要跟着作废由 Boss 决定（主手 AA1 = 作废，副手 BB1 = 继续下一步）。
+            // 拼刀只结束这一招，套路照常接下一步。
             if (clashedBy != null)
             {
                 ClashWindow clash = clashedBy;
@@ -89,7 +89,7 @@ public class MeleeSwingRunner
                 visual?.Hide();
                 activeVisual = null;
 
-                if (ctx.controller != null) ctx.controller.OnMeleeClashed(clash.effect, clash.node);
+                if (ctx.controller != null) ctx.controller.OnMeleeClashed(clash.node);
                 yield break;
             }
 
@@ -201,7 +201,8 @@ public class MeleeSwingRunner
     {
         // 【拼刀】结算伤害之前先看玩家有没有拼刀框挡在这里 —— 挡着就这一下不造成伤害，交给 Run 收招
         if (swing.clashable
-            && ClashRegistry.TryClash(center, swing.hitboxSize, owner.position, out ClashWindow clash))
+            && ClashRegistry.TryClash(center, swing.hitboxSize, owner.position,
+                                      BossController.CategoryOf(knockbackNode), out ClashWindow clash))
         {
             clashedBy = clash;
             return true;

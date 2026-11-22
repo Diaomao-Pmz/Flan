@@ -139,13 +139,31 @@ namespace Flandre.CombatSystem
         /// </summary>
         public readonly Vector2 knockbackForce;
 
+        /// <summary>
+        /// 希望受击方硬直多久（秒）。0 = 不要求。
+        /// 最终是否照做由受击方决定（Boss：打断了 / 本来没在出招时才硬直，眩晕中不处理）。
+        /// </summary>
+        public readonly float hitStun;
+
+        /// <summary>
+        /// 希望受击方被持续推开的速度（格/秒，方向 = 远离 sourcePosition）。0 = 不推。
+        /// 持续伤害的招式每跳都发一次，受击方在 pushDuration 内保持这个推力；不打断受击方的动作。
+        /// </summary>
+        public readonly float pushSpeed;
+
+        /// <summary>这次推力从命中起维持多久（秒）</summary>
+        public readonly float pushDuration;
+
         public DamageInfo(int amount, DamageType type, Vector2 sourcePosition,
                           GameObject instigator = null,
                           ActionCategory breakMask = ActionCategory.None,
                           HitReaction reaction = HitReaction.None,
                           float reactionParam = 0f,
                           bool overrideKnockback = false,
-                          Vector2 knockbackForce = default)
+                          Vector2 knockbackForce = default,
+                          float hitStun = 0f,
+                          float pushSpeed = 0f,
+                          float pushDuration = 0f)
         {
             this.amount = amount;
             this.type = type;
@@ -156,6 +174,9 @@ namespace Flandre.CombatSystem
             this.reactionParam = reactionParam;
             this.overrideKnockback = overrideKnockback;
             this.knockbackForce = knockbackForce;
+            this.hitStun = hitStun;
+            this.pushSpeed = pushSpeed;
+            this.pushDuration = pushDuration;
         }
 
         /// <summary>本次攻击能否打断指定类别的动作</summary>

@@ -20,9 +20,31 @@ namespace Flandre.CombatSystem
         [Header("Jump Settings")]
         [Tooltip("基础最大跳跃次数。目前仍会被 GemActionProcessor 在运行时覆写，阶段2 修复")]
         public int maxJumps = 1;
-        public float jumpForce = 13f;
-        [Tooltip("松开跳跃键时，向上速度被削减到的值（实现「按多久跳多高」）")]
+
+        // 【2026-11-21】跳跃改成填高度：起跳给满跳速度；松手时还没升到最低高度 → 补足到正好最低高度，
+        // 已经过了 → 削速度、很快到顶（按得越久跳得越高）。起跳速度由满跳高度和重力自动算出。
+        [Tooltip("满跳高度（格）：一直按住空格能跳多高。起跳速度由它和重力自动算出（重力 = Physics2D 重力 × 角色的 Gravity Scale）")]
+        [Min(0.1f)]
+        public float maxJumpHeight = 2.87f;
+
+        [Tooltip(
+            "最低跳跃高度（格）：轻点一下空格跳多高。\n" +
+            "在升到这个高度之前松手，都会正好停在这个高度（和手多快无关）；过了这个高度再松手，按得越久跳得越高。\n" +
+            "比满跳高度还大时按满跳高度算")]
+        [Min(0f)]
+        public float minJumpHeight = 1f;
+
+        [Tooltip("松手后剩余上升速度：已经升过最低高度后松手，上升速度被削到这个值。越小停得越利落，0 = 松手立刻开始下落")]
+        [Min(0f)]
         public float minJumpVelocity = 2f;
+
+        [Tooltip("下落重力倍率：往下掉时重力乘以这个数（跳跃下落段和普通下落都算）。1 = 和上升一样；大于 1 = 落得更快，跳起来不飘")]
+        [Min(0.1f)]
+        public float fallGravityMultiplier = 1f;
+
+        [Tooltip("跳跃力属性的基准值。现在只用来算蓄力折损 / 加成的比例（属性值 ÷ 基准值），跳多高看上面的高度")]
+        [HideInInspector]
+        public float jumpForce = 13f;
 
         [Tooltip(
             "空中按 Ctrl 之后的下落加速倍率（普通状态）。\n" +

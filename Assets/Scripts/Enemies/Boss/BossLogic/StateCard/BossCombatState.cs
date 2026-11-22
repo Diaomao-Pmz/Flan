@@ -19,6 +19,12 @@ public class BossActionExecuter : IState
     // 记录当前正在演出的执行器，被打断时好通知它收摊
     IBossActionExecutor activeExecutor;
 
+    /// <summary>
+    /// 正在放的这一招（含出招前的停顿）。没在出招时为 null。
+    /// 受击时用它判断「这一下能不能打断 Boss」（见 BossController.TakeDamage）。
+    /// </summary>
+    public ActionNode CurrentAction { get; private set; }
+
     public BossActionExecuter(BossController bc)
     {
         boss = bc;
@@ -30,6 +36,7 @@ public class BossActionExecuter : IState
         // StartCoroutine 返回后句柄会被赋成一个已结束的协程，导致这里永远以为"还在出招"
         attackCoroutine = null;
         activeExecutor = null;
+        CurrentAction = null;
 
         boss.SetMovementStatus("[移动] 出招中");
 
@@ -60,6 +67,8 @@ public class BossActionExecuter : IState
             activeExecutor.Cancel();
             activeExecutor = null;
         }
+
+        CurrentAction = null;
     }
 
     public void FixedUpdate()
@@ -87,6 +96,8 @@ public class BossActionExecuter : IState
             yield break;
         }
 
+        CurrentAction = actionNode;
+
         // 套路步骤的"出招前停顿"（单招为 0）。停顿期间被破盾等打断时，Exit 会掐掉本协程
         float delay = boss.AI.NextActionDelay;
         if (delay > 0f)
@@ -95,6 +106,7 @@ public class BossActionExecuter : IState
 
             // 停顿期间玩家可能绕到背后 / 起飞了：按此刻情况重新检查这一步的候补招式
             actionNode = boss.AI.RefreshStepChoice(actionNode);
+            CurrentAction = actionNode;
         }
 
         // 2. 查表找到认领这种卡的执行器。大脑到此为止，不关心它是什么技能。
@@ -139,6 +151,7 @@ public class BossActionExecuter : IState
     {
         attackCoroutine = null;
         activeExecutor = null;
+        CurrentAction = null;
 
         // 套路的下一步可以马上接 → 留在战斗状态，下一帧 Update 直接出下一招。
         // 不这么做的话，每一步之间都会先回移动状态走一段，套路就连不起来了。

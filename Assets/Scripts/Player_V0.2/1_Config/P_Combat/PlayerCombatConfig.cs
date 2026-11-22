@@ -32,26 +32,11 @@ namespace Flandre.CombatSystem
         public bool meleeHitsBodyCollider = true;
 
         // ==========================================================
-        // Charge Settings —— 从 PlayerMovementConfig 搬过来的（2026-11-16）
+        // Charge Settings
+        // 【2026-11-21】蓄力时的移动减速（开关 / 移速倍率 / 跳跃倍率）搬到每个招式自己的
+        // ComboNode「蓄力设定」里：蓄到哪一级就用哪一招的设定。这里只剩准备窗口的倍率。
         // ==========================================================
         [Header("Charge Settings")]
-        [Tooltip(
-            "蓄力时是否给移动打折（移速、跳跃力分别乘下面两个倍率）。\n\n" +
-            "关闭时两个倍率参数保留不动，以后想恢复折损直接打开即可。\n" +
-            "「冲刺后接蓄力的速度继承」是配合折损的补偿，也跟着本开关一起开关。")]
-        public bool chargeSlowsMovement = false;
-
-        [Tooltip(
-            "蓄力期间的移动速度倍率。\n" +
-            "0.2 = 只有平时的两成，1 = 蓄力不影响移动速度。")]
-        public float chargeMoveSpeedMultiplier = 0.2f;
-
-        [Tooltip(
-            "蓄力期间的跳跃力度倍率（同样只在 Charge Slows Movement 打开时生效）。\n" +
-            "0.7 = 跳得比平时低三成，1 = 蓄力不影响跳跃。")]
-        [Range(0.1f, 1f)]
-        public float chargeJumpForceMultiplier = 0.7f;
-
         [Tooltip(
             "【蓄力准备窗口】的地面移速倍率。\n\n" +
             "窗口 = 攻击键已判定为长按（按住满 0.15 秒），但人还在攻击动画里、蓄力还没真正开始。\n" +

@@ -52,8 +52,9 @@ public class ComboInputBuffer : MonoBehaviour
     // ==========================================================
     [Header("实验：平a / 蓄力重做")]
     [Tooltip(
-        "【平a后接蓄力】的起步时间（秒）。连段进行中（包括原地 A1/B1 起手之后）长按，\n" +
-        "按住满这么久起步等级就生效；不满就松手 = 什么都不放。\n\n" +
+        "【兜底值】平a后接蓄力的起步时间（秒）。\n" +
+        "平时用的是蓄力招式（ComboNode）自己的「Combo Charge Start Time」；\n" +
+        "只有这只手的武器里找不到对应等级的蓄力招时，才用这里的值（Console 会提示）。\n\n" +
         "连段为 0 时原地起手不用这个值：要按住满武器上的 Charge Time Lv1 才到 1 级。")]
     [Min(0f)]
     public float chargeStartHoldTime = 0.3f;
@@ -116,6 +117,11 @@ public class ComboInputBuffer : MonoBehaviour
         public AttackInstance instance; public bool otherWasValid;
     }
     private LastSingle lastSingle;        // 判定方式 B：刚打出去的那一发单蓄力
+
+    // ---- 被挡住的放蓄力（2026-11-21）：别的招还在前摇 / 判定中时松手，等它进后摇再打出 ----
+    private readonly bool[] pendingRelease = new bool[2];
+    private readonly int[] pendingReleaseLevel = new int[2];
+    private readonly float[] pendingReleaseTime = new float[2];
 
     [Header("Debug")]
     public bool verboseLog = false;
@@ -184,6 +190,57 @@ public class ComboInputBuffer : MonoBehaviour
     /// <summary>这只手现在能不能出招（招式演完且后摇结束了吗）</summary>
     public bool IsHandReady(InputCmd cmd)
         => Time.time >= handBusyUntil[HandIndex(cmd)];
+
+    /// <summary>
+    /// 【2026-11-21 抢拍阶段】别的招正处在它没勾「可被抢拍的阶段」（节拍总表，可多选，默认只勾后摇）的那一段
+    /// → 下一招（换手平a、放蓄力）先等着。
+    /// </summary>
+    private bool NextAttackBlocked => timeline != null && timeline.BlocksNextAttack();
+
+    /// <summary>这只手现在能出招：手空闲，并且没有别的招挡着</summary>
+    private bool CanStartAttack(InputCmd cmd) => IsHandReady(cmd) && !NextAttackBlocked;
+
+    /// <summary>
+    /// 下一招要出了，当前这一招被抢拍（能走到这里，说明它所处的这一段是勾了「可被抢拍」的）：
+    ///   前摇 → 这一招作废：不出判定、不算段数（和被冲刺打断前摇一样），那只手立刻空出来
+    ///   判定 → 这一招算打完，剩下的判定 / 连射立刻掐断，那只手立刻空出来
+    ///   后摇 → 判定早已结束，什么都不用做
+    /// </summary>
+    private void CancelWindupForNextAttack()
+    {
+        AttackInstance inst = CurrentInstance;
+        if (inst == null || !inst.alive || inst.isFly) return;
+
+        AttackPhase phase = inst.Phase;
+
+        if (phase == AttackPhase.Active)
+        {
+            inst.ownsAnimation = false;
+            timeline.Void(inst);
+            if (handAttackId[HandIndex(inst.cmd)] == inst.attackId) FreeHand(inst.cmd);
+
+            if (verboseLog && inst.node != null)
+                PlayerLog.Info($"[连招] {inst.node.nodeName} 判定中被抢拍 → 本招算打完，剩余判定掐断，段数保持 {comboDepth}");
+            return;
+        }
+
+        if (phase != AttackPhase.Windup) return;
+
+        currentNode = inst.prevNode;
+        comboDepth = currentNode != null ? inst.prevDepth : 0;
+        LastTriggerCmd = inst.prevCmd;
+        ActiveWeapon = inst.prevWeapon;
+        if (currentNode != null)
+            comboExpireTime = Mathf.Max(inst.prevExpire, Time.time + currentNode.comboWindow + ComboWindowTolerance);
+
+        inst.ownsAnimation = false;
+        timeline.Void(inst);
+        if (handAttackId[HandIndex(inst.cmd)] == inst.attackId) FreeHand(inst.cmd);
+        if (lastSingle.instance == inst) lastSingle.valid = false;
+
+        if (verboseLog && inst.node != null)
+            PlayerLog.Info($"[连招] {inst.node.nodeName} 前摇被抢拍 → 本招作废，段数退回 {comboDepth}");
+    }
 
     /// <summary>这只手正在出招中（招式动画还没到自然结束的时刻）</summary>
     public bool IsHandAttacking(InputCmd cmd)
@@ -283,6 +340,8 @@ public class ComboInputBuffer : MonoBehaviour
         handAnimEnd[1] = 0f;
         pendingHold[0] = false;
         pendingHold[1] = false;
+        pendingRelease[0] = false;
+        pendingRelease[1] = false;
 
         // 受击：所有还在跑的攻击逻辑一起掐断，双蓄力的等待状态也作废
         timeline?.VoidAll();
@@ -330,7 +389,7 @@ public class ComboInputBuffer : MonoBehaviour
         // ---- 1. 预输入缓存倒计时 ----
         if (hasBufferedInput)
         {
-            if (IsHandReady(bufferedCmd))
+            if (CanStartAttack(bufferedCmd))
             {
                 bufferTimer -= Time.deltaTime;
                 if (bufferTimer <= 0) hasBufferedInput = false;
@@ -353,8 +412,11 @@ public class ComboInputBuffer : MonoBehaviour
         {
             PendingDual p = pendingDual;
             pendingDual.active = false;
-            FireSingle(p.cmd, p.level);
+            FireSingleOrQueue(p.cmd, p.level);
         }
+
+        // ---- 1.6 被挡住的放蓄力：挡着的招一进后摇就按松手先后打出（一帧只打一发）----
+        FlushPendingReleases();
 
         // ---- 2. 长按意图兑现（后摇期间被暂存的那一次）----
         TryFlushPendingHold(InputCmd.MainAttack, player != null && player.isMainAttackHeld);
@@ -366,9 +428,8 @@ public class ComboInputBuffer : MonoBehaviour
         // ---- 4. 兑现预输入 ----
         if (sm.IsFlying) hasBufferedInput = false;
 
-        if (hasBufferedInput
-            && sm.currentState != sm.comboState
-            && IsHandReady(bufferedCmd))
+        // 出招状态里也要试：别的招一进后摇，另一只手存着的那一下就在这里抢拍打出
+        if (hasBufferedInput && CanStartAttack(bufferedCmd))
         {
             TryAdvanceCombo();
         }
@@ -474,9 +535,9 @@ public class ComboInputBuffer : MonoBehaviour
         bool afterCombo = comboDepth > 0 && !afterChargeRelease;
         int startLevel = afterCombo ? Mathf.Clamp(comboDepth, 1, WeaponMoveSet.MaxChargeLevel) : 1;
 
-        // 同手后摇中不能起蓄力（普攻也不行，规则一致）。
-        // 存下来等后摇结束再兑现，否则这一次按键就彻底消失了。
-        if (!IsHandReady(cmd))
+        // 同手还在出招：看这一招的「最早从哪开始蓄」（默认后摇结束）。
+        // 还没到点就存下来，到点再兑现，否则这一次按键就彻底消失了。
+        if (!CanBeginChargeOnHand(cmd))
         {
             pendingHold[i] = true;
             pendingHoldLevel[i] = startLevel;
@@ -510,12 +571,27 @@ public class ComboInputBuffer : MonoBehaviour
         chargeBeganInsideAttack = sm.currentState == sm.comboState || IsAnyHandBusy();
 
         // 起步时间：
-        //   平a后接蓄力（含原地 A1/B1 起手之后）→ chargeStartHoldTime（0.3s）就进入对应等级
+        //   平a后接蓄力（含原地 A1/B1 起手之后）→ 对应等级那一招自己的 comboChargeStartTime
+        //                                        （找不到那一招时用兜底值 chargeStartHoldTime）
         //   连段为 0 的原地起手                 → 要按住满武器的 Lv1 阈值（1s）才到 1 级
-        float startHold = chargeStartHoldTime;
-        if (!afterCombo)
+        WeaponMoveSet w = weapons != null ? weapons.GetWeaponForCommand(cmd) : null;
+        float startHold;
+        if (afterCombo)
         {
-            WeaponMoveSet w = weapons != null ? weapons.GetWeaponForCommand(cmd) : null;
+            ComboNode startNode = FindChargeNode(w, startLevel);
+            if (startNode != null)
+            {
+                startHold = startNode.comboChargeStartTime;
+            }
+            else
+            {
+                startHold = chargeStartHoldTime;
+                PlayerLog.Warn($"[连招] {cmd} 平a后接蓄力：武器「{(w != null ? w.name : "无")}」里没有 ≤ {startLevel} 级的蓄力招，" +
+                               $"起步时间改用 ComboInputBuffer 上的兜底值 {chargeStartHoldTime:F2}s。", this);
+            }
+        }
+        else
+        {
             startHold = w != null ? w.chargeTimeLv1 : 1f;
         }
 
@@ -525,6 +601,31 @@ public class ComboInputBuffer : MonoBehaviour
 
         if (verboseLog)
             PlayerLog.Info($"[连招] {cmd} 长按确认 → 开始蓄力（起步 {startLevel} 级，起步时间 {startHold:F2}s，{(afterCombo ? "平a后" : "原地起手")}）");
+    }
+
+    /// <summary>
+    /// 武器里「等级 ≤ level」的最高那个蓄力招（只看不带方向的那一招），和松手放招时挑招的规则一致。找不到返回 null
+    /// </summary>
+    private static ComboNode FindChargeNode(WeaponMoveSet weapon, int level)
+    {
+        if (weapon == null) return null;
+
+        ComboNode best = null;
+        PickChargeNode(weapon.followUps, level, ref best);
+        PickChargeNode(weapon.openers, level, ref best);
+        return best;
+    }
+
+    private static void PickChargeNode(List<ComboNode> nodes, int level, ref ComboNode best)
+    {
+        if (nodes == null) return;
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            ComboNode n = nodes[i];
+            if (n == null || !n.IsValidChargeNode || n.chargeLevel > level) continue;
+            if (n.inputSequence != null && n.inputSequence.Count > 1) continue;   // 方向变招不算
+            if (best == null || n.chargeLevel > best.chargeLevel) best = n;
+        }
     }
 
     /// <summary>
@@ -543,13 +644,34 @@ public class ComboInputBuffer : MonoBehaviour
             return;
         }
 
-        if (!IsHandReady(cmd)) return;
+        if (!CanBeginChargeOnHand(cmd)) return;
 
         pendingHold[i] = false;
 
         if (!AcceptsAttackInput(cmd)) return;
 
         BeginChargeNow(cmd, pendingHoldLevel[i], pendingHoldAfterCombo[i]);
+    }
+
+    /// <summary>
+    /// 这只手现在能不能开始蓄力：手空闲；或者这只手正在打的那一招已经走到它允许提前蓄力的阶段
+    /// （ComboNode 的「Charge Allowed From」：后摇结束 / 后摇开始 / 判定段开始）。
+    /// </summary>
+    private bool CanBeginChargeOnHand(InputCmd cmd)
+    {
+        if (IsHandReady(cmd)) return true;
+        if (timeline == null) return false;
+
+        AttackInstance inst = timeline.FindAlive(handAttackId[HandIndex(cmd)]);
+        if (inst == null || inst.isFly || inst.node == null) return false;
+
+        AttackPhase phase = inst.Phase;
+        switch (inst.node.chargeAllowedFrom)
+        {
+            case ChargeAllowedFrom.ActiveStart: return phase == AttackPhase.Active || phase == AttackPhase.Recovery;
+            case ChargeAllowedFrom.RecoveryStart: return phase == AttackPhase.Recovery;
+            default: return false;
+        }
     }
 
     /// <summary>
@@ -613,9 +735,9 @@ public class ComboInputBuffer : MonoBehaviour
                 return;
             }
 
-            // 查不到配方 → 两发单蓄力先后打出
-            FireSingle(p.cmd, p.level);
-            FireSingle(cmd, level);
+            // 查不到配方 → 两发单蓄力先后打出（挡着的话按先后排队）
+            FireSingleOrQueue(p.cmd, p.level);
+            FireSingleOrQueue(cmd, level);
             return;
         }
 
@@ -645,7 +767,60 @@ public class ComboInputBuffer : MonoBehaviour
             return;
         }
 
+        FireSingleOrQueue(cmd, level);
+    }
+
+    /// <summary>
+    /// 放一发单蓄力；别的招还在判定中 / 不允许被抢拍的前摇中 → 先记下（哪只手、几级），等它进后摇再打出。
+    /// 双蓄强化招不走这里（它本来就会顶掉第一发）。
+    /// </summary>
+    private void FireSingleOrQueue(InputCmd cmd, int level)
+    {
+        // 这只手已经排着一发、或另一只手先排着 → 也排队，保证按松手先后打出
+        if (NextAttackBlocked || pendingRelease[0] || pendingRelease[1])
+        {
+            int i = HandIndex(cmd);
+            pendingRelease[i] = true;
+            pendingReleaseLevel[i] = level;
+            pendingReleaseTime[i] = Time.time;
+
+            if (verboseLog) PlayerLog.Info($"[蓄力] {cmd} {level} 级要等当前这一招进后摇才能打出，先排着");
+            return;
+        }
+
+        CancelWindupForNextAttack();
         FireSingle(cmd, level);
+    }
+
+    /// <summary>排着的放蓄力：挡着的招进了后摇就按松手先后打出，一帧一发；排太久（maxBufferedHoldTime）作废</summary>
+    private void FlushPendingReleases()
+    {
+        if (!pendingRelease[0] && !pendingRelease[1]) return;
+
+        for (int i = 0; i < 2; i++)
+        {
+            if (pendingRelease[i] && Time.time - pendingReleaseTime[i] > maxBufferedHoldTime)
+            {
+                pendingRelease[i] = false;
+                if (verboseLog) PlayerLog.Info($"[蓄力] 排着的那一发等了超过 {maxBufferedHoldTime:F2}s，作废");
+            }
+        }
+
+        if (sm.currentState == sm.hitState || sm.IsFlying || NextAttackBlocked) return;
+
+        int first = -1;
+        for (int i = 0; i < 2; i++)
+        {
+            if (!pendingRelease[i]) continue;
+            if (first < 0 || pendingReleaseTime[i] < pendingReleaseTime[first]) first = i;
+        }
+        if (first < 0) return;
+
+        pendingRelease[first] = false;
+        InputCmd cmd = first == 1 ? InputCmd.SubAttack : InputCmd.MainAttack;
+
+        CancelWindupForNextAttack();
+        FireSingle(cmd, pendingReleaseLevel[first]);
     }
 
     /// <summary>打出一发单蓄力，并记下来供判定方式 B 回头替换</summary>
@@ -780,7 +955,6 @@ public class ComboInputBuffer : MonoBehaviour
         if (!hasBufferedInput) return false;
 
         // 【P1a 新增】同手后摇闸门。
-        // 换手不查这个 —— 那正是"换手可以抢拍"的实现处。
         if (!IsHandReady(bufferedCmd))
         {
             // 到这里说明是从 OnAttackTap 直接进来的（缓存重试已经在外面挡掉了），
@@ -791,6 +965,14 @@ public class ComboInputBuffer : MonoBehaviour
                     ? $"[连招] {bufferedCmd} 出招中，已存入缓存"
                     : $"[连招] {bufferedCmd} 后摇中（剩 {GetHandRecoveryRemaining(bufferedCmd):F2}s），已存入缓存");
             }
+            return false;
+        }
+
+        // 【2026-11-21】抢拍闸门：别的招还在判定中 / 不允许被抢拍的前摇中 → 先存着，它进后摇再打
+        if (NextAttackBlocked)
+        {
+            if (verboseLog)
+                PlayerLog.Info($"[连招] {bufferedCmd} 要等当前这一招进后摇才能抢拍，已存入缓存");
             return false;
         }
 
@@ -810,6 +992,9 @@ public class ComboInputBuffer : MonoBehaviour
                 PlayerLog.Info($"[连招] {animating.nodeName} 演出中不允许被 {bufferedCmd} 打断");
             return false;
         }
+
+        // 当前这一招还在（允许被抢拍的）前摇 → 作废，段数退回，再按退回后的段数找下一招
+        CancelWindupForNextAttack();
 
         CollectCandidates(bufferedCmd);
 

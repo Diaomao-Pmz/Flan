@@ -28,7 +28,16 @@ namespace Flandre.CombatSystem
         private void WarnIfNoStrikeEvent(AttackInstance inst)
         {
             ComboNode node = inst.node;
-            if (node == null || inst.data.firstStrikeTime >= 0f) return;
+            if (node == null) return;
+
+            if (node.IsSpecial)
+            {
+                if (node.specialMove == null && warnedNodes.Add(node))
+                    PlayerLog.Warn($"[时间表] 招式「{node.nodeName}」是特殊招式类型，但没有选具体的特殊招式，这一招不会造成任何伤害。", node);
+                return;
+            }
+
+            if (inst.data.firstStrikeTime >= 0f || node.HasTableStrikeTime) return;
             if (!warnedNodes.Add(node)) return;
 
             if (node.attackClip == null)
@@ -52,6 +61,7 @@ namespace Flandre.CombatSystem
         private PlayerEffectSpawner fx;
         private PlayerStateMachine sm;
         private PlayerController controller;
+        private SpecialMoveContext specialCtx;
 
         // 每个攻击实例的拼刀框（开过一次就记在这里，招式结束时关掉并移除）
         private readonly Dictionary<AttackInstance, ClashWindow> clashOf = new Dictionary<AttackInstance, ClashWindow>();
@@ -63,12 +73,28 @@ namespace Flandre.CombatSystem
             fx = GetComponent<PlayerEffectSpawner>();
             sm = GetComponent<PlayerStateMachine>();
             controller = GetComponent<PlayerController>();
+
+            specialCtx = new SpecialMoveContext
+            {
+                root = transform,
+                firePoint = emitter != null ? emitter.firePoint : null,
+                controller = controller,
+                aim = GetComponent<PlayerAimProvider>(),
+                instigator = gameObject,
+                enemyTag = hit != null ? hit.enemyTag : "Enemy",
+            };
         }
 
         private void OnDisable()
         {
             foreach (ClashWindow w in clashOf.Values) ClashRegistry.Close(w);
             clashOf.Clear();
+
+            for (int i = 0; i < instances.Count; i++)
+            {
+                instances[i].special?.End();
+                instances[i].special = null;
+            }
         }
 
         /// <summary>一招的总时长 = 前摇 + 攻击 + 后摇</summary>
@@ -107,7 +133,27 @@ namespace Flandre.CombatSystem
 
             WarnIfNoStrikeEvent(inst);
 
+            // 节拍总表里填了出刀 / 出弹时间的：换算成"出招后第几秒"，到点直接触发，动画里的对应事件不再生效
+            if (node != null && !node.IsSpecial)
+            {
+                float hs = node.hitboxStartTime;
+                float ps = node.projectileStartTime;
+                inst.hitboxStartAt = hs >= 0f ? inst.windupEnd + hs : -1f;
+                inst.projectileStartAt = ps >= 0f ? inst.windupEnd + ps : -1f;
+            }
+
+            // 节拍总表里填了特效时间的：从出招那一刻算，到点播，动画里的 PlayEffect 不再生效
+            if (node != null)
+            {
+                float fs = node.playEffectTime;
+                inst.effectStartAt = fs >= 0f ? fs : -1f;
+            }
+
             instances.Add(inst);
+
+            // 特殊招式：按三段时长自己跑（前摇 / 判定 / 后摇），不走动画里的出刀 / 出弹事件
+            SpecialMove special = node != null ? node.ActiveSpecial : null;
+            if (special != null) inst.special = special.Begin(specialCtx, inst);
 
             if (verboseLog)
             {
@@ -153,6 +199,12 @@ namespace Flandre.CombatSystem
         {
             inst.elapsed += dt;
 
+            if (inst.special != null)
+            {
+                inst.special.Tick(dt);
+                if (inst.special.done) inst.special = null;
+            }
+
             // 先推进已经在跑的判定 / 连射，再触发新事件（新开的那份自己会做第 0 帧的检测）
             for (int i = inst.hitRuns.Count - 1; i >= 0; i--)
             {
@@ -178,7 +230,35 @@ namespace Flandre.CombatSystem
                 bool isStrike = e.kind == TimelineEventKind.Hitbox || e.kind == TimelineEventKind.Projectile;
                 if (isStrike && inst.timing.ToReal(e.time) > inst.activeEnd + 0.0001f) continue;
 
+                // 特殊招式不出普通判定和子弹（特效照常）
+                if (isStrike && inst.node != null && inst.node.IsSpecial) continue;
+
+                // 节拍总表里填了时间的：动画里的出刀 / 出弹事件不再生效
+                if (e.kind == TimelineEventKind.Hitbox && inst.hitboxStartAt >= 0f) continue;
+                if (e.kind == TimelineEventKind.Projectile && inst.projectileStartAt >= 0f) continue;
+                if (e.kind == TimelineEventKind.Effect && inst.effectStartAt >= 0f) continue;
+
                 Fire(inst, e);
+            }
+
+            // 节拍总表里填了时间的出刀 / 出弹：到点触发（比判定段还晚的不触发）
+            if (inst.alive && inst.hitboxStartAt >= 0f && !inst.tableHitboxFired && inst.elapsed >= inst.hitboxStartAt)
+            {
+                inst.tableHitboxFired = true;
+                if (inst.hitboxStartAt <= inst.activeEnd + 0.0001f) FireHitbox(inst);
+            }
+
+            if (inst.alive && inst.projectileStartAt >= 0f && !inst.tableProjectileFired && inst.elapsed >= inst.projectileStartAt)
+            {
+                inst.tableProjectileFired = true;
+                if (inst.projectileStartAt <= inst.activeEnd + 0.0001f) FireProjectile(inst);
+            }
+
+            // 节拍总表里填了时间的招式特效：到点播（整招结束前都可以）
+            if (inst.alive && inst.effectStartAt >= 0f && !inst.tableEffectFired && inst.elapsed >= inst.effectStartAt)
+            {
+                inst.tableEffectFired = true;
+                FireTableEffect(inst);
             }
 
             // 拼刀窗口：判定段开始时打开，到时间关掉
@@ -203,26 +283,34 @@ namespace Flandre.CombatSystem
             }
         }
 
+        /// <summary>开一次判定（单段 / 多段窗口序列）</summary>
+        private void FireHitbox(AttackInstance inst)
+        {
+            if (hit == null) return;
+            PlayerHitDetection.HitboxRun run = hit.BeginRun(inst.node, Mathf.Max(0f, inst.activeEnd - inst.elapsed));
+            if (run != null && !run.done) inst.hitRuns.Add(run);
+        }
+
+        /// <summary>出一次弹（含连射）</summary>
+        private void FireProjectile(AttackInstance inst)
+        {
+            if (emitter == null) return;
+            PlayerWeaponEmitter.BurstRun b = emitter.BeginBurst(
+                inst.node, inst.weapon, inst.ownsAnimation, inst.spawnedBullets);
+            RecordBorrowIds(inst.spawnedBullets, inst.spawnedBulletIds);
+            if (b != null && !b.done) inst.bursts.Add(b);
+        }
+
         private void Fire(AttackInstance inst, TimelineEvent e)
         {
             switch (e.kind)
             {
                 case TimelineEventKind.Hitbox:
-                    if (hit != null)
-                    {
-                        PlayerHitDetection.HitboxRun run = hit.BeginRun(inst.node);
-                        if (run != null && !run.done) inst.hitRuns.Add(run);
-                    }
+                    FireHitbox(inst);
                     break;
 
                 case TimelineEventKind.Projectile:
-                    if (emitter != null)
-                    {
-                        PlayerWeaponEmitter.BurstRun b = emitter.BeginBurst(
-                            inst.node, inst.weapon, inst.ownsAnimation, inst.spawnedBullets);
-                        RecordBorrowIds(inst.spawnedBullets, inst.spawnedBulletIds);
-                        if (b != null && !b.done) inst.bursts.Add(b);
-                    }
+                    FireProjectile(inst);
                     break;
 
                 case TimelineEventKind.Effect:
@@ -246,6 +334,31 @@ namespace Flandre.CombatSystem
         /// 出生时就算好交给特效自己计时 —— 所以招式提前结束、实例被删掉，特效照样演到标记处。
         /// 两个事件都按三段倍速换算成实际时间再相减 —— 动画被加速 / 放慢时，特效寿命跟着画面走。
         /// </summary>
+        /// <summary>
+        /// 按节拍总表的时间播这一招的招式特效。
+        /// Until Marker 的结束点借用动画里第一个 PlayEffect 配对的 EffectEnd；没有就按播完一遍
+        /// </summary>
+        private void FireTableEffect(AttackInstance inst)
+        {
+            if (fx == null) return;
+
+            float markerLife = -1f;
+            List<TimelineEvent> evs = inst.data.events;
+            for (int i = 0; i < evs.Count; i++)
+            {
+                if (evs[i].kind != TimelineEventKind.Effect) continue;
+                if (evs[i].endTime >= 0f)
+                {
+                    float life = inst.timing.ToReal(evs[i].endTime) - inst.elapsed;
+                    if (life > 0f) markerLife = life;
+                }
+                break;
+            }
+
+            Track(inst.spawnedEffects, inst.spawnedEffectIds,
+                  fx.SpawnAttackEffect(inst.node, inst.activeEnd - inst.elapsed, inst.duration - inst.elapsed, markerLife));
+        }
+
         private static float MarkerLife(AttackInstance inst, TimelineEvent e)
             => e.endTime >= 0f ? inst.timing.ToReal(e.endTime) - inst.timing.ToReal(e.time) : -1f;
 
@@ -342,7 +455,7 @@ namespace Flandre.CombatSystem
                 controller = controller,
                 offset = node.clashBoxOffset,
                 size = node.clashBoxSize,
-                effect = node.clashEffect,
+                mask = node.clashMask,
                 closeAt = inst.windupEnd + length,
             };
             w.onClash = (cw, attackerPos) => OnClashed(inst, cw, attackerPos);
@@ -364,34 +477,35 @@ namespace Flandre.CombatSystem
             }
         }
 
-        /// <summary>Boss 那边判定拼刀成功后回调（Boss 这一下已经确定不造成伤害）</summary>
+        /// <summary>
+        /// Boss 那边判定拼刀成功后回调（Boss 这一下已经确定不造成伤害，只结束它当前这一招）。
+        /// 招式填了 Clash Thrust 就走一段拼刀位移（X 跟着朝向）。
+        /// </summary>
         private void OnClashed(AttackInstance inst, ClashWindow w, Vector2 attackerPos)
         {
             ComboNode node = inst.node;
-            PlayerLog.Info($"[拼刀] {(node != null ? node.nodeName : "?")} 拼刀成功 → " +
-                           (w.effect == ClashEffect.AbortRoutine ? "中断 Boss 套路" : "只结束 Boss 当前招 + 急退"));
+            PlayerLog.Info($"[拼刀] {(node != null ? node.nodeName : "?")} 拼刀成功 → Boss 当前这一招结束");
 
-            if (w.effect != ClashEffect.EndCurrentAction || node == null) return;
+            if (node == null || node.clashThrust.sqrMagnitude < 0.000001f) return;
 
-            // 急退：往远离 Boss 的方向（Boss 正好重叠时按面朝的反方向）
-            float distance = node.clashRecoilDistance;
-            if (distance <= 0f) return;
-
-            float dx = transform.position.x - attackerPos.x;
-            float dir = Mathf.Abs(dx) > 0.01f
-                ? Mathf.Sign(dx)
-                : (controller != null && controller.facingDirection < 0 ? 1f : -1f);
+            float facing = controller != null && controller.facingDirection < 0 ? -1f : 1f;
+            Vector2 world = new Vector2(node.clashThrust.x * facing, node.clashThrust.y);
 
             bool started = sm != null && sm.currentState == sm.comboState
-                && sm.comboState.StartClashRecoil(inst, new Vector2(dir * distance, 0f), node.clashRecoilDuration);
+                && sm.comboState.StartClashThrust(inst, world, node.clashThrustDuration, node.clashThrustPassThrough);
 
             if (!started && verboseLog)
-                PlayerLog.Info($"[拼刀] {node.nodeName} 已经不在出招状态（动画被顶掉 / 飞行中），这次不急退");
+                PlayerLog.Info($"[拼刀] {node.nodeName} 已经不在出招状态（动画被顶掉 / 飞行中），这次不位移");
         }
 
         private void OnDrawGizmos()
         {
-            if (!showClashBox || !Application.isPlaying) return;
+            if (!Application.isPlaying) return;
+
+            for (int i = 0; i < instances.Count; i++)
+                instances[i].special?.DrawGizmos();
+
+            if (!showClashBox) return;
 
             IReadOnlyList<ClashWindow> list = ClashRegistry.Active;
             Gizmos.color = Color.cyan;
@@ -405,6 +519,12 @@ namespace Flandre.CombatSystem
         private void StopStrikes(AttackInstance inst)
         {
             CloseClash(inst);
+
+            if (inst.special != null)
+            {
+                inst.special.End();
+                inst.special = null;
+            }
 
             for (int i = 0; i < inst.hitRuns.Count; i++) hit?.EndRun(inst.hitRuns[i]);
             inst.hitRuns.Clear();
@@ -450,6 +570,46 @@ namespace Flandre.CombatSystem
             {
                 if (!includeFly && instances[i].isFly) continue;
                 Void(instances[i]);
+            }
+        }
+
+        /// <summary>
+        /// 现在能不能出下一招（换手平a / 放蓄力）：
+        /// 有地面攻击正处在它【没勾】「可被抢拍的阶段」（节拍总表）的那一段 → 不能，先等着。
+        /// </summary>
+        /// <summary>按出招编号找还在跑的攻击实例；没有返回 null</summary>
+        public AttackInstance FindAlive(int attackId)
+        {
+            if (attackId < 0) return null;
+            for (int i = 0; i < instances.Count; i++)
+            {
+                AttackInstance inst = instances[i];
+                if (inst.alive && inst.attackId == attackId) return inst;
+            }
+            return null;
+        }
+
+        public bool BlocksNextAttack()
+        {
+            for (int i = 0; i < instances.Count; i++)
+            {
+                AttackInstance inst = instances[i];
+                if (!inst.alive || inst.isFly) continue;
+
+                AttackPhaseMask allowed = inst.node != null ? inst.node.switchCutPhases : AttackPhaseMask.Recovery;
+                if ((allowed & ToMask(inst.Phase)) == 0) return true;
+            }
+            return false;
+        }
+
+        public static AttackPhaseMask ToMask(AttackPhase phase)
+        {
+            switch (phase)
+            {
+                case AttackPhase.Windup: return AttackPhaseMask.Windup;
+                case AttackPhase.Active: return AttackPhaseMask.Active;
+                case AttackPhase.Recovery: return AttackPhaseMask.Recovery;
+                default: return AttackPhaseMask.Recovery;
             }
         }
 

@@ -10,6 +10,8 @@ namespace Flandre.CombatSystem
         Attack,
         /// <summary>蓄力光效：蓄到某一级时挂上，升级、松手、受击、换武器时收回</summary>
         Charge,
+        /// <summary>消弹特效：Boss 子弹被消掉时，在子弹的位置播一遍（不跟着角色）</summary>
+        BulletCancel,
     }
 
     /// <summary>
@@ -30,7 +32,8 @@ namespace Flandre.CombatSystem
         [System.Serializable]
         public class EffectSettings
         {
-            [Tooltip("招式特效 = 动画里的 PlayEffect 时间戳触发\n蓄力光效 = 蓄到某一级时挂上，松手 / 升级 / 受击时收回")]
+            [Tooltip("招式特效 = 动画里的 PlayEffect 时间戳触发\n蓄力光效 = 蓄到某一级时挂上，松手 / 升级 / 受击时收回\n" +
+                     "消弹特效 = Boss 子弹被消掉时，在子弹的位置播一遍（不跟着角色；表里有多条时用第一条）")]
             public EffectUsage usage = EffectUsage.Attack;
 
             // ---------------- 招式特效 ----------------
@@ -222,6 +225,43 @@ namespace Flandre.CombatSystem
                     return e;
             }
             return null;
+        }
+
+        /// <summary>表里第一条拖了预制体的消弹特效；没有返回 null</summary>
+        private EffectEntry FindBulletCancel()
+        {
+            for (int i = 0; i < effects.Count; i++)
+            {
+                EffectEntry e = effects[i];
+                if (e != null && e.prefab != null && e.settings != null && e.settings.usage == EffectUsage.BulletCancel)
+                    return e;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 在世界坐标 position 播一遍消弹特效（不挂在角色身上，不受招式打断影响）。表里没配时什么都不做
+        /// </summary>
+        public GameObject PlayBulletCancel(Vector3 position)
+        {
+            EffectEntry entry = FindBulletCancel();
+            if (entry == null) return null;
+
+            EffectSettings s = entry.settings;
+            ManagedEffect fx = Borrow(entry.prefab);
+
+            Transform t = fx.transform;
+            t.SetParent(transform, false);
+            t.position = new Vector3(position.x + s.offset.x, position.y + s.offset.y, position.z);
+            t.rotation = Quaternion.Euler(0f, 0f, s.rotation);
+            t.localScale = new Vector3(Mathf.Abs(s.scale.x), s.scale.y, 1f);
+
+            fx.gameObject.SetActive(true);
+            fx.Begin(ManagedEffect.PlayOnce, false, true, defaultLifetime);
+            active.Add(fx);
+
+            if (verboseLog) PlayerLog.Info($"[特效] 消弹特效 {entry.prefab.name} @ {(Vector2)position}");
+            return fx.gameObject;
         }
 
         /// <summary>这个招式在表里有没有配特效</summary>

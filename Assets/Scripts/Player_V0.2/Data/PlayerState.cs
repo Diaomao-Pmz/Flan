@@ -238,8 +238,21 @@ public class PlayerState : MonoBehaviour, IDamageable
     /// 击退力度不由攻击方决定 —— 这里只把「来源在我左边还是右边」翻译成方向，
     /// 力度由 PlayerCombatConfig.hitKnockbackForce 配置、HitState 读取。
     /// </summary>
+    /// <summary>
+    /// 【位移消弹】为 true 时，打过来的 Boss 子弹直接被消掉，不扣血。
+    /// 由出招状态在「勾了位移消弹的招式、位移进行中」时打开，其余时间关闭。
+    /// </summary>
+    public bool CancelBulletsOnContact { get; set; }
+
     public void TakeDamage(in DamageInfo info)
     {
+        if (CancelBulletsOnContact && info.instigator != null
+            && info.instigator.TryGetComponent(out Enemy_Projectile bullet))
+        {
+            BulletCanceller.Cancel(bullet);
+            return;
+        }
+
         float dx = transform.position.x - info.sourcePosition.x;
 
         Vector2 hitDirection = Mathf.Abs(dx) > 0.01f

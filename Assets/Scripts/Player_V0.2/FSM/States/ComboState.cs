@@ -26,6 +26,8 @@ public class ComboState : PlayerStateBase
     private bool thrustRunning;         // 正在走
     private bool thrustEndPending;      // 刚走完，下一物理帧把位移给的速度收掉
     private GuardedMove thrustGuard;    // 终点裁判：位移不停在 Boss 身体里（见 DashEndpointGuard）
+    private bool clashThrustActive;     // 正在走的是拼刀成功后的位移（顶掉了本招原来的位移）
+    private bool clashThrustPassThrough;
 
     // 碰撞箱微调是否生效中
     private bool isBodyAdjusting;
@@ -182,11 +184,24 @@ public class ComboState : PlayerStateBase
     public override void FixedUpdate()
     {
         // ---- 出招位移（判定段开始时起步）----
-        if (TickThrust()) return;
+        bool thrusting = TickThrust();
+        UpdateThrustBulletCancel();
+        if (thrusting) return;
 
         // ---- 冲量结束后锁死移动 ----
         if (sm.IsGrounded())
         {
+            if (HoldingStill)
+            {
+                // 特殊招式可能允许在某一段里慢慢走（只改速度，不转身）
+                float mult = activeNode.ActiveSpecial.MoveSpeedMultiplier(
+                    instance, sm.playerController.moveInput.x, sm.playerController.facingDirection);
+
+                if (mult > 0f) ApplyHorizontalMove(mult);
+                else sm.rb.linearVelocity = new Vector2(0f, sm.rb.linearVelocity.y);
+                return;
+            }
+
             if (activeNode == null || activeNode.lockMovementDuringAttack)
             {
                 // 【蓄力准备窗口】已经按住攻击键准备蓄力 → 可以拖着步子挪（衰减在 ApplyHorizontalMove 里）。
@@ -236,6 +251,7 @@ public class ComboState : PlayerStateBase
     private bool TryMovementCancel()
     {
         if (Buffer == null) return false;
+        if (HoldingStill) return false;   // 特殊招式：前摇里按方向键也不取消，判定段不能动，到后摇才按平常的规矩
         if (activeNode != null && !activeNode.lockMovementDuringAttack) return false;
 
         int sign = MoveSign();
@@ -304,6 +320,11 @@ public class ComboState : PlayerStateBase
         }
     }
 
+    /// <summary>特殊招式（激光等）要求前摇和判定段里站住不动</summary>
+    private bool HoldingStill
+        => activeNode != null && activeNode.HoldsStillUntilRecovery
+           && instance != null && instance.Phase != AttackPhase.Recovery;
+
     /// <summary>出招位移是否正在走</summary>
     private bool IsThrustActive => thrustRunning;
 
@@ -312,8 +333,13 @@ public class ComboState : PlayerStateBase
     /// 状态机在本状态的 FixedUpdate 之前问 —— 所以"这一帧就要起步"也要算上，否则第一步会撞上去。
     /// </summary>
     public bool WantsPassThrough
-        => activeNode != null && activeNode.passThroughDuringThrust
-           && (thrustRunning || (thrustPending && ReachedThrustStart()));
+        => thrustRunning
+            ? CurrentThrustPassThrough
+            : (thrustPending && ReachedThrustStart() && activeNode != null && activeNode.passThroughDuringThrust);
+
+    /// <summary>正在走的这段位移能不能穿身：拼刀位移看招式的 Clash Thrust Pass Through，出招位移看节拍总表</summary>
+    private bool CurrentThrustPassThrough
+        => clashThrustActive ? clashThrustPassThrough : (activeNode != null && activeNode.passThroughDuringThrust);
 
     /// <summary>
     /// 准备本招的位移冲量。
@@ -571,6 +597,7 @@ public class ComboState : PlayerStateBase
             thrustRunning = true;
             thrustTimer = 0f;
             thrustDuration = Mathf.Max(thrustDuration, Time.fixedDeltaTime);   // 填 0 也至少走一个物理帧
+            clashThrustActive = false;
             thrustGuard.Begin(thrustDistance, thrustDistance.magnitude, thrustDuration,
                               activeNode != null && activeNode.passThroughDuringThrust);
 
@@ -600,6 +627,19 @@ public class ComboState : PlayerStateBase
         return true;
     }
 
+    /// <summary>
+    /// 【位移消弹】这一招勾了「位移」消弹时，位移进行期间（含走完后收速度的那一帧）
+    /// 把压在芙兰身上的 Boss 子弹消掉，并让受伤入口把打过来的 Boss 子弹也消掉、不扣血。
+    /// </summary>
+    private void UpdateThrustBulletCancel()
+    {
+        bool on = (thrustRunning || thrustEndPending)
+                  && activeNode != null && activeNode.CancelsBulletsBy(BulletCancelMode.Thrust);
+
+        if (sm.playerState != null) sm.playerState.CancelBulletsOnContact = on;
+        if (on) BulletCanceller.CancelOverlapping(sm.rb);
+    }
+
     private void ApplyThrustVelocity(Vector2 v)
     {
         bool hasY = Mathf.Abs(thrustDistance.y) > 0.0001f;
@@ -612,12 +652,13 @@ public class ComboState : PlayerStateBase
     }
 
     /// <summary>
-    /// 【拼刀急退】BB1 拼刀成功：立刻用出招位移那套逻辑走完一段精确距离（顶掉本招原来的位移）。
+    /// 【拼刀位移】拼刀成功：立刻用出招位移那套逻辑走完一段精确距离（顶掉本招原来的位移）。
     /// 只在本状态还拥有这一招时生效。
     /// </summary>
-    /// <param name="distance">位移（已经算好方向，远离 Boss）</param>
+    /// <param name="distance">世界方向的位移（已按朝向翻好）</param>
+    /// <param name="passThrough">位移期间能不能穿过 Boss</param>
     /// <returns>是否接下了</returns>
-    public bool StartClashRecoil(AttackInstance inst, Vector2 distance, float duration)
+    public bool StartClashThrust(AttackInstance inst, Vector2 distance, float duration, bool passThrough)
     {
         if (inst == null || inst != instance) return false;
 
@@ -627,10 +668,12 @@ public class ComboState : PlayerStateBase
         thrustPending = false;
         thrustRunning = true;
         thrustEndPending = false;
-        thrustGuard.Begin(thrustDistance, thrustDistance.magnitude, thrustDuration, false);
+        clashThrustActive = true;
+        clashThrustPassThrough = passThrough;
+        thrustGuard.Begin(thrustDistance, thrustDistance.magnitude, thrustDuration, passThrough);
 
         if (Buffer != null && Buffer.verboseLog && activeNode != null)
-            PlayerLog.Info($"[拼刀] {activeNode.nodeName} 急退：位移 {distance}，用时 {thrustDuration:F3}s");
+            PlayerLog.Info($"[拼刀] {activeNode.nodeName} 拼刀位移：{distance}，用时 {thrustDuration:F3}s" + (passThrough ? "（可穿身）" : ""));
         return true;
     }
 
@@ -665,6 +708,8 @@ public class ComboState : PlayerStateBase
         thrustRunning = false;
         thrustEndPending = false;
         thrustGuard.End();
+        clashThrustActive = false;
+        if (sm.playerState != null) sm.playerState.CancelBulletsOnContact = false;
 
         sm.rb.gravityScale = originalGravity;
         activeNode = null;

@@ -60,6 +60,20 @@ public class PlayerStateMachine : MonoBehaviour
     public int maxJumps => playerState.stats.maxJumps.IntValue;
     public float jumpForce => playerState.stats.jumpForce.Value;
 
+    /// <summary>跳跃力属性相对基准值的倍率（蓄力折损、加成都在这里体现）。1 = 不变，乘在起跳速度上</summary>
+    public float jumpStrength
+    {
+        get
+        {
+            ModifiableStat s = playerState.stats.jumpForce;
+            return s.BaseValue > 0.0001f ? Mathf.Max(0f, s.Value / s.BaseValue) : 1f;
+        }
+    }
+
+    public float maxJumpHeight => MoveCfg.maxJumpHeight;
+    public float minJumpHeight => MoveCfg.minJumpHeight;
+    public float fallGravityMultiplier => Mathf.Max(0.1f, MoveCfg.fallGravityMultiplier);
+
     // ==========================================================
     // 冲刺 / 滑铲参数：配置里填「距离 + 时长」，速度反推（见 PlayerMovementConfig）。
     // 飞行中是否另用一套参数由 MovementConfig.flightUsesNormalActionParams 决定（默认共用）。

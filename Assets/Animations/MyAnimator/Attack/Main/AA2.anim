@@ -83,21 +83,21 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.1
-    functionName: TriggerAttackHitbox
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0.1
     functionName: PlayEffect
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.3
-    functionName: EffectEnd
+  - time: 0.1
+    functionName: MarkAttackBegin
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.2
+    functionName: TriggerAttackHitbox
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
@@ -105,6 +105,13 @@ AnimationClip:
     messageOptions: 0
   - time: 0.3
     functionName: MarkAttackEnd
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.3
+    functionName: EffectEnd
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

@@ -15,11 +15,32 @@ namespace Flandre.CombatSystem
     }
 
     /// <summary>
+    /// 攻击三段的多选（勾哪几段）。用于「这一招在哪几段可以被下一招抢拍」。
+    /// 以后的战斗模组 / 流派系统可以直接改这个值，不用动代码。
+    /// </summary>
+    [System.Flags]
+    public enum AttackPhaseMask
+    {
+        None = 0,
+
+        [InspectorName("前摇")]
+        Windup = 1 << 0,
+
+        [InspectorName("判定")]
+        Active = 1 << 1,
+
+        [InspectorName("后摇")]
+        Recovery = 1 << 2,
+    }
+
+    /// <summary>
     /// 【节拍总表】所有招式的连段窗口、三段时长（前摇 / 攻击 / 后摇）、动画与表现、蓄力位移集中在这一张表里调。
     ///
-    /// - 平a 6 招、蓄力 6 招：位置固定，按名字自动绑定到同名的招式资产（ComboNode）。
+    /// - 平a 6 招、蓄力 6 招：每一行有固定标题（A1、BB3……），用哪个招式看这一行的选框（新建表时按名字自动填一次）。
+    ///   换成别的招式时，这一行已经填好的数值保留不变。
     /// - 双蓄 5 个槽：还没定，把想复用的招式拖进选框即可。双蓄是连段终点，所以没有连段窗口。
     /// - 表里没有的招式：没有动画（也就打不出判定），三段按 -1，连段窗口 0。运行时 Console 会报错提醒。
+    /// - 同一个招式拖进了不止一行：用到它的行全部不生效，运行时报错。
     ///
     /// 用法：右键 Create → Flandre → Player → 节拍总表 建一张，
     ///       拖到角色身上 PlayerState 的 Attack Timing Config 栏位。
@@ -41,7 +62,7 @@ namespace Flandre.CombatSystem
 
             [Tooltip(
                 "前摇时长：出招到出刀/出弹。\n" +
-                "-1 = 用动画里第一个 TriggerAttackHitbox / SpawnProjectile 事件的时间。\n" +
+                "-1 = 到动画事件 MarkAttackBegin 为止；没打这个事件时，用第一个 TriggerAttackHitbox / SpawnProjectile 事件的时间。\n" +
                 "填了数字后，动画的前摇这一段会自动调速，正好在这个时间里播完；出刀 / 出弹 / 特效跟着对齐。")]
             public float windupOverride = -1f;
 
@@ -64,6 +85,14 @@ namespace Flandre.CombatSystem
 
             [Tooltip("直接把动画文件 (Anim Clip) 拖进来。请确保 Animator 里的 State 名与该动画文件名一致")]
             public AnimationClip attackClip;
+
+            [Tooltip(
+                "什么时候播这一招的招式特效（秒），从出招那一刻（动画第 0 秒）算起，是实际秒数。\n" +
+                "-1 = 跟动画里的 PlayEffect 事件走。\n" +
+                "填了数字后，动画里的 PlayEffect 对这一招不再生效（几招共用一段动画时可以各自定时间）。\n" +
+                "只管 PlayEffect；按名字播的 PlayEffectByKey 还是跟动画事件走。\n" +
+                "存活模式是 Until Marker 的特效，结束点仍读动画里 PlayEffect 配对的 EffectEnd；动画里没有的话按播完一遍")]
+            public float playEffectTime = -1f;
 
             [Tooltip(
                 "出招位移的【距离】（格）。在判定段开始的那一刻启动，匀速走完；中途被打断就停在半路。\n" +
@@ -126,17 +155,79 @@ namespace Flandre.CombatSystem
                 "窗口里拼刀框撞上 Boss 正在生效的近战判定框 → 拼刀成功。0 = 不开窗口。")]
             public float clashWindow = 0.15f;
 
-            [Tooltip("拼刀成功后玩家往远离 Boss 的方向急退多远（格）。只在招式的拼刀效果选「只结束当前招 + 玩家急退」时生效")]
-            public float clashRecoilDistance = 2f;
+            // ---------------- 判定（2026-11-21 从 ComboNode 搬来）----------------
 
-            [Tooltip("急退用多久走完（秒）")]
-            public float clashRecoilDuration = 0.15f;
+            [Tooltip(
+                "判定框什么时候打开（秒），从判定段开始那一刻算起，是实际秒数。\n" +
+                "例：前摇 0.1、这里填 0.1 → 出招后第 0.2 秒开框。\n" +
+                "-1 = 跟动画里的 TriggerAttackHitbox 事件走。\n" +
+                "填了数字后，动画里的 TriggerAttackHitbox 对这一招不再生效（几招共用一段动画时可以各自定时间）。\n" +
+                "比判定段还长的话判定框开不了")]
+            public float hitboxStartTime = -1f;
+
+            [Tooltip(
+                "什么时候出弹（秒），从判定段开始那一刻算起，是实际秒数。\n" +
+                "-1 = 跟动画里的 SpawnProjectile 事件走。\n" +
+                "填了数字后，动画里的 SpawnProjectile 对这一招不再生效（几招共用一段动画时可以各自定时间）。\n" +
+                "连射的发数和间隔在招式（ComboNode）的「弹幕参数」里。比判定段还长的话不会出弹")]
+            public float projectileStartTime = -1f;
+
+            [Tooltip(
+                "单段判定持续多久（秒），从判定框打开那一刻开始算（Hitbox Start Time，或动画里的出刀事件）。0 = 只判定一帧。\n" +
+                "-1 = 一直开到判定段结束（改了三段时长会自动跟着变）。\n" +
+                "只在下面的判定窗口列表为空时使用；判定框大小 / 位置 / 伤害在招式（ComboNode）的「单段判定」里。\n" +
+                "攻击段结束时也会强制关掉")]
+            public float hitboxDuration = 0f;
+
+            [Tooltip(
+                "一招多段的判定窗口（三连斩之类）。留空 = 用招式上的单段判定。\n" +
+                "每一段的 Start Delay 从判定框打开那一刻开始算。\n" +
+                "每一段的框可以在招式面板里点「编辑判定框」，在 Scene 视图里拖着调")]
+            public List<HitboxWindow> hitboxWindows = new List<HitboxWindow>();
+
+            [Tooltip(
+                "这一招在哪几段可以被下一招（另一只手的平a、松手放蓄力）抢拍，可多选。默认只勾后摇。\n" +
+                "没勾的那几段里按的会先存着，等这一招走到勾了的那一段再自动打出。\n" +
+                "  前摇被抢拍 → 这一招作废：不出判定、不算段数（和被冲刺打断前摇一样）\n" +
+                "  判定被抢拍 → 这一招算打完，剩下的判定 / 连射立刻掐断（和被冲刺打断判定一样）\n" +
+                "  后摇被抢拍 → 判定早已结束，直接接下一招\n" +
+                "同一只手照旧要等这一招整个走完；冲刺 / 滑铲 / 方向键取消不受这一项影响。")]
+            public AttackPhaseMask switchCutPhases = AttackPhaseMask.Recovery;
 
             /// <summary>动画与表现是从哪个招式身上搬过来的（换了招式会重新搬一次）</summary>
             [HideInInspector] public ComboNode migratedFrom;
 
-            /// <summary>搬到第几版了：1 = 动画与表现，2 = 加上蓄力位移</summary>
+            /// <summary>搬到第几版了：1 = 动画与表现，2 = 加上蓄力位移，3 = 加上判定窗口 / 判定时长</summary>
             [HideInInspector] public int migratedVersion;
+
+            /// <summary>把招式身上旧的判定窗口列表、单段判定时长抄过来（逐段复制，不共用同一份）</summary>
+            public void CopyLegacyHitbox(ComboNode n)
+            {
+                hitboxDuration = n.LegacyHitboxDuration;
+
+                hitboxWindows = new List<HitboxWindow>();
+                List<HitboxWindow> src = n.LegacyHitboxWindows;
+                if (src != null)
+                {
+                    for (int i = 0; i < src.Count; i++)
+                    {
+                        HitboxWindow w = src[i];
+                        if (w == null) continue;
+                        hitboxWindows.Add(new HitboxWindow
+                        {
+                            label = w.label,
+                            startDelay = w.startDelay,
+                            duration = w.duration,
+                            size = w.size,
+                            offset = w.offset,
+                            damage = w.damage,
+                            refreshHitList = w.refreshHitList,
+                        });
+                    }
+                }
+
+                migratedVersion = 3;
+            }
 
             /// <summary>把招式身上旧的蓄力位移抄过来（动量加成已删除，距离 = 原来的低保距离）</summary>
             public void CopyLegacyAimDash(ComboNode n)
@@ -161,6 +252,7 @@ namespace Flandre.CombatSystem
                 applyThrustInAir = n.LegacyApplyThrustInAir;
                 lockMovementDuringAttack = n.LegacyLockMovement;
                 CopyLegacyAimDash(n);
+                CopyLegacyHitbox(n);
                 migratedFrom = n;
             }
         }
@@ -169,7 +261,7 @@ namespace Flandre.CombatSystem
         [System.Serializable]
         public class FixedEntry : TimingEntry
         {
-            [Tooltip("招式名（固定，按这个名字自动绑定同名的招式资产）")]
+            [Tooltip("这一行的标题（A1、BB3……）。只是标签，用哪个招式看这一行的招式选框")]
             public string slotName = "";
 
             [Tooltip(
@@ -272,6 +364,7 @@ namespace Flandre.CombatSystem
         {
             active = null;
             warnedMissing.Clear();
+            warnedDuplicate.Clear();
 #if UNITY_EDITOR
             editorSearched = false;
 #endif
@@ -303,13 +396,18 @@ namespace Flandre.CombatSystem
             config.lookupDirty = true;
         }
 
+        /// <summary>在表里出现了不止一次的招式（这些招式一行都不生效）</summary>
+        private readonly HashSet<ComboNode> duplicated = new HashSet<ComboNode>();
+        private static readonly HashSet<ComboNode> warnedDuplicate = new HashSet<ComboNode>();
+
         private void BuildLookup()
         {
             lookup.Clear();
-            // 平a、蓄力在前：同一个招式同时出现在双蓄槽里时，以前面的为准
+            duplicated.Clear();
             AddAll(normalAttacks);
             AddAll(chargeAttacks);
             AddAll(dualAttacks);
+            foreach (ComboNode n in duplicated) lookup.Remove(n);
             lookupDirty = false;
         }
 
@@ -318,17 +416,33 @@ namespace Flandre.CombatSystem
             for (int i = 0; i < list.Count; i++)
             {
                 T e = list[i];
-                if (e != null && e.node != null && !lookup.ContainsKey(e.node)) lookup.Add(e.node, e);
+                if (e == null || e.node == null) continue;
+                if (lookup.ContainsKey(e.node)) duplicated.Add(e.node);
+                else lookup.Add(e.node, e);
             }
         }
 
-        /// <summary>这个招式在表里的那一行；不在表里返回 null</summary>
+        /// <summary>这个招式在表里出现了不止一次</summary>
+        public static bool IsDuplicated(ComboNode node)
+        {
+            AttackTimingConfig cfg = Active;
+            if (cfg == null || node == null) return false;
+            if (cfg.lookupDirty) cfg.BuildLookup();
+            return cfg.duplicated.Contains(node);
+        }
+
+        /// <summary>这个招式在表里的那一行；不在表里（或出现了不止一次）返回 null</summary>
         public static TimingEntry Find(ComboNode node)
         {
             AttackTimingConfig cfg = Active;
             if (cfg == null || node == null) return null;
             if (cfg.lookupDirty) cfg.BuildLookup();
-            return cfg.lookup.TryGetValue(node, out TimingEntry e) ? e : null;
+            if (cfg.lookup.TryGetValue(node, out TimingEntry e)) return e;
+
+            if (Application.isPlaying && cfg.duplicated.Contains(node) && warnedDuplicate.Add(node))
+                Debug.LogError($"[节拍总表] 招式「{node.name}」在节拍总表里出现了不止一次，用到它的行全部不生效" +
+                               "（没有动画、打不出判定）。请在表里只保留一行。", node);
+            return null;
         }
 
         /// <summary>连段窗口。只有平a / 蓄力有；双蓄和表里没有的招式 = 0</summary>
@@ -341,12 +455,14 @@ namespace Flandre.CombatSystem
         private static readonly HashSet<ComboNode> warnedMissing = new HashSet<ComboNode>();
 
         /// <summary>动画剪辑。表里没有这个招式 = 没有动画（运行时报错一次）</summary>
+        public static float GetPlayEffectTime(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.playEffectTime : -1f; }
+
         public static AnimationClip GetClip(ComboNode node)
         {
             TimingEntry e = Find(node);
             if (e != null) return e.attackClip;
 
-            if (Application.isPlaying && node != null && warnedMissing.Add(node))
+            if (Application.isPlaying && node != null && !IsDuplicated(node) && warnedMissing.Add(node))
                 Debug.LogError($"[节拍总表] 招式「{node.name}」不在节拍总表里：它没有动画，也打不出判定 / 子弹 / 特效。" +
                                "请把它加进表（双蓄槽可以直接拖）。", node);
             return null;
@@ -374,8 +490,24 @@ namespace Flandre.CombatSystem
         public static float GetAimDashDuration(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.aimDashDuration : 0.15f; }
         // ---- 拼刀 ----
         public static float GetClashWindow(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.clashWindow : 0f; }
-        public static float GetClashRecoilDistance(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.clashRecoilDistance : 0f; }
-        public static float GetClashRecoilDuration(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.clashRecoilDuration : 0.15f; }
+
+        // ---- 判定 ----
+        private static readonly List<HitboxWindow> NoWindows = new List<HitboxWindow>();
+
+        /// <summary>一招多段的判定窗口；表里没有这一招时返回空列表（不要往里加东西）</summary>
+        public static List<HitboxWindow> GetHitboxWindows(ComboNode node)
+        {
+            TimingEntry e = Find(node);
+            if (e == null) return NoWindows;
+            if (e.hitboxWindows == null) e.hitboxWindows = new List<HitboxWindow>();
+            return e.hitboxWindows;
+        }
+
+        public static AttackPhaseMask GetSwitchCutPhases(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.switchCutPhases : AttackPhaseMask.Recovery; }
+
+        public static float GetHitboxDuration(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.hitboxDuration : 0f; }
+        public static float GetHitboxStartTime(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.hitboxStartTime : -1f; }
+        public static float GetProjectileStartTime(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.projectileStartTime : -1f; }
 
         public static float GetActive(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.activeOverride : -1f; }
         public static float GetRecovery(ComboNode node) { TimingEntry e = Find(node); return e != null ? e.recoveryOverride : -1f; }
@@ -393,7 +525,10 @@ namespace Flandre.CombatSystem
             chargeAttacks.Clear();
             dualAttacks.Clear();
             EnsureSlots();
-            AutoBind();
+#if UNITY_EDITOR
+            BindByName(normalAttacks);
+            BindByName(chargeAttacks);
+#endif
             SyncFromNodes();
             lookupDirty = true;
         }
@@ -407,21 +542,11 @@ namespace Flandre.CombatSystem
         }
 
         /// <summary>
-        /// 固定槽位还没绑到招式的，按名字找同名的 ComboNode 资产。
-        /// 建表时、以及在 Inspector 里打开这张表时调用（不放在 OnValidate 里：资产导入期间不宜查 AssetDatabase）。
+        /// 在 Inspector 里打开这张表时调用：新拖进来的招式补一次数据搬运（见 SyncFromNodes）。
+        /// 按名字自动填招式只在新建表时做一次（Reset），之后空着的行保持空着。
         /// </summary>
-        /// <returns>这次有没有新绑上的</returns>
-        public bool AutoBind()
-        {
-            bool changed = false;
-#if UNITY_EDITOR
-            changed |= BindByName(normalAttacks);
-            changed |= BindByName(chargeAttacks);
-            if (changed) lookupDirty = true;
-#endif
-            changed |= SyncFromNodes();
-            return changed;
-        }
+        /// <returns>这次有没有改动</returns>
+        public bool AutoBind() => SyncFromNodes();
 
         /// <summary>
         /// 每一行第一次绑上某个招式（或换成另一个招式）时，把那个招式身上旧的"动画与表现"抄过来一次。
@@ -431,13 +556,17 @@ namespace Flandre.CombatSystem
         public bool SyncFromNodes()
         {
             bool changed = false;
-            changed |= SyncList(normalAttacks);
-            changed |= SyncList(chargeAttacks);
-            changed |= SyncList(dualAttacks);
+            changed |= SyncList(normalAttacks, keepValuesOnSwap: true);
+            changed |= SyncList(chargeAttacks, keepValuesOnSwap: true);
+            changed |= SyncList(dualAttacks, keepValuesOnSwap: false);
             return changed;
         }
 
-        private static bool SyncList<T>(List<T> list) where T : TimingEntry
+        /// <param name="keepValuesOnSwap">
+        /// true（平a / 蓄力的固定行）：这一行搬过一次数据之后，再换成别的招式，保留这一行已经填好的数值。
+        /// false（双蓄槽）：换进来的招式身上的旧数据整套搬过来。
+        /// </param>
+        private static bool SyncList<T>(List<T> list, bool keepValuesOnSwap) where T : TimingEntry
         {
             bool changed = false;
             for (int i = 0; i < list.Count; i++)
@@ -447,12 +576,15 @@ namespace Flandre.CombatSystem
 
                 if (e.migratedFrom != e.node)
                 {
-                    e.CopyLegacyFrom(e.node);        // 新绑上的招式：全部搬一次
+                    if (keepValuesOnSwap && e.migratedFrom != null) e.migratedFrom = e.node;
+                    else e.CopyLegacyFrom(e.node);   // 第一次绑上招式：全部搬一次
                     changed = true;
                 }
-                else if (e.migratedVersion < 2)
+                else if (e.migratedVersion < 3)
                 {
-                    e.CopyLegacyAimDash(e.node);     // 之前已经搬过动画与表现：只补搬蓄力位移，不动你改过的数
+                    // 之前已经搬过动画与表现：只补搬后来新加的，不动你改过的数
+                    if (e.migratedVersion < 2) e.CopyLegacyAimDash(e.node);
+                    e.CopyLegacyHitbox(e.node);
                     changed = true;
                 }
             }

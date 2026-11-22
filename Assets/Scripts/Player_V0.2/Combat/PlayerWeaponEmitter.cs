@@ -100,7 +100,7 @@ namespace Flandre.CombatSystem
             // 单发或零间隔 → 同步射完
             if (count == 1 || interval <= 0f)
             {
-                for (int i = 0; i < count; i++) Track(bulletSink, FireOne(poolKey, node, dir));
+                for (int i = 0; i < count; i++) Track(bulletSink, FireOne(poolKey, node, dir, i));
                 return null;
             }
 
@@ -116,7 +116,7 @@ namespace Flandre.CombatSystem
             };
 
             // 第一发立刻射出
-            Track(bulletSink, FireOne(poolKey, node, dir));
+            Track(bulletSink, FireOne(poolKey, node, dir, 0));
             run.fired = 1;
 
             activeBursts.Add(run);
@@ -136,7 +136,7 @@ namespace Flandre.CombatSystem
 
                 if (run.recomputeAim) run.dir = ResolveDirection(run.weapon, allowFace);
 
-                Track(bulletSink, FireOne(run.poolKey, run.node, run.dir));
+                Track(bulletSink, FireOne(run.poolKey, run.node, run.dir, run.fired));
                 run.fired++;
             }
 
@@ -167,7 +167,8 @@ namespace Flandre.CombatSystem
         // 单发
         // ==========================================================
 
-        private GameObject FireOne(string poolKey, ComboNode node, Vector2 direction)
+        /// <param name="shotIndex">这一轮里的第几颗（从 0 数），用来分子弹总伤害</param>
+        private GameObject FireOne(string poolKey, ComboNode node, Vector2 direction, int shotIndex)
         {
             // key 未注册时池会自己报 LogError，这里拿到 null 就静默跳过避免刷屏
             GameObject bullet = ObjectPoolManager.Instance?.Get(poolKey);
@@ -186,10 +187,12 @@ namespace Flandre.CombatSystem
             // 这些改动会在子弹回池时由 OnDespawn 还原，不会污染池子。
             if (node != null)
             {
-                proj.Configure(
-                    node.projectileSpeedMultiplier,
-                    node.projectileScaleMultiplier,
-                    node.projectileDamageOverride);
+                proj.Configure(node.projectileSpeedMultiplier, node.projectileScaleMultiplier, 0);
+
+                // 子弹总伤害按发数平分；没填就用预制体伤害
+                int shotDamage = node.ProjectileDamageFor(shotIndex);
+                if (shotDamage >= 0) proj.SetDamage(shotDamage);
+                proj.SetCancelsBullets(node.CancelsBulletsBy(BulletCancelMode.Projectile));
             }
 
             proj.Setup(direction);

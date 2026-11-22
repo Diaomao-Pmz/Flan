@@ -48,6 +48,10 @@ public class PlayerHitDetection : MonoBehaviour
         internal int index;          // 轮到第几段窗口
         internal bool inWindow;      // 当前段是否正在判定
         internal float winElapsed;   // 当前段已经判定了多久
+        internal float winDuration;  // 当前段实际要判定多久（duration 填 -1 时 = 到判定段结束）
+
+        /// <summary>开这份序列时，距离判定段结束还有多久（秒）；-1 = 不知道</summary>
+        internal float untilActiveEnd = -1f;
 
         /// <summary>这一帧正在判定的窗口（Gizmos 用）</summary>
         internal HitboxWindow activeWindow;
@@ -93,6 +97,12 @@ public class PlayerHitDetection : MonoBehaviour
     /// </summary>
     public void MarkAttackEnd() { }
 
+    /// <summary>
+    /// 【"攻击开始"时间戳】动画事件用，本身是空操作。
+    /// 打了的话前摇到它为止，判定段从它开始（出刀事件可以放在判定段里更靠后的地方）。
+    /// </summary>
+    public void MarkAttackBegin() { }
+
     /// <summary>掐断所有正在跑的判定</summary>
     public void ForceStopHitbox()
     {
@@ -109,11 +119,12 @@ public class PlayerHitDetection : MonoBehaviour
     // ==========================================================
 
     /// <summary>开一份判定序列，并立刻做第 0 帧的检测</summary>
-    public HitboxRun BeginRun(ComboNode node)
+    /// <param name="untilActiveEnd">距离判定段结束还有多久（秒）。持续时间填 -1 的段会一直开到那时；-1 = 不知道</param>
+    public HitboxRun BeginRun(ComboNode node, float untilActiveEnd = -1f)
     {
         if (node == null) return null;
 
-        HitboxRun run = new HitboxRun { node = node };
+        HitboxRun run = new HitboxRun { node = node, untilActiveEnd = untilActiveEnd };
 
         // 没配多段的话会自动用旧版单段参数合成一条 —— 已配好的资产无需改动
         node.CollectWindows(run.windows);
@@ -128,7 +139,8 @@ public class PlayerHitDetection : MonoBehaviour
 
     /// <summary>
     /// 推进一份判定序列。口径与旧协程一致：
-    /// 各段按顺序执行，等到 startDelay 才开；duration 为 0 的段只判定一帧。
+    /// 各段按顺序执行，等到 startDelay 才开；duration 为 0 的段只判定一帧；
+    /// duration 为 -1 的段一直开到判定段结束（不知道判定段什么时候结束时按 0 处理）。
     /// </summary>
     public void TickRun(HitboxRun run, float dt)
     {
@@ -161,6 +173,7 @@ public class PlayerHitDetection : MonoBehaviour
 
                 run.inWindow = true;
                 run.winElapsed = 0f;
+                run.winDuration = ResolveDuration(run, w);
                 run.activeWindow = w;
 
                 // 本段是否重新允许命中同一个敌人（三连斩每刀都吃伤害）
@@ -169,7 +182,7 @@ public class PlayerHitDetection : MonoBehaviour
                 CheckOverlap(run, w);
 
                 // duration 为 0 → 瞬间伤害，只判定一帧
-                if (w.duration <= 0f)
+                if (run.winDuration <= 0f)
                 {
                     run.inWindow = false;
                     run.activeWindow = null;
@@ -182,7 +195,7 @@ public class PlayerHitDetection : MonoBehaviour
             run.winElapsed += dt;
             dt = 0f;
 
-            if (run.winElapsed < w.duration)
+            if (run.winElapsed < run.winDuration)
             {
                 CheckOverlap(run, w);
                 return;
@@ -190,9 +203,17 @@ public class PlayerHitDetection : MonoBehaviour
 
             run.inWindow = false;
             run.activeWindow = null;
-            run.seqTime += Mathf.Max(0f, w.duration);
+            run.seqTime += Mathf.Max(0f, run.winDuration);
             run.index++;
         }
+    }
+
+    /// <summary>这一段实际判定多久：duration ≥ 0 照填的；-1 = 从这一段开始一直到判定段结束</summary>
+    private static float ResolveDuration(HitboxRun run, HitboxWindow w)
+    {
+        if (w.duration >= 0f) return w.duration;
+        if (run.untilActiveEnd < 0f) return 0f;
+        return Mathf.Max(0f, run.untilActiveEnd - run.seqTime);
     }
 
     /// <summary>结束一份判定序列</summary>
@@ -212,6 +233,10 @@ public class PlayerHitDetection : MonoBehaviour
         float dirX = player.facingDirection;
         Vector2 finalOffset = new Vector2(window.offset.x * dirX, window.offset.y);
         Vector2 boxCenter = (Vector2)transform.position + finalOffset;
+
+        // 勾了「近战判定」消弹：同一个框里的 Boss 子弹顺手消掉（单独查询，确保查得到触发器）
+        if (node.CancelsBulletsBy(BulletCancelMode.Melee))
+            BulletCanceller.CancelInBox(boxCenter, window.size);
 
         overlapResults.Clear();
         Physics2D.OverlapBox(boxCenter, window.size, 0f, overlapFilter, overlapResults);
@@ -239,9 +264,13 @@ public class PlayerHitDetection : MonoBehaviour
             // 【注意】打断与否由受击方裁决 —— 这里只声明"我能破哪几类"，
             // 至于敌人当前在做的动作算不算那一类、破了之后怎么表现，
             // 全是敌人侧的事。这和击退力度归受击方管是同一条原则。
+            // 击退 Boss：招式填的距离放在 knockbackForce.x（受击方自己决定怎么滑、滑多久）
+            bool knock = node.bossKnockbackDistance > 0f;
             enemy.TakeDamage(new DamageInfo(
                 window.damage, DamageType.Melee, transform.position, gameObject,
-                node.breakMask, node.hitReaction, node.hitReactionParam));
+                node.breakMask, node.hitReaction, node.hitReactionParam,
+                knock, knock ? new Vector2(node.bossKnockbackDistance, 0f) : Vector2.zero,
+                node.bossHitStun));
 
             // ---- 命中记账与广播 ----
             LastHitTarget = enemy.transform;

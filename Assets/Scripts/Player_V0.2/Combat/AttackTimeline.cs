@@ -133,6 +133,15 @@ namespace Flandre.CombatSystem
         /// <summary>动画事件 MarkAttackEnd（"攻击结束"时间戳）的时间；没打这个事件则 -1</summary>
         public float attackEndTime = -1f;
 
+        /// <summary>
+        /// 动画事件 MarkAttackBegin（"攻击开始"时间戳）的时间；没打这个事件则 -1。
+        /// 打了的话前摇到它为止（出刀 / 出弹事件可以放在判定段里更靠后的地方，比如先冲刺再出刀）
+        /// </summary>
+        public float attackBeginTime = -1f;
+
+        /// <summary>前摇在动画里的结束点：MarkAttackBegin → 第一个出刀 / 出弹事件 → 0</summary>
+        public float WindupEndInClip => attackBeginTime >= 0f ? attackBeginTime : (firstStrikeTime >= 0f ? firstStrikeTime : 0f);
+
         private static readonly Dictionary<AnimationClip, AttackTimelineData> cache
             = new Dictionary<AnimationClip, AttackTimelineData>();
 
@@ -170,6 +179,13 @@ namespace Flandre.CombatSystem
                 if (e.functionName == "EffectEnd")
                 {
                     endScratch.Add(new TimelineEvent { time = e.time, str = e.stringParameter ?? "" });
+                    continue;
+                }
+
+                // "攻击开始"时间戳：只记时间，不进事件表（打了多个取最早的）
+                if (e.functionName == "MarkAttackBegin")
+                {
+                    if (data.attackBeginTime < 0f || e.time < data.attackBeginTime) data.attackBeginTime = e.time;
                     continue;
                 }
 
@@ -272,11 +288,11 @@ namespace Flandre.CombatSystem
             bool hasClip = clip != null && clip.length > 0f;
             float clipLen = hasClip ? clip.length : FallbackDuration;
 
-            float animWindup = data.firstStrikeTime >= 0f ? data.firstStrikeTime : 0f;
+            float animWindup = data.WindupEndInClip;
 
             float animActiveEnd;
             if (data.attackEndTime >= 0f) animActiveEnd = data.attackEndTime;
-            else if (data.firstStrikeTime >= 0f && node != null) animActiveEnd = EstimateActiveEnd(node, data);
+            else if (node != null && (data.firstStrikeTime >= 0f || node.HasTableStrikeTime)) animActiveEnd = EstimateActiveEnd(node, data);
             else animActiveEnd = clipLen;
 
             animActiveEnd = Mathf.Clamp(animActiveEnd, animWindup, clipLen);
@@ -299,7 +315,8 @@ namespace Flandre.CombatSystem
         /// <summary>没打 MarkAttackEnd 时，按判定窗口序列 / 连射时长推算攻击段在动画里的结束时刻</summary>
         private static float EstimateActiveEnd(ComboNode node, AttackTimelineData data)
         {
-            float end = data.firstStrikeTime;
+            float windupEnd = data.WindupEndInClip;
+            float end = Mathf.Max(windupEnd, Mathf.Max(data.firstStrikeTime, data.attackBeginTime));
 
             // 判定窗口序列的总时长（与 PlayerHitDetection 的顺序执行口径一致）
             node.CollectWindows(windowScratch);
@@ -307,16 +324,24 @@ namespace Flandre.CombatSystem
             for (int i = 0; i < windowScratch.Count; i++)
             {
                 HitboxWindow w = windowScratch[i];
-                seq = Mathf.Max(seq, w.startDelay) + Mathf.Max(0f, w.duration);
+                seq = Mathf.Max(seq, w.startDelay) + Mathf.Max(0f, w.duration);   // -1（到判定段结束）在这里按 0 算，不然会互相依赖
             }
 
             int count = Mathf.Max(1, node.projectileCount);
             float burst = (count > 1 && node.projectileInterval > 0f) ? (count - 1) * node.projectileInterval : 0f;
 
+            // 节拍总表里填了出刀 / 出弹时间的，用它（这时判定段按原速播，实际秒数 = 动画秒数），不看动画事件
+            float hitboxStart = node.hitboxStartTime;
+            float projectileStart = node.projectileStartTime;
+            if (hitboxStart >= 0f) end = Mathf.Max(end, windupEnd + hitboxStart + seq);
+            if (projectileStart >= 0f) end = Mathf.Max(end, windupEnd + projectileStart + burst);
+
             for (int i = 0; i < data.events.Count; i++)
             {
-                if (data.events[i].kind == TimelineEventKind.Hitbox) end = Mathf.Max(end, data.events[i].time + seq);
-                else if (data.events[i].kind == TimelineEventKind.Projectile) end = Mathf.Max(end, data.events[i].time + burst);
+                if (data.events[i].kind == TimelineEventKind.Hitbox && hitboxStart < 0f)
+                    end = Mathf.Max(end, data.events[i].time + seq);
+                else if (data.events[i].kind == TimelineEventKind.Projectile && projectileStart < 0f)
+                    end = Mathf.Max(end, data.events[i].time + burst);
             }
             return end;
         }
@@ -387,6 +412,22 @@ namespace Flandre.CombatSystem
         internal bool strikesClosed;
         internal readonly List<PlayerHitDetection.HitboxRun> hitRuns = new List<PlayerHitDetection.HitboxRun>();
         internal readonly List<PlayerWeaponEmitter.BurstRun> bursts = new List<PlayerWeaponEmitter.BurstRun>();
+
+        /// <summary>特殊招式（激光等）的运行时；不是特殊招式时为 null</summary>
+        internal SpecialMoveRun special;
+
+        /// <summary>节拍总表里填了出刀时间时：出招后第几秒开判定框；-1 = 跟动画事件走</summary>
+        internal float hitboxStartAt = -1f;
+
+        /// <summary>节拍总表里填了出弹时间时：出招后第几秒出弹；-1 = 跟动画事件走</summary>
+        internal float projectileStartAt = -1f;
+
+        internal bool tableHitboxFired;
+        internal bool tableProjectileFired;
+
+        /// <summary>节拍总表里填了特效时间时：出招后第几秒播招式特效；-1 = 跟动画事件走</summary>
+        internal float effectStartAt = -1f;
+        internal bool tableEffectFired;
         internal readonly List<GameObject> spawnedEffects = new List<GameObject>();
         internal readonly List<GameObject> spawnedBullets = new List<GameObject>();
 

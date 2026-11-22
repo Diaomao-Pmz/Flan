@@ -8,7 +8,7 @@ namespace Flandre.CombatSystem.EditorTools
     /// <summary>
     /// 特效表里每一条的显示方式：
     /// - 标题直接写出"用途 · 预制体 → 给谁用"，折叠着也能看出是哪条；
-    /// - 选"招式特效"只显示招式相关的栏位，选"蓄力光效"只显示武器和等级；
+    /// - 选"招式特效"只显示招式相关的栏位，选"蓄力光效"只显示武器和等级，选"消弹特效"只显示位置 / 缩放 / 旋转；
     /// - 没拖预制体、Scale 有 0 时给出提示。
     /// </summary>
     [CustomPropertyDrawer(typeof(EffectManager.EffectEntry))]
@@ -76,11 +76,17 @@ namespace Flandre.CombatSystem.EditorTools
             SerializedProperty s = property.FindPropertyRelative("settings");
             SerializedProperty usage = s.FindPropertyRelative("usage");
             bool isCharge = usage.enumValueIndex == (int)EffectUsage.Charge;
+            bool isCancel = usage.enumValueIndex == (int)EffectUsage.BulletCancel;
 
             fields.Add(prefab);
             fields.Add(usage);
 
-            if (isCharge)
+            if (isCancel)
+            {
+                // 消弹特效：在被消掉的子弹位置播一遍，只需要位置偏移 / 缩放 / 旋转
+                fields.Add(s.FindPropertyRelative("offset"));
+            }
+            else if (isCharge)
             {
                 fields.Add(s.FindPropertyRelative("weapons"));
                 fields.Add(s.FindPropertyRelative("chargeLevel"));
@@ -117,9 +123,13 @@ namespace Flandre.CombatSystem.EditorTools
         {
             SerializedProperty prefab = property.FindPropertyRelative("prefab");
             SerializedProperty s = property.FindPropertyRelative("settings");
-            bool isCharge = s.FindPropertyRelative("usage").enumValueIndex == (int)EffectUsage.Charge;
+            int usageIndex = s.FindPropertyRelative("usage").enumValueIndex;
+            bool isCharge = usageIndex == (int)EffectUsage.Charge;
 
             string prefabName = prefab.objectReferenceValue != null ? prefab.objectReferenceValue.name : "（没拖预制体）";
+
+            if (usageIndex == (int)EffectUsage.BulletCancel)
+                return new GUIContent($"[消弹] {prefabName} → Boss 子弹被消掉的位置", label.tooltip);
 
             string tag;
             SerializedProperty targets;
