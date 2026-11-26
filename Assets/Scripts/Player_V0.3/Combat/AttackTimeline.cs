@@ -411,6 +411,8 @@ namespace Flandre.CombatSystem
         internal int startFrame;
         internal bool strikesClosed;
         internal readonly List<PlayerHitDetection.HitboxRun> hitRuns = new List<PlayerHitDetection.HitboxRun>();
+        /// <summary>这一招已经扣过整招破盾值的敌人（这一招开几次判定都共用这一份）</summary>
+        internal readonly HashSet<EntityBase> shieldCharged = new HashSet<EntityBase>();
         internal readonly List<PlayerWeaponEmitter.BurstRun> bursts = new List<PlayerWeaponEmitter.BurstRun>();
 
         /// <summary>特殊招式（激光等）的运行时；不是特殊招式时为 null</summary>

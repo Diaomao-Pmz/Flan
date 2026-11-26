@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82ed1730d3f804647b3f8b7bbb1573b1, type: 3}
+  m_Name: BB2
+  m_EditorClassIdentifier: Assembly-CSharp::ComboNode
+  nodeName: BB2
+  moveType: 1
+  specialMove:
+    rid: -2
+  castCondition: 0
+  requiredState: 0
+  inputSequence: 05000000
+  isChargeSkill: 1
+  chargeAllowedFrom: 2
+  chargeLevel: 2
+  comboChargeStartTime: 0.6
+  chargeSlowsMovement: 1
+  chargeMoveSpeedStart: 1
+  chargeMoveSpeedMultiplier: 0.6
+  chargeJumpForceStart: 1
+  chargeJumpForceMultiplier: 0.6
+  chargeSlowRampTime: 0.5
+  legacyAttackClip: {fileID: 7400000, guid: 47bd3d2dae8563b4aa7c1a9b989e05db, type: 2}
+  legacyForwardThrust: {x: 0, y: 0}
+  legacyThrustDuration: 0.12
+  legacyApplyThrustInAir: 1
+  legacyLockMovement: 1
+  cancelPermission:
+    byMainWeapon: 1
+    bySubWeapon: 1
+    byMovement: 1
+  legacyHitboxWindows: []
+  legacyHitboxDuration: 0
+  meleeShieldBreak: -1
+  damage: 0
+  hitboxSize: {x: 0, y: 0}
+  hitboxOffset: {x: 0, y: 0}
+  projectilePoolKeyOverride: 
+  projectileCount: 1
+  projectileInterval: 0.06
+  projectileSpeedMultiplier: 0.5
+  projectileScaleMultiplier: 4
+  projectileTotalDamage: 6
+  projectileTotalShieldBreak: -1
+  recomputeAimPerShot: 0
+  legacyUseAimDash: 0
+  legacyAimDashMode: 0
+  legacyAimDashBaseDistance: 2
+  legacyAimDashDuration: 0.15
+  breakMask: 0
+  bossKnockbackDistance: 0
+  bossPushSpeed: 0
+  bossHitStun: 0
+  hitReaction: 0
+  hitReactionParam: 0
+  bulletCancel: 1
+  canClash: 0
+  clashBoxOffset: {x: 0.8, y: 0.8}
+  clashBoxSize: {x: 1, y: 1.2}
+  clashMask: 5
+  clashThrust: {x: 0, y: 0}
+  clashThrustDuration: 0.15
+  clashThrustPassThrough: 0
+  clashBossStagger: 0
+  faceTargetOnHit: 0
+  minComboDepth: 0
+  maxComboDepth: 0
+  childNodes:
+  - {fileID: 11400000, guid: 7bdf1fd478260b847b233e12eaeb9e3a, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

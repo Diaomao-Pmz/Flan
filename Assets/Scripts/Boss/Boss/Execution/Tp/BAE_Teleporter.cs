@@ -7,13 +7,18 @@ using Flandre.CombatSystem;
 /// 传送执行器。两份工作：
 ///   1. 主动传送：认领 TeleportNode，由 AI 抽卡 / 套路调用 Execute
 ///   2. 受击传送：Boss 挨打时（BossController 转交 OnBossHit），
-///      按 Hit Reactions 列表里每张卡的概率、冷却、姿态决定要不要传走
+///      按 Tp Config 里 Hit Reactions 列表每张卡的概率、冷却、姿态决定要不要传走
+/// 落点安检、受击传送列表在 Tp Config（BossTpConfig）上；传送点、场地中央、玩家引用是场景物体，留在这个组件上。
 ///
 /// 【比喻：忍耐槽】每张受击卡有一个忍耐槽（当前概率）。挨一刀没跑 → 槽涨一截；
 /// 跑了 → 槽回到基础值，并进入冷却；一段时间没人打 → 槽自己泄掉。
 /// </summary>
 public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
 {
+    [Header("--- 配置表 ---")]
+    [Tooltip("落点安检、受击传送列表等。必填：留空会在 Console 报错，先用默认数值（受击传送列表为空）")]
+    [SerializeField] private BossTpConfig tpConfig;
+
     [Header("--- 随机点传送 (RandomPoint) ---")]
     [Tooltip("一阶段专用传送点。与二阶段互不共用。")]
     [SerializeField] private List<Transform> phase1Points = new List<Transform>();
@@ -21,57 +26,44 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     [Tooltip("二阶段专用传送点。与一阶段互不共用。")]
     [SerializeField] private List<Transform> phase2Points = new List<Transform>();
 
-    [Tooltip("小于此距离视为「就在原地」，会被排除，避免传了个寂寞。")]
-    [SerializeField] private float samePointThreshold = 0.1f;
-
-    [Header("--- 绕背传送 (BehindPlayer) ---")]
-    [Tooltip("玩家 Transform。留空则由 BossController.Init() 自动注入。")]
+    [Header("--- 玩家 ---")]
+    [Tooltip("玩家 Transform。留空则由 BossController.Init() 自动注入。\n" +
+             "绕背距离、对齐玩家高度、按发动时玩家位置算落点、意图距离落点的距离，都在每张传送卡上填")]
     [SerializeField] private Transform playerTransform;
-
-    [Tooltip("落点与玩家的水平距离。Boss 会出现在玩家背后这么远的地方。")]
-    [SerializeField] private float behindPlayerOffset = 3f;
-
-    [Tooltip("勾选后绕背传送会同时对齐玩家的 Y 坐标；不勾则保持 Boss 当前高度。")]
-    [SerializeField] private bool matchPlayerHeight = false;
-
-    [Tooltip("勾选 = 在【发动传送那一刻】记下玩家位置，前摇结束后按这个位置算落点。\n" +
-             "不勾 = 前摇结束时才读玩家位置（默认）。\n" +
-             "两种模式都会经过下面的落点安检")]
-    [SerializeField] private bool snapshotPlayerPosition = false;
-
-    [Header("--- 落点安检（绕背传送用）---")]
-    [Tooltip("哪些图层算「不能落」：勾地面、墙。\n" +
-             "落点（按 Boss 身体碰撞框大小）压到这些图层就换另一侧；两侧都不行则这次不传。\n" +
-             "选 Nothing = 不检查地形（不推荐）")]
-    [SerializeField] private LayerMask landingBlockLayers;
-
-    [Tooltip("落点不能和玩家身体重叠")]
-    [SerializeField] private bool avoidPlayerOverlap = true;
-
-    [Tooltip("安检时把 Boss 碰撞框缩小这么多（每边，世界单位），\n" +
-             "避免 Boss 本来就踩在地上时，脚底和地面「刚好接触」被误判为压到地面")]
-    [SerializeField] private float landingCheckInset = 0.05f;
-
-    [Tooltip("勾选 = 落点脚下一定距离内必须有地面（Landing Block Layers 里的物体），否则不能落。\n" +
-             "防止传送到地图外的半空。以后 Boss 要传送到空中时可以关掉")]
-    [SerializeField] private bool requireGroundBelow = true;
-
-    [Tooltip("从落点身体底部往下找地面的最大距离（格）")]
-    [Min(0.1f)]
-    [SerializeField] private float groundCheckDistance = 3f;
-
-    [Tooltip("打印绕背传送的详细日志（起点、落点、传送后实际位置），排查卡地底问题用。稳定后可关")]
-    [SerializeField] private bool debugTeleport = true;
 
     [Header("--- 中央传送 (Center) ---")]
     [Tooltip("场地中央锚点。二阶段转场等场合使用。")]
     [SerializeField] private Transform centerPoint;
 
-    [Header("--- 受击传送 (Hit Reactions) ---")]
-    [Tooltip("挨打时会检查的传送卡（需勾选卡上的 React To Hit）。\n" +
-             "从上往下检查，同一次挨打最多触发一张。\n" +
-             "列表留空 = Boss 挨打永远不会被动传送")]
-    [SerializeField] private List<TeleportNode> hitReactions = new List<TeleportNode>();
+    private BossTpConfig activeTp;
+
+    /// <summary>生效中的传送配置。没拖 → 报错，用默认数值</summary>
+    private BossTpConfig Tp
+    {
+        get
+        {
+            if (activeTp == null)
+            {
+                if (tpConfig != null) activeTp = tpConfig;
+                else
+                {
+                    activeTp = ScriptableObject.CreateInstance<BossTpConfig>();
+                    activeTp.name = "TpConfig（未配置，默认数值）";
+                    Debug.LogError("[BAE_Teleporter] 没有拖 Tp Config！先用默认数值（落点安检不检查地形、受击传送列表为空）。", this);
+                }
+            }
+            return activeTp;
+        }
+    }
+
+    private float samePointThreshold => Tp.samePointThreshold;
+    private LayerMask landingBlockLayers => Tp.landingBlockLayers;
+    private bool avoidPlayerOverlap => Tp.avoidPlayerOverlap;
+    private float landingCheckInset => Tp.landingCheckInset;
+    private bool requireGroundBelow => Tp.requireGroundBelow;
+    private float groundCheckDistance => Tp.groundCheckDistance;
+    private bool debugTeleport => Tp.debugTeleport;
+    private List<TeleportNode> hitReactions => Tp.hitReactions;
 
     // 黑板引用，用于读取当前阶段。缓存以避免每次传送都 GetComponent。
     private BossState bossState;
@@ -115,16 +107,16 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         TeleportNode tpNode = node as TeleportNode;
         if (tpNode == null) yield break;
 
-        // 发动那一刻的玩家位置（只在勾了 snapshotPlayerPosition 时使用）
-        Vector2? snapshot = TakePlayerSnapshot();
+        // 发动那一刻的玩家位置（只在卡上勾了 snapshotPlayerPosition 时使用）
+        Vector2? snapshot = TakePlayerSnapshot(tpNode);
 
         // 传送前摇。不想要的话把资产里的 teleportDelay 调成 0。
         if (tpNode.teleportDelay > 0f)
         {
-            yield return new WaitForSeconds(tpNode.teleportDelay);
+            yield return BossTime.Wait(ctx.controller, tpNode.teleportDelay);
         }
 
-        ExecuteTeleport(tpNode.targetType, snapshot);
+        ExecuteTeleport(tpNode, snapshot);
     }
 
     /// <summary>传送本身是瞬时的；需要收摊的是还在等前摇的受击传送 / 位移传送。</summary>
@@ -152,15 +144,18 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         if (node == null || moveRoutine != null) return false;
 
         // Intent Distance 先预检一次落点：现在就落不下的话别白等前摇
-        if (node.targetType == TeleportTargetType.IntentDistance &&
-            !TryPickIntentLanding(PlayerPos(null), intentDistance, out _))
+        if (node.targetType == TeleportTargetType.IntentDistance)
         {
-            if (debugTeleport)
-                Debug.Log($"[BAE_Teleporter] 位移传送 {node.actionName} 取消：意图距离 {intentDistance:F1} 两侧都落不下", this);
-            return false;
+            float d = PrecheckDistance(node, intentDistance);
+            if (!TryPickIntentLanding(PlayerPos(null), d, out _))
+            {
+                if (debugTeleport)
+                    Debug.Log($"[BAE_Teleporter] 位移传送 {node.actionName} 取消：离玩家 {d:F1} 格处两侧都落不下", this);
+                return false;
+            }
         }
 
-        moveRoutine = StartCoroutine(MovementTeleportRoutine(node, intentDistance, TakePlayerSnapshot()));
+        moveRoutine = StartCoroutine(MovementTeleportRoutine(node, intentDistance, TakePlayerSnapshot(node)));
         return true;
     }
 
@@ -174,13 +169,13 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
 
     private IEnumerator MovementTeleportRoutine(TeleportNode node, float intentDistance, Vector2? snapshot)
     {
-        if (node.teleportDelay > 0f) yield return new WaitForSeconds(node.teleportDelay);
+        if (node.teleportDelay > 0f) yield return BossTime.Wait(controller, node.teleportDelay);
         moveRoutine = null;
 
         if (bossState != null && bossState.health.isDead) yield break;
         if (controller != null && controller.IsStunned) yield break;
 
-        ExecuteTeleport(node.targetType, snapshot, intentDistance);
+        ExecuteTeleport(node, snapshot, intentDistance);
     }
 
     //---------------------------------------------------
@@ -256,9 +251,9 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
                 controller.InterruptCurrentAction($"受击传送 {node.actionName}");
 
             if (node.teleportDelay > 0f)
-                reactRoutine = StartCoroutine(ReactAfterDelay(node, TakePlayerSnapshot()));
+                reactRoutine = StartCoroutine(ReactAfterDelay(node, TakePlayerSnapshot(node)));
             else
-                ExecuteTeleport(node.targetType);
+                ExecuteTeleport(node);
 
             return; // 同一次挨打最多触发一张
         }
@@ -266,14 +261,14 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
 
     private IEnumerator ReactAfterDelay(TeleportNode node, Vector2? snapshot)
     {
-        yield return new WaitForSeconds(node.teleportDelay);
+        yield return BossTime.Wait(controller, node.teleportDelay);
         reactRoutine = null;
 
         // 前摇期间被打晕 / 被打死：不传了
         if (bossState != null && bossState.health.isDead) yield break;
         if (controller != null && controller.IsStunned) yield break;
 
-        ExecuteTeleport(node.targetType, snapshot);
+        ExecuteTeleport(node, snapshot);
     }
 
     private ReactRuntime GetRuntime(TeleportNode node)
@@ -306,26 +301,31 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         }
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-        if (hitReactions == null) return;
-        foreach (TeleportNode node in hitReactions)
-        {
-            if (node != null && !node.reactToHit)
-            {
-                Debug.LogWarning(
-                    $"[BAE_Teleporter] 「{node.name}」在 Hit Reactions 列表里，但卡上没勾 React To Hit，不会触发。", this);
-            }
-        }
-    }
-#endif
 
     // ==========================================================
     //  具体位移逻辑
+    /// <summary>没有传送卡时（例如二阶段转场传到中央）绕背 / 意图距离用的默认值，和 TeleportNode 的默认值一致</summary>
+    private const float DefaultBehindDistance = 3f;
+    private const bool DefaultMatchPlayerHeight = true;
+
+    /// <summary>按卡上的落点类型和落点参数传送</summary>
     /// <param name="playerSnapshot">发动时记下的玩家位置；为 null 则按此刻的玩家位置</param>
-    /// <param name="intentDistance">Intent Distance 落点用的距离；为 null 则问 AI 当前意图的理想距离</param>
+    /// <param name="intentDistance">意图距离落点的默认距离（卡上没填时用）；为 null 则问 AI 下一招的理想距离</param>
+    public void ExecuteTeleport(TeleportNode node, Vector2? playerSnapshot = null, float? intentDistance = null)
+    {
+        if (node == null) return;
+        Teleport(node.targetType, playerSnapshot, node.behindDistance, node.matchPlayerHeight,
+                 LandingDistance(node, intentDistance));
+    }
+
+    /// <summary>不经过传送卡、直接按类型传送（二阶段转场传到中央等）。绕背 / 意图距离用默认参数</summary>
     public void ExecuteTeleport(TeleportTargetType strategy, Vector2? playerSnapshot = null, float? intentDistance = null)
+    {
+        Teleport(strategy, playerSnapshot, DefaultBehindDistance, DefaultMatchPlayerHeight, intentDistance);
+    }
+
+    private void Teleport(TeleportTargetType strategy, Vector2? playerSnapshot,
+                          float behindDistance, bool matchHeight, float? landingDistance)
     {
         switch (strategy)
         {
@@ -333,16 +333,27 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
                 TeleportToRandomPoint();
                 break;
             case TeleportTargetType.BehindPlayer:
-                TeleportBehindPlayer(playerSnapshot);
+                TeleportBehindPlayer(playerSnapshot, behindDistance, matchHeight);
                 break;
             case TeleportTargetType.Center:
                 TeleportToCenter();
                 break;
             case TeleportTargetType.IntentDistance:
-                TeleportToIntentDistance(playerSnapshot, intentDistance);
+                TeleportToIntentDistance(playerSnapshot, landingDistance);
                 break;
         }
     }
+
+    /// <summary>
+    /// 意图距离落点的距离：卡上填了（≥ 0）就用卡上的；
+    /// 否则用调用方给的（位移卡池传入意图的理想距离）；都没有就返回 null，落点时再问 AI
+    /// </summary>
+    private static float? LandingDistance(TeleportNode node, float? intentDistance)
+        => node != null && node.landingDistance >= 0f ? node.landingDistance : intentDistance;
+
+    /// <summary>位移卡池预检落点用：卡上填了就用卡上的，否则用意图的理想距离</summary>
+    private static float PrecheckDistance(TeleportNode node, float intentDistance)
+        => node != null && node.landingDistance >= 0f ? node.landingDistance : intentDistance;
 
     /// <summary>
     /// 按意图距离落点：落在离玩家正好 distance 的位置（水平方向）。
@@ -357,7 +368,7 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         }
 
         float distance = intentDistance
-            ?? (controller != null && controller.AI != null ? controller.AI.GetOptimalEngagementDistance() : behindPlayerOffset);
+            ?? (controller != null && controller.AI != null ? controller.AI.GetOptimalEngagementDistance() : DefaultBehindDistance);
 
         Vector2 playerPos = PlayerPos(playerSnapshot);
         Vector2 from = transform.position;
@@ -436,7 +447,7 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
     /// 绕背传送：优先落在玩家「远离 Boss 的那一侧」；那里被地形或玩家挡住就换另一侧；
     /// 两侧都不行则这次不传（Boss 留在原地）。
     /// </summary>
-    private void TeleportBehindPlayer(Vector2? playerSnapshot)
+    private void TeleportBehindPlayer(Vector2? playerSnapshot, float distance, bool matchHeight)
     {
         if (playerTransform == null)
         {
@@ -449,10 +460,10 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
 
         // 玩家在 Boss 右边 → 优先传到玩家更右边；反之更左边
         float sign = playerPos.x > from.x ? 1f : -1f;
-        float targetY = matchPlayerHeight ? playerPos.y : from.y;
+        float targetY = matchHeight ? playerPos.y : from.y;
 
-        Vector2 behind = new Vector2(playerPos.x + sign * behindPlayerOffset, targetY);
-        Vector2 front  = new Vector2(playerPos.x - sign * behindPlayerOffset, targetY);
+        Vector2 behind = new Vector2(playerPos.x + sign * distance, targetY);
+        Vector2 front  = new Vector2(playerPos.x - sign * distance, targetY);
 
         gizmoCandidates.Clear();
         gizmoCandidateOk.Clear();
@@ -569,10 +580,10 @@ public class BAE_Teleporter : MonoBehaviour, IBossActionExecutor
         }
     }
 
-    /// <summary>勾了 snapshotPlayerPosition 时返回此刻玩家位置，否则返回 null</summary>
-    private Vector2? TakePlayerSnapshot()
+    /// <summary>卡上勾了 snapshotPlayerPosition 时返回此刻玩家位置，否则返回 null</summary>
+    private Vector2? TakePlayerSnapshot(TeleportNode node)
     {
-        if (!snapshotPlayerPosition || playerTransform == null) return null;
+        if (node == null || !node.snapshotPlayerPosition || playerTransform == null) return null;
         return playerTransform.position;
     }
 

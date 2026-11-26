@@ -37,7 +37,7 @@ public class SubclassSelectorDrawer : PropertyDrawer
             EditorGUIUtility.singleLineHeight);
 
         object current = property.managedReferenceValue;
-        string currentName = current == null ? "（未选择，点此选择弹幕类型）" : DisplayName(current.GetType());
+        string currentName = current == null ? "（未选择，点此选择类型）" : DisplayName(current.GetType());
 
         if (EditorGUI.DropdownButton(buttonRect, new GUIContent(currentName), FocusType.Keyboard))
             ShowMenu(property, current);
@@ -50,7 +50,11 @@ public class SubclassSelectorDrawer : PropertyDrawer
 
     private void ShowMenu(SerializedProperty property, object current)
     {
+        // 列表 / 数组里的元素：取元素类型（例：List<CinematicStep>）
         Type baseType = fieldInfo.FieldType;
+        if (baseType.IsArray) baseType = baseType.GetElementType();
+        else if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>))
+            baseType = baseType.GetGenericArguments()[0];
         var types = TypeCache.GetTypesDerivedFrom(baseType)
             .Where(t => !t.IsAbstract && !t.IsGenericType && t.GetConstructor(Type.EmptyTypes) != null)
             .OrderBy(t => DisplayName(t))
@@ -92,6 +96,8 @@ public class SubclassSelectorDrawer : PropertyDrawer
     private static string DisplayName(Type t)
     {
         var info = t.GetCustomAttribute<BulletPatternInfoAttribute>();
-        return info != null ? info.displayName : ObjectNames.NicifyVariableName(t.Name);
+        if (info != null) return info.displayName;
+        var named = t.GetCustomAttribute<SubclassNameAttribute>();
+        return named != null ? named.displayName : ObjectNames.NicifyVariableName(t.Name);
     }
 }

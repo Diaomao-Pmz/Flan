@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Boss 的决策大脑。
@@ -12,7 +13,7 @@ using UnityEngine;
 /// 按语义分桶而非按类型分桶，以后再加特殊技能只要丢进对应的桶，本文件一行都不用改。
 ///
 /// 【姿态倾向】合并卡池时保留每张牌来自哪个桶（远程 / 近战）。
-/// 抽卡权重 = 招式基础权重 × 当前姿态对该类别的倍率：
+/// 抽卡权重 = 招式基础权重 × 当前姿态对该类别的倍率（套路按它的「招式定位」Ranged / Melee / Mix 取倍率）：
 ///   护盾在 → 远程为主，用 rangedModeWeights
 ///   护盾碎 → 近战为主，用 meleeModeWeights
 ///
@@ -32,11 +33,20 @@ using UnityEngine;
 ///   · 兜底卡 → 不看射程直接出
 ///   · 套路 → 推进下一步；单招 → 出手前再校验射程和冷却，不通过就作废、回去重新定意图
 ///
-/// 【位移卡池】传送卡不再参与出招抽卡，而是"到位的手段"：
-/// 移动阶段开始时（以及撞墙时），MoveState 调 PickMovementTeleport() 问一句"要不要闪过去"。
+/// 【位移卡池】传送卡 / 冲刺卡不参与出招抽卡，而是"到位的手段"：
+/// 移动阶段开始时（以及撞墙时），MoveState 调 PickMovement() 问一句"要不要闪过去 / 冲过去"。
 ///   · Cornered（撞墙）：按列表顺序取第一张可用的 —— 保命用，要稳定
 ///   · TooFar / TooClose / Random：所有满足条件的放一起按权重抽一张，再按它的 Chance 决定闪还是走
 ///     （多选项随机 + 概率 + 冷却，玩家能感觉到规律，但骗不出固定反应）
+///
+/// 【弹幕在发时的规则表】弹幕卡可以「脱手」：剩下的弹幕交给发射器自己发完（弹幕层），Boss 身体去做下一步。
+/// 弹幕层里还有弹幕时，下一张卡（套路下一步 / 单招 / 兜底 / 位移卡池）按规则表决定能不能出：
+/// 不能出就【等弹幕发完】，等的时候照常走位、不算靠位超时；位移卡池里不能出的卡直接不考虑（改走路）。
+/// 类别按卡的类型判断，卡上的 whileBarrage 可以单独改成允许 / 禁止。
+///
+/// 【近身反应】放弹幕时（或脱手后跟随 Boss 的弹幕还在发、Boss 在走位时）玩家贴近，
+/// 从近身反应卡池里挑一张满足条件的反应招先出。每掷一次骰（不管掷没掷中）都进全局反应冷却。
+/// 走位中触发的反应招放进最优先的槽（QueueReaction），不动套路进度和单招意图。
 /// </summary>
 public class BossAIDecider : MonoBehaviour
 {
@@ -47,22 +57,37 @@ public class BossAIDecider : MonoBehaviour
         Melee     // Melees / SpecialMelees
     }
 
-    /// <summary>某个姿态下，两类招式的权重倍率</summary>
+    /// <summary>某个姿态下，各类招式的权重倍率（单招和套路都用）</summary>
     [System.Serializable]
     public class ModeWeights
     {
+        [Tooltip("远程单招（弹幕 / 特殊远程池）和定位为 Ranged 的套路")]
         [Min(0f)] public float ranged = 1f;
+        [Tooltip("近战单招（近战 / 特殊近战池）和定位为 Melee 的套路")]
         [Min(0f)] public float melee = 1f;
+        [Tooltip("定位为 Mix 的套路（单招没有 Mix，不受影响）")]
+        [Min(0f)] public float mix = 1f;
 
         public ModeWeights() { }
 
-        public ModeWeights(float ranged, float melee)
+        public ModeWeights(float ranged, float melee, float mix = 1f)
         {
             this.ranged = ranged;
             this.melee = melee;
+            this.mix = mix;
         }
 
         public float Get(SkillCategory c) => c == SkillCategory.Ranged ? ranged : melee;
+
+        public float Get(RoutineRole r)
+        {
+            switch (r)
+            {
+                case RoutineRole.Ranged: return ranged;
+                case RoutineRole.Melee:  return melee;
+                default:                 return mix;
+            }
+        }
     }
 
     /// <summary>位移卡什么情况下考虑使用</summary>
@@ -101,13 +126,14 @@ public class BossAIDecider : MonoBehaviour
         [Min(0)]
         public int weight = 100;
 
-        [Tooltip("抽中后真正传送的概率（0~1）。没闪就走路过去")]
+        [Tooltip("抽中后真正位移的概率（0~1）。没位移就走路过去")]
         [Range(0f, 1f)]
         public float chance = 1f;
 
-        [Tooltip("传送卡。冷却用卡上的 Cooldown（与受击传送、套路共用）。\n" +
-                 "Target Type 推荐 Intent Distance：落在离玩家正好是意图理想距离的位置")]
-        public TeleportNode action;
+        [Tooltip("位移卡：传送卡（TeleportNode）或冲刺卡（DashMoveNode），放别的卡不会生效。\n" +
+                 "冷却用卡上的 Cooldown（与受击传送、套路共用）。\n" +
+                 "传送卡推荐 Target Type = Intent Distance；冲刺卡推荐 To Distance、距离填 -1：都会到意图招式的理想距离")]
+        public ActionNode action;
     }
 
     /// <summary>
@@ -129,13 +155,10 @@ public class BossAIDecider : MonoBehaviour
         [Min(0.1f)]
         public float maxApproachTime = 4f;
 
-        [Tooltip("这个姿态下 Boss 的移动速度（格/秒）")]
-        [Min(0f)]
-        public float moveSpeed = 3f;
-
-        [Tooltip("进入二阶段后，上面的移动速度再乘这个倍率。1 = 不变")]
-        [Min(0f)]
-        public float phase2SpeedMultiplier = 1f;
+        [Tooltip("这个姿态下的移速倍率：实际移速 = Movement Config 的基础移速 × 这个倍率。\n" +
+                 "1 = 基础移速；1.2 = 快 20%；0 = 不走。（旧表里的 -1 当作 1）")]
+        [FormerlySerializedAs("moveSpeed")]
+        public float moveSpeedMultiplier = 1f;
 
         public CombatTempo() { }
 
@@ -151,11 +174,69 @@ public class BossAIDecider : MonoBehaviour
             => Random.Range(Mathf.Min(repositionTime.x, repositionTime.y), Mathf.Max(repositionTime.x, repositionTime.y));
     }
 
+    /// <summary>
+    /// 规则表：弹幕层里还有弹幕在发时，每一类卡能不能出。
+    /// 类别按卡的类型判断（不看放在哪个卡池）：
+    ///   BulletNode = 弹幕，MeleeNode = 近战，DashAttackNode = 特殊近战，LaserNode = 特殊远程，
+    ///   DashMoveNode = 冲刺，TeleportNode = 传送。别的类型一律允许
+    /// </summary>
+    [System.Serializable]
+    public class BarrageRuleTable
+    {
+        [Tooltip("弹幕卡（BulletNode）")]
+        public bool bullet = true;
+        [Tooltip("近战卡（MeleeNode）")]
+        public bool melee = true;
+        [Tooltip("特殊近战（DashAttackNode 突进斩）")]
+        public bool specialMelee = false;
+        [Tooltip("特殊远程（LaserNode 激光）")]
+        public bool specialRanged = false;
+        [Tooltip("冲刺卡（DashMoveNode）：套路步骤里的冲刺、位移卡池里的冲刺都算")]
+        public bool dash = true;
+        [Tooltip("传送卡（TeleportNode）：套路步骤里的传送、位移卡池里的传送都算。\n" +
+                 "（受击传送不归它管，由传送卡自己的设置决定）")]
+        public bool teleport = false;
+
+        public bool Allows(ActionNode node)
+        {
+            if (node is BulletNode) return bullet;
+            if (node is MeleeNode) return melee;
+            if (node is DashAttackNode) return specialMelee;
+            if (node is LaserNode) return specialRanged;
+            if (node is DashMoveNode) return dash;
+            if (node is TeleportNode) return teleport;
+            return true;
+        }
+    }
+
     private BossController boss;
 
     // ==========================================================
     //  Inspector：按语义分列表，仅为调试方便
     // ==========================================================
+
+    /// <summary>近身反应卡池里的一个条目</summary>
+    [System.Serializable]
+    public class ReactionEntry
+    {
+        [Tooltip("在哪个作战阶段能用：Mix = 都能用 / Ranged = 只在护盾在时 / Melee = 只在破盾后")]
+        public SkillPhaseTag phaseTag = SkillPhaseTag.Mix;
+
+        [Tooltip("满足这些条件才会反应（所有填了的条件都满足才算）：玩家距离、在 Boss 背后 / 面前、空中状态")]
+        public RoutineCondition condition = new RoutineCondition();
+
+        [Tooltip("多条同时满足条件时的抽取权重")]
+        [Min(0)]
+        public int weight = 100;
+
+        [Tooltip("抽中后真正反应的概率（0~1）。不管掷没掷中，都进全局反应冷却（Reaction Cooldown）")]
+        [Range(0f, 1f)]
+        public float chance = 1f;
+
+        [Tooltip("反应招：近战、突进斩等。它自己也必须够得着玩家、冷却好了、规则表允许（弹幕在发时）才会被选。\n" +
+                 "冷却用卡上的 Cooldown（和其他地方共用）。弹幕卡放这里不生效")]
+        public ActionNode action;
+    }
 
     /// <summary>
     /// 卡池里的一个条目 =「卡套」：阶段标签 + 招式卡。
@@ -190,56 +271,121 @@ public class BossAIDecider : MonoBehaviour
         public List<WeightModifier> weightModifiers = new List<WeightModifier>();
     }
 
-    [Header("--- 一阶段招式池（每个元素：阶段标签 + 招式）---")]
-    [SerializeField] private List<PoolEntry<BulletNode>> phase1Bullets = new List<PoolEntry<BulletNode>>();
-    [SerializeField] private List<PoolEntry<MeleeNode>> phase1Melees = new List<PoolEntry<MeleeNode>>();
+    [Header("--- 配置表 ---")]
+    [Tooltip("一阶段的 AI 配置表（单招池、套路池、位移卡池、近身反应池、兜底卡、规则表）。必填：留空会在 Console 报错，Boss 不出招")]
+    [FormerlySerializedAs("aiConfig")]
+    [SerializeField] private BossAIConfig phase1AIConfig;
 
-    [Tooltip("远程系特殊技能（激光等）。放任何 ActionNode 派生资产即可。")]
-    [SerializeField] private List<PoolEntry<ActionNode>> phase1SpecialBullets = new List<PoolEntry<ActionNode>>();
+    [Tooltip("二阶段的 AI 配置表。进入二阶段时换用这张。\n" +
+             "留空 = 二阶段沿用一阶段的表")]
+    [SerializeField] private BossAIConfig phase2AIConfig;
 
-    [Tooltip("近战系特殊技能（突进斩等）。放任何 ActionNode 派生资产即可。")]
-    [SerializeField] private List<PoolEntry<ActionNode>> phase1SpecialMelees = new List<PoolEntry<ActionNode>>();
+    [Tooltip("一阶段的战斗节奏、姿态倾向、动作倍率。必填：留空会在 Console 报错，先用默认数值")]
+    [FormerlySerializedAs("tempoConfig")]
+    [SerializeField] private BossTempoConfig phase1TempoConfig;
 
-    [Header("--- 二阶段招式池（每个元素：阶段标签 + 招式）---")]
-    [SerializeField] private List<PoolEntry<BulletNode>> phase2Bullets = new List<PoolEntry<BulletNode>>();
-    [SerializeField] private List<PoolEntry<MeleeNode>> phase2Melees = new List<PoolEntry<MeleeNode>>();
-    [SerializeField] private List<PoolEntry<ActionNode>> phase2SpecialBullets = new List<PoolEntry<ActionNode>>();
-    [SerializeField] private List<PoolEntry<ActionNode>> phase2SpecialMelees = new List<PoolEntry<ActionNode>>();
+    [Tooltip("二阶段的战斗节奏、姿态倾向、动作倍率。进入二阶段时换用这张。\n" +
+             "留空 = 二阶段沿用一阶段的表")]
+    [SerializeField] private BossTempoConfig phase2TempoConfig;
 
-    [Header("--- 套路池（每个元素：套路 + 情境加成）---")]
-    [Tooltip("一阶段可用的套路。会按套路自己的姿态 / 距离 / 玩家状态条件筛选")]
-    [SerializeField] private List<RoutineEntry> phase1Routines = new List<RoutineEntry>();
+    // ---- 生效中的配置（一阶段没拖表时用一张空表 / 默认表顶上，并报错）----
+    private BossAIConfig activeAI1;
+    private BossAIConfig activeAI2;
+    private BossTempoConfig activeTempo1;
+    private BossTempoConfig activeTempo2;
 
-    [Tooltip("二阶段可用的套路")]
-    [SerializeField] private List<RoutineEntry> phase2Routines = new List<RoutineEntry>();
+    /// <summary>一阶段生效的表。没拖 → 报错，用一张空表（招式池全空，Boss 不出招）</summary>
+    private BossAIConfig P1Conf
+    {
+        get
+        {
+            if (activeAI1 == null)
+            {
+                if (phase1AIConfig != null) activeAI1 = phase1AIConfig;
+                else
+                {
+                    activeAI1 = ScriptableObject.CreateInstance<BossAIConfig>();
+                    activeAI1.name = "AIConfig（未配置）";
+                    Debug.LogError("[BossAIDecider] 没有拖 Phase 1 AI Config！一阶段招式池为空，Boss 不会出招。", this);
+                }
+            }
+            return activeAI1;
+        }
+    }
 
-    [Tooltip("有合适套路时，仍有这个概率改出单招（节奏穿插，让 Boss 不那么好预判）。0 = 有套路就一定走套路")]
-    [Range(0f, 1f)]
-    [SerializeField] private float singleInterleaveChance = 0.2f;
+    /// <summary>二阶段生效的表：拖了二阶段表用它；没拖 → 沿用一阶段</summary>
+    private BossAIConfig P2Conf
+    {
+        get
+        {
+            if (activeAI2 == null) activeAI2 = phase2AIConfig != null ? phase2AIConfig : P1Conf;
+            return activeAI2;
+        }
+    }
 
-    [Header("--- 位移卡池（传送：到位的手段，不参与出招抽卡）---")]
-    [Tooltip("一阶段的位移卡")]
-    [SerializeField] private List<MovementEntry> phase1Movement = new List<MovementEntry>();
+    /// <summary>当前阶段生效的表</summary>
+    private BossAIConfig CurrentConf
+        => boss != null && boss.bossState != null && boss.bossState.bossMechanic.isPhase2 ? P2Conf : P1Conf;
 
-    [Tooltip("二阶段的位移卡")]
-    [SerializeField] private List<MovementEntry> phase2Movement = new List<MovementEntry>();
+    /// <summary>一阶段生效的节奏表。没拖 → 报错，用默认数值</summary>
+    private BossTempoConfig P1Tempo
+    {
+        get
+        {
+            if (activeTempo1 == null)
+            {
+                if (phase1TempoConfig != null) activeTempo1 = phase1TempoConfig;
+                else
+                {
+                    activeTempo1 = ScriptableObject.CreateInstance<BossTempoConfig>();
+                    activeTempo1.name = "TempoConfig（未配置，默认数值）";
+                    Debug.LogError("[BossAIDecider] 没有拖 Phase 1 Tempo Config！先用默认数值。", this);
+                }
+            }
+            return activeTempo1;
+        }
+    }
 
-    [Header("--- 姿态倾向（权重倍率）---")]
-    [Tooltip("护盾在（远程为主）时，两类招式的权重倍率。0 = 这一类完全不出")]
-    [SerializeField] private ModeWeights rangedModeWeights = new ModeWeights(3f, 1f);
+    /// <summary>二阶段生效的节奏表：拖了用它，没拖沿用一阶段</summary>
+    private BossTempoConfig P2Tempo
+    {
+        get
+        {
+            if (activeTempo2 == null) activeTempo2 = phase2TempoConfig != null ? phase2TempoConfig : P1Tempo;
+            return activeTempo2;
+        }
+    }
 
-    [Tooltip("护盾碎（近战为主）时，两类招式的权重倍率。0 = 这一类完全不出")]
-    [SerializeField] private ModeWeights meleeModeWeights = new ModeWeights(1f, 3f);
+    /// <summary>当前阶段生效的节奏表</summary>
+    private BossTempoConfig TempoConf
+        => boss != null && boss.bossState != null && boss.bossState.bossMechanic.isPhase2 ? P2Tempo : P1Tempo;
 
-    [Header("--- 战斗节奏（每个作战姿态一套）---")]
-    [Tooltip("远程为主（护盾在）时的节奏")]
-    [SerializeField] private CombatTempo rangedTempo = new CombatTempo(0.8f, 1.8f, true, 4f);
+    /// <summary>当前阶段的动作倍率（招式执行快慢）</summary>
+    public float ActionSpeed => Mathf.Max(0.05f, TempoConf.actionSpeed);
 
-    [Tooltip("近战为主（护盾碎）时的节奏")]
-    [SerializeField] private CombatTempo meleeTempo = new CombatTempo(0.2f, 0.5f, true, 4f);
-
-    [Tooltip("卡池全空或全在冷却时的兜底牌。强烈建议配一张，否则会出现状态抖动。")]
-    [SerializeField] private ActionNode fallbackNode;
+    private List<PoolEntry<BulletNode>> phase1Bullets => P1Conf.bullets;
+    private List<PoolEntry<MeleeNode>> phase1Melees => P1Conf.melees;
+    private List<PoolEntry<ActionNode>> phase1SpecialBullets => P1Conf.specialBullets;
+    private List<PoolEntry<ActionNode>> phase1SpecialMelees => P1Conf.specialMelees;
+    private List<PoolEntry<BulletNode>> phase2Bullets => P2Conf.bullets;
+    private List<PoolEntry<MeleeNode>> phase2Melees => P2Conf.melees;
+    private List<PoolEntry<ActionNode>> phase2SpecialBullets => P2Conf.specialBullets;
+    private List<PoolEntry<ActionNode>> phase2SpecialMelees => P2Conf.specialMelees;
+    private List<RoutineEntry> phase1Routines => P1Conf.routines;
+    private List<RoutineEntry> phase2Routines => P2Conf.routines;
+    private List<MovementEntry> phase1Movement => P1Conf.movement;
+    private List<MovementEntry> phase2Movement => P2Conf.movement;
+    private List<ReactionEntry> phase1Reactions => P1Conf.reactions;
+    private List<ReactionEntry> phase2Reactions => P2Conf.reactions;
+    // 下面四项跟着当前阶段的表走
+    private float singleInterleaveChance => CurrentConf.singleInterleaveChance;
+    private float reactionCooldown => CurrentConf.reactionCooldown;
+    private ActionNode fallbackNode => CurrentConf.fallbackNode;
+    private BarrageRuleTable barrageRules => CurrentConf.barrageRules;
+    private ModeWeights rangedModeWeights => TempoConf.rangedModeWeights;
+    private ModeWeights meleeModeWeights => TempoConf.meleeModeWeights;
+    private CombatTempo rangedTempo => TempoConf.rangedTempo;
+    private CombatTempo meleeTempo => TempoConf.meleeTempo;
 
     // ==========================================================
     //  运行时数据
@@ -248,6 +394,13 @@ public class BossAIDecider : MonoBehaviour
     private readonly List<ActionNode> currentPool = new List<ActionNode>();
     private List<MovementEntry> currentMovement = new List<MovementEntry>();
     private readonly List<MovementEntry> movementBuffer = new List<MovementEntry>(8);
+    private List<ReactionEntry> currentReactions = new List<ReactionEntry>();
+    private readonly List<ReactionEntry> reactionBuffer = new List<ReactionEntry>(8);
+    private float nextReactionTime;   // 全局反应冷却：到这一刻之前不反应
+    private ActionNode queuedReaction; // 走位中触发的反应招：下一次 SelectSkill 最先出它
+
+    /// <summary>刚选出的这一招是走位中触发的反应招（打完回移动状态，接着原来的流程）</summary>
+    public bool LastPickWasReaction { get; private set; }
     private readonly Dictionary<ActionNode, SkillPhaseTag> phaseTagOf
         = new Dictionary<ActionNode, SkillPhaseTag>();
     private readonly Dictionary<ActionNode, SkillCategory> categoryOf
@@ -275,6 +428,16 @@ public class BossAIDecider : MonoBehaviour
     private readonly Dictionary<BossRoutine, float> routineNextTime = new Dictionary<BossRoutine, float>();
     private BossRoutine activeRoutine;
     private int routineStep;
+
+    // ---- 套路的后续招式间隔（BossRoutine.restAfter）----
+    // 套路最后一步发出后先「挂起」，等这一招真正放完（NotifyActionEnded；脱手释放的话就是脱手那一刻）才开始计时；
+    // 计时期间不选新套路（单招、位移照常）
+    private float routineGateUntil = -1f;
+    private bool routineEndPending;
+    private float pendingRest;
+
+    /// <summary>此刻不能选新套路（某个套路刚打完、还在它的后续招式间隔里）</summary>
+    public bool RoutinesGated => Time.time < routineGateUntil;
 
     /// <summary>正在执行某个套路（还有后续步骤）</summary>
     public bool IsInRoutine => activeRoutine != null;
@@ -306,15 +469,16 @@ public class BossAIDecider : MonoBehaviour
         => (CurrentMode == BossCombatMode.Ranged ? rangedTempo : meleeTempo) ?? new CombatTempo();
 
     /// <summary>
-    /// 当前实际移动速度 = 当前姿态的移动速度 × （二阶段 ? 该姿态的二阶段倍率 : 1）
+    /// 当前实际移动速度 = 基础移速 × 当前阶段节奏表里当前姿态的移速倍率（倍率为负 = 旧表的 -1，当作 1）
     /// </summary>
     public float CurrentMoveSpeed
     {
         get
         {
             CombatTempo t = CurrentTempo;
-            bool phase2 = boss != null && boss.bossState != null && boss.bossState.bossMechanic.isPhase2;
-            return t.moveSpeed * (phase2 ? t.phase2SpeedMultiplier : 1f);
+            float baseSpeed = boss != null ? boss.BaseMoveSpeed : 3f;
+            float multiplier = t.moveSpeedMultiplier >= 0f ? t.moveSpeedMultiplier : 1f;
+            return baseSpeed * multiplier;
         }
     }
 
@@ -326,6 +490,28 @@ public class BossAIDecider : MonoBehaviour
         RebuildPool(false);
     }
 
+    /// <summary>
+    /// 演出结束时调用：演出期间（从 startTime 起）还没到点的招式 / 套路 / 反应冷却、套路后续间隔都往后顺延 duration 秒，
+    /// 相当于演出期间时间停了
+    /// </summary>
+    public void ShiftTimers(float startTime, float duration)
+    {
+        if (duration <= 0f) return;
+
+        ShiftAfter(nextAvailableTime, startTime, duration);
+        ShiftAfter(routineNextTime, startTime, duration);
+        if (nextReactionTime > startTime) nextReactionTime += duration;
+        if (routineGateUntil > startTime && !float.IsInfinity(routineGateUntil)) routineGateUntil += duration;
+    }
+
+    private static void ShiftAfter<T>(Dictionary<T, float> table, float startTime, float duration)
+    {
+        if (table.Count == 0) return;
+        List<T> keys = new List<T>(table.Keys);
+        foreach (T key in keys)
+            if (table[key] > startTime) table[key] += duration;
+    }
+
     public void SwitchToPhase2()
     {
         Debug.Log("[BossAIDecider] 切换到二阶段招式池！");
@@ -333,6 +519,7 @@ public class BossAIDecider : MonoBehaviour
         RebuildPool(true);
         nextAvailableTime.Clear(); // 转阶段重置所有冷却
         routineNextTime.Clear();
+        nextReactionTime = 0f;
     }
 
     /// <summary>护盾状态变了（破盾 / 回盾）→ 姿态切换，旧姿态下预约的意图作废</summary>
@@ -385,6 +572,7 @@ public class BossAIDecider : MonoBehaviour
         modifiersOf.Clear();
         routineModifiersOf.Clear();
         currentMovement = (phase2 ? phase2Movement : phase1Movement) ?? new List<MovementEntry>();
+        currentReactions = (phase2 ? phase2Reactions : phase1Reactions) ?? new List<ReactionEntry>();
 
         currentRoutines.Clear();
         List<RoutineEntry> routines = phase2 ? phase2Routines : phase1Routines;
@@ -479,7 +667,8 @@ public class BossAIDecider : MonoBehaviour
         {
             // 以套路下一步【实际会出的招】（含候补）的理想距离为目标，和单招意图一致。
             // 旧写法在"下一步已经够得着"时返回当前距离 —— Boss 会以为自己到位了，一步都不走。
-            PeekRoutine(dist, out ActionNode blocking, out ActionNode next);
+            // 被弹幕拦住的那一步也朝它的理想距离走（边等边站位）
+            PeekRoutine(dist, out ActionNode blocking, out ActionNode next, out _);
             ActionNode target = blocking ?? next;
             if (target != null) return PreferredDistance(target);
             return dist;
@@ -491,9 +680,13 @@ public class BossAIDecider : MonoBehaviour
 
     /// <summary>
     /// 卡的理想距离：填了 preferredDistance 就用它（夹在射程内），否则取射程中点。
+    /// 位移卡（传送 / 冲刺）没填时原地不动：它们射程一般填得很宽（0~99），取中点会让 Boss 先往远处走一大段。
     /// </summary>
     private float PreferredDistance(ActionNode node)
     {
+        if (node.preferredDistance < 0f && (node is TeleportNode || node is DashMoveNode))
+            return boss != null ? boss.DistanceToPlayer : 5f;
+
         if (node.preferredDistance >= 0f)
             return Mathf.Clamp(node.preferredDistance, node.minCastDistance, node.MaxCastDistance);
         return MidRange(node);
@@ -524,7 +717,7 @@ public class BossAIDecider : MonoBehaviour
         float dist = boss.DistanceToPlayer;
 
         // ---- 1. 选新套路 ----
-        if (currentRoutines.Count > 0 && Random.value >= singleInterleaveChance)
+        if (currentRoutines.Count > 0 && !RoutinesGated && Random.value >= singleInterleaveChance)
         {
             BossRoutine routine = DrawRoutine(dist);
             if (routine != null)
@@ -554,19 +747,66 @@ public class BossAIDecider : MonoBehaviour
 
     /// <summary>
     /// 意图现在能不能出手了：在射程内（套路则是"下一步能直接出"），
-    /// 或者有兜底卡要出。
+    /// 或者有兜底卡要出。被弹幕在发时的规则表拦住的不算能出（等弹幕发完）。
     /// </summary>
     public bool IsIntentReady
     {
         get
         {
             if (boss == null) return false;
-            if (forcedNode != null) return true;
+            if (forcedNode != null) return !IsBlockedByBarrage(forcedNode);
 
             float dist = boss.DistanceToPlayer;
-            if (activeRoutine != null) return PeekRoutine(dist, out _, out _);
+            if (activeRoutine != null) return PeekRoutine(dist, out _, out _, out _);
 
-            return PendingNode != null && IsInRange(PendingNode, dist) && IsOffCooldown(PendingNode);
+            return PendingNode != null && IsInRange(PendingNode, dist) && IsOffCooldown(PendingNode)
+                   && !IsBlockedByBarrage(PendingNode);
+        }
+    }
+
+    /// <summary>
+    /// 意图够得着、只是被规则表拦住，在等弹幕发完。MoveState 据此暂停靠位超时计时
+    /// </summary>
+    public bool IsWaitingForBarrage
+    {
+        get
+        {
+            if (boss == null || !BarrageActive) return false;
+            if (forcedNode != null) return IsBlockedByBarrage(forcedNode);
+
+            float dist = boss.DistanceToPlayer;
+            if (activeRoutine != null)
+            {
+                PeekRoutine(dist, out _, out _, out bool waiting);
+                return waiting;
+            }
+
+            return PendingNode != null && IsInRange(PendingNode, dist) && IsBlockedByBarrage(PendingNode);
+        }
+    }
+
+    /// <summary>弹幕层里有没有弹幕在发（已经脱手、不占 Boss 身体的弹幕）</summary>
+    public bool BarrageActive
+        => boss != null && boss.BulletEmitter != null && boss.BulletEmitter.HasReleasedBarrage;
+
+    /// <summary>
+    /// 这张卡此刻被「弹幕在发时」的规则拦住了吗。
+    /// 弹幕层没有弹幕 → 不拦；卡上选了允许 / 禁止 → 按卡；否则按规则表里这一类的设置
+    /// </summary>
+    public bool IsBlockedByBarrage(ActionNode node)
+    {
+        if (node == null || !BarrageActive) return false;
+        return !AllowedWhileBarrage(node);
+    }
+
+    /// <summary>弹幕层里有弹幕在发的话，这张卡能不能出（卡上选了允许 / 禁止就按卡，否则按规则表）</summary>
+    private bool AllowedWhileBarrage(ActionNode node)
+    {
+        switch (node.whileBarrage)
+        {
+            case BarrageRule.Allow:  return true;
+            case BarrageRule.Forbid: return false;
+            default:                 return barrageRules == null || barrageRules.Allows(node);
         }
     }
 
@@ -582,7 +822,8 @@ public class BossAIDecider : MonoBehaviour
         ClearIntent("靠位超时");
 
         float dist = boss.DistanceToPlayer;
-        ActionNode inRange = DrawFromPool(node => IsInRange(node, dist) && IsOffCooldown(node) && IsAllowedInMode(node));
+        ActionNode inRange = DrawFromPool(node => IsInRange(node, dist) && IsOffCooldown(node) && IsAllowedInMode(node)
+                                                  && !IsBlockedByBarrage(node));
         if (inRange != null)
         {
             PendingNode = inRange;
@@ -599,6 +840,7 @@ public class BossAIDecider : MonoBehaviour
         AbortRoutine(reason);
         ClearPending();
         forcedNode = null;
+        queuedReaction = null;
     }
 
     /// <summary>当前意图的名字，供调试文字显示</summary>
@@ -629,11 +871,24 @@ public class BossAIDecider : MonoBehaviour
         float dist = boss.DistanceToPlayer;
         NextActionDelay = 0f;
         LastPickRoutineName = null;
+        LastPickWasReaction = false;
         issuedStep = null;
 
-        // ---- 1. 兜底卡：不看射程直接出 ----
+        // ---- 0. 走位中触发的近身反应：最先出，不动套路进度和单招意图 ----
+        if (queuedReaction != null)
+        {
+            ActionNode reaction = queuedReaction;
+            queuedReaction = null;
+            LastPickRoutineName = "近身反应";
+            LastPickWasReaction = true;
+            return reaction; // 挑的时候已经记过冷却
+        }
+
+        // ---- 1. 兜底卡：不看射程直接出（被弹幕拦住就保留着，等弹幕发完）----
         if (forcedNode != null)
         {
+            if (IsBlockedByBarrage(forcedNode)) return null;
+
             ActionNode node = forcedNode;
             forcedNode = null;
             return Commit(node);
@@ -651,6 +906,10 @@ public class BossAIDecider : MonoBehaviour
         if (PendingNode != null)
         {
             ActionNode node = PendingNode;
+
+            // 够得着但被弹幕拦住：意图保留，回移动状态边走位边等
+            if (IsInRange(node, dist) && IsBlockedByBarrage(node)) return null;
+
             ClearPending();
 
             if (IsInRange(node, dist) && IsOffCooldown(node) && IsAllowedInMode(node))
@@ -665,13 +924,15 @@ public class BossAIDecider : MonoBehaviour
     /// <summary>
     /// 看一眼套路接下来能不能直接出招（不改动任何状态）。
     /// </summary>
-    /// <param name="blocking">挡路的那一步（够不着且要求靠位）的默认招式；能直接出时为 null</param>
+    /// <param name="blocking">挡路的那一步：够不着且要求靠位时是它的默认招式，被弹幕拦住时是实际要出的招；能直接出时为 null</param>
     /// <param name="next">下一步此刻能直接出的招（已算上候补）；没有时为 null</param>
+    /// <param name="waitingForBarrage">挡路的原因是被弹幕在发时的规则拦住（够得着，在等弹幕发完）</param>
     /// <returns>true = 下一次 SelectSkill 会出招（或套路会立刻结束 / 作废）</returns>
-    private bool PeekRoutine(float dist, out ActionNode blocking, out ActionNode next)
+    private bool PeekRoutine(float dist, out ActionNode blocking, out ActionNode next, out bool waitingForBarrage)
     {
         blocking = null;
         next = null;
+        waitingForBarrage = false;
         if (activeRoutine == null) return true;
 
         for (int i = routineStep; i < activeRoutine.steps.Count; i++)
@@ -683,6 +944,13 @@ public class BossAIDecider : MonoBehaviour
             ActionNode chosen = v != null ? v.action : step.action;
             if (IsInRange(chosen, dist))
             {
+                if (IsBlockedByBarrage(chosen))
+                {
+                    blocking = chosen;
+                    waitingForBarrage = true;
+                    return false;
+                }
+
                 next = chosen;
                 return true;
             }
@@ -732,7 +1000,7 @@ public class BossAIDecider : MonoBehaviour
     /// <summary>
     /// 推进当前套路：找到下一个能出的步骤。
     ///   Node    = 返回了一招，马上出
-    ///   Waiting = 下一步够不着，已预约靠位
+    ///   Waiting = 下一步够不着，已预约靠位；或者够得着但被弹幕拦住，在等弹幕发完
     ///   Done    = 套路结束或作废
     /// </summary>
     private StepResult AdvanceRoutine(float dist, out ActionNode node)
@@ -754,6 +1022,13 @@ public class BossAIDecider : MonoBehaviour
 
             if (IsInRange(chosen, dist))
             {
+                // 被弹幕在发时的规则拦住：不跳过、不作废，回移动状态边走位边等弹幕发完
+                if (IsBlockedByBarrage(chosen))
+                {
+                    PendingNode = chosen;
+                    return StepResult.Waiting;
+                }
+
                 ClearPending();
                 NextActionDelay = step.delayBefore;
                 LastPickRoutineName = activeRoutine.DisplayName;
@@ -765,6 +1040,7 @@ public class BossAIDecider : MonoBehaviour
                     insertedStepIndex = routineStep;
                     issuedStep = null; // 插入的招不参与停顿后的换招
                     node = Commit(chosen);
+                    if (variant.endRoutineAfter) EndRoutineAfterVariant(chosen);
                     return StepResult.Node;
                 }
 
@@ -777,10 +1053,19 @@ public class BossAIDecider : MonoBehaviour
                 issuedStep = step;
                 node = Commit(chosen);
 
+                // 候补勾了「出完结束套路」→ 套路到此结束（算打完），后面的步骤都不出
+                if (variant != null && variant.endRoutineAfter)
+                {
+                    issuedStep = null; // 套路已经收尾：停顿后不再换回默认招式
+                    EndRoutineAfterVariant(chosen);
+                    return StepResult.Node;
+                }
+
                 // 这是最后一步 → 套路到此结束，打完这招后正常回移动状态
                 if (routineStep >= activeRoutine.steps.Count)
                 {
                     Debug.Log($"[AI] 套路 {activeRoutine.DisplayName} 完成");
+                    BeginRoutineRest(activeRoutine, waitForActionEnd: true);
                     activeRoutine = null;
                     routineStep = 0;
                 }
@@ -807,12 +1092,26 @@ public class BossAIDecider : MonoBehaviour
         if (activeRoutine != null)
         {
             Debug.Log($"[AI] 套路 {activeRoutine.DisplayName} 完成");
+            BeginRoutineRest(activeRoutine, waitForActionEnd: false); // 后面的步骤都跳过了：现在就算打完
             activeRoutine = null;
             routineStep = 0;
         }
         insertedStepIndex = -1;
         ClearPending();
         return StepResult.Done;
+    }
+
+    /// <summary>
+    /// 候补勾了「出完结束套路」：像打完最后一步一样收尾（等这一招放完再开始后续招式间隔），后面的步骤都不出
+    /// </summary>
+    private void EndRoutineAfterVariant(ActionNode chosen)
+    {
+        if (activeRoutine == null) return;
+        Debug.Log($"[AI] 套路 {activeRoutine.DisplayName} 由候补「{chosen.actionName}」结束（出完这招就算打完）");
+        BeginRoutineRest(activeRoutine, waitForActionEnd: true);
+        activeRoutine = null;
+        routineStep = 0;
+        insertedStepIndex = -1;
     }
 
     /// <summary>
@@ -857,7 +1156,207 @@ public class BossAIDecider : MonoBehaviour
 
         Debug.Log($"[AI] 停顿期间玩家走位变化，换招：{current.actionName} → {chosen.actionName}");
         StampCooldown(chosen);
+
+        // 换成的候补勾了「出完结束套路」→ 套路在这里收尾（这一步是最后一步时套路已经收过尾，不重复）
+        if (v != null && v.endRoutineAfter)
+        {
+            issuedStep = null;
+            EndRoutineAfterVariant(chosen);
+        }
         return chosen;
+    }
+
+    /// <summary>套路打完：开始（或挂起等这一招放完再开始）它的后续招式间隔</summary>
+    private void BeginRoutineRest(BossRoutine routine, bool waitForActionEnd)
+    {
+        float rest = routine != null ? routine.restAfter : 0f;
+        if (rest <= 0f) return;
+
+        if (waitForActionEnd)
+        {
+            routineEndPending = true;
+            pendingRest = rest;
+            routineGateUntil = float.PositiveInfinity; // 最后一招还在放：先挂起
+        }
+        else
+        {
+            routineGateUntil = Time.time + rest;
+            Debug.Log($"[AI] 套路 {routine.DisplayName} 后续间隔 {rest:F1} 秒：期间不选新套路");
+        }
+    }
+
+    /// <summary>
+    /// 一招放完（或被打断）时由出招状态调用。
+    /// 刚放完的是套路的最后一招 → 从现在开始它的后续招式间隔；被打断 → 不算打完，不触发间隔
+    /// </summary>
+    public void NotifyActionEnded(bool completed)
+    {
+        if (!routineEndPending) return;
+        routineEndPending = false;
+
+        if (!completed)
+        {
+            routineGateUntil = -1f;
+            return;
+        }
+
+        routineGateUntil = Time.time + pendingRest;
+        Debug.Log($"[AI] 套路后续间隔 {pendingRest:F1} 秒：期间不选新套路");
+    }
+
+    /// <summary>
+    /// 刚选出的这一招要不要脱手释放，用哪份参数。只有弹幕卡能脱手。
+    /// 套路步骤选了不脱手 / 脱手就按步骤；否则（跟随弹幕卡 / 单招 / 插入的候补）按弹幕卡上的。
+    /// 调用时机同 ResolveFireMove
+    /// </summary>
+    public bool ResolveRelease(ActionNode node, out ReleaseSettings settings)
+    {
+        settings = null;
+        if (!(node is BulletNode bullet)) return false;
+
+        if (issuedStep != null)
+        {
+            switch (issuedStep.releaseMode)
+            {
+                case StepReleaseMode.NoRelease:
+                    return false;
+                case StepReleaseMode.Release:
+                    settings = issuedStep.release;
+                    return settings != null;
+            }
+        }
+
+        if (!bullet.allowRelease) return false;
+        settings = bullet.release;
+        return settings != null;
+    }
+
+    /// <summary>
+    /// 刚选出的这张弹幕转到弹幕层后（脱手 / 近身反应托管）跟不跟随 Boss。
+    /// 套路步骤选了 Release 就按步骤上的勾选；否则（跟随弹幕卡 / 不脱手 / 单招 / 插入的候补）按弹幕卡上的。
+    /// 调用时机同 ResolveRelease
+    /// </summary>
+    public bool ResolveFollowBoss(ActionNode node)
+    {
+        if (!(node is BulletNode bullet)) return true;
+        if (issuedStep != null && issuedStep.releaseMode == StepReleaseMode.Release)
+            return issuedStep.followBossWhenReleased;
+        return bullet.followBossWhenReleased;
+    }
+
+    /// <summary>
+    /// 刚选出的这一招允不允许近身反应、反应后取不取回。只有弹幕卡有。
+    /// 套路步骤选了 Off / On 就按步骤；否则（跟随弹幕卡 / 单招 / 插入的候补）按弹幕卡上的。调用时机同 ResolveFireMove
+    /// </summary>
+    public bool ResolveReaction(ActionNode node, out bool reclaim)
+    {
+        reclaim = false;
+        if (!(node is BulletNode bullet)) return false;
+
+        if (issuedStep != null)
+        {
+            switch (issuedStep.reactionMode)
+            {
+                case StepReactionMode.Off:
+                    return false;
+                case StepReactionMode.On:
+                    reclaim = issuedStep.reclaimAfterReaction;
+                    return true;
+            }
+        }
+
+        if (!bullet.allowCloseReaction) return false;
+        reclaim = bullet.reclaimAfterReaction;
+        return true;
+    }
+
+    // ==========================================================
+    //  近身反应（CombatState / MoveState 调用）
+    // ==========================================================
+
+    /// <summary>
+    /// 玩家贴近了吗？从近身反应卡池里挑一张此刻能出的反应招。null = 不反应。
+    /// 能出 = 阶段标签允许、条件满足、够得着、冷却好了、规则表允许（反应时弹幕层里一定有弹幕在发）。
+    /// 有能出的就按权重挑一张、按它的概率掷骰：不管掷没掷中都进全局反应冷却；掷中就记这张卡的冷却并返回它。
+    /// 调用方负责先确认「现在有允许近身反应的弹幕」
+    /// </summary>
+    public ActionNode TryPickReaction()
+    {
+        if (boss == null || currentReactions == null || currentReactions.Count == 0) return null;
+        if (Time.time < nextReactionTime) return null;
+
+        float dist = boss.DistanceToPlayer;
+        BossContext ctx = boss.Context;
+
+        reactionBuffer.Clear();
+        int total = 0;
+        for (int i = 0; i < currentReactions.Count; i++)
+        {
+            ReactionEntry e = currentReactions[i];
+            if (e == null || e.action == null || e.weight <= 0 || e.condition == null) continue;
+            if (e.action is BulletNode) continue; // 弹幕卡不能当反应招
+            if (!IsPhaseTagAllowed(e.phaseTag)) continue;
+            if (!IsInRange(e.action, dist) || !IsOffCooldown(e.action)) continue;
+            if (!AllowedWhileBarrage(e.action)) continue;
+            if (!e.condition.Evaluate(ctx, dist)) continue;
+
+            reactionBuffer.Add(e);
+            total += e.weight;
+        }
+
+        if (reactionBuffer.Count == 0) return null;
+
+        int roll = Random.Range(0, total);
+        ReactionEntry pick = reactionBuffer[reactionBuffer.Count - 1];
+        int acc = 0;
+        for (int i = 0; i < reactionBuffer.Count; i++)
+        {
+            acc += reactionBuffer[i].weight;
+            if (roll < acc) { pick = reactionBuffer[i]; break; }
+        }
+
+        nextReactionTime = Time.time + Mathf.Max(0f, reactionCooldown);
+
+        if (Random.value >= pick.chance)
+        {
+            Debug.Log($"[AI] 近身反应没掷中（{pick.action.actionName}，概率 {pick.chance:F2}），{reactionCooldown:F1} 秒后再看");
+            return null;
+        }
+
+        Debug.Log($"[AI] 近身反应：{pick.action.actionName}（距离 {dist:F1}）");
+        return Commit(pick.action);
+    }
+
+    /// <summary>走位中触发的反应招：放进最优先的槽，下一次 SelectSkill 最先出它</summary>
+    public void QueueReaction(ActionNode reaction) => queuedReaction = reaction;
+
+    /// <summary>
+    /// 刚选出的这一招开火时怎么移动。只有弹幕卡会动，别的卡一律站定。
+    /// 套路步骤选了自己的方式就用步骤上的，否则（跟随弹幕卡 / 单招 / 插入的候补）用弹幕卡上的。
+    /// 要在 SelectSkill（以及停顿后的 RefreshStepChoice）之后、下一次 SelectSkill 之前调用。
+    /// </summary>
+    public FireMoveMode ResolveFireMove(ActionNode node, out FireMoveSettings settings)
+    {
+        settings = null;
+        if (!(node is BulletNode bullet)) return FireMoveMode.StandStill;
+
+        if (issuedStep != null)
+        {
+            switch (issuedStep.fireMoveMode)
+            {
+                case StepFireMoveMode.StandStill:
+                    return FireMoveMode.StandStill;
+                case StepFireMoveMode.KeepDistance:
+                    settings = issuedStep.fireMove;
+                    return FireMoveMode.KeepDistance;
+                case StepFireMoveMode.MoveThenHold:
+                    settings = issuedStep.fireMove;
+                    return FireMoveMode.MoveThenHold;
+            }
+        }
+
+        settings = bullet.fireMove;
+        return bullet.fireMoveMode;
     }
 
     /// <summary>从当前套路池里按权重挑一个条件满足的套路</summary>
@@ -868,6 +1367,7 @@ public class BossAIDecider : MonoBehaviour
         float total = 0f;
         BossCombatMode mode = CurrentMode;
         BossContext ctx = boss.Context;
+        ModeWeights modeWeights = mode == BossCombatMode.Ranged ? rangedModeWeights : meleeModeWeights;
 
         for (int i = 0; i < currentRoutines.Count; i++)
         {
@@ -881,9 +1381,9 @@ public class BossAIDecider : MonoBehaviour
             if (dist < r.minPlayerDistance || dist > r.maxPlayerDistance) continue;
             if (!PlayerConditionMet(r.playerAirCondition)) continue;
 
-            // 情境加成
-            float w = r.baseWeight;
-            if (routineModifiersOf.TryGetValue(r, out List<WeightModifier> mods))
+            // 姿态倾向（按套路的招式定位取倍率）× 情境加成
+            float w = r.baseWeight * (modeWeights != null ? modeWeights.Get(r.role) : 1f);
+            if (w > 0f && routineModifiersOf.TryGetValue(r, out List<WeightModifier> mods))
                 w *= WeightModifier.Factor(mods, ctx, dist);
             if (w <= 0f) continue;
 
@@ -957,15 +1457,16 @@ public class BossAIDecider : MonoBehaviour
     // ==========================================================
 
     /// <summary>
-    /// 问一句"这次要不要闪过去"。返回要用的传送卡；null = 走路。
-    /// 只做选择、不记冷却 —— 传送真正发动后由调用方 StampCooldown。
+    /// 问一句"这次要不要闪过去 / 冲过去"。返回要用的位移卡（传送卡或冲刺卡）；null = 走路。
+    /// 只做选择、不记冷却 —— 位移真正发动后由调用方 StampCooldown。
     /// </summary>
     /// <param name="cornered">true = 撞墙了，只看 Cornered 条目（按列表顺序）；
     /// false = 移动阶段开始，看 TooFar / TooClose / Random（按权重抽）</param>
     /// <summary>最近一次选中的位移卡，形如"BehindPlayer（TooFar）"。供移动意图文字显示</summary>
     public string LastMovementPickLabel { get; private set; }
 
-    public TeleportNode PickMovementTeleport(bool cornered)
+    /// <param name="dashOnly">true = 只看冲刺卡（弹幕脱手后、出下一招前的走位允许冲刺时用）</param>
+    public ActionNode PickMovement(bool cornered, bool dashOnly = false)
     {
         if (boss == null || currentMovement == null || currentMovement.Count == 0) return null;
 
@@ -974,7 +1475,7 @@ public class BossAIDecider : MonoBehaviour
             for (int i = 0; i < currentMovement.Count; i++)
             {
                 MovementEntry e = currentMovement[i];
-                if (!IsMovementUsable(e) || e.trigger != MoveTrigger.Cornered) continue;
+                if (!IsMovementUsable(e, dashOnly) || e.trigger != MoveTrigger.Cornered) continue;
                 if (Random.value >= e.chance) continue;
 
                 Debug.Log($"[AI] 撞墙，位移：{e.action.actionName}");
@@ -992,7 +1493,7 @@ public class BossAIDecider : MonoBehaviour
         for (int i = 0; i < currentMovement.Count; i++)
         {
             MovementEntry e = currentMovement[i];
-            if (!IsMovementUsable(e) || e.weight <= 0) continue;
+            if (!IsMovementUsable(e, dashOnly) || e.weight <= 0) continue;
 
             bool match;
             switch (e.trigger)
@@ -1026,13 +1527,21 @@ public class BossAIDecider : MonoBehaviour
         return pick.action;
     }
 
-    /// <summary>条目可用：配了卡、阶段标签允许、不在冷却</summary>
-    private bool IsMovementUsable(MovementEntry e)
+    /// <summary>条目可用：配了传送卡或冲刺卡、阶段标签允许、不在冷却、没被弹幕在发时的规则拦住</summary>
+    private bool IsMovementUsable(MovementEntry e, bool dashOnly = false)
     {
         if (e == null || e.action == null) return false;
+        if (!(e.action is TeleportNode) && !(e.action is DashMoveNode)) return false;
+        if (dashOnly && !(e.action is DashMoveNode)) return false;
         if (!IsOffCooldown(e.action)) return false;
+        if (IsBlockedByBarrage(e.action)) return false;
+        return IsPhaseTagAllowed(e.phaseTag);
+    }
 
-        switch (e.phaseTag)
+    /// <summary>卡池条目的阶段标签是否允许在当前姿态使用</summary>
+    private bool IsPhaseTagAllowed(SkillPhaseTag tag)
+    {
+        switch (tag)
         {
             case SkillPhaseTag.Ranged: return CurrentMode == BossCombatMode.Ranged;
             case SkillPhaseTag.Melee:  return CurrentMode == BossCombatMode.Melee;

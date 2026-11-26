@@ -277,5 +277,8 @@ namespace Flandre.CombatSystem
 
         /// <summary>飞行中按 Ctrl：限时不可选中</summary>
         public static readonly object FlightSlide = new object();
+
+        /// <summary>Boss 演出期间（演出卡开了 Player Invulnerable）</summary>
+        public static readonly object Cinematic = new object();
     }
 }

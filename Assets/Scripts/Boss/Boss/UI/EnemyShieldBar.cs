@@ -34,7 +34,7 @@ public class EnemyShieldBar : MonoBehaviour
     void Update()
     {
         if (!showRecoverProgress || bossState == null || shieldFillImage == null) return;
-        if (!bossState.bossMechanic.isShieldBroken) return;
+        if (!bossState.bossMechanic.isShieldBroken || !bossState.bossMechanic.HasShield) return;
 
         shieldFillImage.fillAmount = bossState.bossMechanic.ShieldRecoverProgress;
     }
@@ -45,7 +45,9 @@ public class EnemyShieldBar : MonoBehaviour
         if (bossState == null || shieldFillImage == null) return;
 
         // 计算百分比并更新进度条 (你的这句代码写得非常标准！)
-        float percent = (float)bossState.bossMechanic.shieldCurrentHP / bossState.bossMechanic.shieldMaxHP;
+        // 没护盾的 Boss（护盾上限 = 0）显示空条，避免除以 0
+        int max = bossState.bossMechanic.shieldMaxHP;
+        float percent = max > 0 ? (float)bossState.bossMechanic.shieldCurrentHP / max : 0f;
         shieldFillImage.fillAmount = percent;
     }
 }

@@ -57,6 +57,9 @@ public class Player_Projectile : MonoBehaviour, IPoolable
     private Rigidbody2D rb;
     private Collider2D body;
 
+    // 这一发扣多少护盾。-1 = 没填，由受击方按默认值扣（招式填了子弹总破盾值时由发射器写入，回池时还原）
+    private int shieldDamage = -1;
+
     // 【消弹】这一发会擦掉碰到的 Boss 子弹（招式勾了「子弹」消弹时由发射器写入，回池时清掉）
     private bool cancelsBullets;
 
@@ -119,6 +122,12 @@ public class Player_Projectile : MonoBehaviour, IPoolable
         damage = Mathf.Max(0, value);
     }
 
+    /// <summary>设定这一发扣多少护盾（-1 = 没填，0 = 不扣盾）。回池时还原成 -1</summary>
+    public void SetShieldDamage(int value)
+    {
+        shieldDamage = Mathf.Max(-1, value);
+    }
+
     /// <summary>这一发要不要擦掉碰到的 Boss 子弹。回池时自动清掉</summary>
     public void SetCancelsBullets(bool on)
     {
@@ -168,7 +177,8 @@ public class Player_Projectile : MonoBehaviour, IPoolable
         if (enemy != null)
         {
             enemy.TakeDamage(new DamageInfo(
-                damage, DamageType.Ranged, transform.position, gameObject));
+                damage, DamageType.Ranged, transform.position, gameObject,
+                shieldDamage: shieldDamage));
 
             if (recycleOnHit) Recycle();
             return;
@@ -211,6 +221,7 @@ public class Player_Projectile : MonoBehaviour, IPoolable
 
         speed = originalSpeed;      // 可能被 buff / 加速器 / 招式倍率改写过
         damage = originalDamage;
+        shieldDamage = -1;
         moveDirection = Vector2.zero;
         aliveTimer = 0f;
         cancelsBullets = false;

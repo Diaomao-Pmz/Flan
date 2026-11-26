@@ -287,7 +287,7 @@ namespace Flandre.CombatSystem
         private void FireHitbox(AttackInstance inst)
         {
             if (hit == null) return;
-            PlayerHitDetection.HitboxRun run = hit.BeginRun(inst.node, Mathf.Max(0f, inst.activeEnd - inst.elapsed));
+            PlayerHitDetection.HitboxRun run = hit.BeginRun(inst.node, Mathf.Max(0f, inst.activeEnd - inst.elapsed), inst.shieldCharged);
             if (run != null && !run.done) inst.hitRuns.Add(run);
         }
 

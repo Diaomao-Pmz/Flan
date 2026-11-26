@@ -44,6 +44,9 @@ public class PlayerHitDetection : MonoBehaviour
         public readonly List<HitboxWindow> windows = new List<HitboxWindow>();
         public readonly HashSet<Collider2D> alreadyHit = new HashSet<Collider2D>();
 
+        /// <summary>这一招已经扣过整招破盾值的敌人（ComboNode 填了 meleeShieldBreak 时用；同一招的几次判定共用一份）</summary>
+        public HashSet<EntityBase> shieldCharged;
+
         internal float seqTime;      // 序列已经走了多久
         internal int index;          // 轮到第几段窗口
         internal bool inWindow;      // 当前段是否正在判定
@@ -120,11 +123,17 @@ public class PlayerHitDetection : MonoBehaviour
 
     /// <summary>开一份判定序列，并立刻做第 0 帧的检测</summary>
     /// <param name="untilActiveEnd">距离判定段结束还有多久（秒）。持续时间填 -1 的段会一直开到那时；-1 = 不知道</param>
-    public HitboxRun BeginRun(ComboNode node, float untilActiveEnd = -1f)
+    /// <param name="shieldCharged">这一招共用的「已扣过破盾值」名单；不传就只在这次判定内算</param>
+    public HitboxRun BeginRun(ComboNode node, float untilActiveEnd = -1f, HashSet<EntityBase> shieldCharged = null)
     {
         if (node == null) return null;
 
-        HitboxRun run = new HitboxRun { node = node, untilActiveEnd = untilActiveEnd };
+        HitboxRun run = new HitboxRun
+        {
+            node = node,
+            untilActiveEnd = untilActiveEnd,
+            shieldCharged = shieldCharged ?? new HashSet<EntityBase>(),
+        };
 
         // 没配多段的话会自动用旧版单段参数合成一条 —— 已配好的资产无需改动
         node.CollectWindows(run.windows);
@@ -266,11 +275,17 @@ public class PlayerHitDetection : MonoBehaviour
             // 全是敌人侧的事。这和击退力度归受击方管是同一条原则。
             // 击退 Boss：招式填的距离放在 knockbackForce.x（受击方自己决定怎么滑、滑多久）
             bool knock = node.bossKnockbackDistance > 0f;
+
+            // 破盾值是整招总量：第一次打中这个敌人时一次扣完，之后的判定段填 0（只扣血）
+            int shieldBreak = -1;
+            if (node.HasMeleeShieldBreak)
+                shieldBreak = run.shieldCharged.Add(enemy) ? node.meleeShieldBreak : 0;
+
             enemy.TakeDamage(new DamageInfo(
                 window.damage, DamageType.Melee, transform.position, gameObject,
                 node.breakMask, node.hitReaction, node.hitReactionParam,
                 knock, knock ? new Vector2(node.bossKnockbackDistance, 0f) : Vector2.zero,
-                node.bossHitStun));
+                node.bossHitStun, shieldDamage: shieldBreak));
 
             // ---- 命中记账与广播 ----
             LastHitTarget = enemy.transform;

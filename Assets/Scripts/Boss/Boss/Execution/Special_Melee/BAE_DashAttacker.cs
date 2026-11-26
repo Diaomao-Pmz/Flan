@@ -55,14 +55,14 @@ public class BAE_DashAttacker : MonoBehaviour, IBossActionExecutor
         // ---- 前摇 ----
         PlayAnim(dash.chargeAnimName);
         if (dash.windupBeforeDash > 0f)
-            yield return new WaitForSeconds(dash.windupBeforeDash);
+            yield return BossTime.Wait(ctx.controller, dash.windupBeforeDash);
 
         // ---- 第一阶段：冲刺 ----
         PlayAnim(dash.dashAnimName);
         yield return DashTowardTarget(dash, ctx);
 
         if (dash.pauseAfterDash > 0f)
-            yield return new WaitForSeconds(dash.pauseAfterDash);
+            yield return BossTime.Wait(ctx.controller, dash.pauseAfterDash);
 
         // ---- 第二阶段：挥击（复用与近战相同的执行体）----
         if (dash.swings != null && dash.swings.Count > 0)
@@ -126,9 +126,10 @@ public class BAE_DashAttacker : MonoBehaviour, IBossActionExecutor
             // 终止条件 4：超时兜底，防止任何意外导致卡死
             if (elapsed >= dash.dashTimeout) break;
 
-            rb.linearVelocity = new Vector2(dirX * dash.dashSpeed, rb.linearVelocity.y);
+            // 动作倍率：冲得更快（距离判定不变），超时也按 Boss 时间算
+            rb.linearVelocity = new Vector2(dirX * dash.dashSpeed * BossTime.Speed(ctx.controller), rb.linearVelocity.y);
 
-            elapsed += Time.fixedDeltaTime;
+            elapsed += BossTime.FixedDelta(ctx.controller);
             yield return new WaitForFixedUpdate();
         }
 

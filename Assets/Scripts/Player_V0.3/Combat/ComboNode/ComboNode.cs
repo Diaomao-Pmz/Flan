@@ -297,6 +297,17 @@ public class ComboNode : ScriptableObject
     public List<HitboxWindow> LegacyHitboxWindows => legacyHitboxWindows;
     public float LegacyHitboxDuration => legacyHitboxDuration;
 
+    [Header("破盾 (近战)")]
+    [Tooltip(
+        "这一招的近战判定一共扣 Boss 多少护盾（整招总量，只在 Boss 有盾时起作用；扣血仍看伤害）。\n" +
+        "这一招第一次打中 Boss 时一次扣完，之后的判定段只扣血、不再扣盾。\n" +
+        "-1 = 不填，按 Boss 的默认值每次命中都扣（BossMechanic 的 Melee Shield Damage）；0 = 不扣盾")]
+    [Min(-1)]
+    public int meleeShieldBreak = -1;
+
+    /// <summary>填了近战破盾值（没填 = 每次命中按 Boss 的默认值扣）</summary>
+    public bool HasMeleeShieldBreak => meleeShieldBreak >= 0;
+
     [Header("单段判定 (节拍总表里这一招的判定窗口列表为空时使用 · 持续时间在节拍总表)")]
     [Tooltip("伤害")]
     public int damage = 0;
@@ -355,6 +366,24 @@ public class ComboNode : ScriptableObject
         int baseDamage = projectileTotalDamage / count;
         int remainder = projectileTotalDamage % count;
         return baseDamage + (index < remainder ? 1 : 0);
+    }
+
+    [Tooltip(
+        "这一招所有子弹加起来扣 Boss 多少护盾（只在 Boss 有盾时起作用；扣血仍看伤害）。\n" +
+        "按连射发数平分，余数分给前几颗；打空的那颗不算。\n" +
+        "-1 = 不填，每颗按 Boss 的默认值扣（BossMechanic 的 Ranged Shield Damage）；0 = 不扣盾。\n" +
+        "例：总破盾 30、连射 3 发 → 每颗 10")]
+    [Min(-1)]
+    public int projectileTotalShieldBreak = -1;
+
+    /// <summary>第 index 颗子弹（从 0 数）分到的破盾值。没填时返回 -1</summary>
+    public int ProjectileShieldBreakFor(int index)
+    {
+        if (projectileTotalShieldBreak < 0) return -1;
+        int count = Mathf.Max(1, projectileCount);
+        int baseValue = projectileTotalShieldBreak / count;
+        int remainder = projectileTotalShieldBreak % count;
+        return baseValue + (index < remainder ? 1 : 0);
     }
 
     [Tooltip(
@@ -452,6 +481,7 @@ public class ComboNode : ScriptableObject
         "  子弹：这一招射出的子弹会擦掉碰到的 Boss 子弹（自己继续飞，直到打中 Boss 或飞出画面）\n" +
         "  近战判定：判定框开着的每一帧，框里的 Boss 子弹都会被消掉（只消子弹，不免伤；远程招 / 特殊招没有近战判定框，勾了无效）\n" +
         "  位移：这一招的位移（节拍总表里的出招位移 / 蓄力位移）进行期间，碰到芙兰的 Boss 子弹全部消失，也不扣血\n" +
+        "  激光：特殊招是激光时，正式开火期间光束扫到的 Boss 子弹都会被消掉（预警线阶段不消；Boss 的激光不算子弹，消不掉）\n" +
         "被消掉的子弹位置会播特效表里「消弹特效」那一条（没配就不播）。")]
     public BulletCancelMode bulletCancel = BulletCancelMode.None;
 
@@ -480,7 +510,7 @@ public class ComboNode : ScriptableObject
         "能拼掉 Boss 哪几类招式（和 Break Mask 同一种多选）。\n" +
         "目前只有 Boss 的近战挥击会检查拼刀：Melee（普通近战卡）、Special Melee（突进卡的挥击段）。\n" +
         "勾 Bullet / Special Bullet 暂时没有效果（子弹不做抵消）。\n" +
-        "拼刀成功：Boss 这一下不造成伤害，只结束当前这一招，套路照常接下一步。")]
+        "拼刀成功：Boss 这一下不造成伤害，只结束当前这一招，套路照常接下一步（下面的 Clash Boss Stagger 填了就先停顿再接）。")]
     public ActionCategory clashMask = ActionCategory.AllMelee;
 
     [Tooltip(
@@ -494,6 +524,12 @@ public class ComboNode : ScriptableObject
 
     [Tooltip("拼刀位移期间可以穿过 Boss（敌人）。终点判定照样生效，不会停在 Boss 身体里")]
     public bool clashThrustPassThrough = false;
+
+    [Tooltip(
+        "用这一招拼刀成功后，Boss 原地停顿多久（秒）才接套路的下一步。0 = 不停顿（马上接）。\n" +
+        "停顿期间 Boss 不动、不出招；被打照常受击。不受 Boss 的动作倍率影响")]
+    [Min(0f)]
+    public float clashBossStagger = 0f;
 
     /// <summary>拼刀窗口时长（秒），从判定段开始算（查节拍总表）</summary>
     public float clashWindow => AttackTimingConfig.GetClashWindow(this);

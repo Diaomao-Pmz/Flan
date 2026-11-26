@@ -18,6 +18,9 @@ namespace Flandre.CombatSystem
 
         [InspectorName("位移")]
         Thrust = 1 << 2,
+
+        [InspectorName("激光")]
+        Laser = 1 << 3,
     }
 
     /// <summary>
@@ -101,6 +104,19 @@ namespace Flandre.CombatSystem
 
             overlapBuffer.Clear();
             Physics2D.OverlapBox(center, size, 0f, Filter, overlapBuffer);
+            return CancelColliders(overlapBuffer);
+        }
+
+        /// <summary>
+        /// 消掉这个可旋转方框（世界坐标中心 + 大小 + 角度）里的 Boss 子弹。返回消了几颗。
+        /// 给斜着打的激光用：size.x 沿 angle 方向（光束长度），size.y 是宽度
+        /// </summary>
+        public static int CancelInBox(Vector2 center, Vector2 size, float angle)
+        {
+            if (size.x <= 0f || size.y <= 0f) return 0;
+
+            overlapBuffer.Clear();
+            Physics2D.OverlapBox(center, size, angle, Filter, overlapBuffer);
             return CancelColliders(overlapBuffer);
         }
 

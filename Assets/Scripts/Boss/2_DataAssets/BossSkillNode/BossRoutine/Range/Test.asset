@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb1f9fd23b7cba546a3f6f989071214b, type: 3}
+  m_Name: Test
+  m_EditorClassIdentifier: Assembly-CSharp::BossRoutine
+  routineName: 
+  mode: 0
+  role: 1
+  baseWeight: 100
+  cooldown: 7
+  restAfter: 0
+  minPlayerDistance: 3
+  maxPlayerDistance: 99
+  playerAirCondition: 0
+  steps:
+  - action: {fileID: 11400000, guid: ead5623e896c9ff4ea1be273dfec6c1e, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    fireMoveMode: 3
+    fireMove:
+      distanceRange: {x: 3.5, y: 5}
+      distanceBias: 0.5
+      direction: 0
+      moveDistance: 3
+      speedMultiplier: 1.5
+    releaseMode: 1
+    release:
+      beforeEnd: 3
+      holdTime: 0
+      allowDash: 0
+    reactionMode: 2
+    reclaimAfterReaction: 1
+    variants: []
+  - action: {fileID: 11400000, guid: 10674a627498d994cb5d328274c7bd44, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    fireMoveMode: 2
+    fireMove:
+      distanceRange: {x: 5, y: 5.5}
+      distanceBias: 0.5
+      direction: 0
+      moveDistance: 3
+      speedMultiplier: 1
+    releaseMode: 0
+    release:
+      beforeEnd: 1
+      holdTime: 0
+      allowDash: 0
+    reactionMode: 0
+    reclaimAfterReaction: 1
+    variants: []

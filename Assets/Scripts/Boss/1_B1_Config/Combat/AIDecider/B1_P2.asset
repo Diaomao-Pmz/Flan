@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa1a61bd0b274be4f87e6992454a1cae, type: 3}
+  m_Name: B1_P2
+  m_EditorClassIdentifier: Assembly-CSharp::BossAIConfig
+  bullets: []
+  melees:
+  - phaseTag: 0
+    action: {fileID: 11400000, guid: 28f0eef47f9db2c499beba8280ffc4ad, type: 2}
+    weightModifiers: []
+  - phaseTag: 0
+    action: {fileID: 11400000, guid: b352ddc8325bf2049a34fb3509b29a79, type: 2}
+    weightModifiers: []
+  specialBullets: []
+  specialMelees: []
+  routines:
+  - routine: {fileID: 11400000, guid: e579fcaa61121074d8ee0e98fbe4e3fd, type: 2}
+    weightModifiers:
+    - condition:
+        playerSide: 0
+        minDistance: 5
+        maxDistance: 100
+        playerAirCondition: 0
+      multiplier: 1.2
+  - routine: {fileID: 11400000, guid: 9c0b1e70bb1914343a0a1e89572ef774, type: 2}
+    weightModifiers:
+    - condition:
+        playerSide: 0
+        minDistance: 5
+        maxDistance: 8
+        playerAirCondition: 0
+      multiplier: 1.2
+    - condition:
+        playerSide: 0
+        minDistance: 8
+        maxDistance: 100
+        playerAirCondition: 0
+      multiplier: 1.5
+    - condition:
+        playerSide: 0
+        minDistance: 0
+        maxDistance: 5
+        playerAirCondition: 0
+      multiplier: 0
+  - routine: {fileID: 11400000, guid: 9093444a9d58bb2478c97ee4f5f8256d, type: 2}
+    weightModifiers:
+    - condition:
+        playerSide: 0
+        minDistance: 0
+        maxDistance: 3
+        playerAirCondition: 0
+      multiplier: 1.5
+    - condition:
+        playerSide: 0
+        minDistance: 3
+        maxDistance: 100
+        playerAirCondition: 0
+      multiplier: 0.7
+  - routine: {fileID: 11400000, guid: 48b048870ac718244a38e5ad2ff52e3d, type: 2}
+    weightModifiers:
+    - condition:
+        playerSide: 0
+        minDistance: 8
+        maxDistance: 100
+        playerAirCondition: 0
+      multiplier: 1.5
+  singleInterleaveChance: 0.1
+  movement:
+  - phaseTag: 0
+    trigger: 0
+    minGap: 5
+    maxGap: 100
+    weight: 1
+    chance: 0.5
+    action: {fileID: 11400000, guid: 0e3c39b678d80014b8ec9316e26a8a1b, type: 2}
+  - phaseTag: 0
+    trigger: 2
+    minGap: 0
+    maxGap: 0
+    weight: 1
+    chance: 0.5
+    action: {fileID: 11400000, guid: c95e69f95deb530418b24eb8335718e7, type: 2}
+  reactions:
+  - phaseTag: 0
+    condition:
+      playerSide: 0
+      minDistance: 0
+      maxDistance: 0
+      playerAirCondition: 0
+    weight: 0
+    chance: 1
+    action: {fileID: 11400000, guid: 00ee85562b01596418f1a2b2eb6d7e0e, type: 2}
+  reactionCooldown: 1
+  fallbackNode: {fileID: 0}
+  barrageRules:
+    bullet: 1
+    melee: 0
+    specialMelee: 1
+    specialRanged: 0
+    dash: 1
+    teleport: 1

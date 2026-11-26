@@ -27,7 +27,7 @@ namespace Flandre.CombatSystem.EditorTools
         private static readonly HashSet<string> ClashDetailFields = new HashSet<string>
         {
             "clashBoxOffset", "clashBoxSize", "clashMask",
-            "clashThrust", "clashThrustDuration", "clashThrustPassThrough",
+            "clashThrust", "clashThrustDuration", "clashThrustPassThrough", "clashBossStagger",
         };
 
         private static readonly HashSet<string> ChargeSlowFields = new HashSet<string>
@@ -48,12 +48,12 @@ namespace Flandre.CombatSystem.EditorTools
         {
             "projectilePoolKeyOverride", "projectileCount", "projectileInterval",
             "projectileSpeedMultiplier", "projectileScaleMultiplier", "projectileTotalDamage",
-            "recomputeAimPerShot",
+            "projectileTotalShieldBreak", "recomputeAimPerShot",
         };
 
         private static readonly HashSet<string> SingleHitboxFields = new HashSet<string>
         {
-            "damage", "hitboxSize", "hitboxOffset",
+            "damage", "hitboxSize", "hitboxOffset", "meleeShieldBreak",
         };
 
         /// <summary>特殊招式只显示这些（其余隐藏）</summary>
@@ -65,7 +65,7 @@ namespace Flandre.CombatSystem.EditorTools
             "chargeMoveSpeedStart", "chargeJumpForceStart", "chargeSlowRampTime",
             "breakMask", "bossKnockbackDistance", "bossPushSpeed", "bossHitStun", "hitReaction", "hitReactionParam",
             "bulletCancel",
-            "canClash", "clashBoxOffset", "clashBoxSize", "clashMask", "clashThrust", "clashThrustDuration", "clashThrustPassThrough",
+            "canClash", "clashBoxOffset", "clashBoxSize", "clashMask", "clashThrust", "clashThrustDuration", "clashThrustPassThrough", "clashBossStagger",
             "childNodes",
         };
 

@@ -94,7 +94,7 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
                 direction = TrackDirection(direction, ctx, laser);
 
             DrawBeam(beamRenderer, OriginPos, direction, laser, true);
-            elapsed += Time.deltaTime;
+            elapsed += BossTime.Delta(ctx.controller);
             yield return null;
         }
 
@@ -112,14 +112,14 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
 
             float length = DrawBeam(beamRenderer, OriginPos, direction, laser, false);
 
-            tickTimer += Time.deltaTime;
+            tickTimer += BossTime.Delta(ctx.controller);
             if (tickTimer >= laser.damageTickInterval)
             {
                 tickTimer = 0f;
                 DamageTick(OriginPos, direction, length, laser, ctx);
             }
 
-            elapsed += Time.deltaTime;
+            elapsed += BossTime.Delta(ctx.controller);
             yield return null;
         }
 
@@ -132,7 +132,7 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
         PlayAnim(laser.recoverAnimName);
 
         if (laser.recoverTime > 0f)
-            yield return new WaitForSeconds(laser.recoverTime);
+            yield return BossTime.Wait(ctx.controller, laser.recoverTime);
     }
 
     public void Cancel()
@@ -279,7 +279,7 @@ public class BAE_LaserAttacker : MonoBehaviour, IBossActionExecutor
         Vector2 target = ResolveDirection(ctx, OriginPos, laser.aimAngleOffset);
         if (laser.trackTurnSpeed <= 0f) return target;
 
-        float maxRadians = laser.trackTurnSpeed * Mathf.Deg2Rad * Time.deltaTime;
+        float maxRadians = laser.trackTurnSpeed * Mathf.Deg2Rad * BossTime.Delta(ctx.controller);
         Vector3 turned = Vector3.RotateTowards(current, target, maxRadians, 0f);
         return ((Vector2)turned).normalized;
     }

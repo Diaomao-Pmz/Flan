@@ -48,3 +48,15 @@ public interface IBossActionExecutor
     /// </summary>
     void Cancel();
 }
+
+/// <summary>
+/// 可选：执行器能把正在演的这一招「转到后台」继续跑（目前只有弹幕）。
+/// 出招状态到了套路步骤的「接下一步的时机」就调它：这一招对 Boss 来说就算演完了，
+/// Execute 会尽快结束，但效果（弹幕轨道）继续跑到自己结束。
+/// 转到后台的东西不再归 Cancel 管，只有破盾 / 转阶段 / 死亡时统一全停。
+/// </summary>
+public interface IBackgroundableExecutor
+{
+    /// <summary>把正在演的这一招转到后台。返回 false = 现在没有可转的</summary>
+    bool ReleaseToBackground();
+}

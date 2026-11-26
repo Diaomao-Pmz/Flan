@@ -22,6 +22,15 @@ public class PlayerController : MonoBehaviour
 
     [Header("虚拟手柄信号 (Virtual Gamepad)")]
     public Vector2 moveInput { get; private set; }
+
+    /// <summary>
+    /// 输入被锁住（Boss 演出期间，演出卡开了 Lock Player Input）：
+    /// 按键全部无效，移动输入清零；解锁时还按着的方向键接着生效。调试回看键不受影响
+    /// </summary>
+    public bool InputLocked { get; private set; }
+
+    // 锁住期间也记着真实的方向输入，解锁时恢复
+    private Vector2 rawMoveInput;
     public int facingDirection = 1;
 
     /// <summary>
@@ -74,6 +83,39 @@ public class PlayerController : MonoBehaviour
         loadoutManager = GetComponent<LoadoutManager>();
         inputBuffer = GetComponent<ComboInputBuffer>();
         commandRouter = GetComponent<PlayerCommandRouter>();
+    }
+
+    /// <summary>
+    /// 锁 / 解锁玩家输入（Boss 演出导演调用）。
+    /// 锁住时：移动清零；正在按着的键当作松开（正在蓄力的手照常结算这次蓄力），之后按什么都不响应。
+    /// </summary>
+    public void SetInputLocked(bool locked)
+    {
+        if (InputLocked == locked) return;
+
+        if (locked)
+        {
+            // 正在蓄力的手：当作松手，交给连招引擎照常结算（和玩家自己松手一样）
+            if (isMainAttackHeld && mainHoldResolved) inputBuffer.OnAttackReleased(InputCmd.MainAttack);
+            if (isSubAttackHeld && subHoldResolved) inputBuffer.OnAttackReleased(InputCmd.SubAttack);
+
+            InputLocked = true;
+            moveInput = Vector2.zero;
+            isJumpHeld = false;
+            isCrouchHeld = false;
+            isFlyHeld = false;
+            isMainAttackHeld = false;
+            isSubAttackHeld = false;
+            mainHoldResolved = true; // 锁住前按下、锁住后才松开的攻击键不再打出普攻
+            subHoldResolved = true;
+            PlayerLog.Info("[输入] 玩家输入已锁住（Boss 演出）");
+        }
+        else
+        {
+            InputLocked = false;
+            moveInput = rawMoveInput;
+            PlayerLog.Info("[输入] 玩家输入已解锁");
+        }
     }
 
     void Update()
@@ -193,6 +235,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>蓄力上限 +1（3 级之后回到 1）。只在该手蓄力中有效；受击硬直中不响应</summary>
     private void RaiseChargeCap(InputCmd cmd)
     {
+        if (InputLocked) return;
         if (stateMachine == null || stateMachine.currentState == stateMachine.hitState) return;
 
         var charge = stateMachine.chargeSystem;
@@ -232,7 +275,8 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext ctx)
     {
-        moveInput = ctx.ReadValue<Vector2>();
+        rawMoveInput = ctx.ReadValue<Vector2>();
+        if (!InputLocked) moveInput = rawMoveInput;
 
         // 方向输入来自手柄 → 记下"玩家在用手柄"。
         if (ctx.control != null && ctx.control.device is Gamepad) isUsingGamepad = true;
@@ -241,6 +285,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>跳跃键（Space）。飞行中按无效（路由器会拒绝）</summary>
     public void OnJumpPerformed(InputAction.CallbackContext ctx)
     {
+        if (InputLocked) return;
         if (ctx.started)
         {
             isJumpHeld = true;
@@ -254,6 +299,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnDashPerformed(InputAction.CallbackContext ctx)
     {
+        if (InputLocked) return;
         if (ctx.performed) commandRouter.OnCommand(InputCmd.Dash);
     }
 
@@ -262,6 +308,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void OnCrouchSlidePerformed(InputAction.CallbackContext ctx)
     {
+        if (InputLocked) return;
         if (ctx.started)
         {
             isCrouchHeld = true;
@@ -282,6 +329,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void OnFlyPerformed(InputAction.CallbackContext ctx)
     {
+        if (InputLocked) return;
         if (ctx.started)
         {
             isFlyHeld = true;
@@ -298,6 +346,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void OnActiveSkillPerformed(InputAction.CallbackContext ctx)
     {
+        if (InputLocked) return;
         if (ctx.performed) loadoutManager?.TriggerActiveSkill();
     }
 
@@ -310,6 +359,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void OnMainAttackPerformed(InputAction.CallbackContext ctx)
     {
+        if (InputLocked) return;
         if (ctx.started)
         {
             isMainAttackHeld = true;
@@ -318,6 +368,8 @@ public class PlayerController : MonoBehaviour
         }
         else if (ctx.canceled)
         {
+            // 按下时输入被锁着（没记成按住）：这次松手不算点按也不算蓄力
+            if (!isMainAttackHeld) return;
             isMainAttackHeld = false;
 
             if (!mainHoldResolved)
@@ -337,6 +389,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnSubAttackPerformed(InputAction.CallbackContext ctx)
     {
+        if (InputLocked) return;
         if (ctx.started)
         {
             isSubAttackHeld = true;
@@ -345,6 +398,8 @@ public class PlayerController : MonoBehaviour
         }
         else if (ctx.canceled)
         {
+            // 按下时输入被锁着（没记成按住）：这次松手不算点按也不算蓄力
+            if (!isSubAttackHeld) return;
             isSubAttackHeld = false;
 
             if (!subHoldResolved)

@@ -21,11 +21,11 @@ MonoBehaviour:
   fallGravityMultiplier: 1
   jumpForce: 13
   ctrlDropSpeedMultiplier: 3
-  dashDistance: 3
-  dashDuration: 0.15
-  dashCooldown: 3
-  slideDistance: 3
-  slideDuration: 0.59
+  dashDistance: 1.2
+  dashDuration: 0.1
+  dashCooldown: 1.2
+  slideDistance: 2
+  slideDuration: 0.3
   slideToCrouchSpeedMultiplier: 0.4
   slideInvulnerable: 1
   landingSlideInputWindow: 0.1

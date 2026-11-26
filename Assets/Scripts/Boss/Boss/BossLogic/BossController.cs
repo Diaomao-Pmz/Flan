@@ -20,23 +20,56 @@ public class BossController : EntityBase
     public BossMoveState MoveState { get; private set; }
     public BossStunState StunState { get; private set; }
     public BossKnockbackState KnockbackState { get; private set; }
+    public BossCinematicState CinematicState { get; private set; }
+
+    /// <summary>演出导演（没挂就为 null：转二阶段走原来的做法，招式卡的「放完后播放演出」不生效）</summary>
+    public BossCinematicDirector Cinematics { get; private set; }
+
+    /// <summary>正在播演出</summary>
+    public bool InCinematic => Cinematics != null && Cinematics.IsPlaying;
 
     // 各专职部门的执行器引用
     public BAE_BulletEmitter BulletEmitter { get; private set; }
     public BAE_Teleporter Teleporter { get; private set; } // 【新增】传送专职执行器
+    public BAE_Dasher Dasher { get; private set; }         // 冲刺（纯位移）执行器；没挂就为 null，冲刺卡不生效
     public BossState bossState { get; private set; }
 
-    [Header("--- 移动风筝系统参数 ---")]
-    // 注意：maintainDistance 已被彻底删除，由 MoveState 动态向 AI 索取
-    // 移动速度已搬到 BossAIDecider 的 Ranged / Melee Tempo（每个姿态一套，另有二阶段倍率）
-    public float wallCheckDistance = 1.5f;    // 撞墙射线检测距离
-    public LayerMask wallLayer;               // 墙壁/死角的图层
+    [Header("--- 配置表 ---")]
+    [Tooltip("基础移速、撞墙检测、被击退时长。必填：留空会在 Console 报错，先用默认数值")]
+    [SerializeField] private BossMovementConfig movementConfig;
 
-    [Header("--- 被击退 ---")]
-    [Tooltip("被玩家的招式击退时，滑多久（秒）。滑多远由招式决定（ComboNode 的 Boss Knockback Distance）。\n" +
-             "速度由快到慢。招式还带硬直（Boss Hit Stun）时取两者里长的那个，结束后回到移动状态重新做决定。时间越长显得越「重」")]
-    [Min(0.02f)]
-    public float knockbackDuration = 0.25f;
+    private BossMovementConfig activeMovement;
+
+    /// <summary>生效中的移动配置。没拖 → 报错，用默认数值</summary>
+    public BossMovementConfig Movement
+    {
+        get
+        {
+            if (activeMovement == null)
+            {
+                if (movementConfig != null) activeMovement = movementConfig;
+                else
+                {
+                    activeMovement = ScriptableObject.CreateInstance<BossMovementConfig>();
+                    activeMovement.name = "MovementConfig（未配置，默认数值）";
+                    Debug.LogError("[BossController] 没有拖 Movement Config！先用默认数值（墙的图层为空，撞墙检测不起作用）。", this);
+                }
+            }
+            return activeMovement;
+        }
+    }
+
+    /// <summary>基础移速（战斗节奏里 Move Speed 填 -1 的姿态用它）</summary>
+    public float BaseMoveSpeed => Movement.baseMoveSpeed;
+
+    /// <summary>撞墙射线检测距离</summary>
+    public float wallCheckDistance => Movement.wallCheckDistance;
+
+    /// <summary>墙壁 / 死角的图层</summary>
+    public LayerMask wallLayer => Movement.wallLayer;
+
+    /// <summary>被击退时滑多久（秒）</summary>
+    public float knockbackDuration => Movement.knockbackDuration;
 
     [Header("UI For Testing")]
     public TextMeshProUGUI bossStatusText;
@@ -78,11 +111,14 @@ public class BossController : EntityBase
         AI = GetComponent<BossAIDecider>();
         BulletEmitter = GetComponent<BAE_BulletEmitter>();
         Teleporter = GetComponent<BAE_Teleporter>(); // 获取传送器
+        Dasher = GetComponent<BAE_Dasher>();
+        Cinematics = GetComponent<BossCinematicDirector>();
 
         CombatState = new BossActionExecuter(this);
         MoveState = new BossMoveState(this);
         StunState = new BossStunState(this);   // 复用实例，不再每次破盾 new 一个
         KnockbackState = new BossKnockbackState(this);
+        CinematicState = new BossCinematicState(this);
 
         BuildExecutorRegistry();
     }
@@ -131,6 +167,9 @@ public class BossController : EntityBase
         {
             executor.Cancel();
         }
+
+        // Cancel 只停当前这一步的弹幕；转到后台的弹幕在这里一起停
+        if (BulletEmitter != null) BulletEmitter.StopAttack();
     }
 
     void Start()
@@ -138,6 +177,7 @@ public class BossController : EntityBase
         // 统一初始化各部门
         if (BulletEmitter != null) BulletEmitter.Init(playerTransform);
         if (Teleporter != null) Teleporter.Init(playerTransform);
+        if (Dasher != null) Dasher.Init(playerTransform);
 
         // 组装只读情报总线
         Context = new BossContext(this, playerTransform);
@@ -154,14 +194,28 @@ public class BossController : EntityBase
             bossState.bossMechanic.OnHitTaken += HandleHitTaken;
             bossState.bossMechanic.OnPhase2Triggered += HandlePhase2;
             bossState.health.OnDeath += Die;
+
+            // 没护盾的 Boss（State Config 护盾上限 = 0）：开场就不显示护盾特效
+            if (!bossState.bossMechanic.HasShield) HideShieldVisual();
         }
 
         // Boss 开始时先进入风筝移动状态
         ChangeState(MoveState);
     }
 
+    /// <summary>动作倍率：当前阶段节奏表的 Action Speed（招式执行快慢）</summary>
+    public float ActionSpeed => AI != null ? AI.ActionSpeed : 1f;
+
+    /// <summary>Boss 时钟的累计时间（按动作倍率走）。招式里要记「到某个时间点」时用它代替 Time.time</summary>
+    public float ActionTime { get; private set; }
+
     void Update()
     {
+        ActionTime += Time.deltaTime * ActionSpeed;
+
+        // 真动画：出招时按动作倍率播放，其余时候原速
+        if (animator != null) animator.speed = (CurrentState == CombatState || CurrentState == CinematicState) ? ActionSpeed : 1f;
+
         if (bossState != null && bossState.health.isDead) return;
         CurrentState?.Update();
     }
@@ -230,6 +284,36 @@ public class BossController : EntityBase
         if (step > 0f) body.position += dir * step;
     }
 
+    /// <summary>
+    /// 朝「离玩家 minDistance ～ maxDistance」这个范围走：太近就远离玩家，太远就靠近，在范围里就站住。
+    /// 只改水平速度。移动状态走位、开火时保持距离都用它。
+    /// </summary>
+    /// <returns>水平方向：+1 = 往右，-1 = 往左，0 = 站住</returns>
+    public float DriveTowardDistance(float minDistance, float maxDistance, float speed)
+    {
+        Vector2 playerPos = playerTransform.position;
+        Vector2 bossPos = transform.position;
+        float distance = Vector2.Distance(playerPos, bossPos);
+        float dirX = 0f;
+
+        if (distance < minDistance)
+            dirX = (bossPos.x > playerPos.x) ? 1f : -1f;   // 太近：远离玩家
+        else if (distance > maxDistance)
+            dirX = (playerPos.x > bossPos.x) ? 1f : -1f;   // 太远：靠近玩家
+
+        if (body != null || TryGetComponent(out body))
+            body.linearVelocity = new Vector2(dirX * speed, body.linearVelocity.y);
+
+        return dirX;
+    }
+
+    /// <summary>只把水平速度清零（竖直速度保留，比如还在下落）</summary>
+    public void StopHorizontal()
+    {
+        if (body != null || TryGetComponent(out body))
+            body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
+    }
+
     public void ChangeState(IState state)
     {
         if (CurrentState != null) CurrentState.Exit();
@@ -241,6 +325,13 @@ public class BossController : EntityBase
     {
         // 姿态切到近战：远程姿态下预约的意图（比如想拉远放弹幕）作废
         if (AI != null) AI.OnCombatModeChanged();
+
+        // 演出不被打断（只有演出卡没开 Boss 无敌时才会在演出中破盾）：不眩晕，演完直接按近战姿态继续
+        if (InCinematic)
+        {
+            Debug.Log("[Boss] 演出中破盾：不进入眩晕，演完按近战姿态继续");
+            return;
+        }
         ChangeState(StunState);
     }
 
@@ -257,6 +348,7 @@ public class BossController : EntityBase
 
     private void HandleHitTaken(DamageType type, BossCombatMode modeAtHit)
     {
+        if (InCinematic) return; // 演出中不做受击传送
         if (Teleporter != null) Teleporter.OnBossHit(type, modeAtHit);
     }
 
@@ -296,11 +388,33 @@ public class BossController : EntityBase
     /// 近战挥击被玩家拼刀（MeleeSwingRunner 在结算伤害前发现的）。
     /// 只结束当前这一招：剩下的挥击由 Runner 自己收掉（它提前结束，出招协程照常走完 → Finish），
     /// 套路照常接下一步。套路 / 招式的冷却在出手时就开始算了，被拼掉不影响冷却。
+    /// 玩家那一招填了 Clash Boss Stagger：先记下来，这一招收尾时（CombatState.Finish）原地停顿再接下一步。
     /// </summary>
     public void OnMeleeClashed(ComboNode by)
     {
         string who = by != null ? by.nodeName : "玩家";
-        Debug.Log($"[Boss] 被 {who} 拼刀：只结束这一招，套路继续");
+        pendingClashStagger = by != null ? Mathf.Max(0f, by.clashBossStagger) : 0f;
+        Debug.Log(pendingClashStagger > 0f
+            ? $"[Boss] 被 {who} 拼刀：只结束这一招，停顿 {pendingClashStagger:F2} 秒后套路继续"
+            : $"[Boss] 被 {who} 拼刀：只结束这一招，套路继续");
+    }
+
+    // 被拼刀后要停顿多久（这一招收尾时取走）
+    private float pendingClashStagger;
+
+    /// <summary>取走被拼刀留下的停顿时长（取完清零）。有停顿返回 true</summary>
+    public bool TryConsumeClashStagger(out float seconds)
+    {
+        seconds = pendingClashStagger;
+        pendingClashStagger = 0f;
+        return seconds > 0f;
+    }
+
+    /// <summary>被拼刀后的停顿：原地不动、不出招，时间到了回移动状态接着套路（借用受击硬直状态，不滑行）</summary>
+    public void EnterClashStagger(float seconds)
+    {
+        KnockbackState.Setup(1f, 0f, 0f, seconds);
+        ChangeState(KnockbackState);
     }
 
     private void HideShieldVisual() { if (shieldVisual != null) shieldVisual.SetActive(false); }
@@ -310,25 +424,36 @@ public class BossController : EntityBase
     {
         Debug.Log("[BossController] 触发二阶段！");
 
+        // 正在播别的演出（例如招式放完后的演出）：先中止，转阶段优先
+        if (InCinematic) Cinematics.Abort("转二阶段");
+
         // 【改动】不再只停弹幕，通知所有执行器收摊
         CancelAllExecutors();
 
         if (TryGetComponent(out Rigidbody2D rb)) rb.linearVelocity = Vector2.zero;
-
-        // 【关键修改】二阶段转场传送到中央，不再写死坐标，直接委托给传送器
-        if (Teleporter != null) Teleporter.ExecuteTeleport(TeleportTargetType.Center);
 
         if (AI != null) AI.SwitchToPhase2();
 
         // 二阶段转场是一次强制重置：立刻满盾，并把状态机从破防中拽出来。
         // 不做这两件事的话，CurrentState 会一直停在 BossStunState 上数完剩余的破防时间。
         bossState.bossMechanic.RecoverShield();
+
+        // 配了转阶段演出：交给演出导演（传送到中央等都在演出卡里），演完自动回移动状态
+        if (Cinematics != null && Cinematics.Phase2Cinematic != null)
+        {
+            Cinematics.Play(Cinematics.Phase2Cinematic);
+            return;
+        }
+
+        // 没配演出：原来的做法 —— 瞬间传送到中央，马上开始二阶段
+        if (Teleporter != null) Teleporter.ExecuteTeleport(TeleportTargetType.Center);
         ChangeState(MoveState);
     }
 
     protected override void Die()
     {
         Debug.Log("Boss被击败了！触发死亡演出！");
+        if (InCinematic) Cinematics.Abort("Boss 死亡");
         if (CurrentState != null) CurrentState.Exit();
         CancelAllExecutors();
     }
@@ -350,12 +475,18 @@ public class BossController : EntityBase
 
     public override void TakeDamage(in DamageInfo info)
     {
+        // 演出期间无敌（演出卡上开了 Boss Invulnerable）：这一下完全不算
+        if (Cinematics != null && Cinematics.BossInvulnerable) return;
+
         if (bossState != null)
         {
             // 将伤害请求转发给黑板 (BossState) 处理
-            bossState.bossMechanic.TakeDamage(info.amount, info.type);
+            bossState.bossMechanic.TakeDamage(info.amount, info.type, info.shieldDamage);
             if (bossState.health.isDead) return;
         }
+
+        // 演出不被打断：扣血扣盾照常，但不打断、不击退、不推
+        if (InCinematic) return;
 
         HandleBreakAndKnockback(info);
         HandlePush(info);
@@ -418,4 +549,4 @@ public class BossController : EntityBase
             ChangeState(MoveState);
         }
     }
-}
+}

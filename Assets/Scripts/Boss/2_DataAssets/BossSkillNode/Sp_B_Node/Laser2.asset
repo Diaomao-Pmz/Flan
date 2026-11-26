@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6598a00152508d6478e4cf4b4111f476, type: 3}
+  m_Name: Laser2
+  m_EditorClassIdentifier: Assembly-CSharp::LaserNode
+  actionName: Laser1
+  baseWeight: 100
+  cooldown: 5
+  minCastDistance: 0
+  maxCastDistance: 20
+  preferredDistance: -1
+  whileBarrage: 0
+  overrideKnockback: 0
+  knockbackForce: {x: 1.5, y: 8}
+  cinematicAfter: {fileID: 0}
+  chargeAnimName: 
+  activeAnimName: 
+  recoverAnimName: 
+  telegraphTime: 1
+  fireTime: 7
+  recoverTime: 0.6
+  maxLength: 25
+  beamWidth: 0.65
+  telegraphWidth: 0.12
+  aimAngleOffset: 0
+  telegraphTrackTime: 1
+  fireTrackTime: 7
+  trackTurnSpeed: 20
+  beamSprite: {fileID: -92507581433209935, guid: 95c1902fc6ae11c44ae20ee1efab7c57, type: 3}
+  telegraphColor: {r: 1, g: 1, b: 1, a: 1}
+  fireColor: {r: 1, g: 1, b: 1, a: 1}
+  damagePerTick: 12
+  damageTickInterval: 0.22

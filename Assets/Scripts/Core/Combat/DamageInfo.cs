@@ -154,6 +154,15 @@ namespace Flandre.CombatSystem
         /// <summary>这次推力从命中起维持多久（秒）</summary>
         public readonly float pushDuration;
 
+        /// <summary>
+        /// 这一下扣多少护盾。-1 = 没填，受击方按自己的默认规则扣；0 = 不扣盾。
+        /// 只影响护盾，扣血仍看 amount。
+        /// </summary>
+        public readonly int shieldDamage;
+
+        /// <summary>攻击方填了破盾值</summary>
+        public bool HasShieldDamage => shieldDamage >= 0;
+
         public DamageInfo(int amount, DamageType type, Vector2 sourcePosition,
                           GameObject instigator = null,
                           ActionCategory breakMask = ActionCategory.None,
@@ -163,7 +172,8 @@ namespace Flandre.CombatSystem
                           Vector2 knockbackForce = default,
                           float hitStun = 0f,
                           float pushSpeed = 0f,
-                          float pushDuration = 0f)
+                          float pushDuration = 0f,
+                          int shieldDamage = -1)
         {
             this.amount = amount;
             this.type = type;
@@ -177,6 +187,7 @@ namespace Flandre.CombatSystem
             this.hitStun = hitStun;
             this.pushSpeed = pushSpeed;
             this.pushDuration = pushDuration;
+            this.shieldDamage = shieldDamage;
         }
 
         /// <summary>本次攻击能否打断指定类别的动作</summary>

@@ -1,0 +1,127 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb1f9fd23b7cba546a3f6f989071214b, type: 3}
+  m_Name: 3combo_BT
+  m_EditorClassIdentifier: Assembly-CSharp::BossRoutine
+  routineName: 
+  mode: 0
+  role: 2
+  baseWeight: 100
+  cooldown: 15
+  restAfter: 0
+  minPlayerDistance: 0
+  maxPlayerDistance: 99
+  playerAirCondition: 0
+  steps:
+  - action: {fileID: 11400000, guid: 21d1eb33ef5e9b84db1d21f971e19e8f, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    fireMoveMode: 0
+    fireMove:
+      distanceRange: {x: 3.5, y: 5}
+      distanceBias: 0.5
+      direction: 0
+      moveDistance: 3
+      speedMultiplier: 1
+    releaseMode: 0
+    release:
+      beforeEnd: 1
+      holdTime: 0
+      allowDash: 0
+    followBossWhenReleased: 1
+    reactionMode: 0
+    reclaimAfterReaction: 1
+    variants: []
+  - action: {fileID: 11400000, guid: 913baacd522d4794f8bfdfa8d03147b6, type: 2}
+    delayBefore: 0.5
+    whenOutOfRange: 0
+    fireMoveMode: 0
+    fireMove:
+      distanceRange: {x: 3.5, y: 5}
+      distanceBias: 0.5
+      direction: 0
+      moveDistance: 3
+      speedMultiplier: 1
+    releaseMode: 0
+    release:
+      beforeEnd: 1
+      holdTime: 0
+      allowDash: 0
+    followBossWhenReleased: 1
+    reactionMode: 0
+    reclaimAfterReaction: 1
+    variants: []
+  - action: {fileID: 11400000, guid: 28f0eef47f9db2c499beba8280ffc4ad, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    fireMoveMode: 0
+    fireMove:
+      distanceRange: {x: 3.5, y: 5}
+      distanceBias: 0.5
+      direction: 0
+      moveDistance: 3
+      speedMultiplier: 1
+    releaseMode: 0
+    release:
+      beforeEnd: 1
+      holdTime: 0
+      allowDash: 0
+    followBossWhenReleased: 1
+    reactionMode: 0
+    reclaimAfterReaction: 1
+    variants: []
+  - action: {fileID: 11400000, guid: b352ddc8325bf2049a34fb3509b29a79, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    fireMoveMode: 0
+    fireMove:
+      distanceRange: {x: 3.5, y: 5}
+      distanceBias: 0.5
+      direction: 0
+      moveDistance: 3
+      speedMultiplier: 1
+    releaseMode: 0
+    release:
+      beforeEnd: 1
+      holdTime: 0
+      allowDash: 0
+    followBossWhenReleased: 1
+    reactionMode: 0
+    reclaimAfterReaction: 1
+    variants:
+    - condition:
+        playerSide: 0
+        minDistance: 2
+        maxDistance: 10
+        playerAirCondition: 0
+      action: {fileID: 11400000, guid: 0dd02b32eba3b8a45ae5c74311cb7b71, type: 2}
+      mode: 0
+      endRoutineAfter: 1
+  - action: {fileID: 11400000, guid: b352ddc8325bf2049a34fb3509b29a79, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    fireMoveMode: 0
+    fireMove:
+      distanceRange: {x: 3.5, y: 5}
+      distanceBias: 0.5
+      direction: 0
+      moveDistance: 3
+      speedMultiplier: 1
+    releaseMode: 0
+    release:
+      beforeEnd: 1
+      holdTime: 0
+      allowDash: 0
+    followBossWhenReleased: 1
+    reactionMode: 0
+    reclaimAfterReaction: 1
+    variants: []

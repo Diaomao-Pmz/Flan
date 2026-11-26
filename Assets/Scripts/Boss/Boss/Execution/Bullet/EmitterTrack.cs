@@ -31,6 +31,12 @@ public class EmitterTrack
     /// <summary>本轨独立的旋转累加器，仅 Rotation 形态使用。</summary>
     public float angle;
 
+    /// <summary>属于哪一张弹幕卡（发射器每次开卡分配一个编号）。几张卡同时放时，停卡只停自己的轨道</summary>
+    public int comboId;
+
+    /// <summary>这张卡的子弹带什么击退（每张卡各带各的，不再全发射器共用一份）</summary>
+    public BulletKnockback knockback;
+
     public bool IsFinished { get; private set; }
 
     private float delayTimer;
@@ -39,9 +45,11 @@ public class EmitterTrack
     private bool started;
 
     /// <summary>复用前重置。所有字段都要覆盖，绝不把脏数据带进下一次组合。</summary>
-    public void Setup(BulletPatternBase pattern, float startDelay, float duration)
+    public void Setup(BulletPatternBase pattern, float startDelay, float duration, int comboId, BulletKnockback knockback)
     {
         this.pattern = pattern;
+        this.comboId = comboId;
+        this.knockback = knockback;
         this.startDelay = startDelay;
         this.duration = duration;
         this.interval = Mathf.Max(pattern != null ? pattern.interval : 0.5f, 0.01f); // 防止 0 间隔导致每帧狂喷

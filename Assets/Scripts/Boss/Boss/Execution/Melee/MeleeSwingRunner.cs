@@ -125,7 +125,7 @@ public class MeleeSwingRunner
             visual?.Pose(HitboxAnchor(owner, swing, facing), swing.hitboxSize,
                          MeleeSwingPose.Windup, t / windup, swing.swingDirection, facing, false);
             yield return null;
-            t += Time.deltaTime;
+            t += BossTime.Delta(ctx.controller);
         }
 
         // ---- 2. 蓄势：举着不动，憋满抽好的时长 ----
@@ -135,7 +135,7 @@ public class MeleeSwingRunner
             visual?.Pose(HitboxAnchor(owner, swing, facing), swing.hitboxSize,
                          MeleeSwingPose.Hold, 1f, swing.swingDirection, facing, false);
             yield return null;
-            held += Time.deltaTime;
+            held += BossTime.Delta(ctx.controller);
         }
 
         // ---- 3. 攻击 + 后摇（a = 攻击开始后第几秒）----
@@ -188,7 +188,7 @@ public class MeleeSwingRunner
             if (a >= after) break;
 
             yield return null;
-            a += Time.deltaTime;
+            a += BossTime.Delta(ctx.controller);
         }
 
         HitboxActive = false;

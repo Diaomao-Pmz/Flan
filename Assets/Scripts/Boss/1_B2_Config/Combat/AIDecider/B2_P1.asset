@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa1a61bd0b274be4f87e6992454a1cae, type: 3}
+  m_Name: B2_P1
+  m_EditorClassIdentifier: Assembly-CSharp::BossAIConfig
+  bullets: []
+  melees: []
+  specialBullets:
+  - phaseTag: 0
+    action: {fileID: 11400000, guid: 0dd02b32eba3b8a45ae5c74311cb7b71, type: 2}
+    weightModifiers: []
+  specialMelees: []
+  routines:
+  - routine: {fileID: 11400000, guid: 455dc090a38e1844eb18446e0d989982, type: 2}
+    weightModifiers: []
+  - routine: {fileID: 11400000, guid: 610ca5c0a0e6634409cb3ec319a5d109, type: 2}
+    weightModifiers: []
+  - routine: {fileID: 11400000, guid: 9093444a9d58bb2478c97ee4f5f8256d, type: 2}
+    weightModifiers:
+    - condition:
+        playerSide: 0
+        minDistance: 0
+        maxDistance: 3
+        playerAirCondition: 0
+      multiplier: 1.5
+    - condition:
+        playerSide: 0
+        minDistance: 3
+        maxDistance: 100
+        playerAirCondition: 0
+      multiplier: 0
+  singleInterleaveChance: 0.2
+  movement:
+  - phaseTag: 0
+    trigger: 0
+    minGap: 5
+    maxGap: 100
+    weight: 1
+    chance: 0.5
+    action: {fileID: 11400000, guid: 0e3c39b678d80014b8ec9316e26a8a1b, type: 2}
+  - phaseTag: 0
+    trigger: 3
+    minGap: 0
+    maxGap: 100
+    weight: 1
+    chance: 0.3
+    action: {fileID: 11400000, guid: c95e69f95deb530418b24eb8335718e7, type: 2}
+  reactions:
+  - phaseTag: 0
+    condition:
+      playerSide: 0
+      minDistance: 0
+      maxDistance: 100
+      playerAirCondition: 0
+    weight: 100
+    chance: 0.5
+    action: {fileID: 11400000, guid: 00ee85562b01596418f1a2b2eb6d7e0e, type: 2}
+  - phaseTag: 0
+    condition:
+      playerSide: 0
+      minDistance: 0
+      maxDistance: 100
+      playerAirCondition: 0
+    weight: 100
+    chance: 0.5
+    action: {fileID: 11400000, guid: 5c7bf690b46b8784ea9511d88a66c689, type: 2}
+  - phaseTag: 0
+    condition:
+      playerSide: 0
+      minDistance: 0
+      maxDistance: 100
+      playerAirCondition: 0
+    weight: 100
+    chance: 0.5
+    action: {fileID: 11400000, guid: c95e69f95deb530418b24eb8335718e7, type: 2}
+  reactionCooldown: 2
+  fallbackNode: {fileID: 0}
+  barrageRules:
+    bullet: 1
+    melee: 1
+    specialMelee: 1
+    specialRanged: 0
+    dash: 1
+    teleport: 0

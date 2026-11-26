@@ -9,6 +9,7 @@ namespace Flandre.CombatSystem
     /// 时序跟节拍总表走：前摇 = 预警线，判定段 = 开火（按间隔跳伤害），后摇开始时消失。
     /// 第一次打中某个敌人时带上招式的打断能力（breakMask、击退距离、Boss 硬直、受击反应）；
     /// 之后每一跳只有伤害 + 持续推动（ComboNode.bossPushSpeed）。
+    /// 招式勾了「激光」消弹时，开火期间每一帧都把光束范围里的 Boss 子弹消掉（预警线阶段不消）。
     /// </summary>
     [Serializable]
     [SpecialMoveInfo("激光", SpecialMoveKind.Ranged)]
@@ -82,6 +83,11 @@ namespace Flandre.CombatSystem
         [Tooltip("跳伤间隔（秒）。开火那一刻立刻打第一跳")]
         [Min(0.02f)]
         public float damageTickInterval = 0.25f;
+
+        [Tooltip("每一跳扣 Boss 多少护盾（只在 Boss 有盾时起作用；扣血仍看每跳伤害）。\n" +
+                 "-1 = 不填，每跳按 Boss 的默认值扣（BossMechanic 的 Ranged Shield Damage）；0 = 不扣盾")]
+        [Min(-1)]
+        public int shieldBreakPerTick = -1;
 
         public override SpecialMoveRun Begin(SpecialMoveContext ctx, AttackInstance inst)
             => new LaserRun(this, ctx, inst);
@@ -167,6 +173,8 @@ namespace Flandre.CombatSystem
                     firing = true;
                     tickTimer = cfg.damageTickInterval;
                 }
+
+                CancelBullets(origin, length);
 
                 tickTimer += dt;
                 if (tickTimer >= cfg.damageTickInterval)
@@ -294,8 +302,24 @@ namespace Flandre.CombatSystem
                         first ? node.hitReactionParam : 0f,
                         knock, knock ? new Vector2(node.bossKnockbackDistance, 0f) : Vector2.zero,
                         first ? node.bossHitStun : 0f,
-                        pushSpeed, pushTime));
+                        pushSpeed, pushTime, cfg.shieldBreakPerTick));
                 }
+            }
+
+            // ---------------- 消弹 ----------------
+
+            /// <summary>
+            /// 【激光消弹】招式勾了「激光」时，光束范围（碰墙截断后的长度 × 判定宽度，跟着光束转）里的 Boss 子弹全部消掉。
+            /// 每一帧都扫，不跟跳伤间隔走：否则两跳之间飞进光束的子弹会漏掉，看起来时挡时不挡
+            /// </summary>
+            private void CancelBullets(Vector2 origin, float length)
+            {
+                ComboNode node = inst.node;
+                if (node == null || !node.CancelsBulletsBy(BulletCancelMode.Laser)) return;
+
+                Vector2 center = origin + direction * (length * 0.5f);
+                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                BulletCanceller.CancelInBox(center, new Vector2(length, cfg.beamWidth), angle);
             }
 
             // ---------------- 表现 ----------------

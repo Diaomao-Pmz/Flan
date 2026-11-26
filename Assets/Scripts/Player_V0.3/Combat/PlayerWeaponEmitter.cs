@@ -192,6 +192,9 @@ namespace Flandre.CombatSystem
                 // 子弹总伤害按发数平分；没填就用预制体伤害
                 int shotDamage = node.ProjectileDamageFor(shotIndex);
                 if (shotDamage >= 0) proj.SetDamage(shotDamage);
+
+                // 子弹总破盾值同样按发数平分；没填（-1）就由 Boss 按默认值扣
+                proj.SetShieldDamage(node.ProjectileShieldBreakFor(shotIndex));
                 proj.SetCancelsBullets(node.CancelsBulletsBy(BulletCancelMode.Projectile));
             }
 

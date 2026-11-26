@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb1f9fd23b7cba546a3f6f989071214b, type: 3}
+  m_Name: P1_R_R3
+  m_EditorClassIdentifier: Assembly-CSharp::BossRoutine
+  routineName: Carnival
+  mode: 1
+  role: 1
+  baseWeight: 100
+  cooldown: 15
+  restAfter: 0
+  minPlayerDistance: 0
+  maxPlayerDistance: 99
+  playerAirCondition: 0
+  steps:
+  - action: {fileID: 11400000, guid: 7e15dab2ccc5f574a891931e03955dae, type: 2}
+    delayBefore: 0
+    whenOutOfRange: 0
+    fireMoveMode: 1
+    fireMove:
+      distanceRange: {x: 3.5, y: 5}
+      distanceBias: 0.5
+      direction: 0
+      moveDistance: 3
+      speedMultiplier: 1
+    releaseMode: 2
+    release:
+      beforeEnd: 6
+      holdTime: 2
+      allowDash: 0
+    followBossWhenReleased: 1
+    reactionMode: 2
+    reclaimAfterReaction: 1
+    variants: []

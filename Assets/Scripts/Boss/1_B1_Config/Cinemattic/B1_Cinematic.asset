@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c681e3b24c57ab489248acb66aebf95, type: 3}
+  m_Name: B1_Cinematic
+  m_EditorClassIdentifier: Assembly-CSharp::BossCinematic
+  bossInvulnerable: 1
+  lockPlayerInput: 1
+  playerInvulnerable: 1
+  steps:
+  - rid: 2883644672119668808
+  - rid: 2883644672119668809
+  - rid: 2883644672119668811
+  references:
+    version: 2
+    RefIds:
+    - rid: 2883644672119668808
+      type: {class: CinematicWaitStep, ns: , asm: Assembly-CSharp}
+      data:
+        seconds: 2
+    - rid: 2883644672119668809
+      type: {class: CinematicActionStep, ns: , asm: Assembly-CSharp}
+      data:
+        action: {fileID: 11400000, guid: 6b6976cbf26434046ad8b036336f7a8d, type: 2}
+    - rid: 2883644672119668811
+      type: {class: CinematicWaitStep, ns: , asm: Assembly-CSharp}
+      data:
+        seconds: 1

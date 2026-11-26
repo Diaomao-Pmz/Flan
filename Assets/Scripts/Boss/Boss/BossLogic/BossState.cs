@@ -16,19 +16,48 @@ public enum BossCombatMode
 
 public class BossState : MonoBehaviour
 {
+    [Header("--- 配置表 ---")]
+    [Tooltip("血量、护盾、破盾眩晕、二阶段阈值。必填：留空会在 Console 报错，先用默认数值")]
+    [SerializeField] private BossStateConfig stateConfig;
+
+    [Header("--- 运行时数据（只读）---")]
     public EnemyHealth health = new EnemyHealth();
     public BossMechanic bossMechanic = new BossMechanic();
 
+    private BossStateConfig activeConfig;
+
+    /// <summary>生效中的体质配置。没拖 → 报错，用默认数值</summary>
+    public BossStateConfig Config
+    {
+        get
+        {
+            if (activeConfig == null)
+            {
+                if (stateConfig != null) activeConfig = stateConfig;
+                else
+                {
+                    activeConfig = ScriptableObject.CreateInstance<BossStateConfig>();
+                    activeConfig.name = "StateConfig（未配置，默认数值）";
+                    Debug.LogError("[BossState] 没有拖 State Config！先用默认数值。", this);
+                }
+            }
+            return activeConfig;
+        }
+    }
+
     void Awake()
     {
-        health.Init();
-        bossMechanic.Init(health);
+        health.Init(Config.maxHP);
+        bossMechanic.Init(health, Config);
     }
+
+    /// <summary>演出期间为 true：回盾倒计时暂停（由演出导演设置）</summary>
+    [System.NonSerialized] public bool timersPaused;
 
     // 在这个大总管里让各种计时器跑起来（回盾倒计时）
     void Update()
     {
-        if (health.isDead) return;
+        if (health.isDead || timersPaused) return;
 
         bossMechanic.Tick(Time.deltaTime);
     }
@@ -37,15 +66,17 @@ public class BossState : MonoBehaviour
 [Serializable]
 public class EnemyHealth
 {
-    public int maxHP = 100;
+    /// <summary>最大血量（开场从 BossStateConfig 读入）</summary>
+    public int maxHP { get; private set; } = 100;
     public int currentHP = 100;
     public bool isDead = false;
 
     public event Action OnStatChanged;
     public event Action OnDeath;
 
-    public void Init()
+    public void Init(int max)
     {
+        maxHP = Mathf.Max(1, max);
         currentHP = maxHP;
         isDead = false;
         OnStatChanged?.Invoke();
@@ -68,22 +99,27 @@ public class EnemyHealth
 [Serializable]
 public class BossMechanic
 {
-    [Header("--- 护盾与阶段配置 ---")]
-    public int shieldMaxHP = 300;
-    public int meleeShieldDamage = 100;
-    public int rangedShieldDamage = 3;
+    // 开场由 BossState 注入；注入前（极少数组件比 Boss 先初始化时）读默认数值
+    private BossStateConfig config;
+    private static BossStateConfig defaults;
+    private BossStateConfig Cfg
+    {
+        get
+        {
+            if (config != null) return config;
+            if (defaults == null) defaults = ScriptableObject.CreateInstance<BossStateConfig>();
+            return defaults;
+        }
+    }
 
-    [Tooltip("破盾后的眩晕时长 n（秒）。眩晕期间不出招；结束后进入近战为主阶段")]
-    public float stunDuration = 2f;
-
-    [Tooltip("回盾时间 x（秒），从【破盾那一刻】开始算。\n" +
-             "近战为主阶段的实际时长 = x - 眩晕时长。x 小于眩晕时长时按眩晕时长算（晕完立刻回盾）")]
-    public float shieldRecoverTime = 5f;
-
-    [Tooltip("【预留，暂未生效】玩家连招追加破盾时间")]
-    public float comboExtendDuration = 1f;
-    public int phase2Threshold = 30;
-    public float stunKnockupSpeed = 15f;
+    public int shieldMaxHP => Cfg.shieldMaxHP;
+    public int meleeShieldDamage => Cfg.meleeShieldDamage;
+    public int rangedShieldDamage => Cfg.rangedShieldDamage;
+    public float stunDuration => Cfg.stunDuration;
+    public float shieldRecoverTime => Cfg.shieldRecoverTime;
+    public float comboExtendDuration => Cfg.comboExtendDuration;
+    public int phase2Threshold => Cfg.phase2Threshold;
+    public float stunKnockupSpeed => Cfg.stunKnockupSpeed;
 
     [Header("--- 移动与环境感知 (新增) ---")]
     public bool isCornered = false;      // 是否被逼入墙角
@@ -96,7 +132,10 @@ public class BossMechanic
     [Tooltip("破盾后已经过去了多久（只读）")]
     public float shieldBrokenTimer = 0f;
 
-    /// <summary>当前作战姿态：护盾在 = 远程为主，护盾碎 = 近战为主</summary>
+    /// <summary>这个 Boss 有没有护盾。State Config 的护盾上限填 0 = 没护盾：开场就是近战为主，不眩晕、不回盾</summary>
+    public bool HasShield => shieldMaxHP > 0;
+
+    /// <summary>当前作战姿态：护盾在 = 远程为主，护盾碎（或根本没护盾）= 近战为主</summary>
     public BossCombatMode CurrentMode => isShieldBroken ? BossCombatMode.Melee : BossCombatMode.Ranged;
 
     /// <summary>实际回盾时间：至少要等眩晕结束</summary>
@@ -104,7 +143,8 @@ public class BossMechanic
 
     /// <summary>回盾进度 0~1（护盾在时为 1）。供 UI 显示</summary>
     public float ShieldRecoverProgress
-        => !isShieldBroken ? 1f
+        => !HasShield ? 0f
+           : !isShieldBroken ? 1f
            : EffectiveRecoverTime <= 0f ? 1f
            : Mathf.Clamp01(shieldBrokenTimer / EffectiveRecoverTime);
 
@@ -121,11 +161,13 @@ public class BossMechanic
 
     private EnemyHealth health;
 
-    public void Init(EnemyHealth healthModule)
+    public void Init(EnemyHealth healthModule, BossStateConfig cfg)
     {
         this.health = healthModule;
-        shieldCurrentHP = shieldMaxHP;
-        isShieldBroken = false;
+        this.config = cfg;
+        // 没护盾：直接标记为「护盾已碎」= 近战为主。不发破盾通知，所以不会眩晕
+        shieldCurrentHP = HasShield ? shieldMaxHP : 0;
+        isShieldBroken = !HasShield;
         isPhase2 = false;
         isCornered = false;
         shieldBrokenTimer = 0f;
@@ -138,7 +180,7 @@ public class BossMechanic
     /// </summary>
     public void Tick(float deltaTime)
     {
-        if (!isShieldBroken) return;
+        if (!isShieldBroken || !HasShield) return; // 没护盾的 Boss 永远不回盾
 
         shieldBrokenTimer += deltaTime;
 
@@ -148,15 +190,18 @@ public class BossMechanic
         }
     }
 
-    public void TakeDamage(int rawDamage, DamageType type)
+    /// <param name="shieldDamage">这一下扣多少盾。-1 = 没填，按近战 meleeShieldDamage / 远程 rangedShieldDamage 扣</param>
+    public void TakeDamage(int rawDamage, DamageType type, int shieldDamage = -1)
     {
         // 记下挨打那一刻的姿态：这一刀如果刚好打碎护盾，仍算"有盾时挨打"
         BossCombatMode modeAtHit = CurrentMode;
 
         if (!isShieldBroken)
         {
-            // 护盾期间：近战一刀扣 meleeShieldDamage，远程一发只扣 rangedShieldDamage
-            int damageToShield = (type == DamageType.Melee) ? meleeShieldDamage : rangedShieldDamage;
+            // 护盾期间：招式填了破盾值就扣它；没填按近战 / 远程的默认值扣
+            int damageToShield = shieldDamage >= 0
+                ? shieldDamage
+                : (type == DamageType.Melee) ? meleeShieldDamage : rangedShieldDamage;
             shieldCurrentHP -= damageToShield;
 
             OnShieldStatChanged?.Invoke();
@@ -192,6 +237,7 @@ public class BossMechanic
 
     public void RecoverShield()
     {
+        if (!HasShield) return;
         isShieldBroken = false;
         shieldCurrentHP = shieldMaxHP;
         shieldBrokenTimer = 0f;
