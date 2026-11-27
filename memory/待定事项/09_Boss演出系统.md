@@ -5,13 +5,14 @@
 > **11-26 第一版已完成（只做了语法检查，等用户在 Unity 里测）。还没做的只剩镜头步骤（第二版），见文末。**
 
 ## 第一版做了什么（11-26）
-- 演出卡 `Boss/2_DataAssets/BossCinematic/BossCinematic.cs`（菜单 Flandre → Boss → Cinematic）：
+- 演出卡 `Boss/Boss/BossCinematic/BossCinematic.cs`（11-26 用户挪了位置）（菜单 Flandre → Boss → Cinematic）：
   - 整场开关：Boss 无敌（默认开）、锁玩家输入（默认关）、玩家无敌（默认关）。用户决定**不做清子弹**。
   - 步骤（`[SerializeReference, SubclassSelector] List<CinematicStep>`）：出招（任意 ActionNode，走现有执行器，跟动作倍率）、等待（真实时间，不跟动作倍率）、播动画。
   - 预留镜头接口 `IBossCinematicCamera`（SwitchTo / RestoreDefault）；`SubclassNameAttribute` 给下拉框起中文名。
-- 演出导演 `Boss/BossLogic/Execution/Cinematic/BossCinematicDirector.cs`（挂 Boss 身上）：Phase 2 Cinematic 栏位、Camera Rig 栏位（预留）、`CinematicStarted / CinematicEnded` 事件；开始时接管，结束时还原 + `AI.ShiftTimers` 冷却顺延 + 镜头还原。
-- 演出状态 `Boss/BossLogic/BossLogic/StateCard/BossCinematicState.cs`：什么都不做；被别的逻辑切走时中止演出。
+- 演出导演 `Boss/Boss/Execution/Cinematic/BossCinematicDirector.cs`（挂 Boss 身上）：Phase 2 Cinematic 栏位、Camera Rig 栏位（预留）、`CinematicStarted / CinematicEnded` 事件；开始时接管，结束时还原 + `AI.ShiftTimers` 冷却顺延 + 镜头还原。
+- 演出状态 `Boss/Boss/BossLogic/StateCard/BossCinematicState.cs`：什么都不做；被别的逻辑切走时中止演出。
 - 接入点：`BossController`（转阶段先看演出卡；无敌时 TakeDamage 直接返回；演出中不打断不击退、不受击传送、破盾不眩晕；死亡中止演出）、`BossState.timersPaused`（回盾暂停）、`BossCombatState.Finish`（招式卡 `cinematicAfter`）、`ActionNode.cinematicAfter`、`SubclassSelectorDrawer`（支持列表元素、显示 SubclassName）、`PlayerController.SetInputLocked`、`InvulnerableTokens.Cinematic`。
+- 11-26 补：步骤列表点「+」会和上一步共用参数（Unity 的 `[SerializeReference]` 坑），已在 `BossCinematic.OnValidate` 里自动拆开。
 - 规则：死亡结束演出；其他情况都不打断。演出中再触发二阶段 → 中止当前演出，转阶段优先。拼刀停顿和 cinematicAfter 同时有时拼刀停顿优先（被拼掉的招不算正常放完）。
 
 ## 想要的效果

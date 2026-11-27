@@ -73,3 +73,13 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Perforce 的本机文件（工作区配置 / 登录票据），不进 git。.p4ignore 本身要进 git
+.p4config
+.p4tickets
+.p4trust
+.p4enviro
+
+# Unity 崩溃时自动备份的场景
+/[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta

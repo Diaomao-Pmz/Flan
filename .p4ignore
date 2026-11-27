@@ -1,0 +1,70 @@
+# Perforce 忽略清单（Unity 项目）。内容和 .gitignore 对齐，另外排除 git 自己的文件夹。
+# 要让 P4 认这个文件：在命令行执行一次  p4 set P4IGNORE=.p4ignore  然后重开 P4V。
+
+# ---- 版本管理 / 编辑器自己的东西 ----
+.git/
+.vs/
+.vscode/
+.idea/
+.gradle/
+.consulo/
+.utmp/
+
+# ---- Unity 自动生成的文件夹（可以随时重建，体积很大）----
+Library/
+Temp/
+Obj/
+Logs/
+UserSettings/
+MemoryCaptures/
+Recordings/
+Build/
+Builds/
+ExportedObj/
+Assets/Plugins/Editor/JetBrains*
+
+# ---- IDE 自动生成的工程文件 ----
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# ---- 日志、崩溃报告、打包产物 ----
+*.log
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+*.unitypackage.meta
+*.app
+crashlytics-build.properties
+Assets/AddressableAssetsData/*/*.bin*
+Assets/StreamingAssets/aa.meta
+Assets/StreamingAssets/aa/*
+
+# ---- Perforce 的本机文件（工作区配置 / 登录票据）----
+.p4config
+.p4tickets
+.p4trust
+.p4enviro
+
+# ---- AI 工作目录（团队规定不进仓库；本机和 git 里照常保留）----
+memory/
+Claude outputs/
+
+# ---- Unity 崩溃时自动备份的场景（团队规定备份不进仓库）----
+_Recovery/
+_Recovery.meta
